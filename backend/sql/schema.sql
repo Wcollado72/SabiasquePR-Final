@@ -1,0 +1,72 @@
+-- Esquema inicial de Sabias que PR
+-- Fase 1: solo estructura. Los endpoints CRUD se conectan en la Fase 2.
+
+CREATE TABLE IF NOT EXISTS noticias (
+  id              text PRIMARY KEY,
+  titulo          text NOT NULL,
+  fecha           date NOT NULL,
+  fecha_display   text NOT NULL,
+  imagen          text NOT NULL,
+  imagen_alt      text NOT NULL,
+  imagen_caption  text NOT NULL,
+  clase           text NOT NULL,
+  fuente_url      text NOT NULL,
+  fuente_texto    text NOT NULL,
+  parrafos        jsonb NOT NULL DEFAULT '[]',
+  creado_en       timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS productos (
+  id              text PRIMARY KEY,
+  nombre          text NOT NULL,
+  descripcion     text NOT NULL,
+  precio          numeric(10,2) NOT NULL,
+  imagen          text NOT NULL,
+  imagen_alt      text NOT NULL,
+  stripe_link     text,
+  disponible      boolean NOT NULL DEFAULT true,
+  creado_en       timestamptz NOT NULL DEFAULT now()
+);
+
+-- Perfil extendido de cada usuario de Supabase Auth (auth.users)
+CREATE TABLE IF NOT EXISTS perfiles (
+  id              uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email           text NOT NULL,
+  rol             text NOT NULL DEFAULT 'usuario' CHECK (rol IN ('usuario', 'admin')),
+  creado_en       timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS mensajes_contacto (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre          text NOT NULL,
+  email           text NOT NULL,
+  motivo          text NOT NULL,
+  mensaje         text NOT NULL,
+  creado_en       timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS suscriptores (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  email           text NOT NULL UNIQUE,
+  creado_en       timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS ordenes (
+  id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  usuario_id          uuid REFERENCES perfiles(id) ON DELETE SET NULL,
+  items               jsonb NOT NULL,
+  total               numeric(10,2) NOT NULL,
+  stripe_session_id   text,
+  estado              text NOT NULL DEFAULT 'pendiente' CHECK (estado IN ('pendiente', 'pagada', 'cancelada')),
+  creado_en           timestamptz NOT NULL DEFAULT now()
+);
+
+-- RLS activo por defecto en todas las tablas (sin policies = sin acceso
+-- publico via la Data API de Supabase; el backend usa la conexion directa
+-- de Postgres y no pasa por RLS).
+ALTER TABLE noticias           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE productos          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE perfiles           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE mensajes_contacto  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE suscriptores       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ordenes            ENABLE ROW LEVEL SECURITY;

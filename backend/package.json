@@ -1,0 +1,19 @@
+{
+  "name": "sabiasquepr-backend",
+  "version": "0.1.0",
+  "description": "API backend de Sabias que PR",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "db:schema": "node scripts/apply-schema.js",
+    "db:migrate-content": "node scripts/migrate-content.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "pg": "^8.12.0"
+  }
+}
