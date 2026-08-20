@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Sabías que PR</title>
+    <link>https://sabiasquepr.com</link>
+    <description>Noticias, educación e información para Puerto Rico y el mundo.</description>
+    <language>es-pr</language>
+    <atom:link href="https://sabiasquepr.com/rss.xml" rel="self" type="application/rss+xml"/>
+    <image>
+      <url>https://sabiasquepr.com/images/Coqui.webp</url>
+      <title>Sabías que PR</title>
+      <link>https://sabiasquepr.com</link>
+    </image>
+  <item>
+    <title><![CDATA[¡3I/ATLAS Conquista el Cosmos: El Cometa Interestelar Más Rápido!]]></title>
+    <link>https://sabiasquepr.com/noticias.html#3i-atlas-cometa</link>
+    <guid isPermaLink="false">https://sabiasquepr.com/noticias.html#3i-atlas-cometa</guid>
+    <pubDate>Mon, 01 Dec 2025 00:00:00 GMT</pubDate>
+    <description><![CDATA[El cometa <strong>3I/ATLAS</strong>, tercer visitante interestelar confirmado tras 'Oumuamua y Borisov, irrumpió en julio de 2025 detectado por ATLAS en Chile y alcanzó perihelio el 29 de octubre a 1.36 UA del Sol, entre Tierra y Marte, sin riesgo para nosotros.]]></description>
+    <enclosure url="https://sabiasquepr.com/images/3IAtlas.webp" type="image/webp"/>
+  </item>
+  <item>
+    <title><![CDATA[¡Ibrahim Traoré: Revolución Panafricana en Burkina Faso!]]></title>
+    <link>https://sabiasquepr.com/noticias.html#ibrahim-traore-burkina</link>
+    <guid isPermaLink="false">https://sabiasquepr.com/noticias.html#ibrahim-traore-burkina</guid>
+    <pubDate>Mon, 01 Dec 2025 00:00:00 GMT</pubDate>
+    <description><![CDATA[El capitán <strong>Ibrahim Traoré</strong>, de 37 años y presidente interino desde septiembre de 2022, lidera reformas soberanas en Burkina Faso: expulsó tropas francesas y nacionalizó minas de oro con una refinería estatal que procesa 150–400 kg diarios.]]></description>
+    <enclosure url="https://sabiasquepr.com/images/Traore.webp" type="image/webp"/>
+  </item>
+  </channel>
+</rss>

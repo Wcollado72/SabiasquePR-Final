@@ -1,0 +1,38 @@
+[
+  {
+    "id": "3i-atlas-cometa",
+    "titulo": "¡3I/ATLAS Conquista el Cosmos: El Cometa Interestelar Más Rápido!",
+    "fecha": "2025-12-01",
+    "fechaDisplay": "1 de diciembre de 2025",
+    "imagen": "images/3IAtlas.webp",
+    "imagenAlt": "Ilustración del cometa 3I/ATLAS cruzando el Sistema Solar",
+    "imagenCaption": "Imagen: NASA – haz clic para ver la nota completa.",
+    "clase": "noticia-atlas",
+    "fuenteUrl": "https://ciencia.nasa.gov/sistema-solar/cometa-3i-atlas/",
+    "fuenteTexto": "NASA – Cometa 3I/ATLAS",
+    "parrafos": [
+      "El cometa <strong>3I/ATLAS</strong>, tercer visitante interestelar confirmado tras 'Oumuamua y Borisov, irrumpió en julio de 2025 detectado por ATLAS en Chile y alcanzó perihelio el 29 de octubre a 1.36 UA del Sol, entre Tierra y Marte, sin riesgo para nosotros.",
+      "Con velocidad de 61 km/s y excentricidad 6.139, su trayectoria hiperbólica revela un posible origen en el disco grueso galáctico.",
+      "A diferencia de muchos cometas que solo desarrollan una cola cerca del Sol, 3I/ATLAS se mantuvo activo y generó una coma incluso a grandes distancias. Su núcleo fue visiblemente pequeño, con un diámetro estimado entre 200 y 400 metros.",
+      "Para la comunidad científica, <strong>3I/ATLAS</strong> representa una oportunidad única para comparar la composición y dinámica de objetos formados fuera del Sistema Solar. El seguimiento fotométrico y espectroscópico servirá de referencia para futuras misiones que busquen visitar de cerca otros visitantes interestelares."
+    ]
+  },
+  {
+    "id": "ibrahim-traore-burkina",
+    "titulo": "¡Ibrahim Traoré: Revolución Panafricana en Burkina Faso!",
+    "fecha": "2025-12-01",
+    "fechaDisplay": "1 de diciembre de 2025",
+    "imagen": "images/Traore.webp",
+    "imagenAlt": "Ibrahim Traoré frente a la refinería nacional de oro en Burkina Faso",
+    "imagenCaption": "Imagen: Reuters – haz clic para leer el reportaje completo.",
+    "clase": "noticia-traore",
+    "fuenteUrl": "https://www.reuters.com/world/africa/burkina-fasos-self-declared-military-leader-says-situation-is-under-control-2022-10-02/",
+    "fuenteTexto": "Reuters – Ibrahim Traoré",
+    "parrafos": [
+      "El capitán <strong>Ibrahim Traoré</strong>, de 37 años y presidente interino desde septiembre de 2022, lidera reformas soberanas en Burkina Faso: expulsó tropas francesas y nacionalizó minas de oro con una refinería estatal que procesa 150–400 kg diarios.",
+      "Ha fortalecido la Alianza de Estados del Sahel (AES) junto con los líderes militares de Malí y Níger, posicionándose como heredero del legado de Thomas Sankara.",
+      "Traoré impulsa un mayor control estatal del oro: aprobó la construcción de la primera refinería nacional y endureció las reglas para la exportación artesanal para combatir el contrabando y aumentar los ingresos que quedan en Burkina Faso.",
+      "Su discurso panafricanista y antiimperialista ha sido celebrado por sectores que ven en él una recuperación de la dignidad nacional frente a décadas de dependencia externa."
+    ]
+  }
+]

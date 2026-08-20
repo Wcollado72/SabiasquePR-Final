@@ -1,0 +1,50 @@
+{
+  "name": "Sabías que PR",
+  "short_name": "SabiasqPR",
+  "description": "Noticias, educación e información para Puerto Rico y el mundo.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f766e",
+  "lang": "es-PR",
+  "orientation": "portrait-primary",
+  "categories": ["news", "education"],
+  "icons": [
+    {
+      "src": "images/Coqui.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/Coqui.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "images/nuevoshumanos.webp",
+      "sizes": "1280x720",
+      "type": "image/webp",
+      "label": "Pantalla principal de Sabías que PR"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Noticias",
+      "short_name": "Noticias",
+      "description": "Ver últimas noticias",
+      "url": "/noticias.html",
+      "icons": [{ "src": "images/Coqui.webp", "sizes": "96x96" }]
+    },
+    {
+      "name": "Tienda",
+      "short_name": "Tienda",
+      "description": "Apoya el proyecto",
+      "url": "/tienda.html",
+      "icons": [{ "src": "images/Coqui.webp", "sizes": "96x96" }]
+    }
+  ]
+}
