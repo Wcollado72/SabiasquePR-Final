@@ -26,7 +26,7 @@ const SITE = {
   // ── Google Analytics 4 ──────────────────────────────────
   // 1. Ir a https://analytics.google.com → crear propiedad
   // 2. Copiar el Measurement ID (G-XXXXXXXXXX) y pegarlo aquí
-  ga4Id:           'G-XXXXXXXXXX',
+  ga4Id:           'G-5YQT158RHH',
 
   // ── Supabase (autenticación) ─────────────────────────────
   // 1. Crear proyecto en https://supabase.com
