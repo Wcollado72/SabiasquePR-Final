@@ -21,7 +21,7 @@ const SITE = {
   // ── Formspree (contacto) ─────────────────────────────────
   // 1. Crear cuenta en https://formspree.io → New Form
   // 2. Pegar el ID aquí y ejecutar: node build.js
-  formspreeId:     'YOUR_FORM_ID',
+  formspreeId:     'xwleylbw',
 
   // ── Google Analytics 4 ──────────────────────────────────
   // 1. Ir a https://analytics.google.com → crear propiedad
