@@ -31,8 +31,8 @@ const SITE = {
   // ── Supabase (autenticación) ─────────────────────────────
   // 1. Crear proyecto en https://supabase.com
   // 2. Settings → API → copiar Project URL y anon public key
-  supabaseUrl:     'YOUR_SUPABASE_URL',
-  supabaseKey:     'YOUR_SUPABASE_ANON_KEY',
+  supabaseUrl:     'https://qmlhjacduuvptxglqxqn.supabase.co',
+  supabaseKey:     'sb_publishable_xeRmzsC6kmPflMm7FimG4g_-4mDoSbi',
 
   // ── Mailchimp (newsletter) ───────────────────────────────
   // 1. En Mailchimp: Audience → Signup forms → Embedded forms
