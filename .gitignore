@@ -20,6 +20,7 @@ Thumbs.db
 dist/
 build/
 .cache/
+coverage/
 
 # Claude Code — configuración local de la máquina
 .claude/settings.local.json
