@@ -127,108 +127,7 @@
     </aside>
 
     <main class="main tienda-main" id="main-content" tabindex="-1">
-      
-      <section class="box product-card">
-        <figure>
-          <img src="images/nuevoshumanos.webp" alt="Taza con diseño Nuevos Humanos" loading="lazy" width="250" height="180">
-        </figure>
-        <h3>Taza "Nuevos Humanos"</h3>
-        <p>Ideal para café o té mientras lees noticias y estudias. Diseño basado en la imagen principal del proyecto.</p>
-        <p class="price">$12.00</p>
-        <button type="button"
-          data-product-id="taza-nuevos-humanos"
-          data-product-name="Taza &quot;Nuevos Humanos&quot;"
-          data-product-price="12"
-          data-stripe-link=""
-          onclick="addToCart(this)">
-          Añadir al carrito
-        </button>
-      </section>
-
-      <section class="box product-card">
-        <figure>
-          <img src="images/Coqui.webp" alt="Camiseta con logo del coquí Sabías que PR" loading="lazy" width="250" height="180">
-        </figure>
-        <h3>Camiseta "Coquí Borikén"</h3>
-        <p>Camiseta unisex con el logo del proyecto. Pensada para llevar el mensaje de conciencia humana en cada salida.</p>
-        <p class="price">$22.00</p>
-        <button type="button"
-          data-product-id="camiseta-coqui"
-          data-product-name="Camiseta &quot;Coquí Borikén&quot;"
-          data-product-price="22"
-          data-stripe-link=""
-          onclick="addToCart(this)">
-          Añadir al carrito
-        </button>
-      </section>
-
-      <section class="box product-card">
-        <figure>
-          <img src="images/enlaces.webp" alt="Gorra con diseño de Curiosidades y Derechos Humanos" loading="lazy" width="250" height="180">
-        </figure>
-        <h3>Gorra "Curiosidades & Derechos"</h3>
-        <p>Gorra ajustable con arte inspirado en los bloques de Curiosidades, Historia, Lógica Humana y Cero Pobreza.</p>
-        <p class="price">$18.00</p>
-        <button type="button"
-          data-product-id="gorra-curiosidades"
-          data-product-name="Gorra &quot;Curiosidades & Derechos&quot;"
-          data-product-price="18"
-          data-stripe-link=""
-          onclick="addToCart(this)">
-          Añadir al carrito
-        </button>
-      </section>
-
-      <section class="box product-card">
-        <figure>
-          <img src="images/international-news.webp" alt="Polo con diseño de noticias internacionales" loading="lazy" width="250" height="180">
-        </figure>
-        <h3>Polo "Noticias Internacionales"</h3>
-        <p>Polo tipo casual para reuniones y actividades educativas, con gráfico del globo PR.</p>
-        <p class="price">$26.00</p>
-        <button type="button"
-          data-product-id="polo-noticias"
-          data-product-name="Polo &quot;Noticias Internacionales&quot;"
-          data-product-price="26"
-          data-stripe-link=""
-          onclick="addToCart(this)">
-          Añadir al carrito
-        </button>
-      </section>
-
-      <section class="box product-card">
-        <figure>
-          <img src="images/educacion.webp" alt="Libreta de apuntes Educación y Lógica" loading="lazy" width="250" height="180">
-        </figure>
-        <h3>Libreta "Educación y Lógica"</h3>
-        <p>Libreta de apuntes para tus investigaciones, cursos y planificación de proyectos sociales.</p>
-        <p class="price">$9.00</p>
-        <button type="button"
-          data-product-id="libreta-educacion"
-          data-product-name="Libreta &quot;Educación y Lógica&quot;"
-          data-product-price="9"
-          data-stripe-link=""
-          onclick="addToCart(this)">
-          Añadir al carrito
-        </button>
-      </section>
-
-      <section class="box product-card">
-        <figure>
-          <img src="images/descubrimiento.webp" alt="Sticker Pack Descubrimientos" loading="lazy" width="250" height="180">
-        </figure>
-        <h3>Sticker Pack "Descubrimientos"</h3>
-        <p>Paquete de stickers para decorar laptops, libretas o carpetas con temas de ciencia, tecnología y curiosidad.</p>
-        <p class="price">$5.00</p>
-        <button type="button"
-          data-product-id="sticker-pack"
-          data-product-name="Sticker Pack &quot;Descubrimientos&quot;"
-          data-product-price="5"
-          data-stripe-link=""
-          onclick="addToCart(this)">
-          Añadir al carrito
-        </button>
-      </section>
+      <div id="productos"><p class="foro-loading">Cargando productos...</p></div>
       
       <section class="references-box">
         <hr>
@@ -295,7 +194,7 @@
   </script>
   <script src="auth.js" type="module"></script>
   <script src="script.js"></script>
-  
+  <script src="productos.js"></script>
   <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>

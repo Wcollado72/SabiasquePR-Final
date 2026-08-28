@@ -1057,6 +1057,9 @@ html[data-theme="dark"] .box-positivo h3{
 .foro-login-hint{ grid-column:1 / -1; font-size:0.85rem; }
 .foro-empty, .foro-loading, .foro-error{ grid-column:1 / -1; text-align:center; padding:16px; }
 
+/* Contenedores de contenido cargado por API: no deben romper el grid de .main */
+#noticias-list, #productos{ display:contents; }
+
 /* ===== NAV ACTIVE ===== */
 .nav a.nav-active {
   background:none; color:var(--brand); opacity:1;

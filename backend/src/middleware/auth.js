@@ -41,4 +41,12 @@ async function requireAuth(req, res, next) {
   }
 }
 
-module.exports = { requireAuth };
+// Debe usarse despues de requireAuth (necesita req.user ya poblado).
+function requireAdmin(req, res, next) {
+  if (req.user?.rol !== 'admin') {
+    return res.status(403).json({ ok: false, error: 'Requiere rol de administrador.' });
+  }
+  next();
+}
+
+module.exports = { requireAuth, requireAdmin };

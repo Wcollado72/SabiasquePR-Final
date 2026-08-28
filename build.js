@@ -53,50 +53,12 @@ const SITE = {
 
 // ── CONTENIDO DESDE CMS JSON ────────────────────────────────
 const noticias  = JSON.parse(fs.readFileSync('_content/noticias.json',  'utf8'));
-const productos = JSON.parse(fs.readFileSync('_content/productos.json', 'utf8'));
 
 // ── HELPERS DE RENDERIZADO ──────────────────────────────────
 
-function renderArticulo(art) {
-  return `
-      <div class="box box-blog ${art.clase}">
-        <article>
-          <h3>${art.titulo}</h3>
-          <time datetime="${art.fecha}">${art.fechaDisplay}</time>
-          <figure class="${art.clase}-figure">
-            <a href="${art.fuenteUrl}" target="_blank" rel="noopener noreferrer">
-              <img src="${art.imagen}" alt="${art.imagenAlt}" loading="lazy" width="600" height="340">
-            </a>
-            <figcaption>${art.imagenCaption}</figcaption>
-          </figure>
-          ${art.parrafos.map(p => `          <p>${p}</p>`).join('\n')}
-          <p class="fuente-link">
-            Fuente: <a href="${art.fuenteUrl}" target="_blank" rel="noopener noreferrer">${art.fuenteTexto}</a>
-          </p>
-        </article>
-      </div>`;
-}
-
-function renderProducto(p) {
-  const isReal = p.stripeLink && !p.stripeLink.startsWith('YOUR_');
-  return `
-      <section class="box product-card">
-        <figure>
-          <img src="${p.imagen}" alt="${p.imagenAlt}" loading="lazy" width="250" height="180">
-        </figure>
-        <h3>${p.nombre}</h3>
-        <p>${p.descripcion}</p>
-        <p class="price">$${p.precio.toFixed(2)}</p>
-        <button type="button"
-          data-product-id="${p.id}"
-          data-product-name="${p.nombre.replace(/"/g, '&quot;')}"
-          data-product-price="${p.precio}"
-          data-stripe-link="${isReal ? p.stripeLink : ''}"
-          onclick="addToCart(this)">
-          Añadir al carrito
-        </button>
-      </section>`;
-}
+// noticias/tienda ahora se cargan en el navegador vía la API REST
+// (noticias.js / productos.js) en vez de pre-renderizarse aquí.
+// `noticias` sigue leyéndose arriba porque generateRSS() la usa.
 
 // ── COMPONENTES COMPARTIDOS ─────────────────────────────────
 
@@ -400,8 +362,8 @@ const PAGES = [
     description: 'Noticias internacionales con contexto y análisis: descubrimientos, ciencia, política y sociedad.',
     heroH2: 'Noticias',
     heroP: 'Una selección de historias que nos ayudan a entender el mundo de hoy.',
-    mainContent:
-      noticias.map(renderArticulo).join('\n') + `
+    mainContent: `
+      <div id="noticias-list"><p class="foro-loading">Cargando noticias...</p></div>
       <section class="box box-blog">
         <h3>Noticias destacadas</h3>
         <ul>
@@ -410,6 +372,7 @@ const PAGES = [
           <li>"Nuevas estructuras detectadas debajo de las pirámides en Egipto."</li>
         </ul>
       </section>`,
+    extraScript: `<script src="noticias.js"></script>`,
   },
 
   {
@@ -616,7 +579,8 @@ const PAGES = [
           <a href="#productos" class="btn btn-alt">Ver productos</a>
           <a href="about.html" class="btn btn-alt">Sobre el proyecto</a>`,
     mainClass: 'tienda-main',
-    mainContent: productos.map(renderProducto).join('\n'),
+    mainContent: `<div id="productos"><p class="foro-loading">Cargando productos...</p></div>`,
+    extraScript: `<script src="productos.js"></script>`,
   },
 
   {

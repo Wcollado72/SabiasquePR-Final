@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const { pool } = require('./db');
 const foroRoutes = require('./routes/foro');
+const noticiasRoutes = require('./routes/noticias');
+const productosRoutes = require('./routes/productos');
 
 const app = express();
 
@@ -28,6 +30,8 @@ app.get('/api/health', async (_req, res) => {
 });
 
 app.use('/api/foro', foroRoutes);
+app.use('/api/noticias', noticiasRoutes);
+app.use('/api/productos', productosRoutes);
 
 // Manejador de errores (CORS rechazado, JSON malformado, etc.)
 app.use((err, _req, res, _next) => {

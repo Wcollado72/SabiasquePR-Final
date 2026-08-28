@@ -128,45 +128,7 @@
 
     <main class="main" id="main-content" tabindex="-1">
       
-      <div class="box box-blog noticia-atlas">
-        <article>
-          <h3>¡3I/ATLAS Conquista el Cosmos: El Cometa Interestelar Más Rápido!</h3>
-          <time datetime="2025-12-01">1 de diciembre de 2025</time>
-          <figure class="noticia-atlas-figure">
-            <a href="https://ciencia.nasa.gov/sistema-solar/cometa-3i-atlas/" target="_blank" rel="noopener noreferrer">
-              <img src="images/3IAtlas.webp" alt="Ilustración del cometa 3I/ATLAS cruzando el Sistema Solar" loading="lazy" width="600" height="340">
-            </a>
-            <figcaption>Imagen: NASA – haz clic para ver la nota completa.</figcaption>
-          </figure>
-                    <p>El cometa <strong>3I/ATLAS</strong>, tercer visitante interestelar confirmado tras 'Oumuamua y Borisov, irrumpió en julio de 2025 detectado por ATLAS en Chile y alcanzó perihelio el 29 de octubre a 1.36 UA del Sol, entre Tierra y Marte, sin riesgo para nosotros.</p>
-          <p>Con velocidad de 61 km/s y excentricidad 6.139, su trayectoria hiperbólica revela un posible origen en el disco grueso galáctico.</p>
-          <p>A diferencia de muchos cometas que solo desarrollan una cola cerca del Sol, 3I/ATLAS se mantuvo activo y generó una coma incluso a grandes distancias. Su núcleo fue visiblemente pequeño, con un diámetro estimado entre 200 y 400 metros.</p>
-          <p>Para la comunidad científica, <strong>3I/ATLAS</strong> representa una oportunidad única para comparar la composición y dinámica de objetos formados fuera del Sistema Solar. El seguimiento fotométrico y espectroscópico servirá de referencia para futuras misiones que busquen visitar de cerca otros visitantes interestelares.</p>
-          <p class="fuente-link">
-            Fuente: <a href="https://ciencia.nasa.gov/sistema-solar/cometa-3i-atlas/" target="_blank" rel="noopener noreferrer">NASA – Cometa 3I/ATLAS</a>
-          </p>
-        </article>
-      </div>
-
-      <div class="box box-blog noticia-traore">
-        <article>
-          <h3>¡Ibrahim Traoré: Revolución Panafricana en Burkina Faso!</h3>
-          <time datetime="2025-12-01">1 de diciembre de 2025</time>
-          <figure class="noticia-traore-figure">
-            <a href="https://www.reuters.com/world/africa/burkina-fasos-self-declared-military-leader-says-situation-is-under-control-2022-10-02/" target="_blank" rel="noopener noreferrer">
-              <img src="images/Traore.webp" alt="Ibrahim Traoré frente a la refinería nacional de oro en Burkina Faso" loading="lazy" width="600" height="340">
-            </a>
-            <figcaption>Imagen: Reuters – haz clic para leer el reportaje completo.</figcaption>
-          </figure>
-                    <p>El capitán <strong>Ibrahim Traoré</strong>, de 37 años y presidente interino desde septiembre de 2022, lidera reformas soberanas en Burkina Faso: expulsó tropas francesas y nacionalizó minas de oro con una refinería estatal que procesa 150–400 kg diarios.</p>
-          <p>Ha fortalecido la Alianza de Estados del Sahel (AES) junto con los líderes militares de Malí y Níger, posicionándose como heredero del legado de Thomas Sankara.</p>
-          <p>Traoré impulsa un mayor control estatal del oro: aprobó la construcción de la primera refinería nacional y endureció las reglas para la exportación artesanal para combatir el contrabando y aumentar los ingresos que quedan en Burkina Faso.</p>
-          <p>Su discurso panafricanista y antiimperialista ha sido celebrado por sectores que ven en él una recuperación de la dignidad nacional frente a décadas de dependencia externa.</p>
-          <p class="fuente-link">
-            Fuente: <a href="https://www.reuters.com/world/africa/burkina-fasos-self-declared-military-leader-says-situation-is-under-control-2022-10-02/" target="_blank" rel="noopener noreferrer">Reuters – Ibrahim Traoré</a>
-          </p>
-        </article>
-      </div>
+      <div id="noticias-list"><p class="foro-loading">Cargando noticias...</p></div>
       <section class="box box-blog">
         <h3>Noticias destacadas</h3>
         <ul>
@@ -241,7 +203,7 @@
   </script>
   <script src="auth.js" type="module"></script>
   <script src="script.js"></script>
-  
+  <script src="noticias.js"></script>
   <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>
