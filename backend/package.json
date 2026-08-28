@@ -4,6 +4,9 @@
   "description": "API backend de Sabias que PR",
   "main": "src/server.js",
   "type": "commonjs",
+  "engines": {
+    "node": ">=18.18"
+  },
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",

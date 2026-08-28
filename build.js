@@ -20,8 +20,8 @@ const SITE = {
 
   // ── Backend API (foro) ───────────────────────────────────
   // URL del servidor Express. En local: http://localhost:3000
-  // Tras desplegar en Render, actualizar con la URL real.
-  apiUrl:          'http://localhost:3000',
+  // En Netlify: definir la variable de entorno API_URL con la URL de Render.
+  apiUrl:          process.env.API_URL || 'http://localhost:3000',
 
   // ── Formspree (contacto) ─────────────────────────────────
   // 1. Crear cuenta en https://formspree.io → New Form
