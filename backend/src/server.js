@@ -2,9 +2,20 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { pool } = require('./db');
+const foroRoutes = require('./routes/foro');
 
 const app = express();
-app.use(cors());
+
+const allowedOrigins = (process.env.FRONTEND_ORIGIN ||
+  'http://localhost:5500,http://127.0.0.1:5500,http://localhost:8080')
+  .split(',').map((s) => s.trim()).filter(Boolean);
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error('Origen no permitido por CORS.'));
+  },
+}));
 app.use(express.json());
 
 app.get('/api/health', async (_req, res) => {
@@ -14,6 +25,14 @@ app.get('/api/health', async (_req, res) => {
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }
+});
+
+app.use('/api/foro', foroRoutes);
+
+// Manejador de errores (CORS rechazado, JSON malformado, etc.)
+app.use((err, _req, res, _next) => {
+  const status = err.message && err.message.includes('CORS') ? 403 : 400;
+  res.status(status).json({ ok: false, error: err.message });
 });
 
 const PORT = process.env.PORT || 3000;

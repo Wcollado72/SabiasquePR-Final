@@ -1033,6 +1033,30 @@ html[data-theme="dark"] .box-positivo h3{
 .newsletter-status.ok    { color:#16a34a; }
 .newsletter-status.info  { color:#2563eb; }
 
+/* ===== FORO ===== */
+.foro-filters{ grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:8px; margin:4px 0 8px; }
+.foro-filter-btn{
+  padding:6px 14px; border-radius:999px; border:1px solid var(--input-border);
+  background:var(--card-bg); color:var(--ink); cursor:pointer; font-size:0.85rem;
+}
+.foro-filter-btn.active, .foro-filter-btn:hover{ background:var(--brand); color:#fff; border-color:var(--brand); }
+.foro-post-list, .foro-post-detail{ grid-column:1 / -1; display:flex; flex-direction:column; gap:12px; }
+.foro-post-card h3{ margin:6px 0; }
+.foro-post-card h3 a{ color:var(--ink); text-decoration:none; }
+.foro-post-card h3 a:hover{ text-decoration:underline; color:var(--brand); }
+.foro-badge{
+  display:inline-block; font-size:0.65rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.04em; padding:2px 10px; border-radius:999px; background:var(--brand); color:#fff;
+}
+.foro-meta{ font-size:0.78rem; opacity:0.7; margin:4px 0; }
+.foro-body{ white-space:pre-wrap; line-height:1.7; }
+.foro-actions{ display:flex; gap:8px; margin-top:12px; }
+.foro-danger{ color:#b91c1c; border-color:#b91c1c; }
+.foro-comments{ grid-column:1 / -1; display:flex; flex-direction:column; gap:10px; }
+.foro-comment{ border:var(--border); border-radius:8px; padding:10px 12px; background:var(--card-bg); }
+.foro-login-hint{ grid-column:1 / -1; font-size:0.85rem; }
+.foro-empty, .foro-loading, .foro-error{ grid-column:1 / -1; text-align:center; padding:16px; }
+
 /* ===== NAV ACTIVE ===== */
 .nav a.nav-active {
   background:none; color:var(--brand); opacity:1;

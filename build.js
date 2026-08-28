@@ -18,6 +18,11 @@ const SITE = {
   location:        'San Juan, Puerto Rico',
   ogImage:         'https://sabiasquepr.com/images/nuevoshumanos.webp',
 
+  // ── Backend API (foro) ───────────────────────────────────
+  // URL del servidor Express. En local: http://localhost:3000
+  // Tras desplegar en Render, actualizar con la URL real.
+  apiUrl:          'http://localhost:3000',
+
   // ── Formspree (contacto) ─────────────────────────────────
   // 1. Crear cuenta en https://formspree.io → New Form
   // 2. Pegar el ID aquí y ejecutar: node build.js
@@ -260,6 +265,7 @@ function buildPage(p) {
         <li><a href="nuevos-humanos.html">Nuevos Humanos</a></li>
         <li><a href="tecnologia.html">Tecnología</a></li>
         <li><a href="educacion.html">Educación</a></li>
+        <li><a href="foro.html">Foro</a></li>
         <li><a href="tienda.html">Tienda</a></li>
         <li><a href="contacto.html">Contacto</a></li>
         <li><a href="#" class="nav-premium" onclick="window.showToast&amp;&amp;window.showToast('🔒 Suscripción premium — próximamente');return false;">Hazte premium</a></li>
@@ -316,6 +322,7 @@ function buildPage(p) {
     window.SITE_CONFIG = {
       supabaseUrl: '${SITE.supabaseUrl}',
       supabaseKey: '${SITE.supabaseKey}',
+      apiUrl:      '${SITE.apiUrl}',
       mcUser:      '${SITE.mcUser}',
       mcList:      '${SITE.mcList}',
       mcServer:    '${SITE.mcServer}'
@@ -551,6 +558,52 @@ const PAGES = [
         <h3>¿Tienes ideas o sugerencias?</h3>
         <p>Escríbenos: <a href="mailto:${SITE.email}">${SITE.email}</a></p>
       </section>`,
+  },
+
+  {
+    file: 'foro.html',
+    title: 'Sabías que PR — Foro de la comunidad',
+    description: 'Foro de la comunidad de Sabías que PR: comparte ideas, preguntas y descubrimientos sobre tecnología, crítica internacional, nuevos humanos y educación.',
+    heroH2: 'Foro de la Comunidad',
+    heroP: 'Comparte, pregunta y debate con otros lectores de Sabías que PR.',
+    mainContent: `
+      <section class="box box-blog foro-intro">
+        <h3>💬 Foro de la comunidad</h3>
+        <p>Comparte ideas, preguntas y descubrimientos con la comunidad. Inicia sesión para publicar.</p>
+      </section>
+
+      <section class="box box-blog contact-box foro-new-post" id="foro-new-post" style="display:none;">
+        <h3>Nueva publicación</h3>
+        <form id="foro-post-form">
+          <label for="foro-titulo">Título</label>
+          <input type="text" id="foro-titulo" required maxlength="140">
+          <label for="foro-categoria">Categoría</label>
+          <select id="foro-categoria">
+            <option value="general">General</option>
+            <option value="tecnologia">Tecnología</option>
+            <option value="critica-internacional">Crítica Internacional</option>
+            <option value="nuevos-humanos">Nuevos Humanos</option>
+            <option value="educacion">Educación</option>
+          </select>
+          <label for="foro-cuerpo">Mensaje</label>
+          <textarea id="foro-cuerpo" rows="4" required minlength="10"></textarea>
+          <button type="submit" id="foro-submit-btn">Publicar</button>
+          <p id="foro-form-status" class="form-status" aria-live="polite"></p>
+        </form>
+      </section>
+      <p id="foro-login-hint" class="foro-login-hint">🔒 <a href="#login-box">Inicia sesión</a> para publicar en el foro.</p>
+
+      <section class="foro-filters" id="foro-filters">
+        <button type="button" class="foro-filter-btn active" data-categoria="">Todos</button>
+        <button type="button" class="foro-filter-btn" data-categoria="tecnologia">Tecnología</button>
+        <button type="button" class="foro-filter-btn" data-categoria="critica-internacional">Crítica Internacional</button>
+        <button type="button" class="foro-filter-btn" data-categoria="nuevos-humanos">Nuevos Humanos</button>
+        <button type="button" class="foro-filter-btn" data-categoria="educacion">Educación</button>
+      </section>
+
+      <div id="foro-post-list" class="foro-post-list"><p class="foro-loading">Cargando publicaciones...</p></div>
+      <div id="foro-post-detail" class="foro-post-detail" style="display:none;"></div>`,
+    extraScript: `<script src="foro.js"></script>`,
   },
 
   {

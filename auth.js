@@ -27,6 +27,7 @@ async function initAuth() {
       'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
     );
     supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    window.supabase = supabase; // permite que otros scripts (p.ej. foro.js) reutilicen la sesión
     await checkSession();
 
     supabase.auth.onAuthStateChange((_event, session) => {

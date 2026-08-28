@@ -61,6 +61,30 @@ CREATE TABLE IF NOT EXISTS ordenes (
   creado_en           timestamptz NOT NULL DEFAULT now()
 );
 
+-- Publicaciones del foro comunitario
+CREATE TABLE IF NOT EXISTS foro_posts (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  autor_id        uuid NOT NULL REFERENCES perfiles(id) ON DELETE CASCADE,
+  titulo          text NOT NULL,
+  cuerpo          text NOT NULL,
+  categoria       text NOT NULL DEFAULT 'general'
+                    CHECK (categoria IN ('general','tecnologia','critica-internacional','nuevos-humanos','educacion')),
+  creado_en       timestamptz NOT NULL DEFAULT now(),
+  editado_en      timestamptz
+);
+
+-- Comentarios de cada publicacion
+CREATE TABLE IF NOT EXISTS foro_comentarios (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  post_id         uuid NOT NULL REFERENCES foro_posts(id) ON DELETE CASCADE,
+  autor_id        uuid NOT NULL REFERENCES perfiles(id) ON DELETE CASCADE,
+  cuerpo          text NOT NULL,
+  creado_en       timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_foro_posts_categoria      ON foro_posts(categoria, creado_en DESC);
+CREATE INDEX IF NOT EXISTS idx_foro_comentarios_post_id  ON foro_comentarios(post_id, creado_en ASC);
+
 -- RLS activo por defecto en todas las tablas (sin policies = sin acceso
 -- publico via la Data API de Supabase; el backend usa la conexion directa
 -- de Postgres y no pasa por RLS).
@@ -70,3 +94,5 @@ ALTER TABLE perfiles           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE mensajes_contacto  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE suscriptores       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ordenes            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE foro_posts         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE foro_comentarios   ENABLE ROW LEVEL SECURITY;
