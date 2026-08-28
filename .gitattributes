@@ -1,0 +1,7 @@
+# Trata estos archivos binarios como binarios: nunca convertir saltos de linea
+*.pdf binary
+*.webp binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
