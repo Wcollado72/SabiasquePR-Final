@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { pool } = require('./db');
+const { requireAuth } = require('./middleware/auth');
 const foroRoutes = require('./routes/foro');
 const noticiasRoutes = require('./routes/noticias');
 const productosRoutes = require('./routes/productos');
@@ -27,6 +28,11 @@ app.get('/api/health', async (_req, res) => {
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }
+});
+
+// Identidad del usuario autenticado (id, email, rol) -- usado por el panel de administración.
+app.get('/api/me', requireAuth, (req, res) => {
+  res.json({ ok: true, user: req.user });
 });
 
 app.use('/api/foro', foroRoutes);

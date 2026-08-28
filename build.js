@@ -584,6 +584,98 @@ const PAGES = [
   },
 
   {
+    file: 'admin.html',
+    title: 'Sabías que PR — Panel de administración',
+    description: 'Panel de administración de Sabías que PR: gestión de noticias y productos.',
+    heroH2: 'Panel de administración',
+    heroP: 'Gestiona las noticias y los productos de la tienda.',
+    heroButtons: `<a href="index.html" class="btn btn-alt">← Volver al inicio</a>`,
+    mainClass: 'admin-main',
+    hideRefs: true,
+    mainContent: `
+      <section class="box box-blog admin-gate" id="admin-gate">
+        <p class="foro-loading">Verificando acceso...</p>
+      </section>
+
+      <div id="admin-panel" style="display:none;">
+        <nav class="foro-filters admin-tabs">
+          <button type="button" class="foro-filter-btn active" data-tab="noticias">Noticias</button>
+          <button type="button" class="foro-filter-btn" data-tab="productos">Productos</button>
+        </nav>
+
+        <section class="admin-tab-panel" id="admin-panel-noticias">
+          <div class="admin-toolbar">
+            <input type="search" id="admin-noticias-search" placeholder="Buscar noticia por título...">
+            <button type="button" id="admin-noticias-new" class="admin-btn-new">+ Nueva noticia</button>
+          </div>
+          <div id="admin-noticias-list" class="admin-list"></div>
+
+          <section class="box box-blog contact-box admin-form" id="admin-noticias-form-box" style="display:none;">
+            <h3 id="admin-noticias-form-title">Nueva noticia</h3>
+            <form id="admin-noticias-form">
+              <input type="hidden" id="an-id">
+              <label for="an-titulo">Título</label>
+              <input type="text" id="an-titulo" required minlength="3" maxlength="160">
+              <label for="an-fecha">Fecha</label>
+              <input type="date" id="an-fecha" required>
+              <label for="an-imagen">Imagen (ruta o URL)</label>
+              <input type="text" id="an-imagen" required placeholder="images/mi-imagen.webp">
+              <label for="an-imagen-alt">Texto alternativo de la imagen</label>
+              <input type="text" id="an-imagen-alt" required>
+              <label for="an-imagen-caption">Pie de imagen (opcional)</label>
+              <input type="text" id="an-imagen-caption">
+              <label for="an-fuente-url">URL de la fuente</label>
+              <input type="url" id="an-fuente-url" required>
+              <label for="an-fuente-texto">Nombre de la fuente</label>
+              <input type="text" id="an-fuente-texto" required>
+              <label for="an-parrafos">Párrafos (uno por línea)</label>
+              <textarea id="an-parrafos" rows="6" required></textarea>
+              <div class="admin-form-actions">
+                <button type="submit">Guardar</button>
+                <button type="button" class="admin-btn-cancel" id="an-cancel">Cancelar</button>
+              </div>
+              <p id="an-status" class="form-status" aria-live="polite"></p>
+            </form>
+          </section>
+        </section>
+
+        <section class="admin-tab-panel" id="admin-panel-productos" style="display:none;">
+          <div class="admin-toolbar">
+            <input type="search" id="admin-productos-search" placeholder="Buscar producto por nombre...">
+            <button type="button" id="admin-productos-new" class="admin-btn-new">+ Nuevo producto</button>
+          </div>
+          <div id="admin-productos-list" class="admin-list"></div>
+
+          <section class="box box-blog contact-box admin-form" id="admin-productos-form-box" style="display:none;">
+            <h3 id="admin-productos-form-title">Nuevo producto</h3>
+            <form id="admin-productos-form">
+              <input type="hidden" id="ap-id">
+              <label for="ap-nombre">Nombre</label>
+              <input type="text" id="ap-nombre" required minlength="3" maxlength="120">
+              <label for="ap-descripcion">Descripción</label>
+              <textarea id="ap-descripcion" rows="3" required></textarea>
+              <label for="ap-precio">Precio (USD)</label>
+              <input type="number" id="ap-precio" required min="0.01" step="0.01">
+              <label for="ap-imagen">Imagen (ruta o URL)</label>
+              <input type="text" id="ap-imagen" required placeholder="images/mi-producto.webp">
+              <label for="ap-imagen-alt">Texto alternativo de la imagen</label>
+              <input type="text" id="ap-imagen-alt" required>
+              <label for="ap-stripe-link">Enlace de pago de Stripe (opcional)</label>
+              <input type="url" id="ap-stripe-link">
+              <label class="admin-checkbox"><input type="checkbox" id="ap-disponible" checked> Disponible en la tienda</label>
+              <div class="admin-form-actions">
+                <button type="submit">Guardar</button>
+                <button type="button" class="admin-btn-cancel" id="ap-cancel">Cancelar</button>
+              </div>
+              <p id="ap-status" class="form-status" aria-live="polite"></p>
+            </form>
+          </section>
+        </section>
+      </div>`,
+    extraScript: `<script src="admin.js"></script>`,
+  },
+
+  {
     file: 'contacto.html',
     title: 'Sabías que PR — Contacto',
     description: 'Contáctanos para ideas, colaboraciones o sugerencias. Puente directo con el equipo de Sabías que PR.',

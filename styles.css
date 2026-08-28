@@ -1060,6 +1060,40 @@ html[data-theme="dark"] .box-positivo h3{
 /* Contenedores de contenido cargado por API: no deben romper el grid de .main */
 #noticias-list, #productos{ display:contents; }
 
+/* ===== PANEL DE ADMINISTRACIÓN ===== */
+.admin-main{ grid-template-columns:1fr; }
+.admin-gate{ text-align:center; }
+.admin-tabs{ margin-bottom:14px; }
+.admin-tab-panel{ display:flex; flex-direction:column; gap:14px; }
+.admin-toolbar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.admin-toolbar input[type="search"]{
+  flex:1; min-width:200px; padding:7px 10px; border-radius:6px;
+  border:1px solid var(--input-border); background:var(--input-bg); color:var(--ink); font-size:0.9rem;
+}
+.admin-btn-new{
+  padding:7px 16px; border-radius:999px; border:none;
+  background:linear-gradient(90deg,var(--brand),var(--accent)); color:#fff; font-weight:600; cursor:pointer;
+}
+.admin-btn-new:hover{ filter:brightness(1.05); }
+.admin-list{ display:flex; flex-direction:column; gap:8px; }
+.admin-item{
+  display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
+  padding:10px 14px; border:var(--border); border-radius:8px; background:var(--card-bg);
+}
+.admin-item-info{ display:flex; flex-direction:column; gap:2px; }
+.admin-item-actions{ display:flex; gap:8px; flex-shrink:0; }
+.admin-btn-edit, .admin-btn-delete, .admin-btn-cancel{
+  padding:5px 12px; border-radius:6px; border:1px solid var(--input-border);
+  background:var(--card-bg); color:var(--ink); font-size:0.85rem; cursor:pointer;
+}
+.admin-btn-edit:hover{ border-color:var(--brand); color:var(--brand); }
+.admin-btn-delete:hover{ background:#b91c1c; border-color:#b91c1c; color:#fff; }
+.admin-form{ max-width:640px; }
+.admin-form form{ max-width:none; }
+.admin-form-actions{ display:flex; gap:10px; margin-top:6px; }
+.admin-checkbox{ display:flex; align-items:center; gap:8px; font-weight:600; }
+.admin-checkbox input{ width:auto; }
+
 /* ===== NAV ACTIVE ===== */
 .nav a.nav-active {
   background:none; color:var(--brand); opacity:1;
