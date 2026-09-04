@@ -12,6 +12,12 @@
   const isSupabaseConfigured = cfg.supabaseUrl && !cfg.supabaseUrl.includes('YOUR_SUPABASE');
   let supabase = null;
   let currentUser = null;
+  let currentUserRol = 'usuario';
+
+  const WORD_LIMITS = { usuario: 100, premium: 500, admin: 500 };
+  function countWords(text) {
+    return (text || '').trim().split(/\s+/).filter(Boolean).length;
+  }
 
   const CATEGORIAS = {
     general: 'General',
@@ -54,10 +60,12 @@
         }
         const { data: { session } } = await supabase.auth.getSession();
         currentUser = session?.user ?? null;
+        await refreshCurrentUserRol();
 
         supabase.auth.onAuthStateChange((_event, session) => {
           currentUser = session?.user ?? null;
           updateAuthUI();
+          refreshCurrentUserRol();
           route();
         });
       } catch (err) {
@@ -70,11 +78,45 @@
     route();
   }
 
+  async function refreshCurrentUserRol() {
+    if (!currentUser) { currentUserRol = 'usuario'; updateWordCounters(); return; }
+    try {
+      const data = await apiFetch('/api/me');
+      currentUserRol = data.user?.rol || 'usuario';
+    } catch {
+      currentUserRol = 'usuario';
+    }
+    updateWordCounters();
+  }
+
   function updateAuthUI() {
     const box = document.getElementById('foro-new-post');
     const hint = document.getElementById('foro-login-hint');
     if (box) box.style.display = currentUser ? 'block' : 'none';
     if (hint) hint.style.display = currentUser ? 'none' : 'block';
+  }
+
+  const WORD_COUNTER_PAIRS = [
+    ['foro-cuerpo', 'foro-cuerpo-counter'],
+    ['foro-edit-cuerpo', 'foro-edit-cuerpo-counter'],
+  ];
+  function updateWordCounter(textareaId, counterId) {
+    const ta = document.getElementById(textareaId);
+    const counter = document.getElementById(counterId);
+    if (!ta || !counter) return;
+    const limit = WORD_LIMITS[currentUserRol] || WORD_LIMITS.usuario;
+    const n = countWords(ta.value);
+    counter.textContent = `${n}/${limit} palabras${currentUserRol !== 'usuario' ? ' (premium)' : ''}`;
+    counter.classList.toggle('over-limit', n > limit);
+  }
+  function bindWordCounter(textareaId, counterId) {
+    const ta = document.getElementById(textareaId);
+    if (!ta) return;
+    ta.addEventListener('input', () => updateWordCounter(textareaId, counterId));
+    updateWordCounter(textareaId, counterId);
+  }
+  function updateWordCounters() {
+    WORD_COUNTER_PAIRS.forEach(([taId, counterId]) => updateWordCounter(taId, counterId));
   }
 
   async function getToken() {
@@ -156,12 +198,13 @@
     const isOwner = currentUser && currentUser.id === post.autor_id;
     document.getElementById('foro-post-detail').innerHTML = `
       <p><a href="foro.html">← Volver al foro</a></p>
-      <article class="box box-blog foro-post-full">
+      <article class="box box-blog foro-post-full" id="foro-post-full">
         <span class="foro-badge">${CATEGORIAS[post.categoria] || post.categoria}</span>
         <h3>${escapeHtml(post.titulo)}</h3>
         <p class="foro-meta">Por ${escapeHtml(post.autor_email || 'anónimo')} · ${formatDate(post.creado_en)}${post.editado_en ? ' · editado' : ''}</p>
         <p class="foro-body">${escapeHtml(post.cuerpo)}</p>
         ${isOwner ? `<div class="foro-actions">
+          <button type="button" id="foro-edit-post-btn" class="btn-alt">Editar</button>
           <button type="button" id="foro-delete-post-btn" class="btn-alt foro-danger">Eliminar</button>
         </div>` : ''}
       </article>
@@ -211,11 +254,59 @@
         location.href = 'foro.html';
       } catch (err) { window.showToast?.('❌ ' + err.message); }
     });
+
+    document.getElementById('foro-edit-post-btn')?.addEventListener('click', () => {
+      renderEditForm(post);
+    });
+  }
+
+  function renderEditForm(post) {
+    const article = document.getElementById('foro-post-full');
+    if (!article) return;
+    article.innerHTML = `
+      <h3>Editar publicación</h3>
+      <form id="foro-edit-form" class="foro-edit-form">
+        <label for="foro-edit-titulo">Título</label>
+        <input type="text" id="foro-edit-titulo" required maxlength="140" value="${escapeHtml(post.titulo)}">
+        <label for="foro-edit-categoria">Categoría</label>
+        <select id="foro-edit-categoria">
+          ${Object.entries(CATEGORIAS).map(([value, label]) =>
+            `<option value="${value}"${value === post.categoria ? ' selected' : ''}>${label}</option>`).join('')}
+        </select>
+        <label for="foro-edit-cuerpo">Mensaje</label>
+        <textarea id="foro-edit-cuerpo" rows="4" required minlength="10">${escapeHtml(post.cuerpo)}</textarea>
+        <p id="foro-edit-cuerpo-counter" class="foro-word-counter"></p>
+        <div class="foro-actions">
+          <button type="submit">Guardar cambios</button>
+          <button type="button" id="foro-edit-cancel-btn" class="btn-alt">Cancelar</button>
+        </div>
+        <p id="foro-edit-status" class="form-status" aria-live="polite"></p>
+      </form>`;
+
+    document.getElementById('foro-edit-cancel-btn')?.addEventListener('click', () => showDetail(post.id));
+
+    document.getElementById('foro-edit-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const statusEl = document.getElementById('foro-edit-status');
+      const titulo = document.getElementById('foro-edit-titulo').value.trim();
+      const categoria = document.getElementById('foro-edit-categoria').value;
+      const cuerpo = document.getElementById('foro-edit-cuerpo').value.trim();
+      if (titulo.length < 3) { setStatus(statusEl, 'error', 'Título muy corto.'); return; }
+      if (cuerpo.length < 10) { setStatus(statusEl, 'error', 'Mensaje muy corto.'); return; }
+      setStatus(statusEl, 'info', '⏳ Guardando...');
+      try {
+        await apiFetch(`/api/foro/posts/${post.id}`, { method: 'PATCH', body: JSON.stringify({ titulo, categoria, cuerpo }) });
+        showDetail(post.id);
+      } catch (err) { setStatus(statusEl, 'error', '❌ ' + err.message); }
+    });
+
+    bindWordCounter('foro-edit-cuerpo', 'foro-edit-cuerpo-counter');
   }
 
   function bindNewPostForm() {
     const form = document.getElementById('foro-post-form');
     if (!form) return;
+    bindWordCounter('foro-cuerpo', 'foro-cuerpo-counter');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const statusEl = document.getElementById('foro-form-status');

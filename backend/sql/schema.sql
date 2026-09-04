@@ -85,6 +85,19 @@ CREATE TABLE IF NOT EXISTS foro_comentarios (
 CREATE INDEX IF NOT EXISTS idx_foro_posts_categoria      ON foro_posts(categoria, creado_en DESC);
 CREATE INDEX IF NOT EXISTS idx_foro_comentarios_post_id  ON foro_comentarios(post_id, creado_en ASC);
 
+-- Suscripciones premium (Stripe). Se agregan via ALTER porque
+-- CREATE TABLE IF NOT EXISTS no modifica una tabla ya existente.
+ALTER TABLE perfiles ADD COLUMN IF NOT EXISTS stripe_customer_id     text;
+ALTER TABLE perfiles ADD COLUMN IF NOT EXISTS stripe_subscription_id text;
+
+-- Ampliar el rol permitido para incluir 'premium'.
+ALTER TABLE perfiles DROP CONSTRAINT IF EXISTS perfiles_rol_check;
+ALTER TABLE perfiles ADD CONSTRAINT perfiles_rol_check
+  CHECK (rol IN ('usuario', 'admin', 'premium'));
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_perfiles_stripe_customer_id
+  ON perfiles(stripe_customer_id) WHERE stripe_customer_id IS NOT NULL;
+
 -- RLS activo por defecto en todas las tablas (sin policies = sin acceso
 -- publico via la Data API de Supabase; el backend usa la conexion directa
 -- de Postgres y no pasa por RLS).

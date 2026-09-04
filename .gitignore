@@ -24,3 +24,9 @@ coverage/
 
 # Claude Code — configuración local de la máquina
 .claude/settings.local.json
+
+# Skills de referencia instaladas para el asistente (no son parte del sitio)
+.agents/
+.claude/skills/
+.junie/
+skills-lock.json

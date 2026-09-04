@@ -1056,6 +1056,24 @@ html[data-theme="dark"] .box-positivo h3{
 .foro-comment{ border:var(--border); border-radius:8px; padding:10px 12px; background:var(--card-bg); }
 .foro-login-hint{ grid-column:1 / -1; font-size:0.85rem; }
 .foro-empty, .foro-loading, .foro-error{ grid-column:1 / -1; text-align:center; padding:16px; }
+.foro-edit-form{
+  margin-top:12px; display:flex; flex-direction:column; gap:6px; max-width:520px;
+}
+.foro-edit-form label{ font-weight:600; }
+.foro-edit-form input,
+.foro-edit-form textarea,
+.foro-edit-form select{
+  width:100%; padding:6px 8px; border-radius:4px;
+  border:1px solid var(--input-border); font-size:0.9rem; font-family:inherit;
+  background:var(--input-bg,#fff); color:var(--ink);
+}
+.foro-edit-form button[type="submit"]{
+  align-self:flex-start; padding:6px 14px; border-radius:999px; border:none;
+  background:linear-gradient(90deg,var(--brand),var(--accent)); color:#fff;
+  font-weight:600; cursor:pointer;
+}
+.foro-word-counter{ font-size:0.78rem; opacity:0.7; margin:2px 0 8px; }
+.foro-word-counter.over-limit{ color:#b91c1c; opacity:1; font-weight:600; }
 
 /* Contenedores de contenido cargado por API: no deben romper el grid de .main */
 #noticias-list, #productos{ display:contents; }

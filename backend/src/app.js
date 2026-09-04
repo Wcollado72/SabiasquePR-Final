@@ -5,6 +5,8 @@ const { requireAuth } = require('./middleware/auth');
 const foroRoutes = require('./routes/foro');
 const noticiasRoutes = require('./routes/noticias');
 const productosRoutes = require('./routes/productos');
+const stripeRoutes = require('./routes/stripe');
+const stripeWebhookRoutes = require('./routes/stripeWebhook');
 
 function buildApp() {
   const app = express();
@@ -19,6 +21,11 @@ function buildApp() {
       callback(new Error('Origen no permitido por CORS.'));
     },
   }));
+
+  // Debe montarse ANTES de express.json(): Stripe firma el body crudo,
+  // no el JSON ya parseado.
+  app.use('/api/stripe', stripeWebhookRoutes);
+
   app.use(express.json());
 
   app.get('/api/health', async (_req, res) => {
@@ -38,6 +45,7 @@ function buildApp() {
   app.use('/api/foro', foroRoutes);
   app.use('/api/noticias', noticiasRoutes);
   app.use('/api/productos', productosRoutes);
+  app.use('/api/stripe', stripeRoutes);
 
   // Manejador de errores (CORS rechazado, JSON malformado, etc.)
   app.use((err, _req, res, _next) => {

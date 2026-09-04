@@ -230,7 +230,7 @@ function buildPage(p) {
         <li><a href="foro.html">Foro</a></li>
         <li><a href="tienda.html">Tienda</a></li>
         <li><a href="contacto.html">Contacto</a></li>
-        <li><a href="#" class="nav-premium" onclick="window.showToast&amp;&amp;window.showToast('🔒 Suscripción premium — próximamente');return false;">Hazte premium</a></li>
+        <li><a href="premium.html" class="nav-premium">Hazte premium</a></li>
       </ul>
     </nav>
 
@@ -550,6 +550,7 @@ const PAGES = [
           </select>
           <label for="foro-cuerpo">Mensaje</label>
           <textarea id="foro-cuerpo" rows="4" required minlength="10"></textarea>
+          <p id="foro-cuerpo-counter" class="foro-word-counter"></p>
           <button type="submit" id="foro-submit-btn">Publicar</button>
           <p id="foro-form-status" class="form-status" aria-live="polite"></p>
         </form>
@@ -567,6 +568,26 @@ const PAGES = [
       <div id="foro-post-list" class="foro-post-list"><p class="foro-loading">Cargando publicaciones...</p></div>
       <div id="foro-post-detail" class="foro-post-detail" style="display:none;"></div>`,
     extraScript: `<script src="foro.js"></script>`,
+  },
+
+  {
+    file: 'premium.html',
+    title: 'Sabías que PR — Premium',
+    description: 'Hazte miembro premium de Sabías que PR y publica mensajes más largos en el foro de la comunidad.',
+    heroH2: 'Sabías que PR Premium',
+    heroP: 'Publica mensajes más largos en el foro y apoya el proyecto.',
+    mainContent: `
+      <section class="box box-blog foro-intro">
+        <h3>⭐ Beneficios premium</h3>
+        <ul>
+          <li>Publica hasta <strong>500 palabras</strong> por mensaje en el foro (en vez de 100).</li>
+          <li>Apoyas directamente el sostenimiento del proyecto.</li>
+        </ul>
+        <p id="premium-status" class="form-status" aria-live="polite"></p>
+        <button type="button" id="premium-subscribe-btn" class="btn">Suscribirme</button>
+        <p class="foro-login-hint" id="premium-login-hint" style="display:none;">🔒 <a href="#login-box">Inicia sesión</a> para suscribirte.</p>
+      </section>`,
+    extraScript: `<script src="premium.js"></script>`,
   },
 
   {

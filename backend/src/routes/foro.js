@@ -51,7 +51,7 @@ router.get('/posts/:id', async (req, res) => {
 
 // POST /api/foro/posts -- crear -- requiere sesion
 router.post('/posts', requireAuth, async (req, res) => {
-  const errors = validatePost(req.body);
+  const errors = validatePost(req.body, req.user.rol);
   if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
   try {
     const { titulo, cuerpo } = req.body;
@@ -73,7 +73,7 @@ router.patch('/posts/:id', requireAuth, async (req, res) => {
     if (existing[0].autor_id !== req.user.id && req.user.rol !== 'admin') {
       return res.status(403).json({ ok: false, error: 'No tienes permiso para editar esta publicacion.' });
     }
-    const errors = validatePost(req.body);
+    const errors = validatePost(req.body, req.user.rol);
     if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
 
     const { titulo, cuerpo, categoria } = req.body;
