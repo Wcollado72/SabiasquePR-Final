@@ -1,0 +1,21 @@
+name: Mantener activa la base de datos
+
+# Supabase (plan gratis) pausa el proyecto tras ~7 dias sin actividad real
+# en la base de datos. Este workflow llama a /api/health cada 3 dias, que
+# internamente hace una consulta real a Postgres (SELECT NOW()), evitando
+# la pausa automatica. De paso, tambien "despierta" el backend de Render
+# si estaba dormido por inactividad.
+
+on:
+  schedule:
+    - cron: '0 12 */3 * *' # cada 3 dias a las 12:00 UTC
+  workflow_dispatch: {} # permite ejecutarlo manualmente desde GitHub
+
+jobs:
+  ping-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar /api/health (despierta Render y consulta Postgres)
+        run: |
+          curl -sf --retry 4 --retry-delay 20 --retry-all-errors --max-time 90 \
+            https://sabiasquepr-backend-uufz.onrender.com/api/health
