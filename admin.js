@@ -50,7 +50,7 @@
     }
 
     if (!currentUser) {
-      showGate('🔒 Inicia sesión (arriba a la izquierda) para acceder al panel de administración.');
+      showGate('🔒 <a href="#" class="login-modal-trigger">Inicia sesión</a> para acceder al panel de administración.');
       return;
     }
 

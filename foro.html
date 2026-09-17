@@ -52,6 +52,9 @@
         <button class="cart-btn" id="cart-btn" aria-label="Ver carrito" title="Ver carrito de compras">
           🛒 <span class="cart-count" id="cart-count">0</span>
         </button>
+        <button type="button" class="login-trigger-btn" id="login-trigger-btn" aria-haspopup="dialog" aria-expanded="false">
+          <span id="login-trigger-label">Iniciar sesión</span>
+        </button>
       </div>
     </header>
 
@@ -63,11 +66,8 @@
       </button>
       <ul id="nav-menu" role="list">
         <li><a href="index.html">Inicio</a></li>
-        <li><a href="about.html">Sobre el proyecto</a></li>
         <li><a href="noticias.html">Noticias</a></li>
-        <li><a href="critica-internacional.html">Crítica Internacional</a></li>
-        <li><a href="nuevos-humanos.html">Nuevos Humanos</a></li>
-        <li><a href="tecnologia.html">Tecnología</a></li>
+        <li><a href="nuevos-humanos.html">Revolución Humana</a></li>
         <li><a href="educacion.html">Educación</a></li>
         <li><a href="foro.html">Foro</a></li>
         <li><a href="tienda.html">Tienda</a></li>
@@ -82,12 +82,96 @@
         <h2>Foro de la Comunidad</h2>
         <p>Comparte, pregunta y debate con otros lectores de Sabías que PR.</p>
         <div class="hero-buttons">
-          <a href="about.html" class="btn btn-alt">Conócenos</a>
+          <a href="index.html" class="btn btn-alt">Conócenos</a>
           <a href="details.html" class="btn btn-alt">Servicios</a></div>
       </div>
     </section>
 
-    <aside class="sidebar-top">
+    <main class="main" id="main-content" tabindex="-1">
+      
+      <section class="box box-blog foro-intro">
+        <h3>💬 Foro de la comunidad</h3>
+        <p>Comparte ideas, preguntas y descubrimientos con la comunidad. Inicia sesión para publicar.</p>
+      </section>
+
+      <section class="box box-blog contact-box foro-new-post" id="foro-new-post" style="display:none;">
+        <h3>Nueva publicación</h3>
+        <form id="foro-post-form">
+          <label for="foro-titulo">Título</label>
+          <input type="text" id="foro-titulo" required maxlength="140">
+          <label for="foro-categoria">Categoría</label>
+          <select id="foro-categoria">
+            <option value="general">General</option>
+            <option value="tecnologia">Tecnología</option>
+            <option value="internacionales">Internacionales</option>
+            <option value="nuevos-humanos">Revolución Humana</option>
+            <option value="educacion">Educación</option>
+          </select>
+          <label for="foro-cuerpo">Mensaje</label>
+          <textarea id="foro-cuerpo" rows="4" required minlength="10"></textarea>
+          <p id="foro-cuerpo-counter" class="foro-word-counter"></p>
+          <button type="submit" id="foro-submit-btn">Publicar</button>
+          <p id="foro-form-status" class="form-status" aria-live="polite"></p>
+        </form>
+      </section>
+      <p id="foro-login-hint" class="foro-login-hint">🔒 <a href="#" class="login-modal-trigger">Inicia sesión</a> para publicar en el foro.</p>
+
+      <section class="foro-filters" id="foro-filters">
+        <button type="button" class="foro-filter-btn active" data-categoria="">Todos</button>
+        <button type="button" class="foro-filter-btn" data-categoria="tecnologia">Tecnología</button>
+        <button type="button" class="foro-filter-btn" data-categoria="internacionales">Internacionales</button>
+        <button type="button" class="foro-filter-btn" data-categoria="nuevos-humanos">Revolución Humana</button>
+        <button type="button" class="foro-filter-btn" data-categoria="educacion">Educación</button>
+      </section>
+
+      <div id="foro-post-list" class="foro-post-list"><p class="foro-loading">Cargando publicaciones...</p></div>
+      <div id="foro-post-detail" class="foro-post-detail" style="display:none;"></div>
+      
+      <section class="references-box">
+        <hr>
+        <h3>Referencias y Créditos</h3>
+        <ul>
+          <li><strong>Concepto y contenido original:</strong> Aliado Imperfekto (Proyecto ideado y desarrollado 2023 al presente).</li>
+          <li><strong>Herramientas de apoyo:</strong> Código e imágenes generadas con asistencia de Inteligencia Artificial.</li>
+        </ul>
+      </section>
+    </main>
+
+    
+    <footer class="footer">
+      <p>
+        <strong>Contacto:</strong>
+        <a href="mailto:sabiasquepr@yahoo.com">sabiasquepr@yahoo.com</a>
+        · (787) 555-0199 · San Juan, Puerto Rico
+      </p>
+      <p>Universidad Interamericana de Puerto Rico, Recinto de Fajardo</p>
+      <div class="footer-social">
+        <div class="social-links">
+          <a href="https://x.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+            <img src="images/Xlogo.webp" alt="X" width="40" height="40" loading="lazy">
+          </a>
+          <a href="https://www.facebook.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+            <img src="images/Facebook.webp" alt="Facebook" width="40" height="40" loading="lazy">
+          </a>
+          <a href="https://www.instagram.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <img src="images/instagram.webp" alt="Instagram" width="40" height="40" loading="lazy">
+          </a>
+        </div></div>
+      <p>
+        © 2026 Sabias que PR. Todos los derechos reservados.
+        <a href="privacidad.html">Política de privacidad</a> | <a href="terminos.html">Términos</a>
+      </p>
+      <p style="margin-top:10px;">
+        <a href="#arriba" style="color:var(--brand);font-weight:bold;text-decoration:none;">↑ Volver arriba</a>
+      </p>
+    </footer>
+
+  </div>
+
+  
+  <div class="login-modal-overlay" id="login-modal-overlay">
+    <div class="login-modal" id="login-modal" role="dialog" aria-modal="true" aria-label="Iniciar sesión">
+      <button type="button" class="login-modal-close" id="login-modal-close" aria-label="Cerrar">✕</button>
       
       <div class="login-box" id="login-box">
         <div id="auth-logged-out">
@@ -112,95 +196,7 @@
           <button type="button" id="btn-logout">Cerrar sesión</button>
         </div>
       </div>
-      <div class="sidebar-top-content">
-        <div class="social-links">
-          <a href="https://x.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
-            <img src="images/Xlogo.webp" alt="X" width="40" height="40" loading="lazy">
-          </a>
-          <a href="https://www.facebook.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-            <img src="images/Facebook.webp" alt="Facebook" width="40" height="40" loading="lazy">
-          </a>
-          <a href="https://www.instagram.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-            <img src="images/instagram.webp" alt="Instagram" width="40" height="40" loading="lazy">
-          </a>
-        </div></div>
-    </aside>
-
-    <main class="main" id="main-content" tabindex="-1">
-      
-      <section class="box box-blog foro-intro">
-        <h3>💬 Foro de la comunidad</h3>
-        <p>Comparte ideas, preguntas y descubrimientos con la comunidad. Inicia sesión para publicar.</p>
-      </section>
-
-      <section class="box box-blog contact-box foro-new-post" id="foro-new-post" style="display:none;">
-        <h3>Nueva publicación</h3>
-        <form id="foro-post-form">
-          <label for="foro-titulo">Título</label>
-          <input type="text" id="foro-titulo" required maxlength="140">
-          <label for="foro-categoria">Categoría</label>
-          <select id="foro-categoria">
-            <option value="general">General</option>
-            <option value="tecnologia">Tecnología</option>
-            <option value="critica-internacional">Crítica Internacional</option>
-            <option value="nuevos-humanos">Nuevos Humanos</option>
-            <option value="educacion">Educación</option>
-          </select>
-          <label for="foro-cuerpo">Mensaje</label>
-          <textarea id="foro-cuerpo" rows="4" required minlength="10"></textarea>
-          <p id="foro-cuerpo-counter" class="foro-word-counter"></p>
-          <button type="submit" id="foro-submit-btn">Publicar</button>
-          <p id="foro-form-status" class="form-status" aria-live="polite"></p>
-        </form>
-      </section>
-      <p id="foro-login-hint" class="foro-login-hint">🔒 <a href="#login-box">Inicia sesión</a> para publicar en el foro.</p>
-
-      <section class="foro-filters" id="foro-filters">
-        <button type="button" class="foro-filter-btn active" data-categoria="">Todos</button>
-        <button type="button" class="foro-filter-btn" data-categoria="tecnologia">Tecnología</button>
-        <button type="button" class="foro-filter-btn" data-categoria="critica-internacional">Crítica Internacional</button>
-        <button type="button" class="foro-filter-btn" data-categoria="nuevos-humanos">Nuevos Humanos</button>
-        <button type="button" class="foro-filter-btn" data-categoria="educacion">Educación</button>
-      </section>
-
-      <div id="foro-post-list" class="foro-post-list"><p class="foro-loading">Cargando publicaciones...</p></div>
-      <div id="foro-post-detail" class="foro-post-detail" style="display:none;"></div>
-      
-      <section class="references-box">
-        <hr>
-        <h3>Referencias y Créditos</h3>
-        <ul>
-          <li><strong>Concepto y contenido original:</strong> Aliado Imperfekto (Proyecto ideado y desarrollado 2023–2025).</li>
-          <li><strong>Herramientas de apoyo:</strong> Código e imágenes generadas con asistencia de Inteligencia Artificial.</li>
-          <li><strong>Fuentes externas:</strong> Datos consultados de NASA, Reuters y fuentes de dominio público.</li>
-        </ul>
-      </section>
-    </main>
-
-    <aside class="sidebar-bottom">
-      <a href="educacion.html" class="enlaces-btn">Enlaces</a>
-      <img src="images/enlaces.webp"
-           alt="Enlaces: Curiosidades, Historia, Derechos Humanos, Lógica Humana y Cero Pobreza"
-           class="Enlaces-img" loading="lazy" width="300" height="400">
-    </aside>
-
-    
-    <footer class="footer">
-      <p>
-        <strong>Contacto:</strong>
-        <a href="mailto:sabiasquepr@yahoo.com">sabiasquepr@yahoo.com</a>
-        · (787) 555-0199 · San Juan, Puerto Rico
-      </p>
-      <p>Universidad Interamericana de Puerto Rico, Recinto de Fajardo</p>
-      <p>
-        © 2026 Sabias que PR. Todos los derechos reservados.
-        <a href="privacidad.html">Política de privacidad</a> | <a href="terminos.html">Términos</a>
-      </p>
-      <p style="margin-top:10px;">
-        <a href="#arriba" style="color:var(--brand);font-weight:bold;text-decoration:none;">↑ Volver arriba</a>
-      </p>
-    </footer>
-
+    </div>
   </div>
 
   <!-- Carrito lateral -->

@@ -1,7 +1,7 @@
 {
   "name": "Sabías que PR",
   "short_name": "SabiasqPR",
-  "description": "Noticias, educación e información para Puerto Rico y el mundo.",
+  "description": "Noticias, educación e información para quienes creen en un mundo mejor.",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#0f172a",

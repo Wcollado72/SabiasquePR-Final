@@ -52,6 +52,9 @@
         <button class="cart-btn" id="cart-btn" aria-label="Ver carrito" title="Ver carrito de compras">
           🛒 <span class="cart-count" id="cart-count">0</span>
         </button>
+        <button type="button" class="login-trigger-btn" id="login-trigger-btn" aria-haspopup="dialog" aria-expanded="false">
+          <span id="login-trigger-label">Iniciar sesión</span>
+        </button>
       </div>
     </header>
 
@@ -63,11 +66,8 @@
       </button>
       <ul id="nav-menu" role="list">
         <li><a href="index.html">Inicio</a></li>
-        <li><a href="about.html">Sobre el proyecto</a></li>
         <li><a href="noticias.html">Noticias</a></li>
-        <li><a href="critica-internacional.html">Crítica Internacional</a></li>
-        <li><a href="nuevos-humanos.html">Nuevos Humanos</a></li>
-        <li><a href="tecnologia.html">Tecnología</a></li>
+        <li><a href="nuevos-humanos.html">Revolución Humana</a></li>
         <li><a href="educacion.html">Educación</a></li>
         <li><a href="foro.html">Foro</a></li>
         <li><a href="tienda.html">Tienda</a></li>
@@ -85,49 +85,10 @@
       </div>
     </section>
 
-    <aside class="sidebar-top">
-      
-      <div class="login-box" id="login-box">
-        <div id="auth-logged-out">
-          <label for="login-email">Usuario o correo</label>
-          <input type="email" id="login-email" placeholder="tucorreo@example.com" autocomplete="email">
-          <label for="login-pass">Contraseña</label>
-          <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
-          <div class="login-actions">
-            <button type="button" id="btn-login">Entrar</button>
-            <button type="button" id="btn-google" class="btn-google" title="Entrar con Google">G</button>
-          </div>
-          <div class="login-links">
-            <a href="#" id="link-register">Registrar</a>
-            <span>|</span>
-            <a href="#" id="link-forgot">¿Olvidaste tu contraseña?</a>
-          </div>
-          <p id="auth-status" class="auth-status" aria-live="polite"></p>
-        </div>
-        <div id="auth-logged-in" style="display:none;">
-          <p class="user-greeting">Bienvenido/a,</p>
-          <p class="user-email" id="user-email-display"></p>
-          <button type="button" id="btn-logout">Cerrar sesión</button>
-        </div>
-      </div>
-      <div class="sidebar-top-content">
-        <div class="social-links">
-          <a href="https://x.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
-            <img src="images/Xlogo.webp" alt="X" width="40" height="40" loading="lazy">
-          </a>
-          <a href="https://www.facebook.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-            <img src="images/Facebook.webp" alt="Facebook" width="40" height="40" loading="lazy">
-          </a>
-          <a href="https://www.instagram.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-            <img src="images/instagram.webp" alt="Instagram" width="40" height="40" loading="lazy">
-          </a>
-        </div></div>
-    </aside>
-
     <main class="main" id="main-content" tabindex="-1">
       
       <section class="box box-blog contact-box">
-        <p><em>Última actualización: 1 de septiembre de 2026</em></p>
+        <p><em>Última actualización: 17 de septiembre de 2026</em></p>
 
         <h3>1. Aceptación de los términos</h3>
         <p>Al usar este sitio aceptas estos términos. Si no estás de acuerdo, te pedimos no utilizar el sitio.</p>
@@ -156,13 +117,6 @@
       
     </main>
 
-    <aside class="sidebar-bottom">
-      <a href="educacion.html" class="enlaces-btn">Enlaces</a>
-      <img src="images/enlaces.webp"
-           alt="Enlaces: Curiosidades, Historia, Derechos Humanos, Lógica Humana y Cero Pobreza"
-           class="Enlaces-img" loading="lazy" width="300" height="400">
-    </aside>
-
     
     <footer class="footer">
       <p>
@@ -171,6 +125,18 @@
         · (787) 555-0199 · San Juan, Puerto Rico
       </p>
       <p>Universidad Interamericana de Puerto Rico, Recinto de Fajardo</p>
+      <div class="footer-social">
+        <div class="social-links">
+          <a href="https://x.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+            <img src="images/Xlogo.webp" alt="X" width="40" height="40" loading="lazy">
+          </a>
+          <a href="https://www.facebook.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+            <img src="images/Facebook.webp" alt="Facebook" width="40" height="40" loading="lazy">
+          </a>
+          <a href="https://www.instagram.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <img src="images/instagram.webp" alt="Instagram" width="40" height="40" loading="lazy">
+          </a>
+        </div></div>
       <p>
         © 2026 Sabias que PR. Todos los derechos reservados.
         <a href="privacidad.html">Política de privacidad</a> | <a href="terminos.html">Términos</a>
@@ -180,6 +146,37 @@
       </p>
     </footer>
 
+  </div>
+
+  
+  <div class="login-modal-overlay" id="login-modal-overlay">
+    <div class="login-modal" id="login-modal" role="dialog" aria-modal="true" aria-label="Iniciar sesión">
+      <button type="button" class="login-modal-close" id="login-modal-close" aria-label="Cerrar">✕</button>
+      
+      <div class="login-box" id="login-box">
+        <div id="auth-logged-out">
+          <label for="login-email">Usuario o correo</label>
+          <input type="email" id="login-email" placeholder="tucorreo@example.com" autocomplete="email">
+          <label for="login-pass">Contraseña</label>
+          <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+          <div class="login-actions">
+            <button type="button" id="btn-login">Entrar</button>
+            <button type="button" id="btn-google" class="btn-google" title="Entrar con Google">G</button>
+          </div>
+          <div class="login-links">
+            <a href="#" id="link-register">Registrar</a>
+            <span>|</span>
+            <a href="#" id="link-forgot">¿Olvidaste tu contraseña?</a>
+          </div>
+          <p id="auth-status" class="auth-status" aria-live="polite"></p>
+        </div>
+        <div id="auth-logged-in" style="display:none;">
+          <p class="user-greeting">Bienvenido/a,</p>
+          <p class="user-email" id="user-email-display"></p>
+          <button type="button" id="btn-logout">Cerrar sesión</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Carrito lateral -->

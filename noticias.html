@@ -52,6 +52,9 @@
         <button class="cart-btn" id="cart-btn" aria-label="Ver carrito" title="Ver carrito de compras">
           🛒 <span class="cart-count" id="cart-count">0</span>
         </button>
+        <button type="button" class="login-trigger-btn" id="login-trigger-btn" aria-haspopup="dialog" aria-expanded="false">
+          <span id="login-trigger-label">Iniciar sesión</span>
+        </button>
       </div>
     </header>
 
@@ -63,11 +66,8 @@
       </button>
       <ul id="nav-menu" role="list">
         <li><a href="index.html">Inicio</a></li>
-        <li><a href="about.html">Sobre el proyecto</a></li>
         <li><a href="noticias.html">Noticias</a></li>
-        <li><a href="critica-internacional.html">Crítica Internacional</a></li>
-        <li><a href="nuevos-humanos.html">Nuevos Humanos</a></li>
-        <li><a href="tecnologia.html">Tecnología</a></li>
+        <li><a href="nuevos-humanos.html">Revolución Humana</a></li>
         <li><a href="educacion.html">Educación</a></li>
         <li><a href="foro.html">Foro</a></li>
         <li><a href="tienda.html">Tienda</a></li>
@@ -80,14 +80,73 @@
       <div class="hero-content">
         
         <h2>Noticias</h2>
-        <p>Una selección de historias que nos ayudan a entender el mundo de hoy.</p>
+        
         <div class="hero-buttons">
-          <a href="about.html" class="btn btn-alt">Conócenos</a>
-          <a href="details.html" class="btn btn-alt">Servicios</a></div>
+      <div class="noticias-hero-categorias" id="noticias-filters">
+        <button type="button" class="foro-filter-btn active" data-categoria="">Todas</button>
+        <button type="button" class="foro-filter-btn" data-categoria="internacionales">Internacionales</button>
+        <button type="button" class="foro-filter-btn" data-categoria="crimenes">Crímenes</button>
+        <button type="button" class="foro-filter-btn" data-categoria="salud">Salud</button>
+        <button type="button" class="foro-filter-btn" data-categoria="deportes">Deportes</button>
+        <button type="button" class="foro-filter-btn" data-categoria="finanzas">Finanzas</button>
+        <button type="button" class="foro-filter-btn" data-categoria="tecnologia">Tecnología</button>
+        <button type="button" class="foro-filter-btn" data-categoria="descubrimientos">Descubrimientos</button>
+        <button type="button" class="foro-filter-btn" data-categoria="politica">Política</button>
+        <button type="button" class="foro-filter-btn" data-categoria="clima">Clima y Medio Ambiente</button>
+        <button type="button" class="foro-filter-btn" data-categoria="cultura">Cultura</button>
+      </div></div>
       </div>
     </section>
 
-    <aside class="sidebar-top">
+    <main class="main" id="main-content" tabindex="-1">
+      
+      <div id="noticias-list"><p class="foro-loading">Cargando noticias...</p></div>
+      
+      <section class="references-box">
+        <hr>
+        <h3>Referencias y Créditos</h3>
+        <ul>
+          <li><strong>Concepto y contenido original:</strong> Aliado Imperfekto (Proyecto ideado y desarrollado 2023 al presente).</li>
+          <li><strong>Herramientas de apoyo:</strong> Código e imágenes generadas con asistencia de Inteligencia Artificial.</li>
+        </ul>
+      </section>
+    </main>
+
+    
+    <footer class="footer">
+      <p>
+        <strong>Contacto:</strong>
+        <a href="mailto:sabiasquepr@yahoo.com">sabiasquepr@yahoo.com</a>
+        · (787) 555-0199 · San Juan, Puerto Rico
+      </p>
+      <p>Universidad Interamericana de Puerto Rico, Recinto de Fajardo</p>
+      <div class="footer-social">
+        <div class="social-links">
+          <a href="https://x.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+            <img src="images/Xlogo.webp" alt="X" width="40" height="40" loading="lazy">
+          </a>
+          <a href="https://www.facebook.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+            <img src="images/Facebook.webp" alt="Facebook" width="40" height="40" loading="lazy">
+          </a>
+          <a href="https://www.instagram.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <img src="images/instagram.webp" alt="Instagram" width="40" height="40" loading="lazy">
+          </a>
+        </div></div>
+      <p>
+        © 2026 Sabias que PR. Todos los derechos reservados.
+        <a href="privacidad.html">Política de privacidad</a> | <a href="terminos.html">Términos</a>
+      </p>
+      <p style="margin-top:10px;">
+        <a href="#arriba" style="color:var(--brand);font-weight:bold;text-decoration:none;">↑ Volver arriba</a>
+      </p>
+    </footer>
+
+  </div>
+
+  
+  <div class="login-modal-overlay" id="login-modal-overlay">
+    <div class="login-modal" id="login-modal" role="dialog" aria-modal="true" aria-label="Iniciar sesión">
+      <button type="button" class="login-modal-close" id="login-modal-close" aria-label="Cerrar">✕</button>
       
       <div class="login-box" id="login-box">
         <div id="auth-logged-out">
@@ -112,67 +171,7 @@
           <button type="button" id="btn-logout">Cerrar sesión</button>
         </div>
       </div>
-      <div class="sidebar-top-content">
-        <div class="social-links">
-          <a href="https://x.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
-            <img src="images/Xlogo.webp" alt="X" width="40" height="40" loading="lazy">
-          </a>
-          <a href="https://www.facebook.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-            <img src="images/Facebook.webp" alt="Facebook" width="40" height="40" loading="lazy">
-          </a>
-          <a href="https://www.instagram.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-            <img src="images/instagram.webp" alt="Instagram" width="40" height="40" loading="lazy">
-          </a>
-        </div></div>
-    </aside>
-
-    <main class="main" id="main-content" tabindex="-1">
-      
-      <div id="noticias-list"><p class="foro-loading">Cargando noticias...</p></div>
-      <section class="box box-blog">
-        <h3>Noticias destacadas</h3>
-        <ul>
-          <li>"Descubren nueva especie marina en el Pacífico Sur."</li>
-          <li>"Inteligencia Artificial y en qué mercados está adentrándose."</li>
-          <li>"Nuevas estructuras detectadas debajo de las pirámides en Egipto."</li>
-        </ul>
-      </section>
-      
-      <section class="references-box">
-        <hr>
-        <h3>Referencias y Créditos</h3>
-        <ul>
-          <li><strong>Concepto y contenido original:</strong> Aliado Imperfekto (Proyecto ideado y desarrollado 2023–2025).</li>
-          <li><strong>Herramientas de apoyo:</strong> Código e imágenes generadas con asistencia de Inteligencia Artificial.</li>
-          <li><strong>Fuentes externas:</strong> Datos consultados de NASA, Reuters y fuentes de dominio público.</li>
-        </ul>
-      </section>
-    </main>
-
-    <aside class="sidebar-bottom">
-      <a href="educacion.html" class="enlaces-btn">Enlaces</a>
-      <img src="images/enlaces.webp"
-           alt="Enlaces: Curiosidades, Historia, Derechos Humanos, Lógica Humana y Cero Pobreza"
-           class="Enlaces-img" loading="lazy" width="300" height="400">
-    </aside>
-
-    
-    <footer class="footer">
-      <p>
-        <strong>Contacto:</strong>
-        <a href="mailto:sabiasquepr@yahoo.com">sabiasquepr@yahoo.com</a>
-        · (787) 555-0199 · San Juan, Puerto Rico
-      </p>
-      <p>Universidad Interamericana de Puerto Rico, Recinto de Fajardo</p>
-      <p>
-        © 2026 Sabias que PR. Todos los derechos reservados.
-        <a href="privacidad.html">Política de privacidad</a> | <a href="terminos.html">Términos</a>
-      </p>
-      <p style="margin-top:10px;">
-        <a href="#arriba" style="color:var(--brand);font-weight:bold;text-decoration:none;">↑ Volver arriba</a>
-      </p>
-    </footer>
-
+    </div>
   </div>
 
   <!-- Carrito lateral -->
