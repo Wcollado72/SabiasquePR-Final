@@ -1,4 +1,4 @@
-const CATEGORIAS_VALIDAS = ['general', 'tecnologia', 'critica-internacional', 'nuevos-humanos', 'educacion'];
+const CATEGORIAS_VALIDAS = ['general', 'tecnologia', 'internacionales', 'nuevos-humanos', 'educacion'];
 const WORD_LIMITS = { usuario: 100, premium: 500, admin: 500 };
 
 function countWords(text) {

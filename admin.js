@@ -155,6 +155,7 @@
     document.getElementById('admin-noticias-form-title').textContent = item ? 'Editar noticia' : 'Nueva noticia';
     document.getElementById('an-id').value = item?.id || '';
     document.getElementById('an-titulo').value = item?.titulo || '';
+    document.getElementById('an-categoria').value = item?.categoria || 'general';
     document.getElementById('an-fecha').value = item?.fecha ? String(item.fecha).slice(0, 10) : '';
     document.getElementById('an-imagen').value = item?.imagen || '';
     document.getElementById('an-imagen-alt').value = item?.imagen_alt || '';
@@ -178,6 +179,7 @@
     const id = document.getElementById('an-id').value;
     const body = {
       titulo: document.getElementById('an-titulo').value.trim(),
+      categoria: document.getElementById('an-categoria').value,
       fecha: document.getElementById('an-fecha').value,
       imagen: document.getElementById('an-imagen').value.trim(),
       imagenAlt: document.getElementById('an-imagen-alt').value.trim(),

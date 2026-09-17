@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS foro_posts (
   titulo          text NOT NULL,
   cuerpo          text NOT NULL,
   categoria       text NOT NULL DEFAULT 'general'
-                    CHECK (categoria IN ('general','tecnologia','critica-internacional','nuevos-humanos','educacion')),
+                    CHECK (categoria IN ('general','tecnologia','internacionales','nuevos-humanos','educacion')),
   creado_en       timestamptz NOT NULL DEFAULT now(),
   editado_en      timestamptz
 );
@@ -97,6 +97,29 @@ ALTER TABLE perfiles ADD CONSTRAINT perfiles_rol_check
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_perfiles_stripe_customer_id
   ON perfiles(stripe_customer_id) WHERE stripe_customer_id IS NOT NULL;
+
+-- Categoria de cada noticia (separada de 'clase', que es solo para
+-- estilos CSS). Permite filtrar el feed de Noticias por tema.
+ALTER TABLE noticias ADD COLUMN IF NOT EXISTS categoria text NOT NULL DEFAULT 'general';
+
+ALTER TABLE noticias DROP CONSTRAINT IF EXISTS noticias_categoria_check;
+ALTER TABLE noticias ADD CONSTRAINT noticias_categoria_check
+  CHECK (categoria IN (
+    'general', 'internacionales', 'crimenes', 'salud', 'deportes',
+    'finanzas', 'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura'
+  ));
+
+CREATE INDEX IF NOT EXISTS idx_noticias_categoria ON noticias(categoria, fecha DESC);
+
+-- La pagina "Critica Internacional" se retiro; sus temas se fusionaron
+-- en la categoria "internacionales". Reasignar publicaciones existentes
+-- antes de endurecer el CHECK (el CREATE TABLE de arriba no modifica una
+-- tabla ya existente).
+UPDATE foro_posts SET categoria = 'internacionales' WHERE categoria = 'critica-internacional';
+
+ALTER TABLE foro_posts DROP CONSTRAINT IF EXISTS foro_posts_categoria_check;
+ALTER TABLE foro_posts ADD CONSTRAINT foro_posts_categoria_check
+  CHECK (categoria IN ('general', 'tecnologia', 'internacionales', 'nuevos-humanos', 'educacion'));
 
 -- RLS activo por defecto en todas las tablas (sin policies = sin acceso
 -- publico via la Data API de Supabase; el backend usa la conexion directa

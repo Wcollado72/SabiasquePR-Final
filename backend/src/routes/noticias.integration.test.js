@@ -31,6 +31,15 @@ describe('GET /api/noticias', () => {
     expect(res.status).toBe(200);
     expect(res.body.noticias).toHaveLength(1);
   });
+
+  test('filtra por categoria cuando se pasa ?categoria=', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'a', categoria: 'salud' }] });
+    const res = await request(app).get('/api/noticias?categoria=salud');
+    expect(res.status).toBe(200);
+    const [sql, params] = pool.query.mock.calls[0];
+    expect(sql).toMatch(/WHERE categoria = \$1/);
+    expect(params).toEqual(['salud']);
+  });
 });
 
 describe('GET /api/noticias/:id', () => {

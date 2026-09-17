@@ -51,4 +51,17 @@ describe('validateNoticia', () => {
     const errors = validateNoticia({ parrafos: [] }, { partial: true });
     expect(errors).toContain('Debe incluir al menos un parrafo.');
   });
+
+  test('acepta una categoria valida', () => {
+    expect(validateNoticia({ ...NOTICIA_VALIDA, categoria: 'salud' })).toEqual([]);
+  });
+
+  test('rechaza una categoria invalida', () => {
+    const errors = validateNoticia({ ...NOTICIA_VALIDA, categoria: 'chismes' });
+    expect(errors).toContain('Categoria no valida.');
+  });
+
+  test('categoria es opcional (se asume "general")', () => {
+    expect(validateNoticia(NOTICIA_VALIDA)).toEqual([]);
+  });
 });

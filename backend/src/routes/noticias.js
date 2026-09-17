@@ -22,13 +22,21 @@ function toRow(id, body, existing = {}) {
     body.fuenteUrl ?? existing.fuente_url,
     body.fuenteTexto ?? existing.fuente_texto,
     JSON.stringify((body.parrafos ?? existing.parrafos ?? []).filter((p) => p && p.trim())),
+    body.categoria ?? existing.categoria ?? 'general',
   ];
 }
 
-// GET /api/noticias -- lista, publico
-router.get('/', async (_req, res) => {
+// GET /api/noticias?categoria=  -- lista, publico
+router.get('/', async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT * FROM noticias ORDER BY fecha DESC, creado_en DESC');
+    const { categoria } = req.query;
+    const params = [];
+    let where = '';
+    if (categoria) { params.push(categoria); where = 'WHERE categoria = $1'; }
+    const { rows } = await pool.query(
+      `SELECT * FROM noticias ${where} ORDER BY fecha DESC, creado_en DESC`,
+      params
+    );
     res.json({ ok: true, noticias: rows });
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
@@ -53,8 +61,8 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
 
     const values = toRow(id, req.body);
     const { rows } = await pool.query(
-      `INSERT INTO noticias (id, titulo, fecha, fecha_display, imagen, imagen_alt, imagen_caption, clase, fuente_url, fuente_texto, parrafos)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb) RETURNING *`,
+      `INSERT INTO noticias (id, titulo, fecha, fecha_display, imagen, imagen_alt, imagen_caption, clase, fuente_url, fuente_texto, parrafos, categoria)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12) RETURNING *`,
       values
     );
     res.status(201).json({ ok: true, noticia: rows[0] });
@@ -72,7 +80,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     const values = toRow(req.params.id, req.body, existingRows[0]);
     const { rows } = await pool.query(
       `UPDATE noticias SET titulo=$2, fecha=$3, fecha_display=$4, imagen=$5, imagen_alt=$6,
-         imagen_caption=$7, clase=$8, fuente_url=$9, fuente_texto=$10, parrafos=$11::jsonb
+         imagen_caption=$7, clase=$8, fuente_url=$9, fuente_texto=$10, parrafos=$11::jsonb, categoria=$12
        WHERE id=$1 RETURNING *`,
       values
     );
