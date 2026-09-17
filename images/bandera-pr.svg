@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Bandera de Puerto Rico">
+  <rect x="0" y="0"   width="800" height="100" fill="#ED1C24"/>
+  <rect x="0" y="100" width="800" height="100" fill="#FFFFFF"/>
+  <rect x="0" y="200" width="800" height="100" fill="#ED1C24"/>
+  <rect x="0" y="300" width="800" height="100" fill="#FFFFFF"/>
+  <rect x="0" y="400" width="800" height="100" fill="#ED1C24"/>
+  <polygon points="0,0 0,500 350,250" fill="#0033A0"/>
+  <polygon fill="#FFFFFF" points="190,175 206.8,226.8 261.3,226.8 217.3,258.9 234.1,310.7 190,278.7 145.9,310.7 162.8,258.9 118.7,226.8 173.2,226.8"/>
+</svg>

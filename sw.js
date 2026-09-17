@@ -11,9 +11,7 @@ const CACHE_PAGES = 'sqpr-pages-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/about.html',
   '/noticias.html',
-  '/tecnologia.html',
   '/educacion.html',
   '/tienda.html',
   '/contacto.html',

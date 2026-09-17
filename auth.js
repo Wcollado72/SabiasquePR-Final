@@ -47,19 +47,27 @@ async function checkSession() {
 
 // ── UI — actualizar login box según estado ──────────────────
 function updateLoginUI(user) {
-  const loggedOut = document.getElementById('auth-logged-out');
-  const loggedIn  = document.getElementById('auth-logged-in');
-  const emailEl   = document.getElementById('user-email-display');
+  const loggedOut    = document.getElementById('auth-logged-out');
+  const loggedIn     = document.getElementById('auth-logged-in');
+  const emailEl      = document.getElementById('user-email-display');
+  const triggerLabel = document.getElementById('login-trigger-label');
 
-  if (!loggedOut || !loggedIn) return;
+  if (loggedOut && loggedIn) {
+    if (user) {
+      loggedOut.style.display = 'none';
+      loggedIn.style.display  = 'block';
+      if (emailEl) emailEl.textContent = user.email;
+    } else {
+      loggedOut.style.display = 'block';
+      loggedIn.style.display  = 'none';
+    }
+  }
 
-  if (user) {
-    loggedOut.style.display = 'none';
-    loggedIn.style.display  = 'block';
-    if (emailEl) emailEl.textContent = user.email;
-  } else {
-    loggedOut.style.display = 'block';
-    loggedIn.style.display  = 'none';
+  // Botón del header: muestra el correo cuando hay sesión activa.
+  if (triggerLabel) {
+    triggerLabel.textContent = user
+      ? (user.email.length > 18 ? user.email.slice(0, 16) + '…' : user.email)
+      : 'Iniciar sesión';
   }
 }
 
@@ -76,6 +84,7 @@ async function signIn(email, password) {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) { setAuthStatus('❌ ' + error.message, 'error'); return; }
   setAuthStatus('✅ ¡Bienvenido!', 'ok');
+  setTimeout(() => window.closeLoginModal?.(), 900);
 }
 
 async function signUp(email, password) {

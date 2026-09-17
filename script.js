@@ -187,6 +187,48 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ══════════════════════════════════════════════════════════
+  // 4b. LOGIN — Modal accesible desde cualquier página
+  // ══════════════════════════════════════════════════════════
+  const loginTriggerBtn   = document.getElementById('login-trigger-btn');
+  const loginModalOverlay = document.getElementById('login-modal-overlay');
+  const loginModalClose   = document.getElementById('login-modal-close');
+
+  function openLoginModal() {
+    loginModalOverlay?.classList.add('open');
+    loginTriggerBtn?.setAttribute('aria-expanded', 'true');
+  }
+  function closeLoginModal() {
+    loginModalOverlay?.classList.remove('open');
+    loginTriggerBtn?.setAttribute('aria-expanded', 'false');
+  }
+
+  loginTriggerBtn?.addEventListener('click', () => {
+    loginModalOverlay?.classList.contains('open') ? closeLoginModal() : openLoginModal();
+  });
+  loginModalClose?.addEventListener('click', closeLoginModal);
+  loginModalOverlay?.addEventListener('click', (e) => {
+    if (e.target === loginModalOverlay) closeLoginModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && loginModalOverlay?.classList.contains('open')) closeLoginModal();
+  });
+
+  // Cualquier enlace/botón con esta clase abre el modal de login (usado por
+  // los avisos "inicia sesión para..." del foro/premium/admin). Delegado en
+  // document porque varios de estos avisos se insertan dinámicamente
+  // después de este DOMContentLoaded (ej. renderDetail() del foro, el gate
+  // del panel de admin) y no existirían todavía si se enlazaran uno a uno.
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.login-modal-trigger')) {
+      e.preventDefault();
+      openLoginModal();
+    }
+  });
+
+  window.openLoginModal  = openLoginModal;
+  window.closeLoginModal = closeLoginModal;
+
+  // ══════════════════════════════════════════════════════════
   // 5. NEWSLETTER — Mailchimp JSONP
   // ══════════════════════════════════════════════════════════
   const cfg = window.SITE_CONFIG || {};

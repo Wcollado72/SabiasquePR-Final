@@ -105,9 +105,8 @@ const REFERENCES_BOX = `
         <hr>
         <h3>Referencias y Créditos</h3>
         <ul>
-          <li><strong>Concepto y contenido original:</strong> Aliado Imperfekto (Proyecto ideado y desarrollado 2023–2025).</li>
+          <li><strong>Concepto y contenido original:</strong> Aliado Imperfekto (Proyecto ideado y desarrollado 2023 al presente).</li>
           <li><strong>Herramientas de apoyo:</strong> Código e imágenes generadas con asistencia de Inteligencia Artificial.</li>
-          <li><strong>Fuentes externas:</strong> Datos consultados de NASA, Reuters y fuentes de dominio público.</li>
         </ul>
       </section>`;
 
@@ -119,6 +118,7 @@ const FOOTER = `
         · ${SITE.phone} · ${SITE.location}
       </p>
       <p>Universidad Interamericana de Puerto Rico, Recinto de Fajardo</p>
+      <div class="footer-social">${SOCIAL_ICONS}</div>
       <p>
         © ${new Date().getFullYear()} Sabias que PR. Todos los derechos reservados.
         <a href="privacidad.html">Política de privacidad</a> | <a href="terminos.html">Términos</a>
@@ -128,11 +128,19 @@ const FOOTER = `
       </p>
     </footer>`;
 
+const LOGIN_MODAL = `
+  <div class="login-modal-overlay" id="login-modal-overlay">
+    <div class="login-modal" id="login-modal" role="dialog" aria-modal="true" aria-label="Iniciar sesión">
+      <button type="button" class="login-modal-close" id="login-modal-close" aria-label="Cerrar">✕</button>
+      ${LOGIN_BOX}
+    </div>
+  </div>`;
+
 // ── LAYOUT BASE ─────────────────────────────────────────────
 
 function buildPage(p) {
-  const heroButtons = p.heroButtons || `
-          <a href="about.html" class="btn btn-alt">Conócenos</a>
+  const heroButtons = p.heroButtons !== undefined ? p.heroButtons : `
+          <a href="index.html" class="btn btn-alt">Conócenos</a>
           <a href="details.html" class="btn btn-alt">Servicios</a>`;
 
   // ── Schema.org JSON-LD ─────────────────────────────────────
@@ -210,6 +218,9 @@ function buildPage(p) {
         <button class="cart-btn" id="cart-btn" aria-label="Ver carrito" title="Ver carrito de compras">
           🛒 <span class="cart-count" id="cart-count">0</span>
         </button>
+        <button type="button" class="login-trigger-btn" id="login-trigger-btn" aria-haspopup="dialog" aria-expanded="false">
+          <span id="login-trigger-label">Iniciar sesión</span>
+        </button>
       </div>
     </header>
 
@@ -221,11 +232,8 @@ function buildPage(p) {
       </button>
       <ul id="nav-menu" role="list">
         <li><a href="index.html">Inicio</a></li>
-        <li><a href="about.html">Sobre el proyecto</a></li>
         <li><a href="noticias.html">Noticias</a></li>
-        <li><a href="critica-internacional.html">Crítica Internacional</a></li>
-        <li><a href="nuevos-humanos.html">Nuevos Humanos</a></li>
-        <li><a href="tecnologia.html">Tecnología</a></li>
+        <li><a href="nuevos-humanos.html">Revolución Humana</a></li>
         <li><a href="educacion.html">Educación</a></li>
         <li><a href="foro.html">Foro</a></li>
         <li><a href="tienda.html">Tienda</a></li>
@@ -238,31 +246,21 @@ function buildPage(p) {
       <div class="hero-content">
         ${p.heroEyebrow ? `<span class="hero-eyebrow">${p.heroEyebrow}</span>` : ''}
         <h2>${p.heroH2}</h2>
-        <p>${p.heroP}</p>
+        ${p.heroP ? `<p>${p.heroP}</p>` : ''}
         <div class="hero-buttons">${heroButtons}</div>
       </div>
     </section>
-
-    <aside class="sidebar-top">
-      ${LOGIN_BOX}
-      <div class="sidebar-top-content">${SOCIAL_ICONS}</div>
-    </aside>
 
     <main class="main${p.mainClass ? ' ' + p.mainClass : ''}" id="main-content" tabindex="-1">
       ${p.mainContent}
       ${p.hideRefs ? '' : REFERENCES_BOX}
     </main>
 
-    <aside class="sidebar-bottom">
-      <a href="educacion.html" class="enlaces-btn">Enlaces</a>
-      <img src="images/enlaces.webp"
-           alt="Enlaces: Curiosidades, Historia, Derechos Humanos, Lógica Humana y Cero Pobreza"
-           class="Enlaces-img" loading="lazy" width="300" height="400">
-    </aside>
-
     ${FOOTER}
 
   </div>
+
+  ${LOGIN_MODAL}
 
   <!-- Carrito lateral -->
   <div class="cart-drawer" id="cart-drawer" aria-hidden="true">
@@ -304,9 +302,10 @@ const PAGES = [
   {
     file: 'index.html',
     title: 'Sabías que PR — Inicio',
-    description: 'Sabías que PR: La nueva forma de despertar conciencias. Noticias, educación e información para Puerto Rico y el mundo.',
-    heroH2: 'Nuevos Humanos',
-    heroP: 'Conocimiento, ciencia, tecnología y cooperación para un futuro mejor.',
+    description: 'Conoce la visión, misión y datos del proyecto Sabías que PR: despertar conciencias en todo el mundo.',
+    heroH2: 'Sobre Sabías que PR',
+    heroP: 'Un proyecto para entender, cuestionar y mejorar la sociedad en la que vivimos.',
+    heroButtons: '',
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'Organization',
@@ -321,30 +320,17 @@ const PAGES = [
       'contactPoint': { '@type': 'ContactPoint', 'email': 'sabiasquepr@yahoo.com', 'contactType': 'customer service' }
     },
     mainContent: `
-      <section class="box noticias"><a href="noticias.html"><h3>Noticias Internacionales</h3></a></section>
-      <section class="box descubrimientos"><a href="nuevos-humanos.html"><h3>Descubrimientos</h3></a></section>
-      <section class="box educacion"><a href="educacion.html"><h3>Educación</h3></a></section>
-      <section class="box religion"><h3>Religión <span class="soon-badge">Próximamente</span></h3></section>`,
-  },
-
-  {
-    file: 'about.html',
-    title: 'Sabías que PR — Sobre el proyecto',
-    description: 'Conoce la visión, misión y datos del proyecto Sabías que PR: despertar conciencias en Puerto Rico y el mundo.',
-    heroH2: 'Sobre Sabías que PR',
-    heroP: 'Un proyecto para entender, cuestionar y mejorar la sociedad en la que vivimos.',
-    mainContent: `
       <section class="box box-blog vision-box">
         <h3>Visión del proyecto</h3>
-        <p>Sabías que PR... es una iniciativa social dedicada al despertar de la conciencia humana. Mediante herramientas creativas y accesibles, buscamos comprender el entorno actual para formar individuos comprometidos con la construcción de una sociedad futura mejor.</p>
-        <p>Este proyecto está dirigido a personas de Puerto Rico y del mundo dispuestas a expandir sus horizontes. Fomentamos la evolución integral —mental, física y espiritual— promoviendo un ambiente de inclusión libre de distinciones por raza, género, credo, ideología o condición social.</p>
-        <p>A través de la lógica, la ingeniería inversa y el pensamiento crítico, facilitamos los recursos necesarios para cuestionar el entorno y mejorar la toma de decisiones diaria. Nuestro objetivo final es que más seres humanos se reconozcan como agentes de cambio capaces de construir un Borikén y un planeta más justos, solidarios y conscientes.</p>
+        <p>Sabías que PR... es una iniciativa social dedicada al despertar de la conciencia humana. Nació en Puerto Rico, pero su misión no conoce fronteras: mediante herramientas creativas y accesibles, buscamos comprender el entorno actual para formar individuos comprometidos con la construcción de un futuro mejor para toda la humanidad.</p>
+        <p>Este proyecto está dirigido a cualquier persona, en cualquier parte del mundo, dispuesta a expandir sus horizontes. Fomentamos la evolución integral —mental, física y espiritual— promoviendo un ambiente de inclusión libre de distinciones por raza, género, credo, ideología, nacionalidad o condición social.</p>
+        <p>A través de la lógica, la ingeniería inversa y el pensamiento crítico, facilitamos los recursos necesarios para cuestionar el entorno y mejorar la toma de decisiones diaria. Nuestro objetivo final es que más seres humanos, sin importar dónde vivan, se reconozcan como agentes de cambio capaces de construir un planeta más justo, solidario y consciente.</p>
       </section>
       <section class="box box-blog datos-box">
         <h3>Datos del proyecto</h3>
         <p><strong>Nombre:</strong> Sabías que PR</p>
         <p><strong>Año de inicio:</strong> 2025</p>
-        <p><strong>Origen:</strong> Proyecto independiente creado en Puerto Rico, inspirado en la necesidad de entender mejor la realidad social, política y económica de la isla y del mundo.</p>
+        <p><strong>Origen:</strong> Proyecto independiente creado en Puerto Rico, inspirado en la necesidad de entender mejor la realidad social, política y económica del mundo — y con la ambición de servir a cualquier persona, en cualquier lugar.</p>
         <p><strong>Enfoques principales:</strong></p>
         <ul>
           <li>Noticias y reportajes con contexto histórico y social.</li>
@@ -352,7 +338,7 @@ const PAGES = [
           <li>Investigación, datos y análisis de largo plazo.</li>
           <li>Espacios para la participación y la reflexión comunitaria.</li>
         </ul>
-        <p><strong>Público al que se dirige:</strong> personas de Puerto Rico, la diáspora y cualquier lector interesado en comprender la realidad desde una perspectiva humana, crítica y solidaria.</p>
+        <p><strong>Público al que se dirige:</strong> cualquier persona, en cualquier país, interesada en comprender la realidad desde una perspectiva humana, crítica y solidaria — y dispuesta a ser parte del cambio.</p>
       </section>`,
   },
 
@@ -361,56 +347,31 @@ const PAGES = [
     title: 'Sabías que PR — Noticias',
     description: 'Noticias internacionales con contexto y análisis: descubrimientos, ciencia, política y sociedad.',
     heroH2: 'Noticias',
-    heroP: 'Una selección de historias que nos ayudan a entender el mundo de hoy.',
+    heroP: '',
+    heroButtons: `
+      <div class="noticias-hero-categorias" id="noticias-filters">
+        <button type="button" class="foro-filter-btn active" data-categoria="">Todas</button>
+        <button type="button" class="foro-filter-btn" data-categoria="internacionales">Internacionales</button>
+        <button type="button" class="foro-filter-btn" data-categoria="crimenes">Crímenes</button>
+        <button type="button" class="foro-filter-btn" data-categoria="salud">Salud</button>
+        <button type="button" class="foro-filter-btn" data-categoria="deportes">Deportes</button>
+        <button type="button" class="foro-filter-btn" data-categoria="finanzas">Finanzas</button>
+        <button type="button" class="foro-filter-btn" data-categoria="tecnologia">Tecnología</button>
+        <button type="button" class="foro-filter-btn" data-categoria="descubrimientos">Descubrimientos</button>
+        <button type="button" class="foro-filter-btn" data-categoria="politica">Política</button>
+        <button type="button" class="foro-filter-btn" data-categoria="clima">Clima y Medio Ambiente</button>
+        <button type="button" class="foro-filter-btn" data-categoria="cultura">Cultura</button>
+      </div>`,
     mainContent: `
-      <div id="noticias-list"><p class="foro-loading">Cargando noticias...</p></div>
-      <section class="box box-blog">
-        <h3>Noticias destacadas</h3>
-        <ul>
-          <li>"Descubren nueva especie marina en el Pacífico Sur."</li>
-          <li>"Inteligencia Artificial y en qué mercados está adentrándose."</li>
-          <li>"Nuevas estructuras detectadas debajo de las pirámides en Egipto."</li>
-        </ul>
-      </section>`,
+      <div id="noticias-list"><p class="foro-loading">Cargando noticias...</p></div>`,
     extraScript: `<script src="noticias.js"></script>`,
   },
 
   {
-    file: 'critica-internacional.html',
-    title: 'Sabías que PR — Crítica Internacional',
-    description: 'Análisis crítico de instituciones, gobiernos y poder en Puerto Rico, Estados Unidos y el mundo.',
-    heroEyebrow: 'Crítica social · PR / EE.UU.',
-    heroH2: 'Crítica Internacional',
-    heroP: 'Cuestionamos el poder, sin importar de qué país venga.',
-    heroClass: 'hero-critica',
-    mainContent: `
-      <section class="box box-blog box-critica">
-        <h3>Corrupción y abuso de poder</h3>
-        <p>Contratos, licitaciones amañadas y el manejo del dinero público en gobiernos de PR, EE.UU. y otras naciones.</p>
-      </section>
-      <section class="box box-blog box-critica">
-        <h3>Derechos humanos y represión</h3>
-        <p>Casos de abuso estatal, censura policial y violaciones documentadas alrededor del mundo.</p>
-      </section>
-      <section class="box box-blog box-critica">
-        <h3>Desigualdad económica y explotación laboral</h3>
-        <p>Cómo las políticas económicas afectan al trabajador promedio frente a las grandes corporaciones.</p>
-      </section>
-      <section class="box box-blog box-critica">
-        <h3>Censura y control de la información</h3>
-        <p>Medios, algoritmos y gobiernos que deciden qué narrativa llega al público.</p>
-      </section>
-      <section class="box box-blog box-critica">
-        <h3>Medio ambiente y extractivismo corporativo</h3>
-        <p>Explotación de recursos naturales y su impacto real en comunidades vulnerables.</p>
-      </section>`,
-  },
-
-  {
     file: 'nuevos-humanos.html',
-    title: 'Sabías que PR — Nuevos Humanos',
+    title: 'Sabías que PR — Revolución Humana',
     description: 'Descubrimientos, avances científicos y noticias positivas para la humanidad.',
-    heroH2: 'Nuevos Humanos',
+    heroH2: 'Revolución Humana',
     heroP: 'Lo que la humanidad está logrando, descubriendo y sanando.',
     heroClass: 'hero-positivo',
     mainContent: `
@@ -441,52 +402,9 @@ const PAGES = [
   },
 
   {
-    file: 'tecnologia.html',
-    title: 'Sabías que PR — Tecnología',
-    description: 'Inteligencia Artificial, robótica, blockchain y los últimos avances tecnológicos con contexto y análisis.',
-    heroH2: 'Tecnología',
-    heroP: 'Inteligencias Artificiales, autonomía robótica y mucho más.',
-    mainContent: `
-      <section class="box box-blog">
-        <h3>Trayectorias de Exploración Tecnológica</h3>
-        <p>Rutas de estudio sobre temas clave:</p>
-        <ul>
-          <li>Fundamentos de la Inteligencia Artificial (IA) y su impacto ético.</li>
-          <li>Ciberseguridad para la vida diaria y la protección de datos personales.</li>
-          <li>Programación y Lógica Computacional.</li>
-          <li>Análisis de Datos, Hardware y Redes.</li>
-          <li>Desarrollo Web Full-Stack (React/Vue y Node.js/Django).</li>
-          <li>Computación en la Nube: AWS, Azure y Google Cloud.</li>
-        </ul>
-      </section>
-      <section class="box box-blog">
-        <h3>Tendencias y Avances Recientes</h3>
-        <ul>
-          <li><strong>LLMs:</strong> Avances en arquitecturas multimodales e IA generativa aplicada a imágenes, video y código.</li>
-          <li><strong>Interfaces Cerebro-Máquina (BCI):</strong> Neurotecnología no invasiva para comunicación y rehabilitación.</li>
-          <li><strong>Web3 y Blockchain:</strong> DeFi, smart contracts y estándares de identidad digital soberana.</li>
-        </ul>
-      </section>
-      <section class="newsletter">
-        <h3>Recibe nuevo contenido tecnológico</h3>
-        <p>Déjanos tu correo para avisarte cuando publiquemos nuevos artículos y análisis.</p>
-        <form class="newsletter-form">
-          <label for="tec-email" class="visually-hidden">Correo electrónico</label>
-          <input id="tec-email" type="email" placeholder="tucorreo@example.com" required autocomplete="email">
-          <button type="submit">Suscribirme</button>
-        </form>
-        <p class="newsletter-status" aria-live="polite"></p>
-      </section>
-      <section class="box box-blog contact-box">
-        <h3>¿Tienes ideas o sugerencias?</h3>
-        <p>Escríbenos: <a href="mailto:${SITE.email}">${SITE.email}</a></p>
-      </section>`,
-  },
-
-  {
     file: 'educacion.html',
     title: 'Sabías que PR — Educación',
-    description: 'Recursos educativos, rutas de aprendizaje y pensamiento crítico para personas de Puerto Rico y el mundo.',
+    description: 'Recursos educativos, rutas de aprendizaje y pensamiento crítico para cualquier persona dispuesta a cuestionar y aprender.',
     heroH2: 'Educación',
     heroP: 'Recursos, lecturas y proyectos para aprender, cuestionar y transformar nuestra realidad.',
     mainContent: `
@@ -494,6 +412,7 @@ const PAGES = [
         <h3>Rutas de aprendizaje</h3>
         <ul>
           <li>Historia de Borikén y el Caribe.</li>
+          <li>Historia y movimientos sociales alrededor del mundo.</li>
           <li>Derechos humanos y justicia social.</li>
           <li>Educación financiera básica.</li>
           <li>Alfabetización mediática y pensamiento crítico.</li>
@@ -544,8 +463,8 @@ const PAGES = [
           <select id="foro-categoria">
             <option value="general">General</option>
             <option value="tecnologia">Tecnología</option>
-            <option value="critica-internacional">Crítica Internacional</option>
-            <option value="nuevos-humanos">Nuevos Humanos</option>
+            <option value="internacionales">Internacionales</option>
+            <option value="nuevos-humanos">Revolución Humana</option>
             <option value="educacion">Educación</option>
           </select>
           <label for="foro-cuerpo">Mensaje</label>
@@ -555,13 +474,13 @@ const PAGES = [
           <p id="foro-form-status" class="form-status" aria-live="polite"></p>
         </form>
       </section>
-      <p id="foro-login-hint" class="foro-login-hint">🔒 <a href="#login-box">Inicia sesión</a> para publicar en el foro.</p>
+      <p id="foro-login-hint" class="foro-login-hint">🔒 <a href="#" class="login-modal-trigger">Inicia sesión</a> para publicar en el foro.</p>
 
       <section class="foro-filters" id="foro-filters">
         <button type="button" class="foro-filter-btn active" data-categoria="">Todos</button>
         <button type="button" class="foro-filter-btn" data-categoria="tecnologia">Tecnología</button>
-        <button type="button" class="foro-filter-btn" data-categoria="critica-internacional">Crítica Internacional</button>
-        <button type="button" class="foro-filter-btn" data-categoria="nuevos-humanos">Nuevos Humanos</button>
+        <button type="button" class="foro-filter-btn" data-categoria="internacionales">Internacionales</button>
+        <button type="button" class="foro-filter-btn" data-categoria="nuevos-humanos">Revolución Humana</button>
         <button type="button" class="foro-filter-btn" data-categoria="educacion">Educación</button>
       </section>
 
@@ -585,7 +504,7 @@ const PAGES = [
         </ul>
         <p id="premium-status" class="form-status" aria-live="polite"></p>
         <button type="button" id="premium-subscribe-btn" class="btn">Suscribirme</button>
-        <p class="foro-login-hint" id="premium-login-hint" style="display:none;">🔒 <a href="#login-box">Inicia sesión</a> para suscribirte.</p>
+        <p class="foro-login-hint" id="premium-login-hint" style="display:none;">🔒 <a href="#" class="login-modal-trigger">Inicia sesión</a> para suscribirte.</p>
       </section>`,
     extraScript: `<script src="premium.js"></script>`,
   },
@@ -598,7 +517,7 @@ const PAGES = [
     heroP: 'Artículos para apoyar el proyecto y llevar el mensaje a todas partes.',
     heroButtons: `
           <a href="#productos" class="btn btn-alt">Ver productos</a>
-          <a href="about.html" class="btn btn-alt">Sobre el proyecto</a>`,
+          <a href="index.html" class="btn btn-alt">Sobre el proyecto</a>`,
     mainClass: 'tienda-main',
     mainContent: `<div id="productos"><p class="foro-loading">Cargando productos...</p></div>`,
     extraScript: `<script src="productos.js"></script>`,
@@ -637,6 +556,20 @@ const PAGES = [
               <input type="hidden" id="an-id">
               <label for="an-titulo">Título</label>
               <input type="text" id="an-titulo" required minlength="3" maxlength="160">
+              <label for="an-categoria">Categoría</label>
+              <select id="an-categoria">
+                <option value="general">General</option>
+                <option value="internacionales">Internacionales</option>
+                <option value="crimenes">Crímenes</option>
+                <option value="salud">Salud</option>
+                <option value="deportes">Deportes</option>
+                <option value="finanzas">Finanzas</option>
+                <option value="tecnologia">Tecnología</option>
+                <option value="descubrimientos">Descubrimientos</option>
+                <option value="politica">Política</option>
+                <option value="clima">Clima y Medio Ambiente</option>
+                <option value="cultura">Cultura</option>
+              </select>
               <label for="an-fecha">Fecha</label>
               <input type="date" id="an-fecha" required>
               <label for="an-imagen">Imagen (ruta o URL)</label>
@@ -931,7 +864,7 @@ function generateRSS() {
   <channel>
     <title>${SITE.name}</title>
     <link>${SITE.url}</link>
-    <description>Noticias, educación e información para Puerto Rico y el mundo.</description>
+    <description>Noticias, educación e información para quienes creen en un mundo mejor.</description>
     <language>es-pr</language>
     <atom:link href="${SITE.url}/rss.xml" rel="self" type="application/rss+xml"/>
     <image>

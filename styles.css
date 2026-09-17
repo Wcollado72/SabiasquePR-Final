@@ -24,6 +24,9 @@
   --font-mono:'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
   --font-display:'Fraunces', Georgia, 'Times New Roman', serif;
   --font-body:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,sans-serif;
+
+  /* Marca de agua del coquí, de fondo en todo el sitio */
+  --coqui-bg-opacity:0.03;
 }
 
 /* ===== DARK MODE (editorial oscuro — identidad principal del sitio) ===== */
@@ -45,6 +48,8 @@ html[data-theme="dark"]{
   --brand:#2dd4bf;
   --premium:#e8b649;
   --premium-ink:#1a1200;
+
+  --coqui-bg-opacity:0.045;
 }
 html[data-theme="dark"] body{
   color:var(--ink);
@@ -55,7 +60,7 @@ html[data-theme="dark"] .box{
   color:var(--ink);
 }
 html[data-theme="dark"] .box.box-blog{
-  background:var(--blog-bg);
+  background:color-mix(in srgb, var(--blog-bg) 78%, transparent);
   border-color:var(--blog-border);
   color:var(--ink);
 }
@@ -104,18 +109,32 @@ body{
   font-family:var(--font-body);
   color:var(--ink);
   background:var(--bg);
+  position:relative;
+}
+/* Marca de agua: el coquí de fondo, fijo y muy sutil, detrás de todo el sitio */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  background-image:url("images/Coqui.webp");
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:min(55vmin, 640px);
+  opacity:var(--coqui-bg-opacity);
+  pointer-events:none;
 }
 /* ===== LAYOUT GENERAL ===== */
 .page{
   display:grid;
-  grid-template-columns:2fr 1fr;
-  grid-template-rows:auto auto 380px auto auto;
+  grid-template-columns:1fr;
+  grid-template-rows:auto auto minmax(380px, auto) auto auto;
   grid-template-areas:
-    "header header"
-    "nav    nav"
-    "hero   sidebarTop"
-    "main   sidebarBottom"
-    "footer footer";
+    "header"
+    "nav"
+    "hero"
+    "main"
+    "footer";
   gap:var(--grid-gap);
   max-width:1200px;
   margin:24px auto;
@@ -127,15 +146,23 @@ body{
   grid-area:header;
   border:var(--border);
   padding:18px 32px;
-  min-height:110px;
-  color:var(--ink);
+  min-height:150px;
+  color:#fff;
   display:flex;
   align-items:center;
   justify-content:space-between;
   flex-wrap:wrap;
   gap:12px;
   text-align:left;
-  background:var(--panel);
+  position:relative;
+  overflow:hidden;
+  background:
+    linear-gradient(100deg, rgba(10,10,12,.6), rgba(10,10,12,.42)),
+    url("images/Coqui.webp") center 30% / cover no-repeat;
+}
+.header > *{
+  position:relative;
+  z-index:1;
 }
 .brand{
   display:flex;
@@ -143,15 +170,9 @@ body{
   gap:14px;                                /* espacio entre coquí y texto */
 }
 .logo{
-  width:44px;
-  height:44px;
-  border-radius:8px;
-  object-fit:cover;
-  object-position:center;
-  background:transparent;
-  border:var(--border);
-  display:block;
-  filter:none;
+  /* El coquí ya es el fondo del header (ver .header) — el ícono pequeño
+     quedaría redundante encima de sí mismo, así que se oculta aquí. */
+  display:none;
 }
 .brand-text{
   text-align:left;
@@ -160,8 +181,8 @@ body{
   font-family:var(--font-display);
   font-weight:600;
   font-size:clamp(20px, 2.4vw, 26px);
-  color:var(--ink);
-  text-shadow:none;
+  color:#fff;
+  text-shadow:0 2px 10px rgba(0,0,0,.6);
   letter-spacing:0;
 }
 
@@ -169,8 +190,9 @@ body{
   margin:0;
   font-family:var(--font-mono);
   font-size:0.7rem;
-  color:var(--ink);
-  opacity:.55;
+  color:#fff;
+  opacity:.85;
+  text-shadow:0 1px 6px rgba(0,0,0,.6);
   text-transform:uppercase;
   letter-spacing:0.12em;
 }
@@ -274,7 +296,7 @@ body{
   background:var(--panel);
   position:relative;
   display:grid;
-  place-items:center;          /* centro por defecto */
+  align-items:center;          /* centro vertical; horizontal se estira (stretch por defecto) */
   border:var(--border);
   overflow:hidden;
 }
@@ -410,26 +432,16 @@ html[data-theme="dark"] .box-positivo h3{
   background-color:var(--ink);
   color:var(--bg);
 }
-/* ===== SIDEBAR SUPERIOR (login + redes) ===== */
-.sidebar-top{
-  grid-area:sidebarTop;
-  border:var(--border);
-  padding:16px;
-  min-height:260px;
-  background:var(--panel);
-  color:var(--ink);
-  position:relative;
-  display:flex;
-  flex-direction:column;
-}
+/* ===== LOGIN (ahora en ventana emergente, ver MODAL DE LOGIN) ===== */
 .login-box{
   display:flex;
   flex-direction:column;
-  gap:4px;
-  font-size:0.78rem;
+  gap:6px;
+  font-size:0.85rem;
   color:var(--ink);
   text-shadow:none;
-  max-width:240px;
+  width:100%;
+  max-width:300px;
 }
 .login-box label{
   display:block;
@@ -439,12 +451,12 @@ html[data-theme="dark"] .box-positivo h3{
 }
 .login-box input{
   width:100%;
-  padding:3px 6px;
+  padding:6px 8px;
   border-radius:4px;
   border:var(--border);
   background:var(--input-bg);
   color:var(--ink);
-  font-size:0.75rem;
+  font-size:0.85rem;
 }
 .login-box input::placeholder{
   color:var(--ink);
@@ -453,12 +465,12 @@ html[data-theme="dark"] .box-positivo h3{
 .login-box button{
   align-self:flex-end;
   margin-top:2px;
-  padding:4px 8px;
+  padding:6px 14px;
   border-radius:999px;
   border:none;
   background:var(--brand);
   color:#f9fafb;
-  font-size:0.7rem;
+  font-size:0.8rem;
   font-weight:600;
   cursor:pointer;
 }
@@ -474,21 +486,15 @@ html[data-theme="dark"] .box-positivo h3{
 .login-box .login-links a{
   color:var(--brand);
   font-weight:600;
-  font-size:0.7rem;
+  font-size:0.78rem;
   text-decoration:none;
 }
 .login-box .login-links a:hover{
   color:var(--accent);
   text-decoration:underline;
 }
-/* Iconos de redes al final de la tarjeta */
-.sidebar-top-content{
-  margin-top:auto;
-  padding-top:16px;
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-  align-items:center;
+.footer-social{
+  margin:14px 0;
 }
 
 .social-links{
@@ -504,56 +510,6 @@ html[data-theme="dark"] .box-positivo h3{
   object-fit:contain;
   display:block;
 }
-/* SIDEBAR INFERIOR (Enlaces) */
-/* 1. El contenedor: Le damos altura fija y posición relativa */
-.sidebar-bottom {
-  grid-area: sidebarBottom;
-  border: var(--border);
-  position: relative;      /* Esencial para que lo de adentro se amarre aquí */
-  height: 300px;           /* Altura FIJA: igual en todas las páginas */
-  overflow: hidden;        /* Lo que sobre de la imagen se recorta */
-  background: #020617;
-  padding: 0;
-}
-
-/* 2. La imagen: Se convierte en un "fondo" absoluto */
-.Enlaces-img {
-  position: absolute;      /* Se sale del flujo para no empujar nada */
-  top: 0;
-  left: 0;
-  width: 100%;             /* Llena todo el ancho */
-  height: 100%;            /* Llena toda la altura */
-  object-fit: cover;       /* Cubre el área sin estirarse (hace zoom/recorte auto) */
-  object-position: center; /* Se enfoca en el centro de la imagen */
-  z-index: 1;              /* Nivel 1 (fondo) */
-}
-
-/* 3. El botón: Flota encima de la imagen centrado */
-.enlaces-btn {
-  position: absolute;
-  bottom: 20px;            /* Separado 20px del borde inferior */
-  left: 50%;               /* Se mueve a la mitad del contenedor */
-  transform: translateX(-50%); /* Se ajusta para quedar centrado exacto */
-  
-  /* Tus estilos visuales del botón se mantienen igual: */
-  padding: 6px 16px;
-  border-radius: 999px;
-  background: rgba(0,0,0,0.65);
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 0.95rem;
-  text-decoration: none;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-  z-index: 10;             /* Nivel 10 (por encima de la imagen) */
-  border: 1px solid rgba(255,255,255,0.3); /* Un borde sutil para que resalte más */
-}
-
-.enlaces-btn:hover {
-  background: rgba(0,0,0,0.85);
-  cursor: pointer;
-}
-
-
 /* ===== MAIN (cuadros) ===== */
 .main{
   grid-area:main;
@@ -599,7 +555,9 @@ html[data-theme="dark"] .box-positivo h3{
 }
 /* Cajas tipo blog / texto (Tecnología, Educación, Noticias…) */
 .box.box-blog{
-  background:var(--card-bg);
+  background:color-mix(in srgb, var(--card-bg) 82%, transparent);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
   border:var(--border);
   border-radius:12px;
   text-align:left;
@@ -1033,6 +991,18 @@ html[data-theme="dark"] .box-positivo h3{
 .newsletter-status.ok    { color:#16a34a; }
 .newsletter-status.info  { color:#2563eb; }
 
+/* Botones de categoría dentro del hero de Noticias: mismo ancho y alto */
+.noticias-hero-categorias{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));
+  gap:10px;
+  width:100%;
+}
+.noticias-hero-categorias .foro-filter-btn{
+  width:100%;
+  text-align:center;
+}
+
 /* ===== FORO ===== */
 .foro-filters{ grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:8px; margin:4px 0 8px; }
 .foro-filter-btn{
@@ -1219,6 +1189,51 @@ html[data-theme="dark"] .box-positivo h3{
 }
 .cart-overlay.open { display:block; }
 
+/* ===== LOGIN: botón del header + modal ===== */
+.login-trigger-btn {
+  display:flex; align-items:center; gap:5px;
+  padding:5px 12px; border-radius:999px;
+  background:var(--bg); border:var(--border);
+  color:var(--ink); font-size:0.78rem; font-weight:600; cursor:pointer;
+  transition:background 0.2s;
+  white-space:nowrap;
+}
+.login-trigger-btn:hover { background:var(--card-bg); }
+
+/* El header ahora siempre tiene la foto del coquí de fondo (con capa
+   oscura), sin importar el tema claro/oscuro del sitio — sus botones
+   necesitan su propio contraste fijo en vez de heredar var(--bg)/var(--ink). */
+.header-controls .theme-toggle,
+.header-controls .cart-btn,
+.header-controls .login-trigger-btn{
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.45);
+  color:#fff;
+}
+.header-controls .theme-toggle:hover,
+.header-controls .cart-btn:hover,
+.header-controls .login-trigger-btn:hover{
+  background:rgba(255,255,255,.26);
+}
+
+.login-modal-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5);
+  z-index:1000; align-items:center; justify-content:center; padding:16px;
+}
+.login-modal-overlay.open { display:flex; }
+.login-modal {
+  position:relative;
+  background:var(--panel,#fff); border:var(--border); border-radius:12px;
+  padding:28px 24px 20px; max-width:340px; width:100%;
+  box-shadow:0 12px 40px rgba(0,0,0,0.25);
+}
+.login-modal-close {
+  position:absolute; top:8px; right:8px;
+  background:none; border:none; color:var(--ink); font-size:1.1rem;
+  cursor:pointer; padding:4px 8px; border-radius:4px; line-height:1;
+}
+.login-modal-close:hover { background:var(--bg); }
+
 /* ===== AUTH BOX ===== */
 .login-actions { display:flex; gap:6px; margin-top:2px; }
 .btn-google {
@@ -1262,11 +1277,6 @@ html[data-theme="dark"] .auth-status.info  { color:#bfdbfe; }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width:900px){
-  .page{
-    grid-template-columns:1fr;
-    grid-template-rows:auto auto auto auto auto auto auto;
-    grid-template-areas:"header" "nav" "hero" "sidebarTop" "main" "sidebarBottom" "footer";
-  }
   .nav-toggle { display:flex; }
   .nav ul {
     display:none; flex-direction:column; align-items:center;
@@ -1274,7 +1284,6 @@ html[data-theme="dark"] .auth-status.info  { color:#bfdbfe; }
   }
   .nav ul.nav-open { display:flex; }
   .main { grid-template-columns:1fr; }
-  .login-box { max-width:260px; }
   .tienda-main { grid-template-columns:repeat(2,1fr); }
 }
 @media (max-width:480px){

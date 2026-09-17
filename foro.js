@@ -22,8 +22,8 @@
   const CATEGORIAS = {
     general: 'General',
     tecnologia: 'Tecnología',
-    'critica-internacional': 'Crítica Internacional',
-    'nuevos-humanos': 'Nuevos Humanos',
+    internacionales: 'Internacionales',
+    'nuevos-humanos': 'Revolución Humana',
     educacion: 'Educación',
   };
   let activeCategoria = '';
@@ -216,7 +216,7 @@
           <p id="foro-comment-status" class="form-status" aria-live="polite"></p>
         </form>
       </section>
-      <p class="foro-login-hint" style="display:${currentUser ? 'none' : 'block'};">🔒 <a href="#login-box">Inicia sesión</a> para comentar.</p>
+      <p class="foro-login-hint" style="display:${currentUser ? 'none' : 'block'};">🔒 <a href="#" class="login-modal-trigger">Inicia sesión</a> para comentar.</p>
       <div class="foro-comments">${comentarios.length
         ? comentarios.map((c) => `
         <div class="foro-comment">
