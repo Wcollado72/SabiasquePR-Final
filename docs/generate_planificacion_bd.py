@@ -219,11 +219,10 @@ def diagrama_navegacion():
     icx = W / 2
     box(d, icx - 70, 360, 140, 28, 'Inicio', 'index.html', fill=ACCENT_SOFT, stroke=ACCENT)
 
-    # Fila unica con las 9 secciones del menu principal (orden real del nav)
+    # Fila unica con las secciones del menu principal (orden real del nav)
     publicas = [
-        ('Sobre el', 'proyecto'), ('Noticias', None), ('Critica', 'Internacional'),
-        ('Nuevos', 'Humanos'), ('Tecnologia', None), ('Educacion', None),
-        ('Foro', None), ('Tienda', None), ('Contacto', None),
+        ('Noticias', None), ('Revolucion', 'Humana'), ('Educacion', None),
+        ('Foro', None), ('Tienda', None), ('Contacto', None), ('Premium', None),
     ]
     n = len(publicas)
     bw, gap = 50, 6
@@ -242,16 +241,23 @@ def diagrama_navegacion():
         cx = x + bw / 2
         centers.append(cx)
         is_foro = (t1 == 'Foro')
-        box(d, x, row_y, bw, row_h, t1, t2, title_size=6.3,
-            fill=DONE_SOFT if is_foro else ACCENT_SOFT,
-            stroke=DONE if is_foro else ACCENT,
-            title_color=DONE if is_foro else ACCENT_DARK)
+        is_premium = (t1 == 'Premium')
+        if is_foro:
+            fill, stroke, tcolor = DONE_SOFT, DONE, DONE
+        elif is_premium:
+            fill, stroke, tcolor = colors.HexColor('#F5ECE1'), colors.HexColor('#B8791A'), colors.HexColor('#8A5A10')
+        else:
+            fill, stroke, tcolor = ACCENT_SOFT, ACCENT, ACCENT_DARK
+        box(d, x, row_y, bw, row_h, t1, t2, title_size=6.3, fill=fill, stroke=stroke, title_color=tcolor)
         d.add(Line(cx, spine_y, cx, row_y + row_h, strokeColor=INK_SOFT, strokeWidth=1))
         if is_foro:
             foro_center = cx
 
-    # Rama del foro: requiere sesion para publicar/comentar
-    np_x, np_w, np_y, np_h = foro_center - 80, 160, 220, 36
+    # Rama del foro: requiere sesion para publicar/comentar.
+    # Se ancla a la derecha de la columna "Iniciar sesion / Panel admin"
+    # (que ocupa x 40-210) en vez de centrarse bajo Foro, para no
+    # superponerse con esa columna a este ancho de diagrama.
+    np_x, np_w, np_y, np_h = 220, 160, 220, 36
     box(d, np_x, np_y, np_w, np_h, 'Nueva publicacion / comentar', 'requiere sesion',
         fill=WHITE, stroke=LINE, dashed=True, title_color=INK_SOFT, title_size=7.2)
     arrow(d, foro_center, row_y, np_x + np_w/2, np_y + np_h, 'sesion activa', dashed=True)
@@ -265,8 +271,10 @@ def diagrama_navegacion():
         fill=colors.HexColor('#F5ECE1'), stroke=colors.HexColor('#B8791A'), title_color=colors.HexColor('#8A5A10'))
     arrow(d, login_x + login_w/2, login_y, admin_x + admin_w/2, admin_y + admin_h, 'rol = admin', dashed=True)
 
-    # Paginas secundarias (fuera del menu principal)
-    sec_x, sec_y, sec_w, sec_h = W - 210, 214, 170, 46
+    # Paginas secundarias (fuera del menu principal) -- mas abajo que la
+    # rama del foro para no montarse encima (el foro ya no es el 7mo de 9
+    # items sino el 4to de 7, y su rama quedo mas a la izquierda)
+    sec_x, sec_y, sec_w, sec_h = W - 210, 130, 170, 46
     box(d, sec_x, sec_y, sec_w, sec_h, 'Paginas secundarias',
         lines=['Servicios, Privacidad,', 'Terminos, 404'],
         fill=PAPER_RULED, stroke=LINE, dashed=True, title_color=INK_SOFT, title_size=7.4)
@@ -353,6 +361,7 @@ DICCIONARIO = [
         ('fuente_url', 'text', 'NOT NULL', 'URL de la fuente original'),
         ('fuente_texto', 'text', 'NOT NULL', 'Nombre visible de la fuente'),
         ('parrafos', 'jsonb', "NOT NULL, DEFAULT '[]'", 'Arreglo de parrafos del cuerpo'),
+        ('categoria', 'text', "NOT NULL, DEFAULT 'general', CHECK IN (11 valores)", 'Categoria tematica (filtrable desde el frontend)'),
         ('creado_en', 'timestamptz', "NOT NULL, DEFAULT now()", 'Fecha de creacion del registro'),
     ]),
     ('productos', [
@@ -369,7 +378,9 @@ DICCIONARIO = [
     ('perfiles', [
         ('id', 'uuid', 'PK, FK -> auth.users(id) ON DELETE CASCADE', 'Mismo id que el usuario de Supabase Auth'),
         ('email', 'text', 'NOT NULL', 'Correo del usuario'),
-        ('rol', 'text', "NOT NULL, DEFAULT 'usuario', CHECK IN ('usuario','admin')", 'Rol de autorizacion'),
+        ('rol', 'text', "NOT NULL, DEFAULT 'usuario', CHECK IN ('usuario','admin','premium')", 'Rol de autorizacion (premium ampliado por Stripe)'),
+        ('stripe_customer_id', 'text', 'NULL, UNIQUE (parcial)', 'Id del cliente en Stripe, una vez se suscribe'),
+        ('stripe_subscription_id', 'text', 'NULL', 'Id de la suscripcion activa en Stripe'),
         ('creado_en', 'timestamptz', "NOT NULL, DEFAULT now()", 'Fecha de creacion del perfil'),
     ]),
     ('mensajes_contacto', [
@@ -468,7 +479,8 @@ def build_portada(story):
         ['Curso', 'COMP2053 — Desarrollo Web Full-Stack'],
         ['Institución', 'Universidad Interamericana de Puerto Rico, Recinto de Fajardo'],
         ['Repositorio', 'github.com/Wcollado72/SabiasquePR'],
-        ['Fecha', '28 de agosto de 2026'],
+        ['Sitio en vivo', 'fabulous-tartufo-fcb839.netlify.app'],
+        ['Fecha', '17 de septiembre de 2026 (actualizado)'],
     ]
     data = [[Paragraph(f'<font color="#51606E">{k}</font>', styles['Body']), Paragraph(v, styles['Body'])] for k, v in meta]
     t = Table(data, colWidths=[110, CONTENT_W - 110], hAlign='LEFT')
@@ -506,17 +518,20 @@ def build():
 
     h1(story, 1, 'Descripción del proyecto')
     story.append(Paragraph(
-        '<b>Sabías Que PR</b> es una plataforma web informativa y comunitaria dirigida a la población de '
-        'Puerto Rico y su diáspora. Combina noticias con contexto histórico y análisis crítico, contenido '
+        '<b>Sabías Que PR</b> es una plataforma web informativa y comunitaria, nacida en Puerto Rico con una '
+        'misión sin fronteras: cualquier persona, en cualquier país, que quiera entender su entorno y ser '
+        'agente de cambio. Combina noticias categorizadas con contexto histórico y análisis crítico, contenido '
         'educativo organizado por rutas de aprendizaje, una tienda de artículos que apoya el sostenimiento '
-        'del proyecto, y un foro comunitario donde los usuarios registrados publican y comentan.', styles['Body']))
+        'del proyecto, y un foro comunitario donde los usuarios registrados publican y comentan — con un '
+        'modelo de suscripción premium que amplía lo que pueden publicar.', styles['Body']))
     story.append(Paragraph(
         'El sitio nació como una aplicación estática (13 páginas HTML generadas por un script de plantillas '
         'propio) y, como proyecto final del curso, evolucionó hacia una aplicación <b>full-stack</b> real: un '
         'frontend en HTML5/CSS3/JavaScript que consume una <b>API REST propia</b> construida en Node.js y '
-        'Express, con persistencia en una base de datos <b>PostgreSQL</b> (alojada en Supabase) y '
+        'Express, con persistencia en una base de datos <b>PostgreSQL</b> (alojada en Supabase), '
         'autenticación de usuarios mediante <b>JSON Web Tokens verificados en el servidor</b> — no solo '
-        'en el navegador.', styles['Body']))
+        'en el navegador — y suscripciones recurrentes procesadas por <b>Stripe</b>. La aplicación ya está '
+        '<b>desplegada y accesible públicamente</b> (Netlify + Render), no solo en un entorno local.', styles['Body']))
 
     h1(story, 2, 'Objetivo general')
     story.append(Paragraph(
@@ -543,18 +558,21 @@ def build():
     h1(story, 4, 'Alcance del sistema')
     story.append(Paragraph('<b>Incluido en esta entrega:</b>', styles['H2']))
     bullets(story, [
-        'Foro comunitario con CRUD completo (publicaciones y comentarios), autenticación JWT verificada en el servidor y permisos de dueño/administrador.',
-        'CRUD vía API REST propia para noticias y productos (antes generados estáticamente por un script de plantillas).',
-        'Autenticación completa de extremo a extremo: registro, inicio de sesión, recuperación de contraseña e inicio de sesión con Google (Supabase Auth), verificada también del lado del servidor.',
-        'Panel de administración protegido por rol, con formularios CRUD sobre noticias y productos.',
-        'Suite de pruebas automatizadas (unitarias e integración) sobre la API.',
-        'Despliegue público de la aplicación (frontend y backend) en una URL accesible para evaluación.',
+        'Foro comunitario con CRUD completo (publicaciones y comentarios), filtrable por categoría, con límite de palabras según el rol del usuario (100 para usuarios regulares, 500 para premium), autenticación JWT verificada en el servidor y permisos de dueño/administrador.',
+        'CRUD vía API REST propia para noticias (filtrables por 11 categorías) y productos (antes generados estáticamente por un script de plantillas).',
+        'Autenticación completa de extremo a extremo: registro, inicio de sesión, recuperación de contraseña e inicio de sesión con Google (Supabase Auth), verificada también del lado del servidor, con acceso disponible desde una ventana de inicio de sesión en todas las páginas.',
+        'Suscripciones premium recurrentes vía Stripe (checkout + webhook que sincroniza el rol del usuario automáticamente) — construidas y funcionando en modo de prueba (sandbox), sin cobrar dinero real todavía.',
+        'Panel de administración protegido por rol, con formularios CRUD sobre noticias (incluyendo categoría) y productos.',
+        'Suite de pruebas automatizadas (94 pruebas, unitarias e integración) sobre la API.',
+        'Despliegue público real de la aplicación (frontend en Netlify, backend en Render) en una URL accesible para evaluación, con un flujo automatizado (GitHub Actions) que mantiene la base de datos activa.',
     ])
     story.append(Paragraph('<b>Fuera de alcance para esta entrega académica</b> (parte del roadmap de producto, no del criterio de evaluación):', styles['H2']))
     bullets(story, [
-        'Procesamiento real de pagos con Stripe (checkout multi-producto).',
+        'Activar Stripe en modo real (llaves de producción) — las suscripciones premium están construidas y probadas, pero solo con llaves de prueba.',
+        'Checkout de carrito multi-producto para la tienda (hoy usa enlaces de pago individuales de Stripe por producto).',
         'Sistema de newsletter propio para reemplazar Mailchimp.',
-        'Conexión al dominio de producción real (sabiasquepr.com) — el despliegue académico usa una URL de despliegue separada.',
+        'Conexión al dominio de producción real (sabiasquepr.com) — deliberadamente pospuesta hasta tener más contenido publicado; el despliegue académico usa la URL de Netlify/Render, que ya es pública y funcional.',
+        'Catalogador de noticias asistido por IA, sección de videos y soporte multi-idioma — roadmap de producto a futuro.',
     ])
 
     h1(story, 5, 'Tecnologías seleccionadas')
@@ -564,9 +582,11 @@ def build():
         ['Backend', 'Node.js + Express', 'API REST propia (backend/src) con middleware de validación y manejo de errores centralizado'],
         ['Base de datos', 'PostgreSQL (Supabase)', 'Esquema relacional propio con Row Level Security activo'],
         ['Autenticación', 'Supabase Auth + jose (JWKS, ES256)', 'Login/registro/OAuth en el cliente; verificación de JWT en cada ruta protegida del servidor'],
-        ['Pruebas', 'Jest + Supertest', 'Pruebas unitarias de validadores/middleware y de integración de la API'],
+        ['Pagos', 'Stripe (suscripciones)', 'Checkout de suscripción premium + webhook que actualiza el rol del usuario automáticamente (modo prueba)'],
+        ['Pruebas', 'Jest + Supertest', '94 pruebas unitarias de validadores/middleware y de integración de la API'],
         ['Control de versiones', 'Git + GitHub', 'Historial de commits por fase (github.com/Wcollado72/SabiasquePR)'],
-        ['Despliegue (Fase 6)', 'Netlify/Vercel + Render/Railway', 'Frontend estático y backend Express en plataformas gratuitas para estudiantes'],
+        ['Despliegue', 'Netlify + Render', 'Frontend estático (Netlify) y backend Express (Render) — ya desplegados y accesibles públicamente'],
+        ['Automatización', 'GitHub Actions', 'Ping periódico a la API (cada 3 días) para evitar que Supabase pause la base de datos por inactividad'],
     ]
     t = Table([[Paragraph(str(c), styles['TableCell']) if not isinstance(c, Paragraph) else c for c in row] for row in tech_data],
                colWidths=[85, 165, CONTENT_W - 85 - 165], hAlign='LEFT')
@@ -593,12 +613,23 @@ def build():
         'consulta PostgreSQL.', styles['Body']))
     story.append(diagrama_arquitectura())
     story.append(Paragraph('Figura 1. Arquitectura de tres capas: frontend, API propia y base de datos, con Supabase Auth como servicio de identidad compartido.', styles['Caption']))
+    story.append(Paragraph(
+        'Un cuarto integrante, no mostrado en el diagrama por espacio, es <b>Stripe</b>: cuando un usuario se '
+        'suscribe a premium desde <font face="Courier">premium.html</font>, el backend crea una sesión de '
+        'checkout de Stripe; al completarse el pago, Stripe llama a un <i>webhook</i> propio '
+        '(<font face="Courier">POST /api/stripe/webhook</font>), verificado con la firma de Stripe, que '
+        'actualiza directamente el rol del usuario en PostgreSQL — sin que el frontend tenga que hacer nada '
+        'adicional.', styles['Body']))
 
     h1(story, 7, 'Diagrama general de navegación')
     story.append(Paragraph(
-        'Todas las páginas públicas comparten la barra de navegación superior. El foro permite lectura pública '
+        'Todas las páginas públicas comparten la barra de navegación superior y un botón de inicio de sesión '
+        'en el encabezado (ventana emergente, disponible en toda página). El foro permite lectura pública '
         'y restringe la escritura (publicar, comentar) a usuarios con sesión activa; el panel de administración '
-        'está completamente restringido al rol <font face="Courier">admin</font>.', styles['Body']))
+        'está completamente restringido al rol <font face="Courier">admin</font>; la página Premium inicia el '
+        'checkout de Stripe para quien quiera suscribirse. Las páginas "Sobre el proyecto", "Crítica '
+        'Internacional" y "Tecnología" se retiraron: la primera se fusionó dentro de Inicio, y los temas de '
+        'las otras dos se absorbieron en las categorías del feed de Noticias.', styles['Body']))
     story.append(diagrama_navegacion())
     story.append(Paragraph('Figura 2. Mapa de navegación del sitio: páginas públicas, área que requiere sesión (foro) y área restringida por rol (panel de administración).', styles['Caption']))
 
