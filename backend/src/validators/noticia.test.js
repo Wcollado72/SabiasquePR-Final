@@ -33,6 +33,13 @@ describe('validateNoticia', () => {
     expect(errors).toContain('La fecha no es valida.');
   });
 
+  test('acepta destacado booleano y rechaza otros tipos', () => {
+    expect(validateNoticia({ ...NOTICIA_VALIDA, destacado: true })).toEqual([]);
+    expect(validateNoticia({ ...NOTICIA_VALIDA, destacado: false })).toEqual([]);
+    expect(validateNoticia({ ...NOTICIA_VALIDA, destacado: 'true' }))
+      .toContain('El campo "destacado" debe ser verdadero o falso.');
+  });
+
   test('rechaza parrafos vacios', () => {
     const errors = validateNoticia({ ...NOTICIA_VALIDA, parrafos: ['   ', ''] });
     expect(errors).toContain('Debe incluir al menos un parrafo.');

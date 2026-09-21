@@ -1,5 +1,5 @@
 jest.mock('../middleware/auth', () => require('../test-utils/authMock'));
-jest.mock('../db', () => ({ pool: { query: jest.fn() } }));
+jest.mock('../db', () => ({ pool: { query: jest.fn(), connect: jest.fn() } }));
 
 const request = require('supertest');
 const { buildApp } = require('../app');
@@ -22,7 +22,22 @@ const NOTICIA_VALIDA = {
 
 beforeEach(() => {
   pool.query.mockReset();
+  pool.connect.mockReset();
 });
+
+// Cliente de transaccion falso: BEGIN, limpiar la destacada anterior, guardar, COMMIT
+function mockClient(saveStep) {
+  const client = {
+    query: jest.fn()
+      .mockResolvedValueOnce({}) // BEGIN
+      .mockResolvedValueOnce({}) // limpiar
+      .mockImplementationOnce(saveStep) // guardar
+      .mockResolvedValue({}), // COMMIT / ROLLBACK
+    release: jest.fn(),
+  };
+  pool.connect.mockResolvedValueOnce(client);
+  return client;
+}
 
 describe('GET /api/noticias', () => {
   test('devuelve la lista de noticias', async () => {
@@ -89,6 +104,56 @@ describe('POST /api/noticias', () => {
       .send(NOTICIA_VALIDA);
     expect(res.status).toBe(201);
     expect(res.body.noticia.id).toBe('un-titulo-cualquiera');
+  });
+});
+
+describe('noticia destacada', () => {
+  test('400 si destacado no es booleano', async () => {
+    const res = await request(app)
+      .post('/api/noticias')
+      .set('x-test-user', ADMIN)
+      .send({ ...NOTICIA_VALIDA, destacado: 'si' });
+    expect(res.status).toBe(400);
+  });
+
+  test('POST con destacado=true limpia la anterior dentro de una transaccion', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] }); // chequeo de id duplicado
+    const client = mockClient(async () => ({ rows: [{ id: 'un-titulo-cualquiera', destacado: true }] }));
+    const res = await request(app)
+      .post('/api/noticias')
+      .set('x-test-user', ADMIN)
+      .send({ ...NOTICIA_VALIDA, destacado: true });
+    expect(res.status).toBe(201);
+    expect(res.body.noticia.destacado).toBe(true);
+    const sqls = client.query.mock.calls.map((c) => c[0]);
+    expect(sqls[0]).toBe('BEGIN');
+    expect(sqls[1]).toMatch(/SET destacado = false/);
+    expect(sqls[3]).toBe('COMMIT');
+    expect(client.release).toHaveBeenCalled();
+  });
+
+  test('PUT con destacado=true hace ROLLBACK y libera el cliente si falla', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'a', ...NOTICIA_VALIDA }] }); // existente
+    const client = mockClient(async () => { throw new Error('fallo'); });
+    const res = await request(app)
+      .put('/api/noticias/a')
+      .set('x-test-user', ADMIN)
+      .send({ destacado: true });
+    expect(res.status).toBe(500);
+    expect(client.query.mock.calls.map((c) => c[0])).toContain('ROLLBACK');
+    expect(client.release).toHaveBeenCalled();
+  });
+
+  test('PUT con destacado=false no abre transaccion', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'a', ...NOTICIA_VALIDA, destacado: true }] })
+      .mockResolvedValueOnce({ rows: [{ id: 'a', destacado: false }] });
+    const res = await request(app)
+      .put('/api/noticias/a')
+      .set('x-test-user', ADMIN)
+      .send({ destacado: false });
+    expect(res.status).toBe(200);
+    expect(pool.connect).not.toHaveBeenCalled();
   });
 });
 

@@ -23,7 +23,29 @@ function toRow(id, body, existing = {}) {
     body.fuenteTexto ?? existing.fuente_texto,
     JSON.stringify((body.parrafos ?? existing.parrafos ?? []).filter((p) => p && p.trim())),
     body.categoria ?? existing.categoria ?? 'general',
+    body.destacado ?? existing.destacado ?? false,
   ];
+}
+
+// Guarda una noticia. Si se marca como destacada, limpia la anterior en la
+// misma transaccion (el indice unico parcial solo admite una destacada).
+async function saveNoticia(id, values, sql) {
+  const destacado = values[values.length - 1];
+  if (!destacado) return pool.query(sql, values);
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query('UPDATE noticias SET destacado = false WHERE destacado AND id <> $1', [id]);
+    const result = await client.query(sql, values);
+    await client.query('COMMIT');
+    return result;
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 // GET /api/noticias?categoria=  -- lista, publico
@@ -60,10 +82,11 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
     if (dupe.length) id = `${id}-${Date.now().toString(36)}`;
 
     const values = toRow(id, req.body);
-    const { rows } = await pool.query(
-      `INSERT INTO noticias (id, titulo, fecha, fecha_display, imagen, imagen_alt, imagen_caption, clase, fuente_url, fuente_texto, parrafos, categoria)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12) RETURNING *`,
-      values
+    const { rows } = await saveNoticia(
+      id,
+      values,
+      `INSERT INTO noticias (id, titulo, fecha, fecha_display, imagen, imagen_alt, imagen_caption, clase, fuente_url, fuente_texto, parrafos, categoria, destacado)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12,$13) RETURNING *`
     );
     res.status(201).json({ ok: true, noticia: rows[0] });
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
@@ -78,11 +101,13 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     if (existingRows.length === 0) return res.status(404).json({ ok: false, error: 'Noticia no encontrada.' });
 
     const values = toRow(req.params.id, req.body, existingRows[0]);
-    const { rows } = await pool.query(
+    const { rows } = await saveNoticia(
+      req.params.id,
+      values,
       `UPDATE noticias SET titulo=$2, fecha=$3, fecha_display=$4, imagen=$5, imagen_alt=$6,
-         imagen_caption=$7, clase=$8, fuente_url=$9, fuente_texto=$10, parrafos=$11::jsonb, categoria=$12
-       WHERE id=$1 RETURNING *`,
-      values
+         imagen_caption=$7, clase=$8, fuente_url=$9, fuente_texto=$10, parrafos=$11::jsonb, categoria=$12,
+         destacado=$13
+       WHERE id=$1 RETURNING *`
     );
     res.json({ ok: true, noticia: rows[0] });
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
