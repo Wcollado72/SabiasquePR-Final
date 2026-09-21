@@ -50,7 +50,7 @@
     }
 
     if (!currentUser) {
-      showGate('🔒 <a href="#" class="login-modal-trigger">Inicia sesión</a> para acceder al panel de administración.');
+      showGate('<a href="#" class="login-modal-trigger">Inicia sesión</a> para acceder al panel de administración.');
       return;
     }
 
@@ -124,7 +124,7 @@
       noticiasCache = data.noticias;
       renderNoticiasList();
     } catch (err) {
-      el.innerHTML = `<p class="foro-error">❌ ${escapeHtml(err.message)}</p>`;
+      el.innerHTML = `<p class="foro-error">${escapeHtml(err.message)}</p>`;
     }
   }
 
@@ -135,7 +135,7 @@
     el.innerHTML = items.length ? items.map((n) => `
       <div class="admin-item">
         <div class="admin-item-info">
-          <strong>${escapeHtml(n.titulo)}</strong>
+          <strong>${escapeHtml(n.titulo)}${n.destacado ? ' <span class="foro-badge">★ Destacada</span>' : ''}</strong>
           <span class="foro-meta">${escapeHtml(n.fecha_display)}</span>
         </div>
         <div class="admin-item-actions">
@@ -163,6 +163,7 @@
     document.getElementById('an-fuente-url').value = item?.fuente_url || '';
     document.getElementById('an-fuente-texto').value = item?.fuente_texto || '';
     document.getElementById('an-parrafos').value = (item?.parrafos || []).join('\n');
+    document.getElementById('an-destacado').checked = Boolean(item?.destacado);
     setStatus(document.getElementById('an-status'), '', '');
     document.getElementById('admin-noticias-form-box').style.display = 'block';
     document.getElementById('admin-noticias-form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -187,8 +188,9 @@
       fuenteUrl: document.getElementById('an-fuente-url').value.trim(),
       fuenteTexto: document.getElementById('an-fuente-texto').value.trim(),
       parrafos: document.getElementById('an-parrafos').value.split('\n').map((p) => p.trim()).filter(Boolean),
+      destacado: document.getElementById('an-destacado').checked,
     };
-    setStatus(statusEl, 'info', '⏳ Guardando...');
+    setStatus(statusEl, 'info', 'Guardando...');
     try {
       if (id) {
         await apiFetch(`/api/noticias/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body) });
@@ -198,7 +200,7 @@
       closeNoticiaForm();
       loadNoticias();
     } catch (err) {
-      setStatus(statusEl, 'error', '❌ ' + err.message);
+      setStatus(statusEl, 'error', '' + err.message);
     }
   }
 
@@ -208,7 +210,7 @@
       await apiFetch(`/api/noticias/${encodeURIComponent(id)}`, { method: 'DELETE' });
       loadNoticias();
     } catch (err) {
-      alert('❌ ' + err.message);
+      alert('' + err.message);
     }
   }
 
@@ -228,7 +230,7 @@
       productosCache = data.productos;
       renderProductosList();
     } catch (err) {
-      el.innerHTML = `<p class="foro-error">❌ ${escapeHtml(err.message)}</p>`;
+      el.innerHTML = `<p class="foro-error">${escapeHtml(err.message)}</p>`;
     }
   }
 
@@ -288,7 +290,7 @@
       stripeLink: document.getElementById('ap-stripe-link').value.trim() || null,
       disponible: document.getElementById('ap-disponible').checked,
     };
-    setStatus(statusEl, 'info', '⏳ Guardando...');
+    setStatus(statusEl, 'info', 'Guardando...');
     try {
       if (id) {
         await apiFetch(`/api/productos/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body) });
@@ -298,7 +300,7 @@
       closeProductoForm();
       loadProductos();
     } catch (err) {
-      setStatus(statusEl, 'error', '❌ ' + err.message);
+      setStatus(statusEl, 'error', '' + err.message);
     }
   }
 
@@ -308,7 +310,7 @@
       await apiFetch(`/api/productos/${encodeURIComponent(id)}`, { method: 'DELETE' });
       loadProductos();
     } catch (err) {
-      alert('❌ ' + err.message);
+      alert('' + err.message);
     }
   }
 

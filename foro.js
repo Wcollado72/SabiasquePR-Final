@@ -168,12 +168,12 @@
         ? data.posts.map((p) => `
         <article class="box box-blog foro-post-card">
           <span class="foro-badge">${CATEGORIAS[p.categoria] || p.categoria}</span>
-          <h3><a href="foro?post=${p.id}">${escapeHtml(p.titulo)}</a></h3>
-          <p class="foro-meta">Por ${escapeHtml(p.autor_email || 'anónimo')} · ${formatDate(p.creado_en)} · 💬 ${p.comentarios_count}</p>
+          <h3><a href="foro.html?post=${p.id}">${escapeHtml(p.titulo)}</a></h3>
+          <p class="foro-meta">Por ${escapeHtml(p.autor_email || 'anónimo')} · ${formatDate(p.creado_en)} · ${p.comentarios_count} ${p.comentarios_count === 1 ? 'comentario' : 'comentarios'}</p>
         </article>`).join('')
         : '<p class="foro-empty">Aún no hay publicaciones. ¡Sé el primero!</p>';
     } catch (err) {
-      listEl.innerHTML = `<p class="foro-error">❌ ${escapeHtml(err.message)}</p>`;
+      listEl.innerHTML = `<p class="foro-error">${escapeHtml(err.message)}</p>`;
     }
   }
 
@@ -190,7 +190,7 @@
       const data = await apiFetch(`/api/foro/posts/${encodeURIComponent(postId)}`);
       renderDetail(data.post, data.comentarios);
     } catch (err) {
-      detailEl.innerHTML = `<p class="foro-error">❌ ${escapeHtml(err.message)}</p><p><a href="foro.html">← Volver</a></p>`;
+      detailEl.innerHTML = `<p class="foro-error">${escapeHtml(err.message)}</p><p><a href="foro.html">← Volver</a></p>`;
     }
   }
 
@@ -216,7 +216,7 @@
           <p id="foro-comment-status" class="form-status" aria-live="polite"></p>
         </form>
       </section>
-      <p class="foro-login-hint" style="display:${currentUser ? 'none' : 'block'};">🔒 <a href="#" class="login-modal-trigger">Inicia sesión</a> para comentar.</p>
+      <p class="foro-login-hint" style="display:${currentUser ? 'none' : 'block'};"><a href="#" class="login-modal-trigger">Inicia sesión</a> para comentar.</p>
       <div class="foro-comments">${comentarios.length
         ? comentarios.map((c) => `
         <div class="foro-comment">
@@ -234,7 +234,7 @@
       try {
         await apiFetch(`/api/foro/posts/${post.id}/comentarios`, { method: 'POST', body: JSON.stringify({ cuerpo }) });
         showDetail(post.id);
-      } catch (err) { setStatus(statusEl, 'error', '❌ ' + err.message); }
+      } catch (err) { setStatus(statusEl, 'error', '' + err.message); }
     });
 
     document.querySelectorAll('.foro-comment-delete').forEach((btn) => {
@@ -243,7 +243,7 @@
         try {
           await apiFetch(`/api/foro/comentarios/${btn.dataset.id}`, { method: 'DELETE' });
           showDetail(post.id);
-        } catch (err) { window.showToast?.('❌ ' + err.message); }
+        } catch (err) { window.showToast?.('' + err.message); }
       });
     });
 
@@ -252,7 +252,7 @@
       try {
         await apiFetch(`/api/foro/posts/${post.id}`, { method: 'DELETE' });
         location.href = 'foro.html';
-      } catch (err) { window.showToast?.('❌ ' + err.message); }
+      } catch (err) { window.showToast?.('' + err.message); }
     });
 
     document.getElementById('foro-edit-post-btn')?.addEventListener('click', () => {
@@ -293,11 +293,11 @@
       const cuerpo = document.getElementById('foro-edit-cuerpo').value.trim();
       if (titulo.length < 3) { setStatus(statusEl, 'error', 'Título muy corto.'); return; }
       if (cuerpo.length < 10) { setStatus(statusEl, 'error', 'Mensaje muy corto.'); return; }
-      setStatus(statusEl, 'info', '⏳ Guardando...');
+      setStatus(statusEl, 'info', 'Guardando...');
       try {
         await apiFetch(`/api/foro/posts/${post.id}`, { method: 'PATCH', body: JSON.stringify({ titulo, categoria, cuerpo }) });
         showDetail(post.id);
-      } catch (err) { setStatus(statusEl, 'error', '❌ ' + err.message); }
+      } catch (err) { setStatus(statusEl, 'error', '' + err.message); }
     });
 
     bindWordCounter('foro-edit-cuerpo', 'foro-edit-cuerpo-counter');
@@ -315,11 +315,11 @@
       const cuerpo = document.getElementById('foro-cuerpo').value.trim();
       if (titulo.length < 3) { setStatus(statusEl, 'error', 'Título muy corto.'); return; }
       if (cuerpo.length < 10) { setStatus(statusEl, 'error', 'Mensaje muy corto.'); return; }
-      setStatus(statusEl, 'info', '⏳ Publicando...');
+      setStatus(statusEl, 'info', 'Publicando...');
       try {
         const data = await apiFetch('/api/foro/posts', { method: 'POST', body: JSON.stringify({ titulo, categoria, cuerpo }) });
-        location.href = `foro?post=${data.post.id}`;
-      } catch (err) { setStatus(statusEl, 'error', '❌ ' + err.message); }
+        location.href = `foro.html?post=${data.post.id}`;
+      } catch (err) { setStatus(statusEl, 'error', '' + err.message); }
     });
   }
 

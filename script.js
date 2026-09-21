@@ -7,17 +7,14 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   // ══════════════════════════════════════════════════════════
-  // 1. DARK MODE — Toggle con localStorage y prefers-color-scheme
+  // 1. TEMA — Claro por defecto; el modo oscuro se guarda en localStorage
   // ══════════════════════════════════════════════════════════
   const html        = document.documentElement;
   const themeToggle = document.getElementById('theme-toggle');
-  const themeIcon   = themeToggle?.querySelector('.theme-icon');
   const themeLabel  = themeToggle?.querySelector('.theme-label');
 
-  // Leer preferencia guardada o del sistema
-  const savedTheme  = localStorage.getItem('sqpr-theme');
-  const systemDark  = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const initTheme   = savedTheme || (systemDark ? 'dark' : 'light');
+  // Claro por defecto; solo se usa oscuro si la persona lo eligió
+  const initTheme = localStorage.getItem('sqpr-theme') === 'dark' ? 'dark' : 'light';
 
   applyTheme(initTheme);
 
@@ -29,14 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function applyTheme(theme) {
     html.dataset.theme = theme;
-    if (themeIcon)  themeIcon.textContent  = theme === 'dark' ? '☀️' : '🌙';
     if (themeLabel) themeLabel.textContent = theme === 'dark' ? 'Claro' : 'Oscuro';
+    themeToggle?.setAttribute('aria-label', theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
   }
-
-  // Escuchar cambios del sistema operativo
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-    if (!localStorage.getItem('sqpr-theme')) applyTheme(e.matches ? 'dark' : 'light');
-  });
 
   // ══════════════════════════════════════════════════════════
   // 2. MENÚ HAMBURGUESA
@@ -83,9 +75,50 @@ document.addEventListener('DOMContentLoaded', () => {
   const cartCountEl  = document.getElementById('cart-count');
   const cartCheckout = document.getElementById('cart-checkout');
 
-  // Abrir/cerrar carrito
-  function openCart()  { cartDrawer?.classList.add('open');  cartOverlay?.classList.add('open'); cartDrawer?.removeAttribute('aria-hidden'); }
-  function closeCart() { cartDrawer?.classList.remove('open'); cartOverlay?.classList.remove('open'); cartDrawer?.setAttribute('aria-hidden', 'true'); }
+  // ── Foco accesible para el carrito y el modal de login ─────
+  // Al abrir, el foco entra al panel; Tab se queda dentro; Escape cierra;
+  // al cerrar, el foco vuelve a donde estaba.
+  const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+  let lastFocus = null;
+
+  function focusables(root) {
+    return Array.from(root.querySelectorAll(FOCUSABLE)).filter(el => el.offsetParent !== null);
+  }
+  function trapTab(e, root) {
+    if (e.key !== 'Tab' || !root) return;
+    const items = focusables(root);
+    if (!items.length) return;
+    const first = items[0];
+    const last  = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  function restoreFocus(fallback) {
+    const target = lastFocus && document.contains(lastFocus) ? lastFocus : fallback;
+    lastFocus = null;
+    target?.focus();
+  }
+
+  // Abrir/cerrar carrito (cerrado = `inert`, así sus botones no reciben Tab)
+  if (cartDrawer) cartDrawer.inert = true;
+  function openCart() {
+    if (!cartDrawer) return;
+    if (!cartDrawer.classList.contains('open')) lastFocus = document.activeElement;
+    cartDrawer.inert = false;
+    cartDrawer.classList.add('open');
+    cartOverlay?.classList.add('open');
+    cartDrawer.removeAttribute('aria-hidden');
+    cartClose?.focus();
+  }
+  function closeCart() {
+    if (!cartDrawer) return;
+    const wasOpen = cartDrawer.classList.contains('open');
+    cartDrawer.classList.remove('open');
+    cartOverlay?.classList.remove('open');
+    cartDrawer.setAttribute('aria-hidden', 'true');
+    cartDrawer.inert = true;
+    if (wasOpen) restoreFocus(cartBtn);
+  }
 
   cartBtn?.addEventListener('click', openCart);
   cartClose?.addEventListener('click', closeCart);
@@ -193,24 +226,40 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginModalOverlay = document.getElementById('login-modal-overlay');
   const loginModalClose   = document.getElementById('login-modal-close');
 
+  const loginModal = document.getElementById('login-modal');
+  const isLoginOpen = () => loginModalOverlay?.classList.contains('open');
+
   function openLoginModal() {
-    loginModalOverlay?.classList.add('open');
+    if (!loginModalOverlay) return;
+    if (!isLoginOpen()) lastFocus = document.activeElement;
+    loginModalOverlay.classList.add('open');
     loginTriggerBtn?.setAttribute('aria-expanded', 'true');
+    const emailField = document.getElementById('login-email');
+    (emailField?.offsetParent ? emailField : (focusables(loginModal || loginModalOverlay)[0] || loginModalClose))?.focus();
   }
   function closeLoginModal() {
+    const wasOpen = isLoginOpen();
     loginModalOverlay?.classList.remove('open');
     loginTriggerBtn?.setAttribute('aria-expanded', 'false');
+    if (wasOpen) restoreFocus(loginTriggerBtn);
   }
 
   loginTriggerBtn?.addEventListener('click', () => {
-    loginModalOverlay?.classList.contains('open') ? closeLoginModal() : openLoginModal();
+    isLoginOpen() ? closeLoginModal() : openLoginModal();
   });
   loginModalClose?.addEventListener('click', closeLoginModal);
   loginModalOverlay?.addEventListener('click', (e) => {
     if (e.target === loginModalOverlay) closeLoginModal();
   });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && loginModalOverlay?.classList.contains('open')) closeLoginModal();
+    const cartOpen = cartDrawer?.classList.contains('open');
+    if (e.key === 'Escape') {
+      if (isLoginOpen()) closeLoginModal();
+      else if (cartOpen) closeCart();
+      return;
+    }
+    if (isLoginOpen()) trapTab(e, loginModal);
+    else if (cartOpen) trapTab(e, cartDrawer);
   });
 
   // Cualquier enlace/botón con esta clase abre el modal de login (usado por
@@ -241,16 +290,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const emailInput = form.querySelector('input[type="email"]');
       const email = emailInput?.value?.trim();
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        setNLStatus(statusEl, '❌ Escribe un correo electrónico válido.', 'error');
+        setNLStatus(statusEl, 'Escribe un correo electrónico válido.', 'error');
         return;
       }
 
-      setNLStatus(statusEl, '⏳ Suscribiendo...', 'info');
+      setNLStatus(statusEl, 'Suscribiendo...', 'info');
 
       if (!cfg.mcUser || cfg.mcUser === 'YOUR_MC_USER') {
         // Mailchimp no configurado aún
         setTimeout(() => {
-          setNLStatus(statusEl, '✅ ¡Gracias! Te avisaremos cuando el boletín esté activo.', 'ok');
+          setNLStatus(statusEl, '¡Gracias! Te avisaremos cuando el boletín esté activo.', 'ok');
           form.reset();
         }, 600);
         return;
@@ -260,14 +309,14 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const result = await subscribeMailchimp(email, cfg.mcUser, cfg.mcList, cfg.mcServer);
         if (result.ok) {
-          setNLStatus(statusEl, '✅ ¡Suscripción exitosa! Revisa tu correo para confirmar.', 'ok');
+          setNLStatus(statusEl, '¡Suscripción exitosa! Revisa tu correo para confirmar.', 'ok');
           form.reset();
         } else {
           const msg = result.msg?.replace(/<[^>]*>/g, '') || 'Error desconocido.';
-          setNLStatus(statusEl, '❌ ' + msg, 'error');
+          setNLStatus(statusEl, '' + msg, 'error');
         }
       } catch {
-        setNLStatus(statusEl, '❌ Error de conexión. Inténtalo de nuevo.', 'error');
+        setNLStatus(statusEl, 'Error de conexión. Inténtalo de nuevo.', 'error');
       }
     });
   });
@@ -335,13 +384,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const action = contactForm.getAttribute('action') || '';
       if (action.includes('YOUR_FORM_ID')) {
         setFStatus('ok',
-          '✅ Formulario validado. Activa el envío real configurando ' +
+          'Formulario validado. Activa el envío real configurando ' +
           '<a href="https://formspree.io" target="_blank">formspree.io</a> en build.js.'
         );
         return;
       }
 
-      setFStatus('info', '⏳ Enviando...');
+      setFStatus('info', 'Enviando...');
       if (submitBtn) submitBtn.disabled = true;
 
       try {
@@ -351,14 +400,14 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: { Accept: 'application/json' },
         });
         if (res.ok) {
-          setFStatus('ok', '✅ ¡Mensaje enviado! Te responderemos pronto.');
+          setFStatus('ok', '¡Mensaje enviado! Te responderemos pronto.');
           contactForm.reset();
         } else {
           const d = await res.json().catch(() => ({}));
-          setFStatus('error', '❌ ' + (d.errors?.map(x => x.message).join(', ') || 'Error.'));
+          setFStatus('error', '' + (d.errors?.map(x => x.message).join(', ') || 'Error.'));
         }
       } catch {
-        setFStatus('error', '❌ Sin conexión. Escríbenos a <a href="mailto:sabiasquepr@yahoo.com">sabiasquepr@yahoo.com</a>');
+        setFStatus('error', 'Sin conexión. Escríbenos a <a href="mailto:sabiasquepr@yahoo.com">sabiasquepr@yahoo.com</a>');
       } finally {
         if (submitBtn) submitBtn.disabled = false;
       }

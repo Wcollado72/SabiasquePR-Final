@@ -25,7 +25,7 @@
         ? disponibles.map(renderProducto).join('\n')
         : '<p class="foro-empty">Aún no hay productos disponibles.</p>';
     } catch (err) {
-      el.innerHTML = `<p class="foro-error">❌ No se pudo cargar la tienda: ${escapeHtml(err.message)}</p>`;
+      el.innerHTML = `<p class="foro-error">No se pudo cargar la tienda: ${escapeHtml(err.message)}</p>`;
     }
   }
 

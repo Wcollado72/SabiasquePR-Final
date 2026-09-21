@@ -80,18 +80,18 @@ function setAuthStatus(msg, type = 'info') {
 
 // ── ACCIONES DE AUTH ────────────────────────────────────────
 async function signIn(email, password) {
-  setAuthStatus('⏳ Entrando...', 'info');
+  setAuthStatus('Entrando...', 'info');
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) { setAuthStatus('❌ ' + error.message, 'error'); return; }
-  setAuthStatus('✅ ¡Bienvenido!', 'ok');
+  if (error) { setAuthStatus('' + error.message, 'error'); return; }
+  setAuthStatus('¡Bienvenido!', 'ok');
   setTimeout(() => window.closeLoginModal?.(), 900);
 }
 
 async function signUp(email, password) {
-  setAuthStatus('⏳ Registrando...', 'info');
+  setAuthStatus('Registrando...', 'info');
   const { error } = await supabase.auth.signUp({ email, password });
-  if (error) { setAuthStatus('❌ ' + error.message, 'error'); return; }
-  setAuthStatus('✅ Revisa tu correo para confirmar tu cuenta.', 'ok');
+  if (error) { setAuthStatus('' + error.message, 'error'); return; }
+  setAuthStatus('Revisa tu correo para confirmar tu cuenta.', 'ok');
 }
 
 async function signOut() {
@@ -104,16 +104,16 @@ async function signInWithGoogle() {
     provider: 'google',
     options: { redirectTo: window.location.href },
   });
-  if (error) setAuthStatus('❌ ' + error.message, 'error');
+  if (error) setAuthStatus('' + error.message, 'error');
 }
 
 async function resetPassword(email) {
-  setAuthStatus('⏳ Enviando correo...', 'info');
+  setAuthStatus('Enviando correo...', 'info');
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/reset-password.html`,
   });
-  if (error) { setAuthStatus('❌ ' + error.message, 'error'); return; }
-  setAuthStatus('✅ Revisa tu correo para restablecer la contraseña.', 'ok');
+  if (error) { setAuthStatus('' + error.message, 'error'); return; }
+  setAuthStatus('Revisa tu correo para restablecer la contraseña.', 'ok');
 }
 
 // ── MODO DEMO (sin Supabase configurado) ────────────────────
