@@ -111,6 +111,14 @@ ALTER TABLE noticias ADD CONSTRAINT noticias_categoria_check
 
 CREATE INDEX IF NOT EXISTS idx_noticias_categoria ON noticias(categoria, fecha DESC);
 
+-- Noticia destacada de la portada. Solo puede haber una a la vez: el indice
+-- unico parcial lo garantiza a nivel de base de datos (el backend limpia la
+-- anterior dentro de la misma transaccion antes de marcar la nueva).
+ALTER TABLE noticias ADD COLUMN IF NOT EXISTS destacado boolean NOT NULL DEFAULT false;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_noticias_un_destacado
+  ON noticias (destacado) WHERE destacado;
+
 -- La pagina "Critica Internacional" se retiro; sus temas se fusionaron
 -- en la categoria "internacionales". Reasignar publicaciones existentes
 -- antes de endurecer el CHECK (el CREATE TABLE de arriba no modifica una

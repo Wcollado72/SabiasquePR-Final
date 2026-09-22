@@ -79,12 +79,12 @@
   function bindSubscribeButton() {
     document.getElementById('premium-subscribe-btn')?.addEventListener('click', async () => {
       const statusEl = document.getElementById('premium-status');
-      setStatus(statusEl, 'info', '⏳ Redirigiendo a Stripe...');
+      setStatus(statusEl, 'info', 'Redirigiendo a Stripe...');
       try {
         const data = await apiFetch('/api/stripe/create-checkout-session', { method: 'POST' });
         location.href = data.url;
       } catch (err) {
-        setStatus(statusEl, 'error', '❌ ' + err.message);
+        setStatus(statusEl, 'error', '' + err.message);
       }
     });
   }
@@ -93,7 +93,7 @@
     const params = new URLSearchParams(location.search);
     const statusEl = document.getElementById('premium-status');
     if (params.get('success')) {
-      setStatus(statusEl, 'info', '✅ ¡Gracias! Tu cuenta se está actualizando, esto puede tardar unos segundos.');
+      setStatus(statusEl, 'info', '¡Gracias! Tu cuenta se está actualizando, esto puede tardar unos segundos.');
     } else if (params.get('canceled')) {
       setStatus(statusEl, 'error', 'Suscripción cancelada. Puedes intentarlo de nuevo cuando quieras.');
     }

@@ -14,7 +14,7 @@ const SITE = {
   url:             'https://sabiasquepr.com',    // ← Actualizar con URL real
   name:            'Sabías que PR',
   email:           'sabiasquepr@yahoo.com',
-  phone:           '(787) 555-0199',    // TODO: reemplazar con el número real antes de publicar (555 es un prefijo ficticio)
+  phone:           '(787) 435-8872',
   location:        'San Juan, Puerto Rico',
   ogImage:         'https://sabiasquepr.com/images/nuevoshumanos.webp',
 
@@ -54,6 +54,9 @@ const SITE = {
 // ── CONTENIDO DESDE CMS JSON ────────────────────────────────
 const noticias  = JSON.parse(fs.readFileSync('_content/noticias.json',  'utf8'));
 
+// Versión de assets: hash del CSS, para evitar CSS viejo en caché
+const ASSET_VERSION = require('crypto').createHash('md5').update(fs.readFileSync('styles.css')).digest('hex').slice(0,8);
+
 // ── HELPERS DE RENDERIZADO ──────────────────────────────────
 
 // noticias/tienda ahora se cargan en el navegador vía la API REST
@@ -65,13 +68,13 @@ const noticias  = JSON.parse(fs.readFileSync('_content/noticias.json',  'utf8'))
 const SOCIAL_ICONS = `
         <div class="social-links">
           <a href="https://x.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
-            <img src="images/Xlogo.webp" alt="X" width="40" height="40" loading="lazy">
+            <img src="images/Xlogo.webp" alt="X" width="28" height="28" loading="lazy">
           </a>
           <a href="https://www.facebook.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-            <img src="images/Facebook.webp" alt="Facebook" width="40" height="40" loading="lazy">
+            <img src="images/Facebook.webp" alt="Facebook" width="28" height="28" loading="lazy">
           </a>
           <a href="https://www.instagram.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-            <img src="images/instagram.webp" alt="Instagram" width="40" height="40" loading="lazy">
+            <img src="images/instagram.webp" alt="Instagram" width="28" height="28" loading="lazy">
           </a>
         </div>`;
 
@@ -100,32 +103,52 @@ const LOGIN_BOX = `
         </div>
       </div>`;
 
-const REFERENCES_BOX = `
-      <section class="references-box">
-        <hr>
-        <h3>Referencias y Créditos</h3>
-        <ul>
-          <li><strong>Concepto y contenido original:</strong> Aliado Imperfekto (Proyecto ideado y desarrollado 2023 al presente).</li>
-          <li><strong>Herramientas de apoyo:</strong> Código e imágenes generadas con asistencia de Inteligencia Artificial.</li>
-        </ul>
-      </section>`;
-
 const FOOTER = `
     <footer class="footer">
-      <p>
-        <strong>Contacto:</strong>
-        <a href="mailto:${SITE.email}">${SITE.email}</a>
-        · ${SITE.phone} · ${SITE.location}
-      </p>
-      <p>Universidad Interamericana de Puerto Rico, Recinto de Fajardo</p>
-      <div class="footer-social">${SOCIAL_ICONS}</div>
-      <p>
-        © ${new Date().getFullYear()} Sabias que PR. Todos los derechos reservados.
-        <a href="privacidad.html">Política de privacidad</a> | <a href="terminos.html">Términos</a>
-      </p>
-      <p style="margin-top:10px;">
-        <a href="#arriba" style="color:var(--brand);font-weight:bold;text-decoration:none;">↑ Volver arriba</a>
-      </p>
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <a class="brand" href="index.html">
+            <img class="brand-mark" src="images/Coqui-sm.webp" alt="" width="32" height="32" loading="lazy">
+            <span class="brand-name">Sabías que PR</span>
+          </a>
+          <p>Un proyecto para entender, cuestionar y mejorar la sociedad en la que vivimos.</p>
+          <div class="footer-social">${SOCIAL_ICONS}</div>
+        </div>
+        <nav aria-label="Secciones">
+          <h2 class="footer-h">Secciones</h2>
+          <ul>
+            <li><a href="noticias.html">Noticias</a></li>
+            <li><a href="nuevos-humanos.html">Revolución Humana</a></li>
+            <li><a href="educacion.html">Educación</a></li>
+            <li><a href="foro.html">Foro</a></li>
+            <li><a href="tienda.html">Tienda</a></li>
+          </ul>
+        </nav>
+        <nav aria-label="Proyecto">
+          <h2 class="footer-h">Proyecto</h2>
+          <ul>
+            <li><a href="manifiesto.html">Manifiesto</a></li>
+            <li><a href="details.html">Servicios</a></li>
+            <li><a href="premium.html">Hazte premium</a></li>
+            <li><a href="contacto.html">Contacto</a></li>
+            <li><a href="rss.xml">RSS</a></li>
+          </ul>
+        </nav>
+        <div>
+          <h2 class="footer-h">Contacto</h2>
+          <address>
+            <a href="mailto:${SITE.email}">${SITE.email}</a><br>
+            ${SITE.phone}<br>
+            ${SITE.location}<br>
+            Universidad Interamericana de Puerto Rico, Recinto de Fajardo
+          </address>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© ${new Date().getFullYear()} Sabías que PR. Todos los derechos reservados.</p>
+        <p>Concepto y contenido original: Aliado Imperfekto. Código e imágenes generadas con asistencia de Inteligencia Artificial.</p>
+        <p><a href="privacidad.html">Privacidad</a> · <a href="terminos.html">Términos</a> · <a href="#arriba">↑ Volver arriba</a></p>
+      </div>
     </footer>`;
 
 const LOGIN_MODAL = `
@@ -139,9 +162,7 @@ const LOGIN_MODAL = `
 // ── LAYOUT BASE ─────────────────────────────────────────────
 
 function buildPage(p) {
-  const heroButtons = p.heroButtons !== undefined ? p.heroButtons : `
-          <a href="index.html" class="btn btn-alt">Conócenos</a>
-          <a href="details.html" class="btn btn-alt">Servicios</a>`;
+  const heroButtons = p.heroButtons !== undefined ? p.heroButtons : '';
 
   // ── Schema.org JSON-LD ─────────────────────────────────────
   const jsonLd = p.jsonLd || {
@@ -167,7 +188,7 @@ function buildPage(p) {
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${SITE.ga4Id}');</script>`;
 
   return `<!DOCTYPE html>
-<html lang="es" data-theme="dark">
+<html lang="es" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -191,81 +212,83 @@ function buildPage(p) {
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('sqpr-theme')==='dark'?'dark':'light'}catch(e){}</script>
   <link rel="alternate" type="application/rss+xml" title="${SITE.name} — Noticias" href="${SITE.url}/rss.xml">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="images/Coqui.webp">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="apple-touch-icon" href="images/icon-192.png">
+  <link rel="stylesheet" href="styles.css?v=${ASSET_VERSION}">
   <script type="application/ld+json">${jsonLdStr}</script>${ga4Script}
 </head>
 <body>
   <a href="#main-content" class="skip-nav">Saltar al contenido principal</a>
-  <div class="page">
 
-    <header class="header" id="arriba">
-      <div class="brand">
-        <img src="images/Coqui.webp" alt="Logo Sabias que PR" width="110" height="110" class="logo">
-        <div class="brand-text">
-          <h1>Sabias que PR</h1>
-          <p class="tagline">Noticias · Educación · Información</p>
+    <header class="site-header" id="arriba">
+      <div class="site-header-inner">
+        <a class="brand" href="index.html" aria-label="Sabías que PR — Inicio">
+          <img class="brand-mark" src="images/Coqui-sm.webp" alt="" width="32" height="32">
+          <span class="brand-name">Sabías que PR</span>
+        </a>
+        <nav class="nav" aria-label="Principal">
+          <button class="nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Abrir menú">
+            <span class="hamburger-bar"></span>
+            <span class="hamburger-bar"></span>
+            <span class="hamburger-bar"></span>
+          </button>
+          <ul id="nav-menu" role="list">
+            <li><a href="noticias.html">Noticias</a></li>
+            <li><a href="nuevos-humanos.html">Revolución Humana</a></li>
+            <li><a href="educacion.html">Educación</a></li>
+            <li><a href="foro.html">Foro</a></li>
+            <li><a href="tienda.html">Tienda</a></li>
+            <li><a href="contacto.html">Contacto</a></li>
+            <li><a href="premium.html" class="nav-premium">Hazte premium</a></li>
+          </ul>
+        </nav>
+        <div class="header-controls">
+          <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar a modo oscuro">
+            <span class="theme-icon" aria-hidden="true">
+              <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+              <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+            </span>
+            <span class="theme-label">Oscuro</span>
+          </button>
+          <button class="cart-btn" id="cart-btn" aria-label="Ver carrito" title="Ver carrito de compras">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
+            <span class="cart-count" id="cart-count">0</span>
+          </button>
+          <button type="button" class="login-trigger-btn" id="login-trigger-btn" aria-haspopup="dialog" aria-expanded="false">
+            <span id="login-trigger-label">Iniciar sesión</span>
+          </button>
         </div>
-      </div>
-      <div class="header-controls">
-        <button class="theme-toggle" id="theme-toggle" aria-label="Alternar modo oscuro">
-          <span class="theme-icon">🌙</span>
-          <span class="theme-label">Oscuro</span>
-        </button>
-        <button class="cart-btn" id="cart-btn" aria-label="Ver carrito" title="Ver carrito de compras">
-          🛒 <span class="cart-count" id="cart-count">0</span>
-        </button>
-        <button type="button" class="login-trigger-btn" id="login-trigger-btn" aria-haspopup="dialog" aria-expanded="false">
-          <span id="login-trigger-label">Iniciar sesión</span>
-        </button>
       </div>
     </header>
 
-    <nav class="nav" aria-label="Principal">
-      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Abrir menú">
-        <span class="hamburger-bar"></span>
-        <span class="hamburger-bar"></span>
-        <span class="hamburger-bar"></span>
-      </button>
-      <ul id="nav-menu" role="list">
-        <li><a href="index.html">Inicio</a></li>
-        <li><a href="noticias.html">Noticias</a></li>
-        <li><a href="nuevos-humanos.html">Revolución Humana</a></li>
-        <li><a href="educacion.html">Educación</a></li>
-        <li><a href="foro.html">Foro</a></li>
-        <li><a href="tienda.html">Tienda</a></li>
-        <li><a href="contacto.html">Contacto</a></li>
-        <li><a href="premium.html" class="nav-premium">Hazte premium</a></li>
-      </ul>
-    </nav>
+    <div class="page">
 
-    <section class="hero${p.heroClass ? ' ' + p.heroClass : ''}">
+    ${p.noHero ? (p.noHeading ? '' : `<h1 class="visually-hidden">${p.heroH2}</h1>`) : `<section class="hero${p.heroClass ? ' ' + p.heroClass : ''}">
       <div class="hero-content">
         ${p.heroEyebrow ? `<span class="hero-eyebrow">${p.heroEyebrow}</span>` : ''}
-        <h2>${p.heroH2}</h2>
+        <h1>${p.heroH2}</h1>
         ${p.heroP ? `<p>${p.heroP}</p>` : ''}
         <div class="hero-buttons">${heroButtons}</div>
       </div>
-    </section>
+    </section>`}
 
     <main class="main${p.mainClass ? ' ' + p.mainClass : ''}" id="main-content" tabindex="-1">
       ${p.mainContent}
-      ${p.hideRefs ? '' : REFERENCES_BOX}
     </main>
 
-    ${FOOTER}
+    </div>
 
-  </div>
+    ${FOOTER}
 
   ${LOGIN_MODAL}
 
   <!-- Carrito lateral -->
   <div class="cart-drawer" id="cart-drawer" aria-hidden="true">
     <div class="cart-drawer-header">
-      <h2>🛒 Tu carrito</h2>
+      <h2>Tu carrito</h2>
       <button class="cart-close" id="cart-close" aria-label="Cerrar carrito">✕</button>
     </div>
     <div class="cart-items" id="cart-items"></div>
@@ -301,11 +324,11 @@ function buildPage(p) {
 const PAGES = [
   {
     file: 'index.html',
-    title: 'Sabías que PR — Inicio',
-    description: 'Conoce la visión, misión y datos del proyecto Sabías que PR: despertar conciencias en todo el mundo.',
-    heroH2: 'Sobre Sabías que PR',
-    heroP: 'Un proyecto para entender, cuestionar y mejorar la sociedad en la que vivimos.',
-    heroButtons: '',
+    title: 'Sabías que PR — Noticias, Educación e Información',
+    description: 'Un proyecto para entender, cuestionar y mejorar la sociedad en la que vivimos. Noticias, educación e información desde Puerto Rico.',
+    heroH2: 'Sabías que PR — Noticias, Educación e Información',
+    noHero: true,
+    mainClass: 'main-home',
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'Organization',
@@ -319,6 +342,77 @@ const PAGES = [
       ],
       'contactPoint': { '@type': 'ContactPoint', 'email': 'sabiasquepr@yahoo.com', 'contactType': 'customer service' }
     },
+    mainContent: `
+      <section class="featured" id="home-featured" aria-live="polite" aria-busy="true">
+        <div class="card skeleton-card" aria-hidden="true">
+          <div class="card-link">
+            <div class="card-media skeleton"></div>
+            <div class="card-body">
+              <div class="skeleton skeleton-line short"></div>
+              <div class="skeleton skeleton-line"></div>
+              <div class="skeleton skeleton-line"></div>
+            </div>
+          </div>
+        </div>
+        <noscript><p class="empty-state">Activa JavaScript para ver las noticias más recientes.</p></noscript>
+      </section>
+      <p class="home-hint" id="home-hint" aria-live="polite"></p>
+
+      <div class="section-head" id="home-latest-head">
+        <h2>Lo más reciente</h2>
+        <a href="noticias.html">Ver todas</a>
+      </div>
+      <div class="card-grid" id="home-latest">
+        <div class="card skeleton-card" aria-hidden="true"><div class="card-media skeleton"></div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line"></div></div>
+        <div class="card skeleton-card" aria-hidden="true"><div class="card-media skeleton"></div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line"></div></div>
+        <div class="card skeleton-card" aria-hidden="true"><div class="card-media skeleton"></div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line"></div></div>
+      </div>
+
+      <div class="section-head">
+        <h2>Explora</h2>
+      </div>
+      <div class="section-strip">
+        <div class="strip-item">
+          <h3><a href="noticias.html">Noticias</a></h3>
+          <p>Noticias internacionales con contexto y análisis: descubrimientos, ciencia, política y sociedad.</p>
+        </div>
+        <div class="strip-item">
+          <h3><a href="nuevos-humanos.html">Revolución Humana</a></h3>
+          <p>Lo que la humanidad está logrando, descubriendo y sanando.</p>
+        </div>
+        <div class="strip-item">
+          <h3><a href="educacion.html">Educación</a></h3>
+          <p>Recursos, lecturas y proyectos para aprender, cuestionar y transformar nuestra realidad.</p>
+        </div>
+      </div>
+
+      <section class="newsletter">
+        <h3>Recibe nuevo contenido</h3>
+        <p>Déjanos tu correo para avisarte cuando publiquemos nuevas noticias, guías y recursos.</p>
+        <form class="newsletter-form">
+          <label for="home-email" class="visually-hidden">Correo electrónico</label>
+          <input id="home-email" type="email" placeholder="tucorreo@example.com" required autocomplete="email">
+          <button type="submit">Suscribirme</button>
+        </form>
+        <p class="newsletter-status" aria-live="polite"></p>
+      </section>
+
+      <div class="section-head">
+        <h2>Sobre el proyecto</h2>
+        <a href="manifiesto.html">Leer el manifiesto</a>
+      </div>
+      <p class="home-about">Un proyecto para entender, cuestionar y mejorar la sociedad en la que vivimos.</p>`,
+    extraScript: `<script src="editorial.js"></script>
+  <script src="home.js"></script>`,
+  },
+
+  {
+    file: 'manifiesto.html',
+    title: 'Sabías que PR — Manifiesto',
+    description: 'Conoce la visión, misión y datos del proyecto Sabías que PR: despertar conciencias en todo el mundo.',
+    heroH2: 'Manifiesto',
+    heroP: 'Un proyecto para entender, cuestionar y mejorar la sociedad en la que vivimos.',
+    heroButtons: '',
     mainContent: `
       <section class="box box-blog vision-box">
         <h3>Visión del proyecto</h3>
@@ -362,9 +456,38 @@ const PAGES = [
         <button type="button" class="foro-filter-btn" data-categoria="clima">Clima y Medio Ambiente</button>
         <button type="button" class="foro-filter-btn" data-categoria="cultura">Cultura</button>
       </div>`,
+    mainClass: 'main-block',
     mainContent: `
-      <div id="noticias-list"><p class="foro-loading">Cargando noticias...</p></div>`,
-    extraScript: `<script src="noticias.js"></script>`,
+      <p class="home-hint" id="noticias-hint" aria-live="polite"></p>
+      <div class="card-grid" id="noticias-list" aria-live="polite" aria-busy="true"></div>
+      <noscript><p class="empty-state">Activa JavaScript para ver las noticias.</p></noscript>`,
+    extraScript: `<script src="editorial.js"></script>
+  <script src="noticias.js"></script>`,
+  },
+
+  {
+    file: 'articulo.html',
+    title: 'Sabías que PR — Artículo',
+    description: 'Noticias internacionales con contexto y análisis: descubrimientos, ciencia, política y sociedad.',
+    heroH2: 'Artículo',
+    noHero: true,
+    noHeading: true,
+    mainClass: 'main-block',
+    mainContent: `
+      <div class="reading-progress" id="reading-progress" aria-hidden="true"></div>
+      <article class="article" id="article" aria-live="polite" aria-busy="true">
+        <div class="article-state" id="article-state">Cargando…</div>
+        <noscript><div class="article-state">Activa JavaScript para leer este artículo.</div></noscript>
+      </article>
+      <section class="article-more" id="article-more" hidden>
+        <div class="section-head">
+          <h2>Sigue leyendo</h2>
+          <a href="noticias.html">Ver todas</a>
+        </div>
+        <div class="card-grid" id="article-more-grid"></div>
+      </section>`,
+    extraScript: `<script src="editorial.js"></script>
+  <script src="articulo.js"></script>`,
   },
 
   {
@@ -448,9 +571,10 @@ const PAGES = [
     description: 'Foro de la comunidad de Sabías que PR: comparte ideas, preguntas y descubrimientos sobre tecnología, crítica internacional, nuevos humanos y educación.',
     heroH2: 'Foro de la Comunidad',
     heroP: 'Comparte, pregunta y debate con otros lectores de Sabías que PR.',
+    mainClass: 'main-stack',
     mainContent: `
       <section class="box box-blog foro-intro">
-        <h3>💬 Foro de la comunidad</h3>
+        <h3>Foro de la comunidad</h3>
         <p>Comparte ideas, preguntas y descubrimientos con la comunidad. Inicia sesión para publicar.</p>
       </section>
 
@@ -474,7 +598,7 @@ const PAGES = [
           <p id="foro-form-status" class="form-status" aria-live="polite"></p>
         </form>
       </section>
-      <p id="foro-login-hint" class="foro-login-hint">🔒 <a href="#" class="login-modal-trigger">Inicia sesión</a> para publicar en el foro.</p>
+      <p id="foro-login-hint" class="foro-login-hint"><a href="#" class="login-modal-trigger">Inicia sesión</a> para publicar en el foro.</p>
 
       <section class="foro-filters" id="foro-filters">
         <button type="button" class="foro-filter-btn active" data-categoria="">Todos</button>
@@ -495,16 +619,17 @@ const PAGES = [
     description: 'Hazte miembro premium de Sabías que PR y publica mensajes más largos en el foro de la comunidad.',
     heroH2: 'Sabías que PR Premium',
     heroP: 'Publica mensajes más largos en el foro y apoya el proyecto.',
+    mainClass: 'main-stack',
     mainContent: `
       <section class="box box-blog foro-intro">
-        <h3>⭐ Beneficios premium</h3>
+        <h3>Beneficios premium</h3>
         <ul>
           <li>Publica hasta <strong>500 palabras</strong> por mensaje en el foro (en vez de 100).</li>
           <li>Apoyas directamente el sostenimiento del proyecto.</li>
         </ul>
         <p id="premium-status" class="form-status" aria-live="polite"></p>
-        <button type="button" id="premium-subscribe-btn" class="btn">Suscribirme</button>
-        <p class="foro-login-hint" id="premium-login-hint" style="display:none;">🔒 <a href="#" class="login-modal-trigger">Inicia sesión</a> para suscribirte.</p>
+        <button type="button" id="premium-subscribe-btn" class="btn btn-premium">Suscribirme</button>
+        <p class="foro-login-hint" id="premium-login-hint" style="display:none;"><a href="#" class="login-modal-trigger">Inicia sesión</a> para suscribirte.</p>
       </section>`,
     extraScript: `<script src="premium.js"></script>`,
   },
@@ -517,7 +642,7 @@ const PAGES = [
     heroP: 'Artículos para apoyar el proyecto y llevar el mensaje a todas partes.',
     heroButtons: `
           <a href="#productos" class="btn btn-alt">Ver productos</a>
-          <a href="index.html" class="btn btn-alt">Sobre el proyecto</a>`,
+          <a href="manifiesto.html" class="btn btn-alt">Sobre el proyecto</a>`,
     mainClass: 'tienda-main',
     mainContent: `<div id="productos"><p class="foro-loading">Cargando productos...</p></div>`,
     extraScript: `<script src="productos.js"></script>`,
@@ -584,6 +709,7 @@ const PAGES = [
               <input type="text" id="an-fuente-texto" required>
               <label for="an-parrafos">Párrafos (uno por línea)</label>
               <textarea id="an-parrafos" rows="6" required></textarea>
+              <label class="admin-checkbox"><input type="checkbox" id="an-destacado"> Artículo destacado en la portada (reemplaza al anterior)</label>
               <div class="admin-form-actions">
                 <button type="submit">Guardar</button>
                 <button type="button" class="admin-btn-cancel" id="an-cancel">Cancelar</button>
@@ -676,7 +802,7 @@ const PAGES = [
     heroP: 'Todo lo que Sabías que PR tiene para ti: información, formación y comunidad.',
     mainContent: `
       <section class="box box-blog">
-        <h3>📰 Noticias con Contexto</h3>
+        <h3>Noticias con Contexto</h3>
         <p>No publicamos solo titulares. Cada noticia viene acompañada de contexto histórico, análisis crítico y fuentes verificables.</p>
         <ul>
           <li>Noticias internacionales relevantes para la vida cotidiana.</li>
@@ -685,7 +811,7 @@ const PAGES = [
         </ul>
       </section>
       <section class="box box-blog">
-        <h3>🎓 Educación y Rutas de Aprendizaje</h3>
+        <h3>Educación y Rutas de Aprendizaje</h3>
         <ul>
           <li>Guías descargables en PDF para estudiantes y educadores.</li>
           <li>Rutas de estudio en historia, derechos humanos y tecnología.</li>
@@ -693,31 +819,31 @@ const PAGES = [
         </ul>
       </section>
       <section class="box box-blog">
-        <h3>🛒 Tienda Oficial</h3>
+        <h3>Tienda Oficial</h3>
         <p>Apoya el proyecto llevando el mensaje contigo. Cada compra contribuye al sostenimiento del proyecto.</p>
-        <p style="margin-top:10px;"><a href="tienda.html" style="color:var(--brand);font-weight:700;">→ Ver la tienda</a></p>
+        <p class="box-link"><a class="link-arrow" href="tienda.html">Ver la tienda →</a></p>
       </section>
       <section class="box box-blog">
-        <h3>📬 Boletín Informativo</h3>
+        <h3>Boletín Informativo</h3>
         <p>Resumen semanal de noticias, nuevos recursos educativos y novedades del proyecto.</p>
-        <form class="newsletter-form" style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+        <form class="newsletter-form">
           <label for="srv-email" class="visually-hidden">Correo electrónico</label>
-          <input id="srv-email" type="email" placeholder="tucorreo@example.com" required autocomplete="email" style="padding:6px 10px;border-radius:4px;border:1px solid #d1d5db;flex:1;min-width:180px;">
-          <button type="submit" style="padding:6px 14px;border-radius:999px;border:none;background:linear-gradient(90deg,var(--brand),var(--accent));color:#fff;font-weight:600;cursor:pointer;">Suscribirme</button>
+          <input id="srv-email" type="email" placeholder="tucorreo@example.com" required autocomplete="email">
+          <button type="submit">Suscribirme</button>
         </form>
         <p class="newsletter-status" aria-live="polite"></p>
       </section>
       <section class="box box-blog">
-        <h3>🤝 Colaboraciones</h3>
+        <h3>Colaboraciones</h3>
         <ul>
           <li>Investigadores, periodistas y educadores independientes.</li>
           <li>Organizaciones comunitarias y grupos de base.</li>
           <li>Artistas y creadores comprometidos con el cambio social.</li>
         </ul>
-        <p style="margin-top:10px;"><a href="contacto.html" style="color:var(--brand);font-weight:700;">→ Escríbenos para colaborar</a></p>
+        <p class="box-link"><a class="link-arrow" href="contacto.html">Escríbenos para colaborar →</a></p>
       </section>
       <section class="box box-blog">
-        <h3>🌐 Comunidad (Próximamente)</h3>
+        <h3>Comunidad (Próximamente)</h3>
         <ul>
           <li>Foros de discusión por temas.</li>
           <li>Comentarios en artículos.</li>
@@ -816,14 +942,14 @@ const PAGES = [
     heroP: 'La URL que buscas no existe o fue movida.',
     heroButtons: `<a href="index.html" class="btn btn-alt">← Volver al inicio</a>`,
     mainContent: `
-      <section class="box box-blog contact-box" style="text-align:center;">
+      <section class="box box-blog error-page">
         <h3>Error 404</h3>
-        <p style="font-size:4rem;margin:16px 0;">🐸</p>
+        <img class="error-mark" src="images/Coqui-sm.webp" alt="" width="96" height="96">
         <p>No encontramos lo que buscabas. El coquí tampoco lo vio por aquí.</p>
-        <p style="margin-top:16px;">
-          <a href="index.html" style="color:var(--brand);font-weight:700;">← Regresar al inicio</a>
+        <p class="box-link">
+          <a class="link-arrow" href="index.html">← Regresar al inicio</a>
           &nbsp;·&nbsp;
-          <a href="contacto.html" style="color:var(--brand);font-weight:700;">Reportar enlace roto</a>
+          <a class="link-arrow" href="contacto.html">Reportar enlace roto</a>
         </p>
       </section>`,
     hideRefs: true,
@@ -834,7 +960,8 @@ const PAGES = [
 
 function generateSitemap() {
   const today = new Date().toISOString().split('T')[0];
-  const urls = PAGES.filter(p => p.file !== '404.html').map(p => `  <url>
+  // 404, admin y la plantilla de artículo (necesita ?id=) no van en el sitemap
+  const urls = PAGES.filter(p => !['404.html', 'admin.html', 'articulo.html'].includes(p.file)).map(p => `  <url>
     <loc>${SITE.url}/${p.file}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${p.file === 'index.html' ? 'daily' : 'weekly'}</changefreq>
@@ -852,8 +979,8 @@ ${urls}
 function generateRSS() {
   const items = noticias.map(art => `  <item>
     <title><![CDATA[${art.titulo}]]></title>
-    <link>${SITE.url}/noticias.html#${art.id}</link>
-    <guid isPermaLink="false">${SITE.url}/noticias.html#${art.id}</guid>
+    <link>${SITE.url}/articulo.html?id=${encodeURIComponent(art.id)}</link>
+    <guid isPermaLink="false">${SITE.url}/articulo.html?id=${encodeURIComponent(art.id)}</guid>
     <pubDate>${new Date(art.fecha).toUTCString()}</pubDate>
     <description><![CDATA[${art.parrafos[0]}]]></description>
     <enclosure url="${SITE.url}/${art.imagen}" type="image/webp"/>
