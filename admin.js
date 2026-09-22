@@ -15,6 +15,7 @@
 
   let noticiasCache = [];
   let productosCache = [];
+  let contenidosCache = [];
 
   document.addEventListener('DOMContentLoaded', init);
 
@@ -69,8 +70,10 @@
     document.getElementById('admin-panel').style.display = 'block';
     bindTabs();
     bindNoticias();
+    bindContenidos();
     bindProductos();
     loadNoticias();
+    loadContenidos();
     loadProductos();
   }
 
@@ -103,6 +106,7 @@
         btn.classList.add('active');
         const tab = btn.dataset.tab;
         document.getElementById('admin-panel-noticias').style.display = tab === 'noticias' ? '' : 'none';
+        document.getElementById('admin-panel-contenidos').style.display = tab === 'contenidos' ? '' : 'none';
         document.getElementById('admin-panel-productos').style.display = tab === 'productos' ? '' : 'none';
       });
     });
@@ -209,6 +213,135 @@
     try {
       await apiFetch(`/api/noticias/${encodeURIComponent(id)}`, { method: 'DELETE' });
       loadNoticias();
+    } catch (err) {
+      alert('' + err.message);
+    }
+  }
+
+  // ── CONTENIDOS (video/ensayo/noticia/lectura_corta) ──────
+  const SECCION_LABEL = { noticias: 'Noticias', 'revolucion-humana': 'Revolución Humana', educacion: 'Educación' };
+  const TIPO_LABEL = { video: 'Video', ensayo: 'Ensayo', noticia: 'Noticia', lectura_corta: 'Lectura corta' };
+
+  function bindContenidos() {
+    document.getElementById('admin-contenidos-new').addEventListener('click', () => openContenidoForm());
+    document.getElementById('ac-cancel').addEventListener('click', closeContenidoForm);
+    document.getElementById('admin-contenidos-search').addEventListener('input', renderContenidosList);
+    document.getElementById('admin-contenidos-form').addEventListener('submit', submitContenido);
+    document.getElementById('ac-usar-imagen-categoria').addEventListener('click', () => {
+      const categoria = document.getElementById('ac-categoria').value;
+      const img = window.SQPR && window.SQPR.CATEGORIA_IMAGEN && window.SQPR.CATEGORIA_IMAGEN[categoria];
+      if (!img) {
+        alert('Todavía no hay una imagen genérica para esta categoría.');
+        return;
+      }
+      document.getElementById('ac-url-portada').value = img.src;
+      document.getElementById('ac-portada-alt').value = img.alt;
+    });
+  }
+
+  async function loadContenidos() {
+    const el = document.getElementById('admin-contenidos-list');
+    el.innerHTML = '<p class="foro-loading">Cargando...</p>';
+    try {
+      const data = await apiFetch('/api/contenidos');
+      contenidosCache = data.contenidos;
+      renderContenidosList();
+    } catch (err) {
+      el.innerHTML = `<p class="foro-error">${escapeHtml(err.message)}</p>`;
+    }
+  }
+
+  function renderContenidosList() {
+    const el = document.getElementById('admin-contenidos-list');
+    const q = (document.getElementById('admin-contenidos-search').value || '').toLowerCase();
+    const items = contenidosCache.filter((c) => c.titulo.toLowerCase().includes(q));
+    el.innerHTML = items.length ? items.map((c) => `
+      <div class="admin-item">
+        <div class="admin-item-info">
+          <strong>${escapeHtml(c.titulo)}${c.destacado ? ' <span class="foro-badge">★ Destacado</span>' : ''}</strong>
+          <span class="foro-meta">${SECCION_LABEL[c.seccion] || c.seccion} · ${TIPO_LABEL[c.tipo_formato] || c.tipo_formato} · ${escapeHtml(String(c.fecha_publicacion).slice(0, 10))}</span>
+        </div>
+        <div class="admin-item-actions">
+          <button type="button" class="admin-btn-edit" data-id="${c.id}">Editar</button>
+          <button type="button" class="admin-btn-delete foro-danger" data-id="${c.id}">Eliminar</button>
+        </div>
+      </div>`).join('') : '<p class="foro-empty">Sin resultados.</p>';
+
+    el.querySelectorAll('.admin-btn-edit').forEach((btn) => btn.addEventListener('click', () => {
+      const item = contenidosCache.find((c) => c.id === btn.dataset.id);
+      if (item) openContenidoForm(item);
+    }));
+    el.querySelectorAll('.admin-btn-delete').forEach((btn) => btn.addEventListener('click', () => deleteContenido(btn.dataset.id)));
+  }
+
+  function openContenidoForm(item) {
+    document.getElementById('admin-contenidos-form-title').textContent = item ? 'Editar contenido' : 'Nuevo contenido';
+    document.getElementById('ac-id').value = item?.id || '';
+    document.getElementById('ac-seccion').value = item?.seccion || 'noticias';
+    document.getElementById('ac-tipo-formato').value = item?.tipo_formato || 'noticia';
+    document.getElementById('ac-categoria').value = item?.categoria || 'general';
+    document.getElementById('ac-titulo').value = item?.titulo || '';
+    document.getElementById('ac-subtitulo').value = item?.subtitulo_resumen || '';
+    document.getElementById('ac-cuerpo').value = item?.cuerpo || '';
+    document.getElementById('ac-autor').value = item?.autor || '';
+    document.getElementById('ac-url-media').value = item?.url_media || '';
+    document.getElementById('ac-fuente-url').value = item?.fuente_url || '';
+    document.getElementById('ac-fuente-texto').value = item?.fuente_texto || '';
+    document.getElementById('ac-duracion').value = item?.duracion_min || 1;
+    document.getElementById('ac-url-portada').value = item?.url_portada || '';
+    document.getElementById('ac-portada-alt').value = item?.portada_alt || '';
+    document.getElementById('ac-fecha').value = item?.fecha_publicacion ? String(item.fecha_publicacion).slice(0, 10) : '';
+    document.getElementById('ac-destacado').checked = Boolean(item?.destacado);
+    setStatus(document.getElementById('ac-status'), '', '');
+    document.getElementById('admin-contenidos-form-box').style.display = 'block';
+    document.getElementById('admin-contenidos-form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function closeContenidoForm() {
+    document.getElementById('admin-contenidos-form-box').style.display = 'none';
+    document.getElementById('admin-contenidos-form').reset();
+  }
+
+  async function submitContenido(e) {
+    e.preventDefault();
+    const statusEl = document.getElementById('ac-status');
+    const id = document.getElementById('ac-id').value;
+    const body = {
+      seccion: document.getElementById('ac-seccion').value,
+      tipoFormato: document.getElementById('ac-tipo-formato').value,
+      categoria: document.getElementById('ac-categoria').value,
+      titulo: document.getElementById('ac-titulo').value.trim(),
+      subtituloResumen: document.getElementById('ac-subtitulo').value.trim(),
+      cuerpo: document.getElementById('ac-cuerpo').value.trim() || null,
+      autor: document.getElementById('ac-autor').value.trim() || null,
+      urlMedia: document.getElementById('ac-url-media').value.trim() || null,
+      fuenteUrl: document.getElementById('ac-fuente-url').value.trim() || null,
+      fuenteTexto: document.getElementById('ac-fuente-texto').value.trim() || null,
+      duracionMin: Number(document.getElementById('ac-duracion').value),
+      urlPortada: document.getElementById('ac-url-portada').value.trim(),
+      portadaAlt: document.getElementById('ac-portada-alt').value.trim(),
+      fechaPublicacion: document.getElementById('ac-fecha').value,
+      destacado: document.getElementById('ac-destacado').checked,
+    };
+    setStatus(statusEl, 'info', 'Guardando...');
+    try {
+      if (id) {
+        await apiFetch(`/api/contenidos/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body) });
+      } else {
+        await apiFetch('/api/contenidos', { method: 'POST', body: JSON.stringify(body) });
+      }
+      closeContenidoForm();
+      loadContenidos();
+    } catch (err) {
+      setStatus(statusEl, 'error', '' + err.message);
+    }
+  }
+
+  async function deleteContenido(id) {
+    if (!confirm('¿Eliminar este contenido? Esta acción no se puede deshacer.')) return;
+    try {
+      await apiFetch(`/api/contenidos/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      loadContenidos();
     } catch (err) {
       alert('' + err.message);
     }

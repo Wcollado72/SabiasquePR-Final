@@ -666,6 +666,7 @@ const PAGES = [
       <div id="admin-panel" style="display:none;">
         <nav class="foro-filters admin-tabs">
           <button type="button" class="foro-filter-btn active" data-tab="noticias">Noticias</button>
+          <button type="button" class="foro-filter-btn" data-tab="contenidos">Contenidos</button>
           <button type="button" class="foro-filter-btn" data-tab="productos">Productos</button>
         </nav>
 
@@ -721,6 +722,78 @@ const PAGES = [
           </section>
         </section>
 
+        <section class="admin-tab-panel" id="admin-panel-contenidos" style="display:none;">
+          <div class="admin-toolbar">
+            <input type="search" id="admin-contenidos-search" placeholder="Buscar por título...">
+            <button type="button" id="admin-contenidos-new" class="admin-btn-new">+ Nuevo contenido</button>
+          </div>
+          <div id="admin-contenidos-list" class="admin-list"></div>
+
+          <section class="box box-blog contact-box admin-form" id="admin-contenidos-form-box" style="display:none;">
+            <h3 id="admin-contenidos-form-title">Nuevo contenido</h3>
+            <form id="admin-contenidos-form">
+              <input type="hidden" id="ac-id">
+              <label for="ac-seccion">Sección</label>
+              <select id="ac-seccion">
+                <option value="noticias">Noticias</option>
+                <option value="revolucion-humana">Revolución Humana</option>
+                <option value="educacion">Educación</option>
+              </select>
+              <label for="ac-tipo-formato">Tipo de formato</label>
+              <select id="ac-tipo-formato">
+                <option value="video">Video</option>
+                <option value="ensayo">Ensayo</option>
+                <option value="noticia">Noticia</option>
+                <option value="lectura_corta">Lectura corta</option>
+              </select>
+              <label for="ac-categoria">Categoría</label>
+              <select id="ac-categoria">
+                <option value="general">General</option>
+                <option value="internacionales">Internacionales</option>
+                <option value="crimen">Crimen</option>
+                <option value="salud">Salud</option>
+                <option value="deportes">Deportes</option>
+                <option value="finanzas">Finanzas</option>
+                <option value="tecnologia">Tecnología</option>
+                <option value="descubrimientos">Descubrimientos</option>
+                <option value="politica">Política</option>
+                <option value="clima">Clima y Medio Ambiente</option>
+                <option value="cultura">Cultura</option>
+                <option value="ciencia">Ciencia</option>
+              </select>
+              <label for="ac-titulo">Título</label>
+              <input type="text" id="ac-titulo" required minlength="3" maxlength="160">
+              <label for="ac-subtitulo">Resumen (2-3 oraciones, redacción propia)</label>
+              <textarea id="ac-subtitulo" rows="3" required minlength="10"></textarea>
+              <label for="ac-cuerpo">Cuerpo del texto (opcional — solo ensayo/lectura corta con texto propio)</label>
+              <textarea id="ac-cuerpo" rows="6"></textarea>
+              <label for="ac-autor">Autor (opcional)</label>
+              <input type="text" id="ac-autor">
+              <label for="ac-url-media">Video embebible (obligatorio si el tipo es Video, ej. https://www.youtube.com/embed/ID)</label>
+              <input type="url" id="ac-url-media">
+              <label for="ac-fuente-url">URL de la fuente (opcional)</label>
+              <input type="url" id="ac-fuente-url">
+              <label for="ac-fuente-texto">Nombre de la fuente (opcional)</label>
+              <input type="text" id="ac-fuente-texto">
+              <label for="ac-duracion">Duración (minutos de lectura o de video)</label>
+              <input type="number" id="ac-duracion" required min="1" step="1" value="1">
+              <label for="ac-url-portada">Imagen de portada (ruta o URL)</label>
+              <input type="text" id="ac-url-portada" required placeholder="images/mi-imagen.webp">
+              <button type="button" id="ac-usar-imagen-categoria" class="admin-btn-cancel">Usar imagen de la categoría seleccionada</button>
+              <label for="ac-portada-alt">Texto alternativo de la imagen</label>
+              <input type="text" id="ac-portada-alt" required>
+              <label for="ac-fecha">Fecha de publicación</label>
+              <input type="date" id="ac-fecha" required>
+              <label class="admin-checkbox"><input type="checkbox" id="ac-destacado"> Destacado en su sección (reemplaza al anterior de esa sección)</label>
+              <div class="admin-form-actions">
+                <button type="submit">Guardar</button>
+                <button type="button" class="admin-btn-cancel" id="ac-cancel">Cancelar</button>
+              </div>
+              <p id="ac-status" class="form-status" aria-live="polite"></p>
+            </form>
+          </section>
+        </section>
+
         <section class="admin-tab-panel" id="admin-panel-productos" style="display:none;">
           <div class="admin-toolbar">
             <input type="search" id="admin-productos-search" placeholder="Buscar producto por nombre...">
@@ -754,7 +827,34 @@ const PAGES = [
           </section>
         </section>
       </div>`,
-    extraScript: `<script src="admin.js"></script>`,
+    extraScript: `<script src="editorial.js"></script>
+  <script src="admin.js"></script>`,
+  },
+
+  {
+    file: 'reset-password.html',
+    title: 'Sabías que PR — Restablecer contraseña',
+    description: 'Restablece la contraseña de tu cuenta de Sabías que PR.',
+    heroH2: 'Restablecer contraseña',
+    noHero: true,
+    noHeading: true,
+    hideRefs: true,
+    mainClass: 'main-block',
+    mainContent: `
+      <section class="box box-blog contact-box" id="reset-box" style="max-width:420px;margin:0 auto;">
+        <h3>Restablecer contraseña</h3>
+        <p id="reset-intro">Verificando el enlace...</p>
+        <form id="reset-form" style="display:none; flex-direction:column; gap:8px;">
+          <label for="reset-pass">Nueva contraseña</label>
+          <input type="password" id="reset-pass" required minlength="6" autocomplete="new-password">
+          <label for="reset-pass2">Confirma la contraseña</label>
+          <input type="password" id="reset-pass2" required minlength="6" autocomplete="new-password">
+          <button type="submit">Guardar nueva contraseña</button>
+        </form>
+        <p id="reset-status" class="form-status" aria-live="polite"></p>
+        <p style="margin-top:14px;"><a href="index.html">← Volver al inicio</a></p>
+      </section>`,
+    extraScript: `<script src="reset-password.js"></script>`,
   },
 
   {
@@ -963,7 +1063,7 @@ const PAGES = [
 function generateSitemap() {
   const today = new Date().toISOString().split('T')[0];
   // 404, admin y la plantilla de artículo (necesita ?id=) no van en el sitemap
-  const urls = PAGES.filter(p => !['404.html', 'admin.html', 'articulo.html', 'recurso.html'].includes(p.file)).map(p => `  <url>
+  const urls = PAGES.filter(p => !['404.html', 'admin.html', 'articulo.html', 'recurso.html', 'reset-password.html'].includes(p.file)).map(p => `  <url>
     <loc>${SITE.url}/${p.file}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${p.file === 'index.html' ? 'daily' : 'weekly'}</changefreq>
