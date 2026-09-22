@@ -4,20 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sabías que PR — Revolución Humana</title>
-  <meta name="description" content="Descubrimientos, avances científicos y noticias positivas para la humanidad.">
+  <meta name="description" content="Videos, ensayos y noticias sobre lo que la humanidad está logrando, descubriendo y sanando.">
   <meta name="author" content="Aliado Imperfekto">
   <link rel="canonical" href="https://sabiasquepr.com/nuevos-humanos.html">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://sabiasquepr.com/nuevos-humanos.html">
   <meta property="og:title" content="Sabías que PR — Revolución Humana">
-  <meta property="og:description" content="Descubrimientos, avances científicos y noticias positivas para la humanidad.">
-  <meta property="og:image" content="https://sabiasquepr.com/images/nuevoshumanos.webp">
+  <meta property="og:description" content="Videos, ensayos y noticias sobre lo que la humanidad está logrando, descubriendo y sanando.">
+  <meta property="og:image" content="https://sabiasquepr.com/images/portada-social.webp">
   <meta property="og:locale" content="es_PR">
   <meta property="og:site_name" content="Sabías que PR">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Sabías que PR — Revolución Humana">
-  <meta name="twitter:description" content="Descubrimientos, avances científicos y noticias positivas para la humanidad.">
-  <meta name="twitter:image" content="https://sabiasquepr.com/images/nuevoshumanos.webp">
+  <meta name="twitter:description" content="Videos, ensayos y noticias sobre lo que la humanidad está logrando, descubriendo y sanando.">
+  <meta name="twitter:image" content="https://sabiasquepr.com/images/portada-social.webp">
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -28,8 +28,8 @@
   <link rel="alternate" type="application/rss+xml" title="Sabías que PR — Noticias" href="https://sabiasquepr.com/rss.xml">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="images/icon-192.png">
-  <link rel="stylesheet" href="styles.css?v=2984d30b">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Revolución Humana","description":"Descubrimientos, avances científicos y noticias positivas para la humanidad.","url":"https://sabiasquepr.com/nuevos-humanos.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
+  <link rel="stylesheet" href="styles.css?v=50a53892">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Revolución Humana","description":"Videos, ensayos y noticias sobre lo que la humanidad está logrando, descubriendo y sanando.","url":"https://sabiasquepr.com/nuevos-humanos.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
 </head>
@@ -88,32 +88,11 @@
       </div>
     </section>
 
-    <main class="main" id="main-content" tabindex="-1">
+    <main class="main main-block" id="main-content" tabindex="-1">
       
-      <section class="box box-blog box-positivo">
-        <h3>Ciencia y salud</h3>
-        <p>Curas, tratamientos y avances médicos que están cambiando vidas.</p>
-      </section>
-      <section class="box box-blog box-positivo">
-        <h3>Tecnología al servicio de la gente</h3>
-        <p>Energía limpia, accesibilidad e innovación que no busca controlar, sino ayudar.</p>
-      </section>
-      <section class="box box-blog box-positivo">
-        <h3>Justicia social en acción</h3>
-        <p>Movimientos comunitarios que lograron cambios reales y medibles.</p>
-      </section>
-      <section class="box box-blog box-positivo">
-        <h3>Educación e innovación comunitaria</h3>
-        <p>Proyectos educativos que están cerrando brechas de oportunidad.</p>
-      </section>
-      <section class="box box-blog box-positivo">
-        <h3>Espacio y exploración</h3>
-        <p>Descubrimientos astronómicos y avances en la exploración del cosmos.</p>
-      </section>
-      <section class="box box-blog box-positivo">
-        <h3>Conservación y medio ambiente</h3>
-        <p>Esfuerzos de restauración ecológica y protección de especies alrededor del mundo.</p>
-      </section>
+      <p class="home-hint" id="rh-hint" aria-live="polite"></p>
+      <div class="card-grid contenidos-grid" id="rh-list" data-seccion="revolucion-humana" data-hint="rh-hint" aria-live="polite" aria-busy="true"></div>
+      <noscript><p class="empty-state">Activa JavaScript para ver este contenido.</p></noscript>
     </main>
 
     </div>
@@ -236,7 +215,8 @@
   </script>
   <script src="auth.js" type="module"></script>
   <script src="script.js"></script>
-  
+  <script src="editorial.js"></script>
+  <script src="contenidos.js"></script>
   <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>

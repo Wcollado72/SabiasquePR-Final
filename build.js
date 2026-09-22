@@ -16,7 +16,7 @@ const SITE = {
   email:           'sabiasquepr@yahoo.com',
   phone:           '(787) 435-8872',
   location:        'San Juan, Puerto Rico',
-  ogImage:         'https://sabiasquepr.com/images/nuevoshumanos.webp',
+  ogImage:         'https://sabiasquepr.com/images/portada-social.webp',
 
   // ── Backend API (foro) ───────────────────────────────────
   // URL del servidor Express. En local: http://localhost:3000
@@ -64,6 +64,22 @@ const ASSET_VERSION = require('crypto').createHash('md5').update(fs.readFileSync
 // `noticias` sigue leyéndose arriba porque generateRSS() la usa.
 
 // ── COMPONENTES COMPARTIDOS ─────────────────────────────────
+
+// Botones de filtro por categoría, compartidos entre Noticias, Revolución
+// Humana y Educación. Deben coincidir con el CHECK de noticias/contenidos
+// en backend/sql/schema.sql y con editorial.js CATEGORIAS.
+const CATEGORIA_FILTER_BUTTONS = `<button type="button" class="foro-filter-btn active" data-categoria="">Todas</button>
+        <button type="button" class="foro-filter-btn" data-categoria="internacionales">Internacionales</button>
+        <button type="button" class="foro-filter-btn" data-categoria="crimen">Crimen</button>
+        <button type="button" class="foro-filter-btn" data-categoria="salud">Salud</button>
+        <button type="button" class="foro-filter-btn" data-categoria="deportes">Deportes</button>
+        <button type="button" class="foro-filter-btn" data-categoria="finanzas">Finanzas</button>
+        <button type="button" class="foro-filter-btn" data-categoria="tecnologia">Tecnología</button>
+        <button type="button" class="foro-filter-btn" data-categoria="descubrimientos">Descubrimientos</button>
+        <button type="button" class="foro-filter-btn" data-categoria="politica">Política</button>
+        <button type="button" class="foro-filter-btn" data-categoria="clima">Clima y Medio Ambiente</button>
+        <button type="button" class="foro-filter-btn" data-categoria="cultura">Cultura</button>
+        <button type="button" class="foro-filter-btn" data-categoria="ciencia">Ciencia</button>`;
 
 const SOCIAL_ICONS = `
         <div class="social-links">
@@ -414,25 +430,34 @@ const PAGES = [
     heroP: 'Un proyecto para entender, cuestionar y mejorar la sociedad en la que vivimos.',
     heroButtons: '',
     mainContent: `
-      <section class="box box-blog vision-box">
-        <h3>Visión del proyecto</h3>
-        <p>Sabías que PR... es una iniciativa social dedicada al despertar de la conciencia humana. Nació en Puerto Rico, pero su misión no conoce fronteras: mediante herramientas creativas y accesibles, buscamos comprender el entorno actual para formar individuos comprometidos con la construcción de un futuro mejor para toda la humanidad.</p>
-        <p>Este proyecto está dirigido a cualquier persona, en cualquier parte del mundo, dispuesta a expandir sus horizontes. Fomentamos la evolución integral —mental, física y espiritual— promoviendo un ambiente de inclusión libre de distinciones por raza, género, credo, ideología, nacionalidad o condición social.</p>
-        <p>A través de la lógica, la ingeniería inversa y el pensamiento crítico, facilitamos los recursos necesarios para cuestionar el entorno y mejorar la toma de decisiones diaria. Nuestro objetivo final es que más seres humanos, sin importar dónde vivan, se reconozcan como agentes de cambio capaces de construir un planeta más justo, solidario y consciente.</p>
+      <section class="manifiesto-split manifiesto-split-flip">
+        <figure class="manifiesto-media">
+          <img src="images/manifiesto-vision.webp" alt="Amanecer visto desde un mirador en la costa de Puerto Rico, con el sol saliendo sobre el mar" width="1000" height="750" loading="lazy">
+        </figure>
+        <div class="manifiesto-text">
+          <h2>Visión del proyecto</h2>
+          <p>Sabías que PR es una iniciativa social dedicada al despertar de la conciencia humana. Nació en Puerto Rico, pero su misión no conoce fronteras: mediante herramientas creativas y accesibles, buscamos comprender el entorno actual para formar individuos comprometidos con un futuro mejor para toda la humanidad. Está dirigido a cualquier persona, en cualquier parte del mundo, dispuesta a fomentar su evolución integral —mental, física y espiritual— en un ambiente de inclusión libre de distinciones por raza, género, credo, ideología, nacionalidad o condición social.</p>
+          <p>A través de la lógica, la ingeniería inversa y el pensamiento crítico, facilitamos los recursos para cuestionar el entorno y mejorar la toma de decisiones diaria. Nuestro objetivo final es que más seres humanos, sin importar dónde vivan, se reconozcan como agentes de cambio capaces de construir un planeta más justo, solidario y consciente.</p>
+        </div>
       </section>
-      <section class="box box-blog datos-box">
-        <h3>Datos del proyecto</h3>
-        <p><strong>Nombre:</strong> Sabías que PR</p>
-        <p><strong>Año de inicio:</strong> 2025</p>
-        <p><strong>Origen:</strong> Proyecto independiente creado en Puerto Rico, inspirado en la necesidad de entender mejor la realidad social, política y económica del mundo — y con la ambición de servir a cualquier persona, en cualquier lugar.</p>
-        <p><strong>Enfoques principales:</strong></p>
-        <ul>
-          <li>Noticias y reportajes con contexto histórico y social.</li>
-          <li>Educación y recursos para el pensamiento crítico.</li>
-          <li>Investigación, datos y análisis de largo plazo.</li>
-          <li>Espacios para la participación y la reflexión comunitaria.</li>
-        </ul>
-        <p><strong>Público al que se dirige:</strong> cualquier persona, en cualquier país, interesada en comprender la realidad desde una perspectiva humana, crítica y solidaria — y dispuesta a ser parte del cambio.</p>
+      <section class="manifiesto-split">
+        <figure class="manifiesto-media">
+          <img src="images/manifiesto-datos.webp" alt="Libreta en blanco sobre un escritorio de madera, junto a café, una lupa y un mapa" width="1000" height="750" loading="lazy">
+        </figure>
+        <div class="manifiesto-text">
+          <h2>Datos del proyecto</h2>
+          <p><strong>Nombre:</strong> Sabías que PR</p>
+          <p><strong>Año de inicio:</strong> 2025</p>
+          <p><strong>Origen:</strong> Proyecto independiente creado en Puerto Rico, inspirado en la necesidad de entender mejor la realidad social, política y económica del mundo — y con la ambición de servir a cualquier persona, en cualquier lugar.</p>
+          <p><strong>Enfoques principales:</strong></p>
+          <ul>
+            <li>Noticias y reportajes con contexto histórico y social.</li>
+            <li>Educación y recursos para el pensamiento crítico.</li>
+            <li>Investigación, datos y análisis de largo plazo.</li>
+            <li>Espacios para la participación y la reflexión comunitaria.</li>
+          </ul>
+          <p><strong>Público al que se dirige:</strong> cualquier persona, en cualquier país, interesada en comprender la realidad desde una perspectiva humana, crítica y solidaria — y dispuesta a ser parte del cambio.</p>
+        </div>
       </section>`,
   },
 
@@ -443,19 +468,7 @@ const PAGES = [
     heroH2: 'Noticias',
     heroP: '',
     heroButtons: `
-      <div class="noticias-hero-categorias" id="noticias-filters">
-        <button type="button" class="foro-filter-btn active" data-categoria="">Todas</button>
-        <button type="button" class="foro-filter-btn" data-categoria="internacionales">Internacionales</button>
-        <button type="button" class="foro-filter-btn" data-categoria="crimenes">Crímenes</button>
-        <button type="button" class="foro-filter-btn" data-categoria="salud">Salud</button>
-        <button type="button" class="foro-filter-btn" data-categoria="deportes">Deportes</button>
-        <button type="button" class="foro-filter-btn" data-categoria="finanzas">Finanzas</button>
-        <button type="button" class="foro-filter-btn" data-categoria="tecnologia">Tecnología</button>
-        <button type="button" class="foro-filter-btn" data-categoria="descubrimientos">Descubrimientos</button>
-        <button type="button" class="foro-filter-btn" data-categoria="politica">Política</button>
-        <button type="button" class="foro-filter-btn" data-categoria="clima">Clima y Medio Ambiente</button>
-        <button type="button" class="foro-filter-btn" data-categoria="cultura">Cultura</button>
-      </div>`,
+      <div class="noticias-hero-categorias" id="noticias-filters">${CATEGORIA_FILTER_BUTTONS}</div>`,
     mainClass: 'main-block',
     mainContent: `
       <p class="home-hint" id="noticias-hint" aria-live="polite"></p>
@@ -491,64 +504,50 @@ const PAGES = [
   },
 
   {
+    file: 'recurso.html',
+    title: 'Sabías que PR — Recurso',
+    description: 'Videos, ensayos y lecturas curadas sobre lo que la humanidad está logrando, descubriendo y aprendiendo.',
+    heroH2: 'Recurso',
+    noHero: true,
+    noHeading: true,
+    mainClass: 'main-block',
+    mainContent: `
+      <article class="article" id="recurso" aria-live="polite" aria-busy="true">
+        <div class="article-state" id="recurso-state">Cargando…</div>
+        <noscript><div class="article-state">Activa JavaScript para ver este contenido.</div></noscript>
+      </article>`,
+    extraScript: `<script src="editorial.js"></script>
+  <script src="recurso.js"></script>`,
+  },
+
+  {
     file: 'nuevos-humanos.html',
     title: 'Sabías que PR — Revolución Humana',
-    description: 'Descubrimientos, avances científicos y noticias positivas para la humanidad.',
+    description: 'Videos, ensayos y noticias sobre lo que la humanidad está logrando, descubriendo y sanando.',
     heroH2: 'Revolución Humana',
     heroP: 'Lo que la humanidad está logrando, descubriendo y sanando.',
     heroClass: 'hero-positivo',
+    mainClass: 'main-block',
     mainContent: `
-      <section class="box box-blog box-positivo">
-        <h3>Ciencia y salud</h3>
-        <p>Curas, tratamientos y avances médicos que están cambiando vidas.</p>
-      </section>
-      <section class="box box-blog box-positivo">
-        <h3>Tecnología al servicio de la gente</h3>
-        <p>Energía limpia, accesibilidad e innovación que no busca controlar, sino ayudar.</p>
-      </section>
-      <section class="box box-blog box-positivo">
-        <h3>Justicia social en acción</h3>
-        <p>Movimientos comunitarios que lograron cambios reales y medibles.</p>
-      </section>
-      <section class="box box-blog box-positivo">
-        <h3>Educación e innovación comunitaria</h3>
-        <p>Proyectos educativos que están cerrando brechas de oportunidad.</p>
-      </section>
-      <section class="box box-blog box-positivo">
-        <h3>Espacio y exploración</h3>
-        <p>Descubrimientos astronómicos y avances en la exploración del cosmos.</p>
-      </section>
-      <section class="box box-blog box-positivo">
-        <h3>Conservación y medio ambiente</h3>
-        <p>Esfuerzos de restauración ecológica y protección de especies alrededor del mundo.</p>
-      </section>`,
+      <p class="home-hint" id="rh-hint" aria-live="polite"></p>
+      <div class="card-grid contenidos-grid" id="rh-list" data-seccion="revolucion-humana" data-hint="rh-hint" aria-live="polite" aria-busy="true"></div>
+      <noscript><p class="empty-state">Activa JavaScript para ver este contenido.</p></noscript>`,
+    extraScript: `<script src="editorial.js"></script>
+  <script src="contenidos.js"></script>`,
   },
 
   {
     file: 'educacion.html',
     title: 'Sabías que PR — Educación',
-    description: 'Recursos educativos, rutas de aprendizaje y pensamiento crítico para cualquier persona dispuesta a cuestionar y aprender.',
+    description: 'Videos, ensayos y lecturas curadas para aprender, cuestionar y transformar nuestra realidad.',
     heroH2: 'Educación',
     heroP: 'Recursos, lecturas y proyectos para aprender, cuestionar y transformar nuestra realidad.',
+    mainClass: 'main-block',
     mainContent: `
-      <section class="box box-blog">
-        <h3>Rutas de aprendizaje</h3>
-        <ul>
-          <li>Historia de Borikén y el Caribe.</li>
-          <li>Historia y movimientos sociales alrededor del mundo.</li>
-          <li>Derechos humanos y justicia social.</li>
-          <li>Educación financiera básica.</li>
-          <li>Alfabetización mediática y pensamiento crítico.</li>
-        </ul>
-      </section>
-      <section class="box box-blog">
-        <h3>Material descargable (próximamente)</h3>
-        <ul>
-          <li>Guías en PDF para estudiantes y docentes.</li>
-          <li>Infografías sobre datos importantes de Puerto Rico.</li>
-          <li>Plantillas para proyectos escolares y comunitarios.</li>
-        </ul>
-      </section>
+      <div class="foro-filters" id="edu-filters">${CATEGORIA_FILTER_BUTTONS}</div>
+      <p class="home-hint" id="edu-hint" aria-live="polite"></p>
+      <div class="card-grid contenidos-grid" id="edu-list" data-seccion="educacion" data-filters="edu-filters" data-hint="edu-hint" aria-live="polite" aria-busy="true"></div>
+      <noscript><p class="empty-state">Activa JavaScript para ver este contenido.</p></noscript>
       <section class="newsletter">
         <h3>Recibe nuevo contenido educativo</h3>
         <p>Déjanos tu correo para avisarte cuando publiquemos nuevas guías, videos y recursos.</p>
@@ -563,6 +562,8 @@ const PAGES = [
         <h3>¿Tienes ideas o sugerencias?</h3>
         <p>Escríbenos: <a href="mailto:${SITE.email}">${SITE.email}</a></p>
       </section>`,
+    extraScript: `<script src="editorial.js"></script>
+  <script src="contenidos.js"></script>`,
   },
 
   {
@@ -685,7 +686,7 @@ const PAGES = [
               <select id="an-categoria">
                 <option value="general">General</option>
                 <option value="internacionales">Internacionales</option>
-                <option value="crimenes">Crímenes</option>
+                <option value="crimen">Crimen</option>
                 <option value="salud">Salud</option>
                 <option value="deportes">Deportes</option>
                 <option value="finanzas">Finanzas</option>
@@ -694,6 +695,7 @@ const PAGES = [
                 <option value="politica">Política</option>
                 <option value="clima">Clima y Medio Ambiente</option>
                 <option value="cultura">Cultura</option>
+                <option value="ciencia">Ciencia</option>
               </select>
               <label for="an-fecha">Fecha</label>
               <input type="date" id="an-fecha" required>
@@ -961,7 +963,7 @@ const PAGES = [
 function generateSitemap() {
   const today = new Date().toISOString().split('T')[0];
   // 404, admin y la plantilla de artículo (necesita ?id=) no van en el sitemap
-  const urls = PAGES.filter(p => !['404.html', 'admin.html', 'articulo.html'].includes(p.file)).map(p => `  <url>
+  const urls = PAGES.filter(p => !['404.html', 'admin.html', 'articulo.html', 'recurso.html'].includes(p.file)).map(p => `  <url>
     <loc>${SITE.url}/${p.file}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${p.file === 'index.html' ? 'daily' : 'weekly'}</changefreq>

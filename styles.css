@@ -500,6 +500,66 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   letter-spacing:.02em;
 }
 
+/* Tarjetas de contenido multi-formato (video/ensayo/noticia/lectura corta):
+   consumo dual — el botón de reproducir NO navega; el título/categoría sí.
+   Por eso .card-media no va dentro de <a> cuando hay video (evita anidar
+   <button> dentro de <a>, inválido en HTML y confuso para lectores de pantalla). */
+.card-media{ position:relative; }
+.card-format{
+  position:absolute;
+  top:10px;
+  left:10px;
+  z-index:1;
+  padding:3px 10px;
+  background:color-mix(in srgb, var(--ink) 82%, transparent);
+  color:var(--bg);
+  font-family:var(--font-ui);
+  font-size:.66rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  border-radius:999px;
+}
+.card-play{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+  padding:0;
+  background:rgba(0,0,0,.15);
+  border:0;
+  cursor:pointer;
+  transition:background-color .2s;
+}
+.card-play:hover{ background:rgba(0,0,0,.32); }
+.card-play-icon{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:rgba(255,255,255,.92);
+  color:var(--ink);
+  box-shadow:0 4px 16px rgba(0,0,0,.3);
+}
+.card-play-icon svg{ width:22px; height:22px; margin-left:3px; }
+.card-media-frame{
+  display:block;
+  width:100%;
+  height:100%;
+  border:0;
+  background:#000;
+}
+.card-title-link{ text-decoration:none; color:inherit; }
+.card-title-link:hover{ text-decoration:none; }
+.card-title-link:hover .card-title{ text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:4px; }
+.card-dek-link{ text-decoration:none; color:inherit; display:block; }
+
 .featured{ margin-top:8px; }
 .featured .card-link{
   display:grid;
@@ -591,6 +651,22 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   aspect-ratio:16 / 9;
   object-fit:cover;
 }
+.video-embed{
+  position:relative;
+  width:100%;
+  aspect-ratio:16 / 9;
+  background:#000;
+}
+.video-embed iframe{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border:0;
+}
+.eyebrow-trail{ margin:0 0 14px; }
+.eyebrow-trail .eyebrow{ margin:0; }
+.article-author{ margin-top:-8px; }
 .article-figure figcaption{
   margin-top:8px;
   padding:0 min(12vw, 120px);
@@ -654,6 +730,43 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .box figcaption{ font-size:.78rem; color:var(--ink-mute); margin-top:6px; font-family:var(--font-ui); }
 .box time{ font-size:.8rem; color:var(--ink-mute); display:block; margin-bottom:8px; }
 .contact-box{ grid-column:1 / -1; }
+
+/* Manifiesto: foto + texto en zigzag (alternado), apilado en móvil */
+.manifiesto-split{
+  grid-column:1 / -1;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:32px 56px;
+  align-items:center;
+  padding-top:16px;
+  border-top:1px solid var(--line-strong);
+}
+.manifiesto-split + .manifiesto-split{ margin-top:16px; }
+.manifiesto-media{ margin:0; }
+.manifiesto-media img{
+  display:block;
+  width:100%;
+  aspect-ratio:4 / 3;
+  object-fit:cover;
+}
+.manifiesto-text h2{
+  font-size:clamp(1.5rem, 3vw, 1.9rem);
+  margin:0 0 16px;
+}
+.manifiesto-text p,
+.manifiesto-text li{
+  font-family:var(--font-read);
+  font-size:1.12rem;
+  line-height:1.68;
+  color:var(--ink-soft);
+}
+.manifiesto-text p{ margin:0 0 1.1em; }
+.manifiesto-text p:last-child{ margin-bottom:0; }
+.manifiesto-text ul{ margin:0 0 1.1em; padding-left:1.2em; }
+.manifiesto-text li{ margin-bottom:.4em; }
+.manifiesto-text strong{ color:var(--ink); }
+.manifiesto-split-flip .manifiesto-media{ order:2; }
+.manifiesto-split-flip .manifiesto-text{ order:1; }
 
 .newsletter{
   grid-column:1 / -1;
@@ -1126,6 +1239,11 @@ html[data-theme="dark"] .social-links img{ filter:invert(1) hue-rotate(180deg); 
   .article-figure{ margin-left:0; margin-right:0; }
   .article-figure figcaption{ padding:0; }
   .hero{ padding:36px 0 24px; margin-bottom:28px; }
+  .manifiesto-split{ grid-template-columns:minmax(0,1fr); gap:18px; }
+  .manifiesto-split .manifiesto-media,
+  .manifiesto-split-flip .manifiesto-media{ order:-1; }
+  .manifiesto-split .manifiesto-text,
+  .manifiesto-split-flip .manifiesto-text{ order:0; }
 }
 @media (max-width:560px){
   :root{ --gutter:16px; }

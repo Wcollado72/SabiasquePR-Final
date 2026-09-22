@@ -4,20 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sabías que PR — Educación</title>
-  <meta name="description" content="Recursos educativos, rutas de aprendizaje y pensamiento crítico para cualquier persona dispuesta a cuestionar y aprender.">
+  <meta name="description" content="Videos, ensayos y lecturas curadas para aprender, cuestionar y transformar nuestra realidad.">
   <meta name="author" content="Aliado Imperfekto">
   <link rel="canonical" href="https://sabiasquepr.com/educacion.html">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://sabiasquepr.com/educacion.html">
   <meta property="og:title" content="Sabías que PR — Educación">
-  <meta property="og:description" content="Recursos educativos, rutas de aprendizaje y pensamiento crítico para cualquier persona dispuesta a cuestionar y aprender.">
-  <meta property="og:image" content="https://sabiasquepr.com/images/nuevoshumanos.webp">
+  <meta property="og:description" content="Videos, ensayos y lecturas curadas para aprender, cuestionar y transformar nuestra realidad.">
+  <meta property="og:image" content="https://sabiasquepr.com/images/portada-social.webp">
   <meta property="og:locale" content="es_PR">
   <meta property="og:site_name" content="Sabías que PR">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Sabías que PR — Educación">
-  <meta name="twitter:description" content="Recursos educativos, rutas de aprendizaje y pensamiento crítico para cualquier persona dispuesta a cuestionar y aprender.">
-  <meta name="twitter:image" content="https://sabiasquepr.com/images/nuevoshumanos.webp">
+  <meta name="twitter:description" content="Videos, ensayos y lecturas curadas para aprender, cuestionar y transformar nuestra realidad.">
+  <meta name="twitter:image" content="https://sabiasquepr.com/images/portada-social.webp">
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -28,8 +28,8 @@
   <link rel="alternate" type="application/rss+xml" title="Sabías que PR — Noticias" href="https://sabiasquepr.com/rss.xml">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="images/icon-192.png">
-  <link rel="stylesheet" href="styles.css?v=2984d30b">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Educación","description":"Recursos educativos, rutas de aprendizaje y pensamiento crítico para cualquier persona dispuesta a cuestionar y aprender.","url":"https://sabiasquepr.com/educacion.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
+  <link rel="stylesheet" href="styles.css?v=50a53892">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Educación","description":"Videos, ensayos y lecturas curadas para aprender, cuestionar y transformar nuestra realidad.","url":"https://sabiasquepr.com/educacion.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
 </head>
@@ -88,26 +88,23 @@
       </div>
     </section>
 
-    <main class="main" id="main-content" tabindex="-1">
+    <main class="main main-block" id="main-content" tabindex="-1">
       
-      <section class="box box-blog">
-        <h3>Rutas de aprendizaje</h3>
-        <ul>
-          <li>Historia de Borikén y el Caribe.</li>
-          <li>Historia y movimientos sociales alrededor del mundo.</li>
-          <li>Derechos humanos y justicia social.</li>
-          <li>Educación financiera básica.</li>
-          <li>Alfabetización mediática y pensamiento crítico.</li>
-        </ul>
-      </section>
-      <section class="box box-blog">
-        <h3>Material descargable (próximamente)</h3>
-        <ul>
-          <li>Guías en PDF para estudiantes y docentes.</li>
-          <li>Infografías sobre datos importantes de Puerto Rico.</li>
-          <li>Plantillas para proyectos escolares y comunitarios.</li>
-        </ul>
-      </section>
+      <div class="foro-filters" id="edu-filters"><button type="button" class="foro-filter-btn active" data-categoria="">Todas</button>
+        <button type="button" class="foro-filter-btn" data-categoria="internacionales">Internacionales</button>
+        <button type="button" class="foro-filter-btn" data-categoria="crimen">Crimen</button>
+        <button type="button" class="foro-filter-btn" data-categoria="salud">Salud</button>
+        <button type="button" class="foro-filter-btn" data-categoria="deportes">Deportes</button>
+        <button type="button" class="foro-filter-btn" data-categoria="finanzas">Finanzas</button>
+        <button type="button" class="foro-filter-btn" data-categoria="tecnologia">Tecnología</button>
+        <button type="button" class="foro-filter-btn" data-categoria="descubrimientos">Descubrimientos</button>
+        <button type="button" class="foro-filter-btn" data-categoria="politica">Política</button>
+        <button type="button" class="foro-filter-btn" data-categoria="clima">Clima y Medio Ambiente</button>
+        <button type="button" class="foro-filter-btn" data-categoria="cultura">Cultura</button>
+        <button type="button" class="foro-filter-btn" data-categoria="ciencia">Ciencia</button></div>
+      <p class="home-hint" id="edu-hint" aria-live="polite"></p>
+      <div class="card-grid contenidos-grid" id="edu-list" data-seccion="educacion" data-filters="edu-filters" data-hint="edu-hint" aria-live="polite" aria-busy="true"></div>
+      <noscript><p class="empty-state">Activa JavaScript para ver este contenido.</p></noscript>
       <section class="newsletter">
         <h3>Recibe nuevo contenido educativo</h3>
         <p>Déjanos tu correo para avisarte cuando publiquemos nuevas guías, videos y recursos.</p>
@@ -244,7 +241,8 @@
   </script>
   <script src="auth.js" type="module"></script>
   <script src="script.js"></script>
-  
+  <script src="editorial.js"></script>
+  <script src="contenidos.js"></script>
   <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>

@@ -9,7 +9,7 @@
   const CATEGORIAS = {
     general: 'General',
     internacionales: 'Internacionales',
-    crimenes: 'Crímenes',
+    crimen: 'Crimen',
     salud: 'Salud',
     deportes: 'Deportes',
     finanzas: 'Finanzas',
@@ -18,6 +18,24 @@
     politica: 'Política',
     clima: 'Clima y Medio Ambiente',
     cultura: 'Cultura',
+    ciencia: 'Ciencia',
+  };
+
+  // Ilustración genérica por categoría (fondo/portada de respaldo cuando una
+  // noticia o contenido no trae foto propia). Usar SQPR.CATEGORIA_IMAGEN[categoria].
+  const CATEGORIA_IMAGEN = {
+    general: { src: 'images/categoria-general.webp', alt: 'Ilustración de un árbol del conocimiento con libros y bombillas, símbolo de la categoría General' },
+    internacionales: { src: 'images/categoria-internacionales.webp', alt: 'Ilustración de un globo terráqueo con rutas trazadas hacia Puerto Rico, símbolo de la categoría Internacionales' },
+    crimen: { src: 'images/categoria-crimenes.webp', alt: 'Ilustración de una lupa sobre una huella dactilar y un expediente, símbolo de la categoría Crimen' },
+    salud: { src: 'images/categoria-salud.webp', alt: 'Ilustración de un estetoscopio formando un corazón con una línea de pulso, símbolo de la categoría Salud' },
+    deportes: { src: 'images/categoria-deportes.webp', alt: 'Ilustración de balones y guantes de boxeo bajo las luces de un estadio, símbolo de la categoría Deportes' },
+    finanzas: { src: 'images/categoria-finanzas.webp', alt: 'Ilustración de columnas de monedas crecientes con una flecha ascendente, símbolo de la categoría Finanzas' },
+    tecnologia: { src: 'images/categoria-tecnologia.webp', alt: 'Ilustración de un microchip con circuitos en forma de red neuronal, símbolo de la categoría Tecnología' },
+    descubrimientos: { src: 'images/categoria-descubrimientos.webp', alt: 'Ilustración de un telescopio observando un cometa en el cielo estrellado, símbolo de la categoría Descubrimientos' },
+    ciencia: { src: 'images/categoria-ciencia.webp', alt: 'Ilustración de un microscopio, un átomo y una hebra de ADN, símbolo de la categoría Ciencia' },
+    politica: { src: 'images/categoria-politica.webp', alt: 'Ilustración de una balanza frente al Capitolio, símbolo de la categoría Política' },
+    clima: { src: 'images/categoria-clima.webp', alt: 'Ilustración de un huracán girando sobre el mapa de Puerto Rico y el Caribe, símbolo de la categoría Clima y Medio Ambiente' },
+    cultura: { src: 'images/categoria-cultura.webp', alt: 'Ilustración de un vejigante, un cuatro y una pandereta, símbolo de la categoría Cultura' },
   };
 
   function escapeHtml(str) {
@@ -85,6 +103,93 @@
     return CATEGORIAS[art.categoria] || art.categoria || '';
   }
 
+  // ── Tarjeta multi-formato (video/ensayo/noticia/lectura_corta) ─────
+  // La usan noticias.js (Noticias combina noticias + contenidos) y
+  // contenidos.js (Revolución Humana / Educación). Consumo dual: el botón
+  // "reproducir" cambia la imagen por un <iframe> sin navegar; el título sí
+  // navega. En video, el área de medios queda FUERA del <a> para no anidar
+  // <button> dentro de <a> (inválido en HTML) — ver styles.css, .card-media.
+  const FORMATO_LABEL = {
+    video: 'Video',
+    ensayo: 'Ensayo',
+    noticia: 'Noticia',
+    lectura_corta: 'Lectura corta',
+  };
+  const PLAY_ICON = '<span class="card-play-icon" aria-hidden="true">'
+    + '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>';
+
+  function contenidoHref(item) {
+    return (item._hrefBase || 'recurso.html') + '?id=' + encodeURIComponent(item.id);
+  }
+
+  function contenidoMetaLine(item) {
+    const parts = [];
+    if (item.fecha_publicacion) parts.push(escapeHtml(String(item.fecha_publicacion).slice(0, 10)));
+    parts.push((item.duracion_min || 1) + (item.tipo_formato === 'video' ? ' min de video' : ' min de lectura'));
+    return parts.join(' · ');
+  }
+
+  function contenidoCardHtml(item) {
+    const formatoLabel = FORMATO_LABEL[item.tipo_formato] || item.tipo_formato;
+    const catLabel = CATEGORIAS[item.categoria] || item.categoria;
+    const img = '<img src="' + escapeHtml(item.url_portada) + '" alt="' + escapeHtml(item.portada_alt || '') + '" width="600" height="400" loading="lazy">';
+    const badge = '<span class="card-format">' + escapeHtml(formatoLabel) + '</span>';
+
+    const body = '<div class="card-body">'
+      + '<span class="eyebrow">' + escapeHtml(catLabel) + '</span>'
+      + '<h3 class="card-title">' + escapeHtml(item.titulo) + '</h3>'
+      + '<p class="card-dek">' + escapeHtml(item.subtitulo_resumen) + '</p>'
+      + '<p class="card-meta">' + contenidoMetaLine(item) + '</p>'
+      + '</div>';
+
+    if (item.tipo_formato === 'video' && item.url_media) {
+      return '<article class="card">'
+        + '<div class="card-media">' + badge + img
+        + '<button type="button" class="card-play" data-url="' + escapeHtml(item.url_media) + '" aria-label="Reproducir video: ' + escapeHtml(item.titulo) + '">' + PLAY_ICON + '</button>'
+        + '</div>'
+        + '<a class="card-title-link" href="' + contenidoHref(item) + '">' + body + '</a>'
+        + '</article>';
+    }
+
+    return '<article class="card">'
+      + '<a class="card-link" href="' + contenidoHref(item) + '">'
+      + '<div class="card-media">' + badge + img + '</div>'
+      + body
+      + '</a></article>';
+  }
+
+  // Delegación de eventos: reproduce el video dentro de la tarjeta sin navegar.
+  function bindCardPlayDelegation(container) {
+    container.addEventListener('click', (e) => {
+      const btn = e.target.closest('.card-play');
+      if (!btn) return;
+      e.preventDefault();
+      const media = btn.closest('.card-media');
+      const url = btn.dataset.url;
+      if (!media || !url) return;
+      media.innerHTML = '<iframe class="card-media-frame" src="' + escapeHtml(url) + '?autoplay=1"'
+        + ' title="Reproductor de video" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>';
+    });
+  }
+
+  // Convierte una fila de la tabla `noticias` a la misma forma que `contenidos`,
+  // para poder mostrarlas juntas con contenidoCardHtml() en la página Noticias.
+  function noticiaComoContenido(row) {
+    return {
+      id: row.id,
+      tipo_formato: 'noticia',
+      categoria: row.categoria,
+      titulo: row.titulo,
+      subtitulo_resumen: dek(row, 170),
+      url_portada: row.imagen,
+      portada_alt: row.imagen_alt,
+      fecha_publicacion: row.fecha,
+      duracion_min: readingMinutes(row),
+      url_media: null,
+      _hrefBase: 'articulo.html',
+    };
+  }
+
   function articleUrl(art) {
     return 'articulo.html?id=' + encodeURIComponent(art.id);
   }
@@ -128,6 +233,10 @@
 
   window.SQPR = {
     CATEGORIAS: CATEGORIAS,
+    CATEGORIA_IMAGEN: CATEGORIA_IMAGEN,
+    contenidoCardHtml: contenidoCardHtml,
+    bindCardPlayDelegation: bindCardPlayDelegation,
+    noticiaComoContenido: noticiaComoContenido,
     escapeHtml: escapeHtml,
     stripHtml: stripHtml,
     safeUrl: safeUrl,
