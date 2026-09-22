@@ -14,7 +14,7 @@ const SITE = {
   url:             'https://sabiasquepr.com',    // ← Actualizar con URL real
   name:            'Sabías que PR',
   email:           'sabiasquepr@yahoo.com',
-  phone:           '(787) 555-0199',    // TODO: reemplazar con el número real antes de publicar (555 es un prefijo ficticio)
+  phone:           '(787) 435-8872',
   location:        'San Juan, Puerto Rico',
   ogImage:         'https://sabiasquepr.com/images/nuevoshumanos.webp',
 
