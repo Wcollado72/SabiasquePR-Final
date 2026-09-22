@@ -129,6 +129,43 @@ ALTER TABLE foro_posts DROP CONSTRAINT IF EXISTS foro_posts_categoria_check;
 ALTER TABLE foro_posts ADD CONSTRAINT foro_posts_categoria_check
   CHECK (categoria IN ('general', 'tecnologia', 'internacionales', 'nuevos-humanos', 'educacion'));
 
+-- Contenido multi-formato (video/ensayo/noticia/lectura_corta) para las
+-- secciones "Revolución Humana" y "Educación", que antes eran cajas de
+-- texto estáticas. Tabla separada de `noticias`: esta última se mantiene
+-- 100% periodística (RSS, tono de noticia), mientras que `contenidos`
+-- alimenta secciones editoriales de formato mixto.
+CREATE TABLE IF NOT EXISTS contenidos (
+  id                text PRIMARY KEY,                    -- slug
+  seccion           text NOT NULL
+                      CHECK (seccion IN ('revolucion-humana', 'educacion')),
+  tipo_formato      text NOT NULL
+                      CHECK (tipo_formato IN ('video', 'ensayo', 'noticia', 'lectura_corta')),
+  categoria         text NOT NULL DEFAULT 'general'
+                      CHECK (categoria IN (
+                        'general', 'internacionales', 'crimenes', 'salud', 'deportes',
+                        'finanzas', 'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura'
+                      )),
+  titulo            text NOT NULL,
+  subtitulo_resumen text NOT NULL,                       -- dek: 2-3 oraciones, redacción propia
+  cuerpo            text,                                -- opcional: texto largo propio (ensayo/lectura_corta)
+  autor             text,
+  url_media         text,                                -- video embebible (NULL si no aplica)
+  fuente_url        text,                                -- enlace a la fuente/medio original
+  fuente_texto      text,                                -- nombre visible de esa fuente
+  duracion_min      integer NOT NULL DEFAULT 1 CHECK (duracion_min > 0),
+  url_portada       text NOT NULL,
+  portada_alt       text NOT NULL,
+  fecha_publicacion date NOT NULL,
+  destacado         boolean NOT NULL DEFAULT false,
+  creado_en         timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_contenidos_seccion
+  ON contenidos(seccion, categoria, fecha_publicacion DESC);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_contenidos_un_destacado
+  ON contenidos (seccion, destacado) WHERE destacado;
+
 -- RLS activo por defecto en todas las tablas (sin policies = sin acceso
 -- publico via la Data API de Supabase; el backend usa la conexion directa
 -- de Postgres y no pasa por RLS).
@@ -140,3 +177,33 @@ ALTER TABLE suscriptores       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ordenes            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE foro_posts         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE foro_comentarios   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contenidos         ENABLE ROW LEVEL SECURITY;
+
+-- Noticias combina dos fuentes: articulos propios de `noticias` y
+-- video/ensayo/lectura_corta curados en `contenidos` (seccion='noticias').
+-- Esto permite que un video (que `noticias` no soporta) aparezca en la
+-- pagina de Noticias con su reproduccion en linea intacta.
+ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_seccion_check;
+ALTER TABLE contenidos ADD CONSTRAINT contenidos_seccion_check
+  CHECK (seccion IN ('revolucion-humana', 'educacion', 'noticias'));
+
+-- Categoria: "crimenes" (plural, lista cerrada de delitos) se renombra a
+-- "crimen" (dominio editorial, igual que "salud"/"politica"/"cultura"), y se
+-- agrega "ciencia" para noticias y contenidos de ciencia en general (no solo
+-- espacio). Reasignar filas existentes antes de endurecer el CHECK.
+UPDATE noticias   SET categoria = 'crimen' WHERE categoria = 'crimenes';
+UPDATE contenidos SET categoria = 'crimen' WHERE categoria = 'crimenes';
+
+ALTER TABLE noticias DROP CONSTRAINT IF EXISTS noticias_categoria_check;
+ALTER TABLE noticias ADD CONSTRAINT noticias_categoria_check
+  CHECK (categoria IN (
+    'general', 'internacionales', 'crimen', 'salud', 'deportes', 'finanzas',
+    'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura', 'ciencia'
+  ));
+
+ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_categoria_check;
+ALTER TABLE contenidos ADD CONSTRAINT contenidos_categoria_check
+  CHECK (categoria IN (
+    'general', 'internacionales', 'crimen', 'salud', 'deportes', 'finanzas',
+    'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura', 'ciencia'
+  ));

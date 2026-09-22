@@ -4,6 +4,7 @@ const { pool } = require('./db');
 const { requireAuth } = require('./middleware/auth');
 const foroRoutes = require('./routes/foro');
 const noticiasRoutes = require('./routes/noticias');
+const contenidosRoutes = require('./routes/contenidos');
 const productosRoutes = require('./routes/productos');
 const stripeRoutes = require('./routes/stripe');
 const stripeWebhookRoutes = require('./routes/stripeWebhook');
@@ -44,6 +45,7 @@ function buildApp() {
 
   app.use('/api/foro', foroRoutes);
   app.use('/api/noticias', noticiasRoutes);
+  app.use('/api/contenidos', contenidosRoutes);
   app.use('/api/productos', productosRoutes);
   app.use('/api/stripe', stripeRoutes);
 

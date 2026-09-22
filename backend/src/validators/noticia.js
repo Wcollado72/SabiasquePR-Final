@@ -1,6 +1,6 @@
 const CATEGORIAS_VALIDAS = [
-  'general', 'internacionales', 'crimenes', 'salud', 'deportes',
-  'finanzas', 'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura',
+  'general', 'internacionales', 'crimen', 'salud', 'deportes',
+  'finanzas', 'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura', 'ciencia',
 ];
 
 function validateNoticia(body, { partial = false } = {}) {
