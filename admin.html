@@ -28,7 +28,7 @@
   <link rel="alternate" type="application/rss+xml" title="Sabías que PR — Noticias" href="https://sabiasquepr.com/rss.xml">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="images/icon-192.png">
-  <link rel="stylesheet" href="styles.css?v=a99c98f7">
+  <link rel="stylesheet" href="styles.css?v=a03472f7">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Panel de administración","description":"Panel de administración de Sabías que PR: gestión de noticias y productos.","url":"https://sabiasquepr.com/admin.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -228,6 +228,33 @@
               <input type="url" id="ac-fuente-url">
               <label for="ac-fuente-texto">Nombre de la fuente (opcional)</label>
               <input type="text" id="ac-fuente-texto">
+              <fieldset class="citation-group" id="ac-citation-group">
+                <legend>Citación de la fuente</legend>
+                <label class="admin-checkbox"><input type="checkbox" id="ac-cita-sin-fuente"> Sin fuente externa / contenido 100% original</label>
+                <label for="ac-cita-estilo">Estilo de citación</label>
+                <select id="ac-cita-estilo">
+                  <option value="">Seleccionar estilo...</option>
+<option value="abnt">ABNT</option>
+<option value="ama">AMA</option>
+<option value="apa">APA</option>
+<option value="bluebook">Bluebook</option>
+<option value="chicago">Chicago</option>
+<option value="icontec">ICONTEC</option>
+<option value="ieee">IEEE</option>
+<option value="mla">MLA</option>
+<option value="turabian">Turabian</option>
+<option value="vancouver">Vancouver</option>
+                </select>
+                <label for="ac-cita-autor">Autor de la fuente</label>
+                <input type="text" id="ac-cita-autor" spellcheck="true" lang="es">
+                <label for="ac-cita-anio">Año</label>
+                <input type="text" id="ac-cita-anio" placeholder="2026">
+                <label for="ac-cita-titulo-original">Título del artículo original</label>
+                <input type="text" id="ac-cita-titulo-original" spellcheck="true" lang="es">
+                <label for="ac-cita-fecha-acceso">Fecha de acceso</label>
+                <input type="date" id="ac-cita-fecha-acceso">
+                <p class="citation-preview" id="ac-cita-preview" aria-live="polite"></p>
+              </fieldset>
               <label for="ac-duracion">Duración (minutos de lectura o de video)</label>
               <input type="number" id="ac-duracion" required min="1" step="1" value="1">
               <label for="ac-url-portada">Imagen de portada (ruta o URL)</label>
@@ -423,6 +450,7 @@
   <script src="auth.js" type="module"></script>
   <script src="script.js"></script>
   <script src="editorial.js"></script>
+  <script src="citas.js"></script>
   <script src="admin.js"></script>
   <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>

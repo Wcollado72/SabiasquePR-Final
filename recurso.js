@@ -90,6 +90,17 @@
         + (sourceUrl ? '<a href="' + S.escapeHtml(sourceUrl) + '" target="_blank" rel="noopener noreferrer">' + S.escapeHtml(item.fuente_texto) + '</a>' : S.escapeHtml(item.fuente_texto))
         + '</p>'
       : '';
+    const citaTexto = (item.cita_estilo && !item.cita_sin_fuente_externa && S.formatCitation)
+      ? S.formatCitation(item.cita_estilo, {
+          autor: item.cita_autor,
+          anio: item.cita_anio,
+          tituloOriginal: item.cita_titulo_original,
+          publicacion: item.fuente_texto,
+          url: item.fuente_url,
+          fechaAcceso: item.cita_fecha_acceso,
+        })
+      : '';
+    const cita = citaTexto ? '<p class="article-citation">Cómo citar esta fuente: <em>' + S.escapeHtml(citaTexto) + '</em></p>' : '';
     const autor = item.autor ? '<p class="article-meta article-author">Por ' + S.escapeHtml(item.autor) + '</p>' : '';
 
     root.innerHTML =
@@ -104,7 +115,8 @@
       + '</header>'
       + media
       + cuerpo
-      + fuente;
+      + fuente
+      + cita;
 
     updateMeta(item);
     document.title = item.titulo + ' — ' + SITE_NAME;

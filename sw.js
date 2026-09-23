@@ -37,6 +37,7 @@ const STATIC_ASSETS = [
   '/noticias.js',
   '/articulo.js',
   '/contenidos.js',
+  '/citas.js',
   '/recurso.js',
   '/reset-password.js',
   '/foro.js',

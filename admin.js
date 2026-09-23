@@ -247,6 +247,31 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !document.getElementById('image-picker-modal').hidden) closeImagePicker();
     });
+
+    document.getElementById('ac-cita-sin-fuente').addEventListener('change', () => { toggleCitationFields(); updateCitationPreview(); });
+    ['ac-cita-estilo', 'ac-cita-autor', 'ac-cita-anio', 'ac-cita-titulo-original', 'ac-cita-fecha-acceso', 'ac-fuente-texto', 'ac-fuente-url']
+      .forEach((id) => document.getElementById(id).addEventListener('input', updateCitationPreview));
+  }
+
+  function toggleCitationFields() {
+    const sinFuente = document.getElementById('ac-cita-sin-fuente').checked;
+    ['ac-cita-estilo', 'ac-cita-autor', 'ac-cita-anio', 'ac-cita-titulo-original', 'ac-cita-fecha-acceso']
+      .forEach((id) => { document.getElementById(id).disabled = sinFuente; });
+  }
+
+  function updateCitationPreview() {
+    const preview = document.getElementById('ac-cita-preview');
+    const sinFuente = document.getElementById('ac-cita-sin-fuente').checked;
+    const estilo = document.getElementById('ac-cita-estilo').value;
+    if (sinFuente || !estilo || !window.SQPR || !window.SQPR.formatCitation) { preview.textContent = ''; return; }
+    preview.textContent = window.SQPR.formatCitation(estilo, {
+      autor: document.getElementById('ac-cita-autor').value.trim(),
+      anio: document.getElementById('ac-cita-anio').value.trim(),
+      tituloOriginal: document.getElementById('ac-cita-titulo-original').value.trim(),
+      publicacion: document.getElementById('ac-fuente-texto').value.trim(),
+      url: document.getElementById('ac-fuente-url').value.trim(),
+      fechaAcceso: document.getElementById('ac-cita-fecha-acceso').value,
+    });
   }
 
   function updateImagePreview() {
@@ -337,6 +362,16 @@
     document.getElementById('ac-portada-alt').value = item?.portada_alt || '';
     document.getElementById('ac-fecha').value = item?.fecha_publicacion ? String(item.fecha_publicacion).slice(0, 10) : '';
     document.getElementById('ac-destacado').checked = Boolean(item?.destacado);
+    document.getElementById('ac-cita-sin-fuente').checked = Boolean(item?.cita_sin_fuente_externa);
+    document.getElementById('ac-cita-estilo').value = item?.cita_estilo || '';
+    document.getElementById('ac-cita-autor').value = item?.cita_autor || '';
+    document.getElementById('ac-cita-anio').value = item?.cita_anio || '';
+    document.getElementById('ac-cita-titulo-original').value = item?.cita_titulo_original || '';
+    document.getElementById('ac-cita-fecha-acceso').value = item?.cita_fecha_acceso
+      ? String(item.cita_fecha_acceso).slice(0, 10)
+      : (item ? '' : new Date().toISOString().slice(0, 10));
+    toggleCitationFields();
+    updateCitationPreview();
     updateImagePreview();
     setStatus(document.getElementById('ac-status'), '', '');
     document.getElementById('admin-contenidos-form-box').style.display = 'block';
@@ -353,6 +388,7 @@
     e.preventDefault();
     const statusEl = document.getElementById('ac-status');
     const id = document.getElementById('ac-id').value;
+    const sinFuente = document.getElementById('ac-cita-sin-fuente').checked;
     const body = {
       seccion: document.getElementById('ac-seccion').value,
       tipoFormato: document.getElementById('ac-tipo-formato').value,
@@ -371,6 +407,12 @@
       portadaAlt: document.getElementById('ac-portada-alt').value.trim(),
       fechaPublicacion: document.getElementById('ac-fecha').value,
       destacado: document.getElementById('ac-destacado').checked,
+      citaSinFuenteExterna: sinFuente,
+      citaEstilo: sinFuente ? null : (document.getElementById('ac-cita-estilo').value || null),
+      citaAutor: sinFuente ? null : (document.getElementById('ac-cita-autor').value.trim() || null),
+      citaAnio: sinFuente ? null : (document.getElementById('ac-cita-anio').value.trim() || null),
+      citaTituloOriginal: sinFuente ? null : (document.getElementById('ac-cita-titulo-original').value.trim() || null),
+      citaFechaAcceso: sinFuente ? null : (document.getElementById('ac-cita-fecha-acceso').value || null),
     };
     setStatus(statusEl, 'info', 'Guardando...');
     try {

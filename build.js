@@ -551,6 +551,7 @@ const PAGES = [
         <noscript><div class="article-state">Activa JavaScript para ver este contenido.</div></noscript>
       </article>`,
     extraScript: `<script src="editorial.js"></script>
+  <script src="citas.js"></script>
   <script src="recurso.js"></script>`,
   },
 
@@ -793,6 +794,23 @@ const PAGES = [
               <input type="url" id="ac-fuente-url">
               <label for="ac-fuente-texto">Nombre de la fuente (opcional)</label>
               <input type="text" id="ac-fuente-texto">
+              <fieldset class="citation-group" id="ac-citation-group">
+                <legend>Citación de la fuente</legend>
+                <label class="admin-checkbox"><input type="checkbox" id="ac-cita-sin-fuente"> Sin fuente externa / contenido 100% original</label>
+                <label for="ac-cita-estilo">Estilo de citación</label>
+                <select id="ac-cita-estilo">
+                  ${optionsHtml(CITA_ESTILOS, { includeEmpty: 'Seleccionar estilo...' })}
+                </select>
+                <label for="ac-cita-autor">Autor de la fuente</label>
+                <input type="text" id="ac-cita-autor" spellcheck="true" lang="es">
+                <label for="ac-cita-anio">Año</label>
+                <input type="text" id="ac-cita-anio" placeholder="2026">
+                <label for="ac-cita-titulo-original">Título del artículo original</label>
+                <input type="text" id="ac-cita-titulo-original" spellcheck="true" lang="es">
+                <label for="ac-cita-fecha-acceso">Fecha de acceso</label>
+                <input type="date" id="ac-cita-fecha-acceso">
+                <p class="citation-preview" id="ac-cita-preview" aria-live="polite"></p>
+              </fieldset>
               <label for="ac-duracion">Duración (minutos de lectura o de video)</label>
               <input type="number" id="ac-duracion" required min="1" step="1" value="1">
               <label for="ac-url-portada">Imagen de portada (ruta o URL)</label>
@@ -860,6 +878,7 @@ const PAGES = [
         </div>
       </div>`,
     extraScript: `<script src="editorial.js"></script>
+  <script src="citas.js"></script>
   <script src="admin.js"></script>`,
   },
 

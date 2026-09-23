@@ -1029,6 +1029,29 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .image-picker-item:hover,
 .image-picker-item:focus-visible{ border-color:var(--focus); }
 
+/* Citación de fuentes */
+.citation-group{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin:4px 0;
+  padding:14px;
+  border:1px dashed var(--line);
+  border-radius:var(--radius);
+}
+.citation-group legend{ padding:0 4px; font-weight:600; font-size:.9rem; }
+.citation-preview{
+  margin:0;
+  padding:10px 12px;
+  background:var(--input-bg);
+  border:1px solid var(--input-border);
+  border-radius:var(--radius);
+  font-family:var(--font-read);
+  font-size:.92rem;
+  min-height:1.4em;
+}
+.article-citation{ font-size:.88rem; color:var(--ink-mute); font-style:italic; }
+
 /* ===== 12. CARRITO Y MODAL DE LOGIN ===== */
 .cart-drawer{
   position:fixed;
