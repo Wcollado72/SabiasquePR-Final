@@ -133,6 +133,28 @@
     document.getElementById('admin-noticias-search').addEventListener('input', renderNoticiasList);
     document.getElementById('admin-noticias-form').addEventListener('submit', submitNoticia);
     bindImagePicker('an-imagen', 'an-imagen-preview', 'an-elegir-imagen');
+    document.getElementById('an-autocompletar-ia').addEventListener('click', autocompletarNoticiaConIA);
+  }
+
+  // Pide al backend que descargue el articulo de la URL y lo redacte con
+  // Claude (endpoint protegido, la llave nunca llega al navegador). Nunca
+  // guarda nada solo -- rellena el formulario para que el admin revise.
+  async function autocompletarNoticiaConIA() {
+    const statusEl = document.getElementById('an-autocompletar-status');
+    const url = document.getElementById('an-autocompletar-url').value.trim();
+    if (!url) { statusEl.textContent = 'Pega primero la URL del artículo original.'; return; }
+    statusEl.textContent = 'Leyendo el artículo y redactando con IA... (puede tardar unos segundos)';
+    try {
+      const data = await apiFetch('/api/admin/autocompletar-ia', { method: 'POST', body: JSON.stringify({ url }) });
+      document.getElementById('an-titulo').value = data.titulo || '';
+      document.getElementById('an-parrafos').value = [data.subtituloResumen, ...(data.parrafos || [])].filter(Boolean).join('\n');
+      document.getElementById('an-fuente-url').value = url;
+      document.getElementById('an-fuente-texto').value = data.fuenteTexto || '';
+      document.getElementById('an-divulgacion-ia').value = 'parcial';
+      statusEl.textContent = 'Listo — revisa y ajusta el texto antes de guardar. Falta elegir categoría, fecha e imagen.';
+    } catch (err) {
+      statusEl.textContent = 'No se pudo autocompletar: ' + err.message;
+    }
   }
 
   async function loadNoticias() {
@@ -182,7 +204,9 @@
     document.getElementById('an-fuente-url').value = item?.fuente_url || '';
     document.getElementById('an-fuente-texto').value = item?.fuente_texto || '';
     document.getElementById('an-parrafos').value = (item?.parrafos || []).join('\n');
+    document.getElementById('an-divulgacion-ia').value = item?.divulgacion_ia || 'no';
     document.getElementById('an-destacado').checked = Boolean(item?.destacado);
+    document.getElementById('an-autocompletar-url').value = '';
     updateImagePreview('an-imagen', 'an-imagen-preview');
     setStatus(document.getElementById('an-status'), '', '');
     document.getElementById('admin-noticias-form-box').style.display = 'block';
@@ -209,6 +233,7 @@
       fuenteUrl: document.getElementById('an-fuente-url').value.trim(),
       fuenteTexto: document.getElementById('an-fuente-texto').value.trim(),
       parrafos: document.getElementById('an-parrafos').value.split('\n').map((p) => p.trim()).filter(Boolean),
+      divulgacionIa: document.getElementById('an-divulgacion-ia').value,
       destacado: document.getElementById('an-destacado').checked,
     };
     setStatus(statusEl, 'info', 'Guardando...');

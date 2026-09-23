@@ -716,6 +716,13 @@ const PAGES = [
             <h3 id="admin-noticias-form-title">Nueva noticia</h3>
             <form id="admin-noticias-form">
               <input type="hidden" id="an-id">
+              <fieldset class="citation-group" id="an-autocompletar-group">
+                <legend>Autocompletar con IA (opcional)</legend>
+                <label for="an-autocompletar-url">URL del artículo original</label>
+                <input type="url" id="an-autocompletar-url" placeholder="https://ejemplo.com/articulo">
+                <button type="button" id="an-autocompletar-ia" class="admin-btn-cancel">Autocompletar con IA</button>
+                <p class="admin-hint" id="an-autocompletar-status" aria-live="polite"></p>
+              </fieldset>
               <label for="an-titulo">Título</label>
               <input type="text" id="an-titulo" required minlength="3" maxlength="160">
               <label for="an-categoria">Categoría</label>
@@ -740,6 +747,11 @@ const PAGES = [
               <input type="text" id="an-fuente-texto" required>
               <label for="an-parrafos">Párrafos (uno por línea)</label>
               <textarea id="an-parrafos" rows="6" required></textarea>
+              <label for="an-divulgacion-ia">Divulgación de uso de IA</label>
+              <select id="an-divulgacion-ia">
+                ${optionsHtml(DIVULGACION_IA)}
+              </select>
+              <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir esta noticia. Se muestra públicamente.</p>
               <label class="admin-checkbox"><input type="checkbox" id="an-destacado"> Artículo destacado en la portada (reemplaza al anterior)</label>
               <div class="admin-form-actions">
                 <button type="submit">Guardar</button>
