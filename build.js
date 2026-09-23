@@ -726,6 +726,10 @@ const PAGES = [
               <input type="date" id="an-fecha" required>
               <label for="an-imagen">Imagen (ruta o URL)</label>
               <input type="text" id="an-imagen" required placeholder="images/mi-imagen.webp">
+              <div class="admin-image-actions">
+                <button type="button" id="an-elegir-imagen" class="admin-btn-cancel">Elegir imagen de la galería</button>
+              </div>
+              <img id="an-imagen-preview" class="admin-image-preview" alt="" hidden>
               <label for="an-imagen-alt">Texto alternativo de la imagen</label>
               <input type="text" id="an-imagen-alt" required>
               <label for="an-imagen-caption">Pie de imagen (opcional)</label>

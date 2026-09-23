@@ -118,6 +118,7 @@
     document.getElementById('an-cancel').addEventListener('click', closeNoticiaForm);
     document.getElementById('admin-noticias-search').addEventListener('input', renderNoticiasList);
     document.getElementById('admin-noticias-form').addEventListener('submit', submitNoticia);
+    bindImagePicker('an-imagen', 'an-imagen-preview', 'an-elegir-imagen');
   }
 
   async function loadNoticias() {
@@ -168,6 +169,7 @@
     document.getElementById('an-fuente-texto').value = item?.fuente_texto || '';
     document.getElementById('an-parrafos').value = (item?.parrafos || []).join('\n');
     document.getElementById('an-destacado').checked = Boolean(item?.destacado);
+    updateImagePreview('an-imagen', 'an-imagen-preview');
     setStatus(document.getElementById('an-status'), '', '');
     document.getElementById('admin-noticias-form-box').style.display = 'block';
     document.getElementById('admin-noticias-form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -176,6 +178,7 @@
   function closeNoticiaForm() {
     document.getElementById('admin-noticias-form-box').style.display = 'none';
     document.getElementById('admin-noticias-form').reset();
+    updateImagePreview('an-imagen', 'an-imagen-preview');
   }
 
   async function submitNoticia(e) {
@@ -236,17 +239,9 @@
       }
       document.getElementById('ac-url-portada').value = img.src;
       document.getElementById('ac-portada-alt').value = img.alt;
-      updateImagePreview();
+      updateImagePreview('ac-url-portada', 'ac-url-portada-preview');
     });
-    document.getElementById('ac-url-portada').addEventListener('input', updateImagePreview);
-    document.getElementById('ac-elegir-imagen').addEventListener('click', openImagePicker);
-    document.getElementById('image-picker-close').addEventListener('click', closeImagePicker);
-    document.getElementById('image-picker-modal').addEventListener('click', (e) => {
-      if (e.target.id === 'image-picker-modal') closeImagePicker();
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !document.getElementById('image-picker-modal').hidden) closeImagePicker();
-    });
+    bindImagePicker('ac-url-portada', 'ac-url-portada-preview', 'ac-elegir-imagen');
 
     document.getElementById('ac-cita-sin-fuente').addEventListener('change', () => { toggleCitationFields(); updateCitationPreview(); });
     ['ac-cita-estilo', 'ac-cita-autor', 'ac-cita-anio', 'ac-cita-titulo-original', 'ac-cita-fecha-acceso', 'ac-fuente-texto', 'ac-fuente-url']
@@ -315,14 +310,37 @@
     });
   }
 
-  function updateImagePreview() {
-    const src = document.getElementById('ac-url-portada').value.trim();
-    const preview = document.getElementById('ac-url-portada-preview');
+  // Selector visual de imágenes, compartido entre Noticias y Contenidos:
+  // cada formulario llama bindImagePicker(inputId, previewId, botonId) una
+  // vez; el modal (uno solo en la página) recuerda a qué campo debe escribir
+  // el resultado mientras esté abierto.
+  let currentImageTarget = null;
+  let imagesManifestCache = null;
+  let imagePickerModalBound = false;
+
+  function bindImagePicker(inputId, previewId, buttonId) {
+    document.getElementById(inputId).addEventListener('input', () => updateImagePreview(inputId, previewId));
+    document.getElementById(buttonId).addEventListener('click', () => openImagePicker(inputId, previewId));
+    if (!imagePickerModalBound) {
+      imagePickerModalBound = true;
+      document.getElementById('image-picker-close').addEventListener('click', closeImagePicker);
+      document.getElementById('image-picker-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'image-picker-modal') closeImagePicker();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !document.getElementById('image-picker-modal').hidden) closeImagePicker();
+      });
+    }
+  }
+
+  function updateImagePreview(inputId, previewId) {
+    const src = document.getElementById(inputId).value.trim();
+    const preview = document.getElementById(previewId);
     if (src) { preview.src = src; preview.hidden = false; } else { preview.hidden = true; preview.src = ''; }
   }
 
-  let imagesManifestCache = null;
-  async function openImagePicker() {
+  async function openImagePicker(inputId, previewId) {
+    currentImageTarget = { inputId, previewId };
     const grid = document.getElementById('image-picker-grid');
     document.getElementById('image-picker-modal').hidden = false;
     if (!imagesManifestCache) {
@@ -338,8 +356,9 @@
       `<button type="button" class="image-picker-item" data-src="${src}"><img src="${src}" alt="" loading="lazy"></button>`
     ).join('');
     grid.querySelectorAll('.image-picker-item').forEach((btn) => btn.addEventListener('click', () => {
-      document.getElementById('ac-url-portada').value = btn.dataset.src;
-      updateImagePreview();
+      if (!currentImageTarget) return;
+      document.getElementById(currentImageTarget.inputId).value = btn.dataset.src;
+      updateImagePreview(currentImageTarget.inputId, currentImageTarget.previewId);
       closeImagePicker();
     }));
   }
@@ -413,7 +432,7 @@
       : (item ? '' : new Date().toISOString().slice(0, 10));
     toggleCitationFields();
     updateCitationPreview();
-    updateImagePreview();
+    updateImagePreview('ac-url-portada', 'ac-url-portada-preview');
     setStatus(document.getElementById('ac-status'), '', '');
     document.getElementById('admin-contenidos-form-box').style.display = 'block';
     document.getElementById('admin-contenidos-form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -422,7 +441,7 @@
   function closeContenidoForm() {
     document.getElementById('admin-contenidos-form-box').style.display = 'none';
     document.getElementById('admin-contenidos-form').reset();
-    updateImagePreview();
+    updateImagePreview('ac-url-portada', 'ac-url-portada-preview');
   }
 
   async function submitContenido(e) {
