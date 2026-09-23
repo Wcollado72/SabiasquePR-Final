@@ -251,6 +251,47 @@
     document.getElementById('ac-cita-sin-fuente').addEventListener('change', () => { toggleCitationFields(); updateCitationPreview(); });
     ['ac-cita-estilo', 'ac-cita-autor', 'ac-cita-anio', 'ac-cita-titulo-original', 'ac-cita-fecha-acceso', 'ac-fuente-texto', 'ac-fuente-url']
       .forEach((id) => document.getElementById(id).addEventListener('input', updateCitationPreview));
+
+    document.querySelectorAll('[data-revisar]').forEach((btn) => btn.addEventListener('click', () => {
+      revisarTexto(btn.dataset.revisar, btn.dataset.revisar + '-suggestions');
+    }));
+  }
+
+  // Revisión ortográfica/gramatical con LanguageTool (API pública gratuita,
+  // detecta idioma automáticamente). El corrector nativo del navegador
+  // (spellcheck="true") queda siempre activo aparte, sin necesidad de JS.
+  async function revisarTexto(textareaId, resultsId) {
+    const ta = document.getElementById(textareaId);
+    const ul = document.getElementById(resultsId);
+    ul.innerHTML = '<li class="foro-loading">Revisando...</li>';
+    try {
+      const res = await fetch('https://api.languagetool.org/v2/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ text: ta.value, language: 'auto' }),
+      });
+      const data = await res.json();
+      const matches = data.matches || [];
+      if (!matches.length) { ul.innerHTML = '<li class="foro-empty">Sin sugerencias.</li>'; return; }
+      ul.innerHTML = matches.map((m) => {
+        const snippet = ta.value.slice(m.offset, m.offset + m.length);
+        const repl = (m.replacements || [])[0] && m.replacements[0].value;
+        const btn = repl
+          ? `<button type="button" data-offset="${m.offset}" data-length="${m.length}" data-replacement="${escapeHtml(repl)}" data-target="${textareaId}" data-results="${resultsId}">Usar "${escapeHtml(repl)}"</button>`
+          : '';
+        return `<li class="suggestion-item">"<mark>${escapeHtml(snippet)}</mark>" — ${escapeHtml(m.message)}${btn}</li>`;
+      }).join('');
+      ul.querySelectorAll('button[data-offset]').forEach((b) => b.addEventListener('click', () => {
+        const input = document.getElementById(b.dataset.target);
+        const offset = Number(b.dataset.offset);
+        const length = Number(b.dataset.length);
+        input.value = input.value.slice(0, offset) + b.dataset.replacement + input.value.slice(offset + length);
+        // Los demas offsets de esta lista quedan invalidos tras editar el texto.
+        document.getElementById(b.dataset.results).innerHTML = '<li class="foro-empty">Texto actualizado — vuelve a revisar si quieres seguir corrigiendo.</li>';
+      }));
+    } catch (err) {
+      ul.innerHTML = `<li class="foro-error">No se pudo revisar: ${escapeHtml(err.message)}</li>`;
+    }
   }
 
   function toggleCitationFields() {

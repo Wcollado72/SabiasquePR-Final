@@ -1052,6 +1052,29 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 }
 .article-citation{ font-size:.88rem; color:var(--ink-mute); font-style:italic; }
 
+/* Revisar texto (LanguageTool + corrector nativo del navegador) */
+.spellcheck-actions{ margin:-2px 0 2px; }
+.suggestion-list{ list-style:none; margin:0 0 4px; padding:0; display:grid; gap:6px; }
+.suggestion-item{
+  padding:8px 10px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  font-size:.85rem;
+  background:var(--input-bg);
+}
+.suggestion-item mark{ background:color-mix(in srgb, var(--err) 22%, transparent); color:inherit; padding:0 2px; border-radius:2px; }
+.suggestion-item button{
+  margin-left:6px;
+  padding:2px 10px;
+  font-size:.78rem;
+  border-radius:999px;
+  border:1px solid var(--ink);
+  background:transparent;
+  color:var(--ink);
+  cursor:pointer;
+}
+.suggestion-item button:hover{ background:var(--ink); color:var(--bg); }
+
 /* ===== 12. CARRITO Y MODAL DE LOGIN ===== */
 .cart-drawer{
   position:fixed;
