@@ -72,9 +72,23 @@
     bindNoticias();
     bindContenidos();
     bindProductos();
+    bindUrlNormalizer();
     loadNoticias();
     loadContenidos();
     loadProductos();
+  }
+
+  // Los campos type="url" exigen un esquema completo (https://...) para que
+  // el navegador deje enviar el formulario. En vez de que el admin tenga que
+  // recordar escribirlo siempre, al salir del campo se le agrega solo si
+  // falta — así "sabiasquepr.com" se completa a "https://sabiasquepr.com".
+  function bindUrlNormalizer() {
+    document.querySelectorAll('#admin-panel input[type="url"]').forEach((input) => {
+      input.addEventListener('blur', () => {
+        const v = input.value.trim();
+        if (v && !/^[a-z][a-z0-9+.-]*:\/\//i.test(v)) input.value = 'https://' + v;
+      });
+    });
   }
 
   function showGate(msg) {
