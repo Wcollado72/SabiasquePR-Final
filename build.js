@@ -94,13 +94,21 @@ const SOCIAL_ICONS = `
           </a>
         </div>`;
 
+const PASS_TOGGLE_BTN = (targetId) => `<button type="button" class="pass-toggle" data-target="${targetId}" aria-label="Mostrar contraseña" aria-pressed="false">
+              <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.77 21.77 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a21.77 21.77 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>
+            </button>`;
+
 const LOGIN_BOX = `
       <div class="login-box" id="login-box">
         <div id="auth-logged-out">
           <label for="login-email">Usuario o correo</label>
           <input type="email" id="login-email" placeholder="tucorreo@example.com" autocomplete="email">
           <label for="login-pass">Contraseña</label>
-          <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+          <div class="pass-field">
+            <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+            ${PASS_TOGGLE_BTN('login-pass')}
+          </div>
           <div class="login-actions">
             <button type="button" id="btn-login">Entrar</button>
             <button type="button" id="btn-google" class="btn-google" title="Entrar con Google">G</button>
@@ -846,9 +854,15 @@ const PAGES = [
         <p id="reset-intro">Verificando el enlace...</p>
         <form id="reset-form" style="display:none; flex-direction:column; gap:8px;">
           <label for="reset-pass">Nueva contraseña</label>
-          <input type="password" id="reset-pass" required minlength="6" autocomplete="new-password">
+          <div class="pass-field">
+            <input type="password" id="reset-pass" required minlength="6" autocomplete="new-password">
+            ${PASS_TOGGLE_BTN('reset-pass')}
+          </div>
           <label for="reset-pass2">Confirma la contraseña</label>
-          <input type="password" id="reset-pass2" required minlength="6" autocomplete="new-password">
+          <div class="pass-field">
+            <input type="password" id="reset-pass2" required minlength="6" autocomplete="new-password">
+            ${PASS_TOGGLE_BTN('reset-pass2')}
+          </div>
           <button type="submit">Guardar nueva contraseña</button>
         </form>
         <p id="reset-status" class="form-status" aria-live="polite"></p>

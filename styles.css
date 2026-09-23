@@ -385,6 +385,34 @@ input:focus-visible,
 textarea:focus-visible,
 select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 
+.pass-field{ position:relative; }
+.pass-field input{ padding-right:2.5rem; }
+.pass-field .pass-toggle{
+  position:absolute;
+  right:4px;
+  top:50%;
+  transform:translateY(-50%);
+  align-self:auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:2rem;
+  height:2rem;
+  margin:0;
+  padding:0;
+  background:none;
+  border:none;
+  border-radius:var(--radius);
+  color:var(--ink-mute);
+  font-weight:400;
+  cursor:pointer;
+}
+.pass-field .pass-toggle:hover{ opacity:1; color:var(--ink); }
+.pass-field .pass-toggle svg{ display:block; width:18px; height:18px; }
+.pass-field .pass-toggle .icon-eye-off{ display:none; }
+.pass-field .pass-toggle.is-visible .icon-eye{ display:none; }
+.pass-field .pass-toggle.is-visible .icon-eye-off{ display:block; }
+
 .form-status,
 .newsletter-status,
 .auth-status{ display:block; font-size:.88rem; margin-top:8px; }
