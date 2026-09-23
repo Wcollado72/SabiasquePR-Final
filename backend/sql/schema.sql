@@ -259,3 +259,14 @@ ALTER TABLE contenidos ADD CONSTRAINT contenidos_cita_estilo_check
 ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_tipo_formato_check;
 ALTER TABLE contenidos ADD CONSTRAINT contenidos_tipo_formato_check
   CHECK (tipo_formato IN ('video', 'ensayo', 'noticia', 'lectura_corta', 'audio', 'foto'));
+
+-- ============================================================
+-- Divulgación de uso de IA también en `noticias` (hasta ahora solo
+-- existía en `contenidos`) — necesaria para el botón "Autocompletar
+-- con IA": sin este campo no habría forma de indicar públicamente
+-- que una noticia se redactó con asistencia de IA.
+-- ============================================================
+ALTER TABLE noticias ADD COLUMN IF NOT EXISTS divulgacion_ia text NOT NULL DEFAULT 'no';
+ALTER TABLE noticias DROP CONSTRAINT IF EXISTS noticias_divulgacion_ia_check;
+ALTER TABLE noticias ADD CONSTRAINT noticias_divulgacion_ia_check
+  CHECK (divulgacion_ia IN ('no', 'parcial', 'generado'));

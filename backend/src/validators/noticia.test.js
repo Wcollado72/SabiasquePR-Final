@@ -71,4 +71,15 @@ describe('validateNoticia', () => {
   test('categoria es opcional (se asume "general")', () => {
     expect(validateNoticia(NOTICIA_VALIDA)).toEqual([]);
   });
+
+  test('acepta los 3 niveles de divulgacionIa y rechaza invalido', () => {
+    expect(validateNoticia({ ...NOTICIA_VALIDA, divulgacionIa: 'no' })).toEqual([]);
+    expect(validateNoticia({ ...NOTICIA_VALIDA, divulgacionIa: 'parcial' })).toEqual([]);
+    expect(validateNoticia({ ...NOTICIA_VALIDA, divulgacionIa: 'generado' })).toEqual([]);
+    expect(validateNoticia({ ...NOTICIA_VALIDA, divulgacionIa: 'total' })).toContain('Divulgacion de IA no valida.');
+  });
+
+  test('divulgacionIa es opcional (se asume "no")', () => {
+    expect(validateNoticia(NOTICIA_VALIDA)).toEqual([]);
+  });
 });

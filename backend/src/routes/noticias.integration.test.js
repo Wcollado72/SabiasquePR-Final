@@ -105,6 +105,20 @@ describe('POST /api/noticias', () => {
     expect(res.status).toBe(201);
     expect(res.body.noticia.id).toBe('un-titulo-cualquiera');
   });
+
+  test('201 persiste divulgacionIa en el INSERT', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'un-titulo-cualquiera' }] });
+    const res = await request(app)
+      .post('/api/noticias')
+      .set('x-test-user', ADMIN)
+      .send({ ...NOTICIA_VALIDA, divulgacionIa: 'parcial' });
+    expect(res.status).toBe(201);
+    const [sql, values] = pool.query.mock.calls[1];
+    expect(sql).toMatch(/divulgacion_ia/);
+    expect(values[values.length - 1]).toBe('parcial');
+  });
 });
 
 describe('noticia destacada', () => {
