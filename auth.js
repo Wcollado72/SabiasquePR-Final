@@ -129,12 +129,24 @@ function setupDemoMode() {
 
 // ── EVENTOS DE BOTONES ──────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // Botón Entrar
-  document.getElementById('btn-login')?.addEventListener('click', () => {
-    const email = document.getElementById('login-email')?.value.trim();
-    const pass  = document.getElementById('login-pass')?.value;
-    if (!email || !pass) { setAuthStatus('Completa todos los campos.', 'error'); return; }
-    signIn(email, pass);
+  let registerMode = false;
+  const btnLogin = document.getElementById('btn-login');
+  const linkRegister = document.getElementById('link-register');
+
+  // Un solo handler que decide segun el modo actual, para no ir
+  // agregando/quitando listeners distintos (eso dejaba el de login
+  // pegado incluso en modo registro).
+  function submitAuth() {
+    if (registerMode) handleRegister(); else handleLogin();
+  }
+
+  btnLogin?.addEventListener('click', submitAuth);
+
+  // Enviar con Enter desde los campos de correo/contraseña
+  ['login-email', 'login-pass'].forEach((id) => {
+    document.getElementById(id)?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); submitAuth(); }
+    });
   });
 
   // Botón Google
@@ -144,22 +156,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-logout')?.addEventListener('click', signOut);
 
   // Registrar (toggle modo registro)
-  let registerMode = false;
-  document.getElementById('link-register')?.addEventListener('click', (e) => {
+  linkRegister?.addEventListener('click', (e) => {
     e.preventDefault();
     registerMode = !registerMode;
-    const btn = document.getElementById('btn-login');
-    const link = document.getElementById('link-register');
-    if (btn)  btn.textContent  = registerMode ? 'Crear cuenta' : 'Entrar';
-    if (link) link.textContent = registerMode ? '← Tengo cuenta' : 'Registrar';
-
-    if (registerMode) {
-      btn?.removeEventListener('click', handleLogin);
-      btn?.addEventListener('click', handleRegister);
-    } else {
-      btn?.removeEventListener('click', handleRegister);
-      btn?.addEventListener('click', handleLogin);
-    }
+    if (btnLogin)     btnLogin.textContent     = registerMode ? 'Crear cuenta' : 'Entrar';
+    if (linkRegister) linkRegister.textContent = registerMode ? '← Tengo cuenta' : 'Registrar';
   });
 
   // Recuperar contraseña
