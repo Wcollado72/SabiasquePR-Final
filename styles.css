@@ -979,6 +979,55 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .admin-checkbox{ display:flex; align-items:center; gap:8px; font-weight:600; }
 .admin-checkbox input{ width:auto; }
 .admin-hint{ margin:-2px 0 4px; font-size:.82rem; color:var(--ink-mute); }
+.admin-image-actions{ display:flex; flex-wrap:wrap; gap:8px; }
+.admin-image-preview{
+  display:block;
+  max-width:160px;
+  max-height:120px;
+  margin-top:8px;
+  object-fit:cover;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+}
+
+/* Selector visual de imágenes (panel admin, campo de portada) */
+.image-picker-modal{
+  position:fixed;
+  inset:0;
+  z-index:400;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:rgba(0,0,0,.5);
+}
+.image-picker-box{
+  width:100%;
+  max-width:720px;
+  max-height:80vh;
+  overflow:auto;
+  padding:20px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+}
+.image-picker-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(100px, 1fr));
+  gap:10px;
+  margin-top:12px;
+}
+.image-picker-item{
+  padding:0;
+  border:2px solid var(--line);
+  border-radius:var(--radius);
+  background:var(--input-bg);
+  cursor:pointer;
+  overflow:hidden;
+}
+.image-picker-item img{ display:block; width:100%; height:80px; object-fit:cover; }
+.image-picker-item:hover,
+.image-picker-item:focus-visible{ border-color:var(--focus); }
 
 /* ===== 12. CARRITO Y MODAL DE LOGIN ===== */
 .cart-drawer{

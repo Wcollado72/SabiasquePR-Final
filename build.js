@@ -797,7 +797,11 @@ const PAGES = [
               <input type="number" id="ac-duracion" required min="1" step="1" value="1">
               <label for="ac-url-portada">Imagen de portada (ruta o URL)</label>
               <input type="text" id="ac-url-portada" required placeholder="images/mi-imagen.webp">
-              <button type="button" id="ac-usar-imagen-categoria" class="admin-btn-cancel">Usar imagen de la categoría seleccionada</button>
+              <div class="admin-image-actions">
+                <button type="button" id="ac-usar-imagen-categoria" class="admin-btn-cancel">Usar imagen de la categoría seleccionada</button>
+                <button type="button" id="ac-elegir-imagen" class="admin-btn-cancel">Elegir imagen de la galería</button>
+              </div>
+              <img id="ac-url-portada-preview" class="admin-image-preview" alt="" hidden>
               <label for="ac-portada-alt">Texto alternativo de la imagen</label>
               <input type="text" id="ac-portada-alt" required>
               <label for="ac-fecha">Fecha de publicación</label>
@@ -844,6 +848,16 @@ const PAGES = [
             </form>
           </section>
         </section>
+      </div>
+
+      <div class="image-picker-modal" id="image-picker-modal" hidden>
+        <div class="image-picker-box">
+          <div class="admin-toolbar">
+            <strong>Elegir imagen</strong>
+            <button type="button" id="image-picker-close" class="admin-btn-cancel">Cerrar</button>
+          </div>
+          <div class="image-picker-grid" id="image-picker-grid"></div>
+        </div>
       </div>`,
     extraScript: `<script src="editorial.js"></script>
   <script src="admin.js"></script>`,
@@ -1130,6 +1144,24 @@ ${items}
 </rss>`;
 }
 
+// ── MANIFIESTO DE IMÁGENES ───────────────────────────────────
+// Lista todo lo que hay en images/ (incluidas fotos que ya no se usan en
+// ningún producto/categoría) para el selector visual del panel de admin
+// (ac-elegir-imagen). Se regenera en cada build — cualquier imagen nueva
+// que se agregue a la carpeta aparece sola la próxima vez que se corra
+// `node build.js`. El picker solo puede elegir entre lo que ya está aquí;
+// que esas imágenes sean originales o libres de derechos sigue siendo
+// responsabilidad manual de quien las agrega a la carpeta.
+const path = require('path');
+function generateImagesManifest() {
+  const exts = new Set(['.webp', '.png', '.jpg', '.jpeg', '.svg', '.gif']);
+  const files = fs.readdirSync('images')
+    .filter(f => exts.has(path.extname(f).toLowerCase()))
+    .sort((a, b) => a.localeCompare(b, 'es'))
+    .map(f => `images/${f}`);
+  return JSON.stringify(files, null, 2);
+}
+
 // ── ROBOTS.TXT ──────────────────────────────────────────────
 
 const ROBOTS = `User-agent: *
@@ -1157,6 +1189,9 @@ console.log('  ✓ robots.txt');
 
 fs.writeFileSync('rss.xml', generateRSS(), 'utf8');
 console.log('  ✓ rss.xml');
+
+fs.writeFileSync('images-manifest.json', generateImagesManifest(), 'utf8');
+console.log('  ✓ images-manifest.json');
 
 console.log(`\n✅ Build completo — ${PAGES.length} páginas generadas.`);
 console.log('   Configurar en SITE: formspreeId · ga4Id · supabaseUrl · supabaseKey · mcUser · mcList\n');

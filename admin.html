@@ -28,7 +28,7 @@
   <link rel="alternate" type="application/rss+xml" title="Sabías que PR — Noticias" href="https://sabiasquepr.com/rss.xml">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="images/icon-192.png">
-  <link rel="stylesheet" href="styles.css?v=fa105a83">
+  <link rel="stylesheet" href="styles.css?v=a99c98f7">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Panel de administración","description":"Panel de administración de Sabías que PR: gestión de noticias y productos.","url":"https://sabiasquepr.com/admin.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -232,7 +232,11 @@
               <input type="number" id="ac-duracion" required min="1" step="1" value="1">
               <label for="ac-url-portada">Imagen de portada (ruta o URL)</label>
               <input type="text" id="ac-url-portada" required placeholder="images/mi-imagen.webp">
-              <button type="button" id="ac-usar-imagen-categoria" class="admin-btn-cancel">Usar imagen de la categoría seleccionada</button>
+              <div class="admin-image-actions">
+                <button type="button" id="ac-usar-imagen-categoria" class="admin-btn-cancel">Usar imagen de la categoría seleccionada</button>
+                <button type="button" id="ac-elegir-imagen" class="admin-btn-cancel">Elegir imagen de la galería</button>
+              </div>
+              <img id="ac-url-portada-preview" class="admin-image-preview" alt="" hidden>
               <label for="ac-portada-alt">Texto alternativo de la imagen</label>
               <input type="text" id="ac-portada-alt" required>
               <label for="ac-fecha">Fecha de publicación</label>
@@ -279,6 +283,16 @@
             </form>
           </section>
         </section>
+      </div>
+
+      <div class="image-picker-modal" id="image-picker-modal" hidden>
+        <div class="image-picker-box">
+          <div class="admin-toolbar">
+            <strong>Elegir imagen</strong>
+            <button type="button" id="image-picker-close" class="admin-btn-cancel">Cerrar</button>
+          </div>
+          <div class="image-picker-grid" id="image-picker-grid"></div>
+        </div>
       </div>
     </main>
 
