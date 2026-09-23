@@ -85,7 +85,7 @@ describe('validateContenido', () => {
 
   test('exige urlMedia cuando tipoFormato es video (no parcial)', () => {
     const errors = validateContenido({ ...BASE, tipoFormato: 'video' });
-    expect(errors).toContain('Los contenidos de tipo "video" requieren "urlMedia".');
+    expect(errors).toContain('Los contenidos de tipo "video" o "audio" requieren "urlMedia".');
   });
 
   test('acepta video con urlMedia presente', () => {
@@ -95,6 +95,58 @@ describe('validateContenido', () => {
 
   test('no exige urlMedia para video en modo parcial', () => {
     const errors = validateContenido({ tipoFormato: 'video' }, { partial: true });
-    expect(errors).not.toContain('Los contenidos de tipo "video" requieren "urlMedia".');
+    expect(errors).not.toContain('Los contenidos de tipo "video" o "audio" requieren "urlMedia".');
+  });
+
+  test('acepta tipoFormato "audio" y "foto"', () => {
+    expect(validateContenido({ ...BASE, tipoFormato: 'audio', urlMedia: 'https://example.com/audio.mp3' })).toEqual([]);
+    expect(validateContenido({ ...BASE, tipoFormato: 'foto' })).toEqual([]);
+  });
+
+  test('exige urlMedia cuando tipoFormato es audio (no parcial)', () => {
+    const errors = validateContenido({ ...BASE, tipoFormato: 'audio' });
+    expect(errors).toContain('Los contenidos de tipo "video" o "audio" requieren "urlMedia".');
+  });
+
+  test('no exige urlMedia para foto', () => {
+    const errors = validateContenido({ ...BASE, tipoFormato: 'foto' });
+    expect(errors).toEqual([]);
+  });
+
+  test('acepta subformato valido, ausente, y rechaza invalido', () => {
+    expect(validateContenido({ ...BASE, subformato: 'entrevista' })).toEqual([]);
+    expect(validateContenido(BASE)).toEqual([]);
+    expect(validateContenido({ ...BASE, subformato: 'inventado' })).toContain('Subformato no valido.');
+  });
+
+  test('acepta los 3 niveles de divulgacionIa y rechaza invalido', () => {
+    expect(validateContenido({ ...BASE, divulgacionIa: 'no' })).toEqual([]);
+    expect(validateContenido({ ...BASE, divulgacionIa: 'parcial' })).toEqual([]);
+    expect(validateContenido({ ...BASE, divulgacionIa: 'generado' })).toEqual([]);
+    expect(validateContenido({ ...BASE, divulgacionIa: 'total' })).toContain('Divulgacion de IA no valida.');
+  });
+
+  test('acepta cada uno de los 10 estilos de cita y rechaza invalido', () => {
+    const estilos = ['apa', 'mla', 'chicago', 'turabian', 'ama', 'vancouver', 'abnt', 'icontec', 'ieee', 'bluebook'];
+    for (const citaEstilo of estilos) {
+      expect(validateContenido({ ...BASE, citaEstilo })).toEqual([]);
+    }
+    expect(validateContenido({ ...BASE, citaEstilo: 'harvard' })).toContain('Estilo de cita no valido.');
+  });
+
+  test('acepta citaSinFuenteExterna booleano y rechaza otros tipos', () => {
+    expect(validateContenido({ ...BASE, citaSinFuenteExterna: true })).toEqual([]);
+    expect(validateContenido({ ...BASE, citaSinFuenteExterna: 'si' }))
+      .toContain('El campo "citaSinFuenteExterna" debe ser verdadero o falso.');
+  });
+
+  test('rechaza citaFechaAcceso invalida', () => {
+    expect(validateContenido({ ...BASE, citaFechaAcceso: 'no-es-una-fecha' }))
+      .toContain('La fecha de acceso de la cita no es valida.');
+    expect(validateContenido({ ...BASE, citaFechaAcceso: '2026-09-23' })).toEqual([]);
+  });
+
+  test('un contenido sin ningun campo de cita sigue siendo valido (todo opcional)', () => {
+    expect(validateContenido(BASE)).toEqual([]);
   });
 });

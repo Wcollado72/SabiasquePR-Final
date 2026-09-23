@@ -24,13 +24,22 @@ function toRow(id, body, existing = {}) {
     body.portadaAlt ?? existing.portada_alt,
     body.fechaPublicacion ?? existing.fecha_publicacion,
     body.destacado ?? existing.destacado ?? false,
+    body.subformato !== undefined ? body.subformato : (existing.subformato ?? null),
+    body.divulgacionIa ?? existing.divulgacion_ia ?? 'no',
+    body.citaEstilo !== undefined ? body.citaEstilo : (existing.cita_estilo ?? null),
+    body.citaAutor !== undefined ? body.citaAutor : (existing.cita_autor ?? null),
+    body.citaAnio !== undefined ? body.citaAnio : (existing.cita_anio ?? null),
+    body.citaTituloOriginal !== undefined ? body.citaTituloOriginal : (existing.cita_titulo_original ?? null),
+    body.citaFechaAcceso !== undefined ? body.citaFechaAcceso : (existing.cita_fecha_acceso ?? null),
+    body.citaSinFuenteExterna ?? existing.cita_sin_fuente_externa ?? false,
   ];
 }
 
 // Guarda un contenido. Si se marca como destacado, limpia el anterior de la
 // MISMA seccion en la misma transaccion (indice unico parcial por seccion).
-async function saveContenido(id, seccion, values, sql) {
-  const destacado = values[values.length - 1];
+// `destacado` se recibe explicito (no se infiere por posicion de `values`)
+// para que agregar columnas a `toRow` en el futuro no pueda romper esto en silencio.
+async function saveContenido(id, seccion, destacado, values, sql) {
   if (!destacado) return pool.query(sql, values);
 
   const client = await pool.connect();
@@ -51,15 +60,16 @@ async function saveContenido(id, seccion, values, sql) {
   }
 }
 
-// GET /api/contenidos?seccion=&categoria=&tipoFormato=  -- lista, publico
+// GET /api/contenidos?seccion=&categoria=&tipoFormato=&subformato=  -- lista, publico
 router.get('/', async (req, res) => {
   try {
-    const { seccion, categoria, tipoFormato } = req.query;
+    const { seccion, categoria, tipoFormato, subformato } = req.query;
     const params = [];
     const where = [];
     if (seccion) { params.push(seccion); where.push(`seccion = $${params.length}`); }
     if (categoria) { params.push(categoria); where.push(`categoria = $${params.length}`); }
     if (tipoFormato) { params.push(tipoFormato); where.push(`tipo_formato = $${params.length}`); }
+    if (subformato) { params.push(subformato); where.push(`subformato = $${params.length}`); }
     const sql = `SELECT * FROM contenidos ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY fecha_publicacion DESC, creado_en DESC`;
     const { rows } = await pool.query(sql, params);
     res.json({ ok: true, contenidos: rows });
@@ -85,12 +95,19 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
     if (dupe.length) id = `${id}-${Date.now().toString(36)}`;
 
     const values = toRow(id, req.body);
+    const destacado = req.body.destacado ?? false;
     const { rows } = await saveContenido(
       id,
       req.body.seccion,
+      destacado,
       values,
-      `INSERT INTO contenidos (id, seccion, tipo_formato, categoria, titulo, subtitulo_resumen, cuerpo, autor, url_media, fuente_url, fuente_texto, duracion_min, url_portada, portada_alt, fecha_publicacion, destacado)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`
+      `INSERT INTO contenidos (
+         id, seccion, tipo_formato, categoria, titulo, subtitulo_resumen, cuerpo, autor,
+         url_media, fuente_url, fuente_texto, duracion_min, url_portada, portada_alt,
+         fecha_publicacion, destacado, subformato, divulgacion_ia, cita_estilo, cita_autor,
+         cita_anio, cita_titulo_original, cita_fecha_acceso, cita_sin_fuente_externa
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)
+       RETURNING *`
     );
     res.status(201).json({ ok: true, contenido: rows[0] });
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
@@ -106,13 +123,18 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     const existing = existingRows[0];
 
     const values = toRow(req.params.id, req.body, existing);
+    const seccion = req.body.seccion ?? existing.seccion;
+    const destacado = req.body.destacado ?? existing.destacado ?? false;
     const { rows } = await saveContenido(
       req.params.id,
-      req.body.seccion ?? existing.seccion,
+      seccion,
+      destacado,
       values,
       `UPDATE contenidos SET seccion=$2, tipo_formato=$3, categoria=$4, titulo=$5, subtitulo_resumen=$6,
          cuerpo=$7, autor=$8, url_media=$9, fuente_url=$10, fuente_texto=$11, duracion_min=$12,
-         url_portada=$13, portada_alt=$14, fecha_publicacion=$15, destacado=$16
+         url_portada=$13, portada_alt=$14, fecha_publicacion=$15, destacado=$16, subformato=$17,
+         divulgacion_ia=$18, cita_estilo=$19, cita_autor=$20, cita_anio=$21, cita_titulo_original=$22,
+         cita_fecha_acceso=$23, cita_sin_fuente_externa=$24
        WHERE id=$1 RETURNING *`
     );
     res.json({ ok: true, contenido: rows[0] });

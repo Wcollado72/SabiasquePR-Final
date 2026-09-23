@@ -54,6 +54,15 @@ describe('GET /api/contenidos', () => {
     expect(sql).toMatch(/WHERE seccion = \$1 AND categoria = \$2 AND tipo_formato = \$3/);
     expect(params).toEqual(['educacion', 'descubrimientos', 'video']);
   });
+
+  test('filtra por tipoFormato=audio y por subformato', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] });
+    const res = await request(app).get('/api/contenidos?tipoFormato=audio&subformato=podcast');
+    expect(res.status).toBe(200);
+    const [sql, params] = pool.query.mock.calls[0];
+    expect(sql).toMatch(/WHERE tipo_formato = \$1 AND subformato = \$2/);
+    expect(params).toEqual(['audio', 'podcast']);
+  });
 });
 
 describe('GET /api/contenidos/:id', () => {
@@ -113,6 +122,49 @@ describe('POST /api/contenidos', () => {
     expect(sql).toMatch(/SET destacado = false WHERE destacado AND seccion = \$1/);
     expect(params[0]).toBe('educacion');
   });
+
+  test('201 persiste subformato, divulgacionIa y los campos de cita en el INSERT', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [] }) // chequeo de id duplicado
+      .mockResolvedValueOnce({ rows: [{ id: 'un-titulo-cualquiera' }] }); // insert
+    const body = {
+      ...CONTENIDO_VALIDO,
+      subformato: 'entrevista',
+      divulgacionIa: 'parcial',
+      citaEstilo: 'apa',
+      citaAutor: 'Jane Doe',
+      citaAnio: '2026',
+      citaTituloOriginal: 'Titulo original',
+      citaFechaAcceso: '2026-09-23',
+      citaSinFuenteExterna: false,
+    };
+    const res = await request(app).post('/api/contenidos').set('x-test-user', ADMIN).send(body);
+    expect(res.status).toBe(201);
+    const [sql, values] = pool.query.mock.calls[1];
+    expect(sql).toMatch(/subformato, divulgacion_ia, cita_estilo, cita_autor,\s*cita_anio, cita_titulo_original, cita_fecha_acceso, cita_sin_fuente_externa/);
+    // Posiciones 17-24 del array toRow(): subformato..citaSinFuenteExterna
+    expect(values.slice(16)).toEqual([
+      'entrevista', 'parcial', 'apa', 'Jane Doe', '2026', 'Titulo original', '2026-09-23', false,
+    ]);
+  });
+
+  test('201 con tipoFormato "audio" y urlMedia', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'un-podcast' }] });
+    const res = await request(app).post('/api/contenidos').set('x-test-user', ADMIN)
+      .send({ ...CONTENIDO_VALIDO, tipoFormato: 'audio', urlMedia: 'https://example.com/audio.mp3' });
+    expect(res.status).toBe(201);
+  });
+
+  test('201 con tipoFormato "foto" sin urlMedia', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'una-foto' }] });
+    const res = await request(app).post('/api/contenidos').set('x-test-user', ADMIN)
+      .send({ ...CONTENIDO_VALIDO, tipoFormato: 'foto' });
+    expect(res.status).toBe(201);
+  });
 });
 
 describe('PUT /api/contenidos/:id', () => {
@@ -129,6 +181,40 @@ describe('PUT /api/contenidos/:id', () => {
     const res = await request(app).put('/api/contenidos/a').set('x-test-user', ADMIN).send({ titulo: 'Titulo editado' });
     expect(res.status).toBe(200);
     expect(res.body.contenido.titulo).toBe('Titulo editado');
+  });
+
+  test('PUT parcial que solo cambia subformato no toca los demas campos nuevos', async () => {
+    const existente = {
+      id: 'a',
+      seccion: 'educacion',
+      tipo_formato: 'ensayo',
+      categoria: 'general',
+      titulo: 'Titulo',
+      subtitulo_resumen: 'Resumen de diez caracteres.',
+      duracion_min: 5,
+      url_portada: 'images/educacion.webp',
+      portada_alt: 'Alt',
+      fecha_publicacion: '2026-01-15',
+      destacado: false,
+      subformato: null,
+      divulgacion_ia: 'parcial',
+      cita_estilo: 'apa',
+      cita_autor: 'Jane Doe',
+      cita_anio: '2026',
+      cita_titulo_original: 'Original',
+      cita_fecha_acceso: '2026-09-20',
+      cita_sin_fuente_externa: false,
+    };
+    pool.query
+      .mockResolvedValueOnce({ rows: [existente] })
+      .mockResolvedValueOnce({ rows: [{ ...existente, subformato: 'reportaje' }] });
+    const res = await request(app).put('/api/contenidos/a').set('x-test-user', ADMIN).send({ subformato: 'reportaje' });
+    expect(res.status).toBe(200);
+    const [, values] = pool.query.mock.calls[1];
+    // subformato..citaSinFuenteExterna son las ultimas 8 posiciones del array de toRow()
+    expect(values.slice(-8)).toEqual([
+      'reportaje', 'parcial', 'apa', 'Jane Doe', '2026', 'Original', '2026-09-20', false,
+    ]);
   });
 });
 

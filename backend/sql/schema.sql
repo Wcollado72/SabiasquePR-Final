@@ -207,3 +207,55 @@ ALTER TABLE contenidos ADD CONSTRAINT contenidos_categoria_check
     'general', 'internacionales', 'crimen', 'salud', 'deportes', 'finanzas',
     'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura', 'ciencia'
   ));
+
+-- ============================================================
+-- Expansión de `contenidos`: subformato libre, divulgación de uso
+-- de IA (política editorial, no requisito legal), citación
+-- académica (APA y otros) y nuevos tipo_formato ('audio','foto').
+-- ============================================================
+
+-- Subformato: etiqueta secundaria opcional que NO cambia el
+-- comportamiento de renderizado de la tarjeta (eso lo sigue
+-- controlando tipo_formato). Lista curada, ampliable con un ALTER.
+ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS subformato text NULL;
+
+ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_subformato_check;
+ALTER TABLE contenidos ADD CONSTRAINT contenidos_subformato_check
+  CHECK (subformato IS NULL OR subformato IN (
+    'podcast', 'entrevista', 'galeria', 'opinion', 'reportaje',
+    'cronica', 'guia', 'infografia', 'tutorial', 'documental', 'columna'
+  ));
+
+-- Divulgación de uso de IA: política editorial voluntaria (no hay
+-- ley en PR/EE.UU. que la exija para contenido editorial general a
+-- 2026-09-23). Debe mostrarse públicamente en tarjeta y artículo.
+ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS divulgacion_ia text NOT NULL DEFAULT 'no';
+
+ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_divulgacion_ia_check;
+ALTER TABLE contenidos ADD CONSTRAINT contenidos_divulgacion_ia_check
+  CHECK (divulgacion_ia IN ('no', 'parcial', 'generado'));
+
+-- Citación automática (APA/MLA/Chicago/Turabian/AMA/Vancouver/ABNT/
+-- ICONTEC/IEEE/Bluebook). Reutiliza fuente_url/fuente_texto ya
+-- existentes como URL y nombre de publicación — no se duplican.
+ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS cita_estilo text NULL;
+ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS cita_autor text NULL;
+ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS cita_anio text NULL;
+ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS cita_titulo_original text NULL;
+ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS cita_fecha_acceso date NULL;
+ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS cita_sin_fuente_externa boolean NOT NULL DEFAULT false;
+
+ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_cita_estilo_check;
+ALTER TABLE contenidos ADD CONSTRAINT contenidos_cita_estilo_check
+  CHECK (cita_estilo IS NULL OR cita_estilo IN (
+    'apa', 'mla', 'chicago', 'turabian', 'ama', 'vancouver', 'abnt', 'icontec', 'ieee', 'bluebook'
+  ));
+
+-- tipo_formato: se agregan 'audio' (reproducción en línea vía
+-- <audio>, igual que video) y 'foto' (navega a recurso.html, mismo
+-- comportamiento que ensayo/noticia/lectura_corta por ahora).
+-- Nombre de constraint confirmado contra la base real (pg_constraint)
+-- antes de aplicar esta migración: contenidos_tipo_formato_check.
+ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_tipo_formato_check;
+ALTER TABLE contenidos ADD CONSTRAINT contenidos_tipo_formato_check
+  CHECK (tipo_formato IN ('video', 'ensayo', 'noticia', 'lectura_corta', 'audio', 'foto'));

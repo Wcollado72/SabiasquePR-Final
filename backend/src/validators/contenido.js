@@ -1,8 +1,16 @@
 const SECCIONES_VALIDAS = ['revolucion-humana', 'educacion', 'noticias'];
-const TIPOS_VALIDOS = ['video', 'ensayo', 'noticia', 'lectura_corta'];
+const TIPOS_VALIDOS = ['video', 'ensayo', 'noticia', 'lectura_corta', 'audio', 'foto'];
 const CATEGORIAS_VALIDAS = [
   'general', 'internacionales', 'crimen', 'salud', 'deportes',
   'finanzas', 'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura', 'ciencia',
+];
+const SUBFORMATOS_VALIDOS = [
+  'podcast', 'entrevista', 'galeria', 'opinion', 'reportaje',
+  'cronica', 'guia', 'infografia', 'tutorial', 'documental', 'columna',
+];
+const DIVULGACION_IA_VALIDAS = ['no', 'parcial', 'generado'];
+const CITA_ESTILOS_VALIDOS = [
+  'apa', 'mla', 'chicago', 'turabian', 'ama', 'vancouver', 'abnt', 'icontec', 'ieee', 'bluebook',
 ];
 
 function validateContenido(body, { partial = false } = {}) {
@@ -20,6 +28,21 @@ function validateContenido(body, { partial = false } = {}) {
   if (body.categoria !== undefined && !CATEGORIAS_VALIDAS.includes(body.categoria)) {
     errors.push('Categoria no valida.');
   }
+  if (body.subformato !== undefined && body.subformato !== null && !SUBFORMATOS_VALIDOS.includes(body.subformato)) {
+    errors.push('Subformato no valido.');
+  }
+  if (body.divulgacionIa !== undefined && !DIVULGACION_IA_VALIDAS.includes(body.divulgacionIa)) {
+    errors.push('Divulgacion de IA no valida.');
+  }
+  if (body.citaEstilo !== undefined && body.citaEstilo !== null && !CITA_ESTILOS_VALIDOS.includes(body.citaEstilo)) {
+    errors.push('Estilo de cita no valido.');
+  }
+  if (body.citaSinFuenteExterna !== undefined && typeof body.citaSinFuenteExterna !== 'boolean') {
+    errors.push('El campo "citaSinFuenteExterna" debe ser verdadero o falso.');
+  }
+  if (body.citaFechaAcceso !== undefined && body.citaFechaAcceso !== null && Number.isNaN(Date.parse(body.citaFechaAcceso))) {
+    errors.push('La fecha de acceso de la cita no es valida.');
+  }
   if (body.titulo !== undefined && body.titulo.trim().length < 3) {
     errors.push('El titulo debe tener al menos 3 caracteres.');
   }
@@ -35,12 +58,20 @@ function validateContenido(body, { partial = false } = {}) {
   if (body.destacado !== undefined && typeof body.destacado !== 'boolean') {
     errors.push('El campo "destacado" debe ser verdadero o falso.');
   }
-  // El video necesita de donde reproducirse
+  // El video y el audio necesitan de donde reproducirse
   const tipo = body.tipoFormato;
-  if (tipo === 'video' && !partial && !body.urlMedia) {
-    errors.push('Los contenidos de tipo "video" requieren "urlMedia".');
+  if ((tipo === 'video' || tipo === 'audio') && !partial && !body.urlMedia) {
+    errors.push('Los contenidos de tipo "video" o "audio" requieren "urlMedia".');
   }
   return errors;
 }
 
-module.exports = { validateContenido, SECCIONES_VALIDAS, TIPOS_VALIDOS, CATEGORIAS_VALIDAS };
+module.exports = {
+  validateContenido,
+  SECCIONES_VALIDAS,
+  TIPOS_VALIDOS,
+  CATEGORIAS_VALIDAS,
+  SUBFORMATOS_VALIDOS,
+  DIVULGACION_IA_VALIDAS,
+  CITA_ESTILOS_VALIDOS,
+};
