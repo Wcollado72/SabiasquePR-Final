@@ -115,6 +115,9 @@ const SOCIAL_ICONS = `
           <a href="https://www.instagram.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
             <img src="images/instagram.webp" alt="Instagram" width="28" height="28" loading="lazy">
           </a>
+          <a href="https://www.youtube.com/@sabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="YouTube" class="social-youtube">
+            <svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><rect x="1" y="5" width="26" height="18" rx="6" fill="#FF0000"/><path d="M11.5 9.7l7.5 4.3-7.5 4.3z" fill="#fff"/></svg>
+          </a>
         </div>`;
 
 const PASS_TOGGLE_BTN = (targetId) => `<button type="button" class="pass-toggle" data-target="${targetId}" aria-label="Mostrar contraseña" aria-pressed="false">
@@ -384,7 +387,8 @@ const PAGES = [
       'logo': 'https://sabiasquepr.com/images/Coqui.webp',
       'sameAs': [
         'https://x.com/SabiasquePR',
-        'https://www.instagram.com/SabiasquePR'
+        'https://www.instagram.com/SabiasquePR',
+        'https://www.youtube.com/@sabiasquePR'
       ],
       'contactPoint': { '@type': 'ContactPoint', 'email': 'sabiasquepr@yahoo.com', 'contactType': 'customer service' }
     },
