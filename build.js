@@ -112,9 +112,6 @@ const SOCIAL_ICONS = `
           <a href="https://x.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
             <img src="images/Xlogo.webp" alt="X" width="28" height="28" loading="lazy">
           </a>
-          <a href="https://www.facebook.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-            <img src="images/Facebook.webp" alt="Facebook" width="28" height="28" loading="lazy">
-          </a>
           <a href="https://www.instagram.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
             <img src="images/instagram.webp" alt="Instagram" width="28" height="28" loading="lazy">
           </a>
@@ -387,7 +384,6 @@ const PAGES = [
       'logo': 'https://sabiasquepr.com/images/Coqui.webp',
       'sameAs': [
         'https://x.com/SabiasquePR',
-        'https://www.facebook.com/SabiasquePR',
         'https://www.instagram.com/SabiasquePR'
       ],
       'contactPoint': { '@type': 'ContactPoint', 'email': 'sabiasquepr@yahoo.com', 'contactType': 'customer service' }
