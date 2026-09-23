@@ -111,10 +111,15 @@
   // <button> dentro de <a> (inválido en HTML) — ver styles.css, .card-media.
   const FORMATO_LABEL = {
     video: 'Video',
+    audio: 'Audio',
+    foto: 'Foto',
     ensayo: 'Ensayo',
     noticia: 'Noticia',
     lectura_corta: 'Lectura corta',
   };
+  // Formatos con reproducción en línea (el botón no navega, solo video/audio
+  // traen la imagen fuera del <a> — ver comentario arriba de .card-media en styles.css).
+  const REPRODUCIBLES = { video: 'Reproducir video', audio: 'Reproducir audio' };
   const SUBFORMATO_LABEL = {
     podcast: 'Podcast', entrevista: 'Entrevista', galeria: 'Galería', opinion: 'Opinión',
     reportaje: 'Reportaje', cronica: 'Crónica', guia: 'Guía', infografia: 'Infografía',
@@ -136,7 +141,8 @@
   function contenidoMetaLine(item) {
     const parts = [];
     if (item.fecha_publicacion) parts.push(escapeHtml(String(item.fecha_publicacion).slice(0, 10)));
-    parts.push((item.duracion_min || 1) + (item.tipo_formato === 'video' ? ' min de video' : ' min de lectura'));
+    const unidad = item.tipo_formato === 'video' ? ' min de video' : item.tipo_formato === 'audio' ? ' min de audio' : ' min de lectura';
+    parts.push((item.duracion_min || 1) + unidad);
     return parts.join(' · ');
   }
 
@@ -160,10 +166,11 @@
       + iaBadge
       + '</div>';
 
-    if (item.tipo_formato === 'video' && item.url_media) {
+    const reproducirLabel = REPRODUCIBLES[item.tipo_formato];
+    if (reproducirLabel && item.url_media) {
       return '<article class="card">'
         + '<div class="card-media">' + badge + img
-        + '<button type="button" class="card-play" data-url="' + escapeHtml(item.url_media) + '" aria-label="Reproducir video: ' + escapeHtml(item.titulo) + '">' + PLAY_ICON + '</button>'
+        + '<button type="button" class="card-play" data-url="' + escapeHtml(item.url_media) + '" data-formato="' + escapeHtml(item.tipo_formato) + '" aria-label="' + reproducirLabel + ': ' + escapeHtml(item.titulo) + '">' + PLAY_ICON + '</button>'
         + '</div>'
         + '<a class="card-title-link" href="' + contenidoHref(item) + '">' + body + '</a>'
         + '</article>';
@@ -176,7 +183,10 @@
       + '</a></article>';
   }
 
-  // Delegación de eventos: reproduce el video dentro de la tarjeta sin navegar.
+  // Delegación de eventos: reproduce video/audio dentro de la tarjeta sin
+  // navegar. El video reemplaza toda el área de medios por un <iframe>; el
+  // audio deja la portada visible y agrega una barra de reproductor al pie
+  // (un <audio> ahí adentro, sin imagen, se vería como un hueco vacío).
   function bindCardPlayDelegation(container) {
     container.addEventListener('click', (e) => {
       const btn = e.target.closest('.card-play');
@@ -185,6 +195,14 @@
       const media = btn.closest('.card-media');
       const url = btn.dataset.url;
       if (!media || !url) return;
+      if (btn.dataset.formato === 'audio') {
+        btn.remove();
+        const bar = document.createElement('div');
+        bar.className = 'card-audio-inline';
+        bar.innerHTML = '<audio controls autoplay src="' + escapeHtml(url) + '"></audio>';
+        media.appendChild(bar);
+        return;
+      }
       media.innerHTML = '<iframe class="card-media-frame" src="' + escapeHtml(url) + '?autoplay=1"'
         + ' title="Reproductor de video" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>';
     });

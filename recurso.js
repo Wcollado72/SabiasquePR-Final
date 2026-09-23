@@ -15,6 +15,8 @@
 
   const FORMATO_LABEL = {
     video: 'Video',
+    audio: 'Audio',
+    foto: 'Foto',
     ensayo: 'Ensayo',
     noticia: 'Noticia',
     lectura_corta: 'Lectura corta',
@@ -80,6 +82,13 @@
         ? '<figure class="article-figure"><img src="' + S.escapeHtml(item.url_portada) + '" alt="' + S.escapeHtml(item.portada_alt || '') + '" width="1200" height="675" fetchpriority="high"></figure>'
         : '');
 
+    // El audio conserva la imagen de portada arriba (rama "media" de arriba)
+    // y agrega el reproductor de ancho completo aparte, en vez de forzarlo
+    // dentro de la caja 16:9 de .video-embed (pensada para iframes de video).
+    const audioEmbed = item.tipo_formato === 'audio' && item.url_media
+      ? '<div class="audio-embed"><audio controls src="' + S.escapeHtml(item.url_media) + '"></audio></div>'
+      : '';
+
     const cuerpo = item.cuerpo
       ? '<div class="article-body">' + S.sanitizeHtml(item.cuerpo).split(/\n{2,}/).map((p) => '<p>' + p + '</p>').join('') + '</div>'
       : '<div class="article-body"><p>' + S.escapeHtml(item.subtitulo_resumen) + '</p></div>';
@@ -109,11 +118,12 @@
       + ' <span aria-hidden="true">·</span> <span class="eyebrow">' + S.escapeHtml(formatoLabel) + '</span>'
       + ' <span aria-hidden="true">·</span> <span class="eyebrow">' + S.escapeHtml(categoriaLabel) + '</span></p>'
       + '<h1 class="article-title">' + S.escapeHtml(item.titulo) + '</h1>'
-      + '<p class="article-meta">' + S.escapeHtml(String(item.fecha_publicacion).slice(0, 10)) + ' · ' + (item.duracion_min || 1) + (item.tipo_formato === 'video' ? ' min de video' : ' min de lectura') + '</p>'
+      + '<p class="article-meta">' + S.escapeHtml(String(item.fecha_publicacion).slice(0, 10)) + ' · ' + (item.duracion_min || 1) + (item.tipo_formato === 'video' ? ' min de video' : item.tipo_formato === 'audio' ? ' min de audio' : ' min de lectura') + '</p>'
       + autor
       + iaBadge
       + '</header>'
       + media
+      + audioEmbed
       + cuerpo
       + fuente
       + cita;

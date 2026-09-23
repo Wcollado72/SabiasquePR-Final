@@ -220,7 +220,7 @@
 
   // ── CONTENIDOS (video/ensayo/noticia/lectura_corta) ──────
   const SECCION_LABEL = { noticias: 'Noticias', 'revolucion-humana': 'Revolución Humana', educacion: 'Educación' };
-  const TIPO_LABEL = { video: 'Video', ensayo: 'Ensayo', noticia: 'Noticia', lectura_corta: 'Lectura corta' };
+  const TIPO_LABEL = { video: 'Video', audio: 'Audio', foto: 'Foto', ensayo: 'Ensayo', noticia: 'Noticia', lectura_corta: 'Lectura corta' };
 
   function bindContenidos() {
     document.getElementById('admin-contenidos-new').addEventListener('click', () => openContenidoForm());

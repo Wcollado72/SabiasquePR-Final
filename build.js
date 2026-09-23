@@ -87,7 +87,7 @@ const CATEGORIAS = {
   politica: 'Política', clima: 'Clima y Medio Ambiente', cultura: 'Cultura', ciencia: 'Ciencia',
 };
 const TIPOS_FORMATO = {
-  video: 'Video', ensayo: 'Ensayo', noticia: 'Noticia', lectura_corta: 'Lectura corta',
+  video: 'Video', audio: 'Audio', foto: 'Foto', ensayo: 'Ensayo', noticia: 'Noticia', lectura_corta: 'Lectura corta',
 };
 const SUBFORMATOS = {
   podcast: 'Podcast', entrevista: 'Entrevista', galeria: 'Galería', opinion: 'Opinión',
@@ -815,8 +815,12 @@ const PAGES = [
                 <input type="date" id="ac-cita-fecha-acceso">
                 <p class="citation-preview" id="ac-cita-preview" aria-live="polite"></p>
               </fieldset>
-              <label for="ac-duracion">Duración (minutos de lectura o de video)</label>
-              <input type="number" id="ac-duracion" required min="1" step="1" value="1">
+              <label for="ac-duracion">Duración (minutos de lectura, video o audio)</label>
+              <input type="number" id="ac-duracion" required min="1" step="1" value="1" list="ac-duracion-presets">
+              <datalist id="ac-duracion-presets">
+                <option value="3"><option value="5"><option value="8"><option value="10">
+                <option value="15"><option value="20"><option value="30"><option value="45"><option value="60">
+              </datalist>
               <label for="ac-url-portada">Imagen de portada (ruta o URL)</label>
               <input type="text" id="ac-url-portada" required placeholder="images/mi-imagen.webp">
               <div class="admin-image-actions">

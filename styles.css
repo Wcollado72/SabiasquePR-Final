@@ -600,6 +600,16 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   border:0;
   background:#000;
 }
+.card-audio-inline{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:2;
+  padding:8px;
+  background:color-mix(in srgb, var(--ink) 75%, transparent);
+}
+.card-audio-inline audio{ width:100%; display:block; }
 .card-title-link{ text-decoration:none; color:inherit; }
 .card-title-link:hover{ text-decoration:none; }
 .card-title-link:hover .card-title{ text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:4px; }
@@ -709,6 +719,8 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   height:100%;
   border:0;
 }
+.audio-embed{ margin:24px 0; }
+.audio-embed audio{ width:100%; display:block; }
 .eyebrow-trail{ margin:0 0 14px; }
 .eyebrow-trail .eyebrow{ margin:0; }
 .article-author{ margin-top:-8px; }
