@@ -115,6 +115,17 @@
     noticia: 'Noticia',
     lectura_corta: 'Lectura corta',
   };
+  const SUBFORMATO_LABEL = {
+    podcast: 'Podcast', entrevista: 'Entrevista', galeria: 'Galería', opinion: 'Opinión',
+    reportaje: 'Reportaje', cronica: 'Crónica', guia: 'Guía', infografia: 'Infografía',
+    tutorial: 'Tutorial', documental: 'Documental', columna: 'Columna',
+  };
+  // Divulgación de IA: política editorial, no requisito legal (ver
+  // reference_deploy_setup / project_contenidos_multiformato). "no" queda
+  // implícito (sin insignia) para no saturar cada tarjeta con una etiqueta
+  // negativa en cada post.
+  const DIVULGACION_IA_LABEL = { parcial: 'Asistencia parcial de IA', generado: 'Generado con IA' };
+  const DIVULGACION_IA_CLASS = { parcial: 'badge-ia-parcial', generado: 'badge-ia-generado' };
   const PLAY_ICON = '<span class="card-play-icon" aria-hidden="true">'
     + '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>';
 
@@ -131,15 +142,22 @@
 
   function contenidoCardHtml(item) {
     const formatoLabel = FORMATO_LABEL[item.tipo_formato] || item.tipo_formato;
+    const subformatoLabel = item.subformato && SUBFORMATO_LABEL[item.subformato];
+    const formatoTexto = subformatoLabel ? formatoLabel + ' · ' + subformatoLabel : formatoLabel;
     const catLabel = CATEGORIAS[item.categoria] || item.categoria;
     const img = '<img src="' + escapeHtml(item.url_portada) + '" alt="' + escapeHtml(item.portada_alt || '') + '" width="600" height="400" loading="lazy">';
-    const badge = '<span class="card-format">' + escapeHtml(formatoLabel) + '</span>';
+    const badge = '<span class="card-format">' + escapeHtml(formatoTexto) + '</span>';
+    const iaLabel = item.divulgacion_ia && DIVULGACION_IA_LABEL[item.divulgacion_ia];
+    const iaBadge = iaLabel
+      ? '<span class="badge-ia ' + DIVULGACION_IA_CLASS[item.divulgacion_ia] + '">' + escapeHtml(iaLabel) + '</span>'
+      : '';
 
     const body = '<div class="card-body">'
       + '<span class="eyebrow">' + escapeHtml(catLabel) + '</span>'
       + '<h3 class="card-title">' + escapeHtml(item.titulo) + '</h3>'
       + '<p class="card-dek">' + escapeHtml(item.subtitulo_resumen) + '</p>'
       + '<p class="card-meta">' + contenidoMetaLine(item) + '</p>'
+      + iaBadge
       + '</div>';
 
     if (item.tipo_formato === 'video' && item.url_media) {
@@ -234,6 +252,10 @@
   window.SQPR = {
     CATEGORIAS: CATEGORIAS,
     CATEGORIA_IMAGEN: CATEGORIA_IMAGEN,
+    FORMATO_LABEL: FORMATO_LABEL,
+    SUBFORMATO_LABEL: SUBFORMATO_LABEL,
+    DIVULGACION_IA_LABEL: DIVULGACION_IA_LABEL,
+    DIVULGACION_IA_CLASS: DIVULGACION_IA_CLASS,
     contenidoCardHtml: contenidoCardHtml,
     bindCardPlayDelegation: bindCardPlayDelegation,
     noticiaComoContenido: noticiaComoContenido,

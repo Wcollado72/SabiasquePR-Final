@@ -528,6 +528,23 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   letter-spacing:.02em;
 }
 
+/* Divulgación de uso de IA: política editorial, no requisito legal.
+   Se muestra solo cuando hubo asistencia/generación de IA — "no" queda
+   implícito (sin insignia) para no saturar cada tarjeta. */
+.badge-ia{
+  display:inline-block;
+  margin-top:6px;
+  padding:3px 10px;
+  border-radius:999px;
+  font-family:var(--font-ui);
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.badge-ia-parcial{ background:color-mix(in srgb, var(--info) 18%, transparent); color:var(--info); }
+.badge-ia-generado{ background:color-mix(in srgb, var(--accent) 18%, transparent); color:var(--accent); }
+
 /* Tarjetas de contenido multi-formato (video/ensayo/noticia/lectura corta):
    consumo dual — el botón de reproducir NO navega; el título/categoría sí.
    Por eso .card-media no va dentro de <a> cuando hay video (evita anidar
@@ -961,6 +978,7 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .admin-form-actions{ display:flex; gap:10px; margin-top:6px; }
 .admin-checkbox{ display:flex; align-items:center; gap:8px; font-weight:600; }
 .admin-checkbox input{ width:auto; }
+.admin-hint{ margin:-2px 0 4px; font-size:.82rem; color:var(--ink-mute); }
 
 /* ===== 12. CARRITO Y MODAL DE LOGIN ===== */
 .cart-drawer{

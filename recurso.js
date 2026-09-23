@@ -64,7 +64,12 @@
     const seccionHref = SECCION_HREF[item.seccion] || 'index.html';
     const seccionLabel = SECCION_LABEL[item.seccion] || item.seccion;
     const categoriaLabel = (S.CATEGORIAS && S.CATEGORIAS[item.categoria]) || item.categoria;
-    const formatoLabel = FORMATO_LABEL[item.tipo_formato] || item.tipo_formato;
+    const subformatoLabel = item.subformato && S.SUBFORMATO_LABEL && S.SUBFORMATO_LABEL[item.subformato];
+    const formatoLabel = (FORMATO_LABEL[item.tipo_formato] || item.tipo_formato) + (subformatoLabel ? ' · ' + subformatoLabel : '');
+    const iaLabel = item.divulgacion_ia && S.DIVULGACION_IA_LABEL && S.DIVULGACION_IA_LABEL[item.divulgacion_ia];
+    const iaBadge = iaLabel
+      ? '<span class="badge-ia ' + S.DIVULGACION_IA_CLASS[item.divulgacion_ia] + '">' + S.escapeHtml(iaLabel) + '</span>'
+      : '';
 
     const media = item.tipo_formato === 'video' && item.url_media
       ? '<figure class="article-figure"><div class="video-embed">'
@@ -95,6 +100,7 @@
       + '<h1 class="article-title">' + S.escapeHtml(item.titulo) + '</h1>'
       + '<p class="article-meta">' + S.escapeHtml(String(item.fecha_publicacion).slice(0, 10)) + ' · ' + (item.duracion_min || 1) + (item.tipo_formato === 'video' ? ' min de video' : ' min de lectura') + '</p>'
       + autor
+      + iaBadge
       + '</header>'
       + media
       + cuerpo

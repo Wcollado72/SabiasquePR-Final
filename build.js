@@ -63,23 +63,49 @@ const ASSET_VERSION = require('crypto').createHash('md5').update(fs.readFileSync
 // (noticias.js / productos.js) en vez de pre-renderizarse aquí.
 // `noticias` sigue leyéndose arriba porque generateRSS() la usa.
 
+// Ordena un mapa {valor: etiqueta} por la ETIQUETA mostrada (no por la
+// clave interna), sensible al idioma. Se ordena aquí, en Node, al generar
+// el sitio (todas estas listas son HTML estático) — cuando el sitio sea
+// multilingüe, este mismo helper se llama una vez por idioma con el mapa
+// de etiquetas de ese idioma, sin rediseño.
+function sortLabelEntries(map, locale = 'es') {
+  return Object.entries(map).sort((a, b) => a[1].localeCompare(b[1], locale));
+}
+function optionsHtml(map, { includeEmpty } = {}) {
+  const empty = includeEmpty ? `<option value="">${includeEmpty}</option>\n` : '';
+  return empty + sortLabelEntries(map).map(([v, l]) => `<option value="${v}">${l}</option>`).join('\n');
+}
+
 // ── COMPONENTES COMPARTIDOS ─────────────────────────────────
 
+// Taxonomía compartida por Noticias, Contenidos, Revolución Humana y
+// Educación. Deben coincidir con los CHECK de backend/sql/schema.sql y
+// con editorial.js (CATEGORIAS / FORMATO_LABEL / etc.).
+const CATEGORIAS = {
+  general: 'General', internacionales: 'Internacionales', crimen: 'Crimen', salud: 'Salud',
+  deportes: 'Deportes', finanzas: 'Finanzas', tecnologia: 'Tecnología', descubrimientos: 'Descubrimientos',
+  politica: 'Política', clima: 'Clima y Medio Ambiente', cultura: 'Cultura', ciencia: 'Ciencia',
+};
+const TIPOS_FORMATO = {
+  video: 'Video', ensayo: 'Ensayo', noticia: 'Noticia', lectura_corta: 'Lectura corta',
+};
+const SUBFORMATOS = {
+  podcast: 'Podcast', entrevista: 'Entrevista', galeria: 'Galería', opinion: 'Opinión',
+  reportaje: 'Reportaje', cronica: 'Crónica', guia: 'Guía', infografia: 'Infografía',
+  tutorial: 'Tutorial', documental: 'Documental', columna: 'Columna',
+};
+const DIVULGACION_IA = {
+  no: 'No se usó IA', parcial: 'Asistencia parcial de IA', generado: 'Generado principalmente con IA',
+};
+const CITA_ESTILOS = {
+  apa: 'APA', mla: 'MLA', chicago: 'Chicago', turabian: 'Turabian', ama: 'AMA',
+  vancouver: 'Vancouver', abnt: 'ABNT', icontec: 'ICONTEC', ieee: 'IEEE', bluebook: 'Bluebook',
+};
+
 // Botones de filtro por categoría, compartidos entre Noticias, Revolución
-// Humana y Educación. Deben coincidir con el CHECK de noticias/contenidos
-// en backend/sql/schema.sql y con editorial.js CATEGORIAS.
-const CATEGORIA_FILTER_BUTTONS = `<button type="button" class="foro-filter-btn active" data-categoria="">Todas</button>
-        <button type="button" class="foro-filter-btn" data-categoria="internacionales">Internacionales</button>
-        <button type="button" class="foro-filter-btn" data-categoria="crimen">Crimen</button>
-        <button type="button" class="foro-filter-btn" data-categoria="salud">Salud</button>
-        <button type="button" class="foro-filter-btn" data-categoria="deportes">Deportes</button>
-        <button type="button" class="foro-filter-btn" data-categoria="finanzas">Finanzas</button>
-        <button type="button" class="foro-filter-btn" data-categoria="tecnologia">Tecnología</button>
-        <button type="button" class="foro-filter-btn" data-categoria="descubrimientos">Descubrimientos</button>
-        <button type="button" class="foro-filter-btn" data-categoria="politica">Política</button>
-        <button type="button" class="foro-filter-btn" data-categoria="clima">Clima y Medio Ambiente</button>
-        <button type="button" class="foro-filter-btn" data-categoria="cultura">Cultura</button>
-        <button type="button" class="foro-filter-btn" data-categoria="ciencia">Ciencia</button>`;
+// Humana y Educación. "Todas" siempre primero, sin ordenar (es el reset).
+const CATEGORIA_FILTER_BUTTONS = `<button type="button" class="foro-filter-btn active" data-categoria="">Todas</button>\n`
+  + sortLabelEntries(CATEGORIAS).map(([v, l]) => `        <button type="button" class="foro-filter-btn" data-categoria="${v}">${l}</button>`).join('\n');
 
 const SOCIAL_ICONS = `
         <div class="social-links">
@@ -693,18 +719,7 @@ const PAGES = [
               <input type="text" id="an-titulo" required minlength="3" maxlength="160">
               <label for="an-categoria">Categoría</label>
               <select id="an-categoria">
-                <option value="general">General</option>
-                <option value="internacionales">Internacionales</option>
-                <option value="crimen">Crimen</option>
-                <option value="salud">Salud</option>
-                <option value="deportes">Deportes</option>
-                <option value="finanzas">Finanzas</option>
-                <option value="tecnologia">Tecnología</option>
-                <option value="descubrimientos">Descubrimientos</option>
-                <option value="politica">Política</option>
-                <option value="clima">Clima y Medio Ambiente</option>
-                <option value="cultura">Cultura</option>
-                <option value="ciencia">Ciencia</option>
+                ${optionsHtml(CATEGORIAS)}
               </select>
               <label for="an-fecha">Fecha</label>
               <input type="date" id="an-fecha" required>
@@ -749,25 +764,15 @@ const PAGES = [
               </select>
               <label for="ac-tipo-formato">Tipo de formato</label>
               <select id="ac-tipo-formato">
-                <option value="video">Video</option>
-                <option value="ensayo">Ensayo</option>
-                <option value="noticia">Noticia</option>
-                <option value="lectura_corta">Lectura corta</option>
+                ${optionsHtml(TIPOS_FORMATO)}
+              </select>
+              <label for="ac-subformato">Subformato (opcional)</label>
+              <select id="ac-subformato">
+                ${optionsHtml(SUBFORMATOS, { includeEmpty: 'Ninguno' })}
               </select>
               <label for="ac-categoria">Categoría</label>
               <select id="ac-categoria">
-                <option value="general">General</option>
-                <option value="internacionales">Internacionales</option>
-                <option value="crimen">Crimen</option>
-                <option value="salud">Salud</option>
-                <option value="deportes">Deportes</option>
-                <option value="finanzas">Finanzas</option>
-                <option value="tecnologia">Tecnología</option>
-                <option value="descubrimientos">Descubrimientos</option>
-                <option value="politica">Política</option>
-                <option value="clima">Clima y Medio Ambiente</option>
-                <option value="cultura">Cultura</option>
-                <option value="ciencia">Ciencia</option>
+                ${optionsHtml(CATEGORIAS)}
               </select>
               <label for="ac-titulo">Título</label>
               <input type="text" id="ac-titulo" required minlength="3" maxlength="160">
@@ -777,7 +782,12 @@ const PAGES = [
               <textarea id="ac-cuerpo" rows="6"></textarea>
               <label for="ac-autor">Autor (opcional)</label>
               <input type="text" id="ac-autor">
-              <label for="ac-url-media">Video embebible (obligatorio si el tipo es Video, ej. https://www.youtube.com/embed/ID)</label>
+              <label for="ac-divulgacion-ia">Divulgación de uso de IA</label>
+              <select id="ac-divulgacion-ia">
+                ${optionsHtml(DIVULGACION_IA)}
+              </select>
+              <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir este contenido. Se muestra públicamente en la tarjeta y el artículo.</p>
+              <label for="ac-url-media">Video/audio embebible (obligatorio si el tipo es Video o Audio, ej. https://www.youtube.com/embed/ID)</label>
               <input type="url" id="ac-url-media">
               <label for="ac-fuente-url">URL de la fuente (opcional)</label>
               <input type="url" id="ac-fuente-url">

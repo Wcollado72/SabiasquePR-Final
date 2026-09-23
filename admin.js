@@ -284,6 +284,8 @@
     document.getElementById('ac-subtitulo').value = item?.subtitulo_resumen || '';
     document.getElementById('ac-cuerpo').value = item?.cuerpo || '';
     document.getElementById('ac-autor').value = item?.autor || '';
+    document.getElementById('ac-subformato').value = item?.subformato || '';
+    document.getElementById('ac-divulgacion-ia').value = item?.divulgacion_ia || 'no';
     document.getElementById('ac-url-media').value = item?.url_media || '';
     document.getElementById('ac-fuente-url').value = item?.fuente_url || '';
     document.getElementById('ac-fuente-texto').value = item?.fuente_texto || '';
@@ -314,6 +316,8 @@
       subtituloResumen: document.getElementById('ac-subtitulo').value.trim(),
       cuerpo: document.getElementById('ac-cuerpo').value.trim() || null,
       autor: document.getElementById('ac-autor').value.trim() || null,
+      subformato: document.getElementById('ac-subformato').value || null,
+      divulgacionIa: document.getElementById('ac-divulgacion-ia').value,
       urlMedia: document.getElementById('ac-url-media').value.trim() || null,
       fuenteUrl: document.getElementById('ac-fuente-url').value.trim() || null,
       fuenteTexto: document.getElementById('ac-fuente-texto').value.trim() || null,

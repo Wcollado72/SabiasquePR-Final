@@ -28,7 +28,7 @@
   <link rel="alternate" type="application/rss+xml" title="Sabías que PR — Noticias" href="https://sabiasquepr.com/rss.xml">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="images/icon-192.png">
-  <link rel="stylesheet" href="styles.css?v=79ed82a1">
+  <link rel="stylesheet" href="styles.css?v=fa105a83">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Panel de administración","description":"Panel de administración de Sabías que PR: gestión de noticias y productos.","url":"https://sabiasquepr.com/admin.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -116,18 +116,18 @@
               <input type="text" id="an-titulo" required minlength="3" maxlength="160">
               <label for="an-categoria">Categoría</label>
               <select id="an-categoria">
-                <option value="general">General</option>
-                <option value="internacionales">Internacionales</option>
-                <option value="crimen">Crimen</option>
-                <option value="salud">Salud</option>
-                <option value="deportes">Deportes</option>
-                <option value="finanzas">Finanzas</option>
-                <option value="tecnologia">Tecnología</option>
-                <option value="descubrimientos">Descubrimientos</option>
-                <option value="politica">Política</option>
-                <option value="clima">Clima y Medio Ambiente</option>
-                <option value="cultura">Cultura</option>
                 <option value="ciencia">Ciencia</option>
+<option value="clima">Clima y Medio Ambiente</option>
+<option value="crimen">Crimen</option>
+<option value="cultura">Cultura</option>
+<option value="deportes">Deportes</option>
+<option value="descubrimientos">Descubrimientos</option>
+<option value="finanzas">Finanzas</option>
+<option value="general">General</option>
+<option value="internacionales">Internacionales</option>
+<option value="politica">Política</option>
+<option value="salud">Salud</option>
+<option value="tecnologia">Tecnología</option>
               </select>
               <label for="an-fecha">Fecha</label>
               <input type="date" id="an-fecha" required>
@@ -172,25 +172,40 @@
               </select>
               <label for="ac-tipo-formato">Tipo de formato</label>
               <select id="ac-tipo-formato">
-                <option value="video">Video</option>
                 <option value="ensayo">Ensayo</option>
-                <option value="noticia">Noticia</option>
-                <option value="lectura_corta">Lectura corta</option>
+<option value="lectura_corta">Lectura corta</option>
+<option value="noticia">Noticia</option>
+<option value="video">Video</option>
+              </select>
+              <label for="ac-subformato">Subformato (opcional)</label>
+              <select id="ac-subformato">
+                <option value="">Ninguno</option>
+<option value="columna">Columna</option>
+<option value="cronica">Crónica</option>
+<option value="documental">Documental</option>
+<option value="entrevista">Entrevista</option>
+<option value="galeria">Galería</option>
+<option value="guia">Guía</option>
+<option value="infografia">Infografía</option>
+<option value="opinion">Opinión</option>
+<option value="podcast">Podcast</option>
+<option value="reportaje">Reportaje</option>
+<option value="tutorial">Tutorial</option>
               </select>
               <label for="ac-categoria">Categoría</label>
               <select id="ac-categoria">
-                <option value="general">General</option>
-                <option value="internacionales">Internacionales</option>
-                <option value="crimen">Crimen</option>
-                <option value="salud">Salud</option>
-                <option value="deportes">Deportes</option>
-                <option value="finanzas">Finanzas</option>
-                <option value="tecnologia">Tecnología</option>
-                <option value="descubrimientos">Descubrimientos</option>
-                <option value="politica">Política</option>
-                <option value="clima">Clima y Medio Ambiente</option>
-                <option value="cultura">Cultura</option>
                 <option value="ciencia">Ciencia</option>
+<option value="clima">Clima y Medio Ambiente</option>
+<option value="crimen">Crimen</option>
+<option value="cultura">Cultura</option>
+<option value="deportes">Deportes</option>
+<option value="descubrimientos">Descubrimientos</option>
+<option value="finanzas">Finanzas</option>
+<option value="general">General</option>
+<option value="internacionales">Internacionales</option>
+<option value="politica">Política</option>
+<option value="salud">Salud</option>
+<option value="tecnologia">Tecnología</option>
               </select>
               <label for="ac-titulo">Título</label>
               <input type="text" id="ac-titulo" required minlength="3" maxlength="160">
@@ -200,7 +215,14 @@
               <textarea id="ac-cuerpo" rows="6"></textarea>
               <label for="ac-autor">Autor (opcional)</label>
               <input type="text" id="ac-autor">
-              <label for="ac-url-media">Video embebible (obligatorio si el tipo es Video, ej. https://www.youtube.com/embed/ID)</label>
+              <label for="ac-divulgacion-ia">Divulgación de uso de IA</label>
+              <select id="ac-divulgacion-ia">
+                <option value="parcial">Asistencia parcial de IA</option>
+<option value="generado">Generado principalmente con IA</option>
+<option value="no">No se usó IA</option>
+              </select>
+              <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir este contenido. Se muestra públicamente en la tarjeta y el artículo.</p>
+              <label for="ac-url-media">Video/audio embebible (obligatorio si el tipo es Video o Audio, ej. https://www.youtube.com/embed/ID)</label>
               <input type="url" id="ac-url-media">
               <label for="ac-fuente-url">URL de la fuente (opcional)</label>
               <input type="url" id="ac-fuente-url">
