@@ -46,6 +46,13 @@ const SITE = {
   mcList:          'YOUR_MC_LIST',
   mcServer:        'us1',
 
+  // ── YouTube Data API (panel admin — elegir video del canal) ──
+  // Llave PÚBLICA restringida por dominio (HTTP referrer) en Google
+  // Cloud Console — es seguro exponerla en el navegador solo si está
+  // restringida así. Se lee de la variable de entorno YOUTUBE_API_KEY
+  // en el momento del build (Netlify), igual patrón que API_URL.
+  youtubeApiKey:   process.env.YOUTUBE_API_KEY || '',
+
   // ── Stripe (tienda) ──────────────────────────────────────
   // 1. En Stripe dashboard: Products → Payment Links
   // 2. Crear un link por producto y pegarlo en _content/productos.json
@@ -358,7 +365,8 @@ function buildPage(p) {
       apiUrl:      '${SITE.apiUrl}',
       mcUser:      '${SITE.mcUser}',
       mcList:      '${SITE.mcList}',
-      mcServer:    '${SITE.mcServer}'
+      mcServer:    '${SITE.mcServer}',
+      youtubeApiKey: '${SITE.youtubeApiKey}'
     };
   </script>
   <script src="auth.js" type="module"></script>
@@ -812,6 +820,7 @@ const PAGES = [
               <input type="url" id="ac-url-media" placeholder="Pega cualquier enlace de YouTube (watch, youtu.be, embed...)">
               <div class="admin-image-actions">
                 <button type="button" id="ac-autocompletar-youtube" class="admin-btn-cancel">Autocompletar desde YouTube</button>
+                <button type="button" id="ac-elegir-video-canal" class="admin-btn-cancel">Elegir de mi canal de YouTube</button>
               </div>
               <p class="admin-hint" id="ac-youtube-status"></p>
               <label for="ac-fuente-url">URL de la fuente (opcional)</label>
@@ -903,6 +912,16 @@ const PAGES = [
             <button type="button" id="image-picker-close" class="admin-btn-cancel">Cerrar</button>
           </div>
           <div class="image-picker-grid" id="image-picker-grid"></div>
+        </div>
+      </div>
+
+      <div class="image-picker-modal" id="youtube-picker-modal" hidden>
+        <div class="image-picker-box">
+          <div class="admin-toolbar">
+            <strong>Elegir video de @sabiasquePR</strong>
+            <button type="button" id="youtube-picker-close" class="admin-btn-cancel">Cerrar</button>
+          </div>
+          <div class="image-picker-grid" id="youtube-picker-grid"></div>
         </div>
       </div>`,
     extraScript: `<script src="editorial.js"></script>

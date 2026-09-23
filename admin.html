@@ -28,7 +28,7 @@
   <link rel="alternate" type="application/rss+xml" title="Sabías que PR — Noticias" href="https://sabiasquepr.com/rss.xml">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="images/icon-192.png">
-  <link rel="stylesheet" href="styles.css?v=ac655a7e">
+  <link rel="stylesheet" href="styles.css?v=4216c79f">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Panel de administración","description":"Panel de administración de Sabías que PR: gestión de noticias y productos.","url":"https://sabiasquepr.com/admin.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -250,6 +250,7 @@
               <input type="url" id="ac-url-media" placeholder="Pega cualquier enlace de YouTube (watch, youtu.be, embed...)">
               <div class="admin-image-actions">
                 <button type="button" id="ac-autocompletar-youtube" class="admin-btn-cancel">Autocompletar desde YouTube</button>
+                <button type="button" id="ac-elegir-video-canal" class="admin-btn-cancel">Elegir de mi canal de YouTube</button>
               </div>
               <p class="admin-hint" id="ac-youtube-status"></p>
               <label for="ac-fuente-url">URL de la fuente (opcional)</label>
@@ -351,6 +352,16 @@
             <button type="button" id="image-picker-close" class="admin-btn-cancel">Cerrar</button>
           </div>
           <div class="image-picker-grid" id="image-picker-grid"></div>
+        </div>
+      </div>
+
+      <div class="image-picker-modal" id="youtube-picker-modal" hidden>
+        <div class="image-picker-box">
+          <div class="admin-toolbar">
+            <strong>Elegir video de @sabiasquePR</strong>
+            <button type="button" id="youtube-picker-close" class="admin-btn-cancel">Cerrar</button>
+          </div>
+          <div class="image-picker-grid" id="youtube-picker-grid"></div>
         </div>
       </div>
     </main>
@@ -476,7 +487,8 @@
       apiUrl:      'http://localhost:3000',
       mcUser:      'YOUR_MC_USER',
       mcList:      'YOUR_MC_LIST',
-      mcServer:    'us1'
+      mcServer:    'us1',
+      youtubeApiKey: ''
     };
   </script>
   <script src="auth.js" type="module"></script>

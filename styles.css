@@ -1040,6 +1040,14 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .image-picker-item img{ display:block; width:100%; height:80px; object-fit:cover; }
 .image-picker-item:hover,
 .image-picker-item:focus-visible{ border-color:var(--focus); }
+.image-picker-item-title{
+  display:block;
+  padding:6px 8px;
+  font-size:.76rem;
+  line-height:1.3;
+  color:var(--ink);
+  text-align:left;
+}
 
 /* Citación de fuentes */
 .citation-group{

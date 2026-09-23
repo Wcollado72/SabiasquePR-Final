@@ -282,6 +282,14 @@
     });
     bindImagePicker('ac-url-portada', 'ac-url-portada-preview', 'ac-elegir-imagen');
     document.getElementById('ac-autocompletar-youtube').addEventListener('click', autocompletarYoutube);
+    document.getElementById('ac-elegir-video-canal').addEventListener('click', abrirSelectorCanalYoutube);
+    document.getElementById('youtube-picker-close').addEventListener('click', cerrarSelectorCanalYoutube);
+    document.getElementById('youtube-picker-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'youtube-picker-modal') cerrarSelectorCanalYoutube();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !document.getElementById('youtube-picker-modal').hidden) cerrarSelectorCanalYoutube();
+    });
 
     document.getElementById('ac-cita-sin-fuente').addEventListener('change', () => { toggleCitationFields(); updateCitationPreview(); });
     ['ac-cita-estilo', 'ac-cita-autor', 'ac-cita-anio', 'ac-cita-titulo-original', 'ac-cita-fecha-acceso', 'ac-fuente-texto', 'ac-fuente-url']
@@ -458,6 +466,76 @@
     } catch (err) {
       statusEl.textContent = 'No se pudo autocompletar: ' + err.message;
     }
+  }
+
+  // ── Selector del canal propio de YouTube (@sabiasquePR) ──────
+  // Usa una llave de API de Google restringida por dominio (segura para
+  // exponer en el navegador). No requiere que el admin inicie sesion en
+  // YouTube -- solo lee datos publicos del canal.
+  const YOUTUBE_HANDLE = 'sabiasquePR';
+  let youtubeVideosCache = null;
+
+  async function abrirSelectorCanalYoutube() {
+    const grid = document.getElementById('youtube-picker-grid');
+    document.getElementById('youtube-picker-modal').hidden = false;
+    const apiKey = window.SITE_CONFIG && window.SITE_CONFIG.youtubeApiKey;
+    if (!apiKey) {
+      grid.innerHTML = '<p class="foro-error">No hay una llave de YouTube configurada (YOUTUBE_API_KEY). Pídele a tu administrador de infraestructura que la agregue.</p>';
+      return;
+    }
+    if (!youtubeVideosCache) {
+      grid.innerHTML = '<p class="foro-loading">Cargando videos del canal...</p>';
+      try {
+        youtubeVideosCache = await cargarVideosDelCanal(apiKey);
+      } catch (err) {
+        grid.innerHTML = `<p class="foro-error">No se pudo cargar el canal: ${escapeHtml(err.message)}</p>`;
+        return;
+      }
+    }
+    if (!youtubeVideosCache.length) {
+      grid.innerHTML = '<p class="foro-empty">El canal no tiene videos públicos.</p>';
+      return;
+    }
+    grid.innerHTML = youtubeVideosCache.map((v) => `
+      <button type="button" class="image-picker-item" data-id="${v.id}" data-titulo="${escapeHtml(v.titulo)}" data-thumb="${v.miniatura}">
+        <img src="${v.miniatura}" alt="" loading="lazy">
+        <span class="image-picker-item-title">${escapeHtml(v.titulo)}</span>
+      </button>`).join('');
+    grid.querySelectorAll('.image-picker-item').forEach((btn) => btn.addEventListener('click', () => {
+      document.getElementById('ac-url-media').value = `https://www.youtube.com/embed/${btn.dataset.id}`;
+      document.getElementById('ac-tipo-formato').value = 'video';
+      if (!document.getElementById('ac-titulo').value.trim()) document.getElementById('ac-titulo').value = btn.dataset.titulo;
+      if (!document.getElementById('ac-fuente-texto').value.trim()) document.getElementById('ac-fuente-texto').value = 'Did U Know? PR';
+      if (!document.getElementById('ac-fuente-url').value.trim()) document.getElementById('ac-fuente-url').value = `https://www.youtube.com/@${YOUTUBE_HANDLE}`;
+      if (!document.getElementById('ac-url-portada').value.trim()) {
+        document.getElementById('ac-url-portada').value = btn.dataset.thumb;
+        updateImagePreview('ac-url-portada', 'ac-url-portada-preview');
+      }
+      if (!document.getElementById('ac-portada-alt').value.trim()) document.getElementById('ac-portada-alt').value = btn.dataset.titulo;
+      cerrarSelectorCanalYoutube();
+    }));
+  }
+
+  async function cargarVideosDelCanal(apiKey) {
+    const canalRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&forHandle=${YOUTUBE_HANDLE}&key=${apiKey}`);
+    const canalData = await canalRes.json();
+    if (!canalRes.ok) throw new Error(canalData.error?.message || `Error de YouTube (HTTP ${canalRes.status}).`);
+    const uploadsId = canalData.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+    if (!uploadsId) throw new Error('No se encontró el canal.');
+
+    const videosRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${uploadsId}&key=${apiKey}`);
+    const videosData = await videosRes.json();
+    if (!videosRes.ok) throw new Error(videosData.error?.message || `Error de YouTube (HTTP ${videosRes.status}).`);
+
+    return (videosData.items || []).map((item) => ({
+      id: item.snippet.resourceId.videoId,
+      titulo: item.snippet.title,
+      miniatura: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url || '',
+    }));
+  }
+
+  function cerrarSelectorCanalYoutube() {
+    document.getElementById('youtube-picker-modal').hidden = true;
   }
 
   async function loadContenidos() {
