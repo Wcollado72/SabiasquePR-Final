@@ -25,6 +25,9 @@ function validateNoticia(body, { partial = false } = {}) {
   if (body.destacado !== undefined && typeof body.destacado !== 'boolean') {
     errors.push('El campo "destacado" debe ser verdadero o falso.');
   }
+  if (body.publicado !== undefined && typeof body.publicado !== 'boolean') {
+    errors.push('El campo "publicado" debe ser verdadero o falso.');
+  }
   if (!partial || body.parrafos !== undefined) {
     if (!Array.isArray(body.parrafos) || body.parrafos.filter((p) => p && p.trim()).length === 0) {
       errors.push('Debe incluir al menos un parrafo.');

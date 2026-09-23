@@ -151,7 +151,8 @@
       document.getElementById('an-fuente-url').value = url;
       document.getElementById('an-fuente-texto').value = data.fuenteTexto || '';
       document.getElementById('an-divulgacion-ia').value = 'parcial';
-      statusEl.textContent = 'Listo — revisa y ajusta el texto antes de guardar. Falta elegir categoría, fecha e imagen.';
+      document.getElementById('an-publicado').checked = false;
+      statusEl.textContent = 'Listo — se guardó como borrador (sin publicar). Revisa el texto, elige categoría, fecha e imagen, y marca "Publicado" cuando esté listo.';
     } catch (err) {
       statusEl.textContent = 'No se pudo autocompletar: ' + err.message;
     }
@@ -176,7 +177,7 @@
     el.innerHTML = items.length ? items.map((n) => `
       <div class="admin-item">
         <div class="admin-item-info">
-          <strong>${escapeHtml(n.titulo)}${n.destacado ? ' <span class="foro-badge">★ Destacada</span>' : ''}</strong>
+          <strong>${escapeHtml(n.titulo)}${n.destacado ? ' <span class="foro-badge">★ Destacada</span>' : ''}${n.publicado === false ? ' <span class="foro-badge foro-badge-borrador">Borrador</span>' : ''}</strong>
           <span class="foro-meta">${escapeHtml(n.fecha_display)}</span>
         </div>
         <div class="admin-item-actions">
@@ -206,6 +207,7 @@
     document.getElementById('an-parrafos').value = (item?.parrafos || []).join('\n');
     document.getElementById('an-divulgacion-ia').value = item?.divulgacion_ia || 'no';
     document.getElementById('an-destacado').checked = Boolean(item?.destacado);
+    document.getElementById('an-publicado').checked = item ? Boolean(item.publicado) : true;
     document.getElementById('an-autocompletar-url').value = '';
     updateImagePreview('an-imagen', 'an-imagen-preview');
     setStatus(document.getElementById('an-status'), '', '');
@@ -235,6 +237,7 @@
       parrafos: document.getElementById('an-parrafos').value.split('\n').map((p) => p.trim()).filter(Boolean),
       divulgacionIa: document.getElementById('an-divulgacion-ia').value,
       destacado: document.getElementById('an-destacado').checked,
+      publicado: document.getElementById('an-publicado').checked,
     };
     setStatus(statusEl, 'info', 'Guardando...');
     try {

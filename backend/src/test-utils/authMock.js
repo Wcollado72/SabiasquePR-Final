@@ -22,4 +22,17 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-module.exports = { requireAuth, requireAdmin };
+// Version "suave" para pruebas: igual que requireAuth pero nunca rechaza --
+// sin x-test-user o con uno invalido, sigue con req.user = null.
+function tryAuth(req, _res, next) {
+  const raw = req.headers['x-test-user'];
+  if (!raw) { req.user = null; return next(); }
+  try {
+    req.user = JSON.parse(raw);
+  } catch {
+    req.user = null;
+  }
+  next();
+}
+
+module.exports = { requireAuth, requireAdmin, tryAuth };

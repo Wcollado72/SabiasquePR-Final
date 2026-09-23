@@ -82,4 +82,11 @@ describe('validateNoticia', () => {
   test('divulgacionIa es opcional (se asume "no")', () => {
     expect(validateNoticia(NOTICIA_VALIDA)).toEqual([]);
   });
+
+  test('acepta publicado booleano y rechaza otros tipos', () => {
+    expect(validateNoticia({ ...NOTICIA_VALIDA, publicado: true })).toEqual([]);
+    expect(validateNoticia({ ...NOTICIA_VALIDA, publicado: false })).toEqual([]);
+    expect(validateNoticia({ ...NOTICIA_VALIDA, publicado: 'si' }))
+      .toContain('El campo "publicado" debe ser verdadero o falso.');
+  });
 });

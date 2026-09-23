@@ -55,6 +55,20 @@ describe('GET /api/noticias', () => {
     expect(sql).toMatch(/WHERE categoria = \$1/);
     expect(params).toEqual(['salud']);
   });
+
+  test('sin autenticacion, solo pide publicadas', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] });
+    await request(app).get('/api/noticias');
+    const [sql] = pool.query.mock.calls[0];
+    expect(sql).toMatch(/publicado = true/);
+  });
+
+  test('como admin, tambien incluye borradores', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] });
+    await request(app).get('/api/noticias').set('x-test-user', ADMIN);
+    const [sql] = pool.query.mock.calls[0];
+    expect(sql).not.toMatch(/publicado/);
+  });
 });
 
 describe('GET /api/noticias/:id', () => {
@@ -64,11 +78,23 @@ describe('GET /api/noticias/:id', () => {
     expect(res.status).toBe(404);
   });
 
-  test('200 con la noticia si existe', async () => {
-    pool.query.mockResolvedValueOnce({ rows: [{ id: 'a', titulo: 'A' }] });
+  test('200 con la noticia si existe y esta publicada', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'a', titulo: 'A', publicado: true }] });
     const res = await request(app).get('/api/noticias/a');
     expect(res.status).toBe(200);
     expect(res.body.noticia.id).toBe('a');
+  });
+
+  test('404 si la noticia es un borrador y quien pregunta no es admin', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'a', titulo: 'A', publicado: false }] });
+    const res = await request(app).get('/api/noticias/a');
+    expect(res.status).toBe(404);
+  });
+
+  test('200 si la noticia es un borrador pero quien pregunta es admin', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'a', titulo: 'A', publicado: false }] });
+    const res = await request(app).get('/api/noticias/a').set('x-test-user', ADMIN);
+    expect(res.status).toBe(200);
   });
 });
 
@@ -117,7 +143,21 @@ describe('POST /api/noticias', () => {
     expect(res.status).toBe(201);
     const [sql, values] = pool.query.mock.calls[1];
     expect(sql).toMatch(/divulgacion_ia/);
-    expect(values[values.length - 1]).toBe('parcial');
+    expect(values[values.length - 2]).toBe('parcial');
+  });
+
+  test('201 con publicado=false lo persiste como borrador (por defecto es true)', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'un-titulo-cualquiera' }] });
+    const res = await request(app)
+      .post('/api/noticias')
+      .set('x-test-user', ADMIN)
+      .send({ ...NOTICIA_VALIDA, publicado: false });
+    expect(res.status).toBe(201);
+    const [sql, values] = pool.query.mock.calls[1];
+    expect(sql).toMatch(/publicado/);
+    expect(values[values.length - 1]).toBe(false);
   });
 });
 

@@ -1,6 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
-const { requireAuth, requireAdmin } = require('../middleware/auth');
+const { requireAuth, requireAdmin, tryAuth } = require('../middleware/auth');
 const { slugify } = require('../util/slugify');
 const { validateNoticia } = require('../validators/noticia');
 
@@ -25,6 +25,7 @@ function toRow(id, body, existing = {}) {
     body.categoria ?? existing.categoria ?? 'general',
     body.destacado ?? existing.destacado ?? false,
     body.divulgacionIa ?? existing.divulgacion_ia ?? 'no',
+    body.publicado ?? existing.publicado ?? true,
   ];
 }
 
@@ -50,27 +51,34 @@ async function saveNoticia(id, destacado, values, sql) {
   }
 }
 
-// GET /api/noticias?categoria=  -- lista, publico
-router.get('/', async (req, res) => {
+// GET /api/noticias?categoria=  -- publico ve solo publicadas; un admin
+// autenticado (tryAuth) ve tambien los borradores, para poder gestionarlos
+// desde el panel.
+router.get('/', tryAuth, async (req, res) => {
   try {
     const { categoria } = req.query;
+    const esAdmin = req.user?.rol === 'admin';
     const params = [];
-    let where = '';
-    if (categoria) { params.push(categoria); where = 'WHERE categoria = $1'; }
-    const { rows } = await pool.query(
-      `SELECT * FROM noticias ${where} ORDER BY fecha DESC, creado_en DESC`,
-      params
-    );
+    const where = [];
+    if (categoria) { params.push(categoria); where.push(`categoria = $${params.length}`); }
+    if (!esAdmin) where.push('publicado = true');
+    const sql = `SELECT * FROM noticias ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY fecha DESC, creado_en DESC`;
+    const { rows } = await pool.query(sql, params);
     res.json({ ok: true, noticias: rows });
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
-// GET /api/noticias/:id -- detalle, publico
-router.get('/:id', async (req, res) => {
+// GET /api/noticias/:id -- detalle. Un borrador no publicado se trata como
+// inexistente para quien no sea admin (no revela que existe).
+router.get('/:id', tryAuth, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM noticias WHERE id = $1', [req.params.id]);
-    if (rows.length === 0) return res.status(404).json({ ok: false, error: 'Noticia no encontrada.' });
-    res.json({ ok: true, noticia: rows[0] });
+    const noticia = rows[0];
+    const esAdmin = req.user?.rol === 'admin';
+    if (!noticia || (!noticia.publicado && !esAdmin)) {
+      return res.status(404).json({ ok: false, error: 'Noticia no encontrada.' });
+    }
+    res.json({ ok: true, noticia });
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
@@ -89,8 +97,8 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
       id,
       destacado,
       values,
-      `INSERT INTO noticias (id, titulo, fecha, fecha_display, imagen, imagen_alt, imagen_caption, clase, fuente_url, fuente_texto, parrafos, categoria, destacado, divulgacion_ia)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12,$13,$14) RETURNING *`
+      `INSERT INTO noticias (id, titulo, fecha, fecha_display, imagen, imagen_alt, imagen_caption, clase, fuente_url, fuente_texto, parrafos, categoria, destacado, divulgacion_ia, publicado)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12,$13,$14,$15) RETURNING *`
     );
     res.status(201).json({ ok: true, noticia: rows[0] });
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
@@ -112,7 +120,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
       values,
       `UPDATE noticias SET titulo=$2, fecha=$3, fecha_display=$4, imagen=$5, imagen_alt=$6,
          imagen_caption=$7, clase=$8, fuente_url=$9, fuente_texto=$10, parrafos=$11::jsonb, categoria=$12,
-         destacado=$13, divulgacion_ia=$14
+         destacado=$13, divulgacion_ia=$14, publicado=$15
        WHERE id=$1 RETURNING *`
     );
     res.json({ ok: true, noticia: rows[0] });

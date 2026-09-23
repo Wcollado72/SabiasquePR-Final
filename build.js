@@ -760,6 +760,7 @@ const PAGES = [
                 ${optionsHtml(DIVULGACION_IA)}
               </select>
               <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir esta noticia. Se muestra públicamente.</p>
+              <label class="admin-checkbox"><input type="checkbox" id="an-publicado" checked> Publicado (desmárcalo para guardar como borrador, visible solo en el panel)</label>
               <label class="admin-checkbox"><input type="checkbox" id="an-destacado"> Artículo destacado en la portada (reemplaza al anterior)</label>
               <div class="admin-form-actions">
                 <button type="submit">Guardar</button>

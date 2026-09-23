@@ -270,3 +270,12 @@ ALTER TABLE noticias ADD COLUMN IF NOT EXISTS divulgacion_ia text NOT NULL DEFAU
 ALTER TABLE noticias DROP CONSTRAINT IF EXISTS noticias_divulgacion_ia_check;
 ALTER TABLE noticias ADD CONSTRAINT noticias_divulgacion_ia_check
   CHECK (divulgacion_ia IN ('no', 'parcial', 'generado'));
+
+-- ============================================================
+-- Borradores en `noticias`: hasta ahora todo lo que existía en la
+-- tabla era publico de inmediato via GET /api/noticias, sin forma de
+-- guardar algo "sin publicar" para revisar despues. DEFAULT true para
+-- que las filas ya existentes (todas publicadas hoy) no cambien de
+-- comportamiento con esta migracion.
+-- ============================================================
+ALTER TABLE noticias ADD COLUMN IF NOT EXISTS publicado boolean NOT NULL DEFAULT true;

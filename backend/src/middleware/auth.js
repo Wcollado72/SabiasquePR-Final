@@ -49,4 +49,24 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-module.exports = { requireAuth, requireAdmin };
+// Version "suave": intenta identificar al usuario si manda un token valido,
+// pero NUNCA rechaza la peticion (sin token, o token invalido, simplemente
+// sigue con req.user = null). Para rutas publicas que quieren mostrar mas
+// informacion cuando quien pregunta es admin (ej. incluir borradores en
+// noticias), sin exigir login a los visitantes normales.
+async function tryAuth(req, _res, next) {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!token) { req.user = null; return next(); }
+  try {
+    const { payload } = await jwtVerify(token, getJWKS());
+    if (!payload.sub) { req.user = null; return next(); }
+    const { rows } = await pool.query('SELECT id, email, rol FROM perfiles WHERE id = $1', [payload.sub]);
+    req.user = rows[0] || null;
+  } catch {
+    req.user = null;
+  }
+  next();
+}
+
+module.exports = { requireAuth, requireAdmin, tryAuth };

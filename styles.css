@@ -453,6 +453,7 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   color:var(--accent);
 }
 .foro-badge{ color:var(--brand); }
+.foro-badge-borrador{ color:var(--ink-mute); }
 
 .section-head{
   display:flex;
