@@ -797,7 +797,11 @@ const PAGES = [
               </select>
               <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir este contenido. Se muestra públicamente en la tarjeta y el artículo.</p>
               <label for="ac-url-media">Video/audio embebible (obligatorio si el tipo es Video o Audio, ej. https://www.youtube.com/embed/ID)</label>
-              <input type="url" id="ac-url-media">
+              <input type="url" id="ac-url-media" placeholder="Pega cualquier enlace de YouTube (watch, youtu.be, embed...)">
+              <div class="admin-image-actions">
+                <button type="button" id="ac-autocompletar-youtube" class="admin-btn-cancel">Autocompletar desde YouTube</button>
+              </div>
+              <p class="admin-hint" id="ac-youtube-status"></p>
               <label for="ac-fuente-url">URL de la fuente (opcional)</label>
               <input type="url" id="ac-fuente-url">
               <label for="ac-fuente-texto">Nombre de la fuente (opcional)</label>

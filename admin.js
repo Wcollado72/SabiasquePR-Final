@@ -256,6 +256,7 @@
       updateImagePreview('ac-url-portada', 'ac-url-portada-preview');
     });
     bindImagePicker('ac-url-portada', 'ac-url-portada-preview', 'ac-elegir-imagen');
+    document.getElementById('ac-autocompletar-youtube').addEventListener('click', autocompletarYoutube);
 
     document.getElementById('ac-cita-sin-fuente').addEventListener('change', () => { toggleCitationFields(); updateCitationPreview(); });
     ['ac-cita-estilo', 'ac-cita-autor', 'ac-cita-anio', 'ac-cita-titulo-original', 'ac-cita-fecha-acceso', 'ac-fuente-texto', 'ac-fuente-url']
@@ -379,6 +380,59 @@
 
   function closeImagePicker() {
     document.getElementById('image-picker-modal').hidden = true;
+  }
+
+  // Extrae el ID de video de cualquier formato de enlace de YouTube
+  // (watch?v=, youtu.be/, embed/, shorts/) para poder normalizar a la URL
+  // embebible que usa el reproductor en linea (.card-play).
+  function extraerYoutubeId(url) {
+    const patrones = [
+      /youtube\.com\/watch\?v=([\w-]{11})/,
+      /youtu\.be\/([\w-]{11})/,
+      /youtube\.com\/embed\/([\w-]{11})/,
+      /youtube\.com\/shorts\/([\w-]{11})/,
+    ];
+    for (const p of patrones) {
+      const m = url.match(p);
+      if (m) return m[1];
+    }
+    return null;
+  }
+
+  // Rellena titulo/portada/fuente desde el oembed publico de YouTube (sin
+  // llave de API, gratis). NO toca el resumen (ac-subtitulo) a proposito --
+  // esa redaccion original la escribe el admin, incluso cuando el video es
+  // de otro canal (ver ac-fuente-texto/ac-fuente-url, que si se rellenan
+  // con el canal real para dar credito correcto).
+  async function autocompletarYoutube() {
+    const statusEl = document.getElementById('ac-youtube-status');
+    const raw = document.getElementById('ac-url-media').value.trim();
+    const id = extraerYoutubeId(raw);
+    if (!id) {
+      statusEl.textContent = 'Pega un enlace valido de YouTube primero (watch, youtu.be, embed o shorts).';
+      return;
+    }
+    statusEl.textContent = 'Buscando datos del video...';
+    try {
+      const watchUrl = `https://www.youtube.com/watch?v=${id}`;
+      const res = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(watchUrl)}&format=json`);
+      if (!res.ok) throw new Error('No se encontro ese video (¿es privado o fue eliminado?).');
+      const data = await res.json();
+
+      document.getElementById('ac-url-media').value = `https://www.youtube.com/embed/${id}`;
+      document.getElementById('ac-tipo-formato').value = 'video';
+      if (!document.getElementById('ac-titulo').value.trim()) document.getElementById('ac-titulo').value = data.title || '';
+      if (!document.getElementById('ac-fuente-texto').value.trim()) document.getElementById('ac-fuente-texto').value = data.author_name || '';
+      if (!document.getElementById('ac-fuente-url').value.trim()) document.getElementById('ac-fuente-url').value = data.author_url || watchUrl;
+      if (!document.getElementById('ac-url-portada').value.trim() && data.thumbnail_url) {
+        document.getElementById('ac-url-portada').value = data.thumbnail_url;
+        updateImagePreview('ac-url-portada', 'ac-url-portada-preview');
+      }
+      if (!document.getElementById('ac-portada-alt').value.trim()) document.getElementById('ac-portada-alt').value = data.title || '';
+      statusEl.textContent = `Listo: "${data.title}" — canal ${data.author_name}. Revisa los campos y escribe tu resumen antes de guardar.`;
+    } catch (err) {
+      statusEl.textContent = 'No se pudo autocompletar: ' + err.message;
+    }
   }
 
   async function loadContenidos() {
