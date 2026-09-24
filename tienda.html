@@ -28,7 +28,7 @@
   <link rel="alternate" type="application/rss+xml" title="Sabías que PR — Noticias" href="https://sabiasquepr.com/rss.xml">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="images/icon-192.png">
-  <link rel="stylesheet" href="styles.css?v=e04bcfaa">
+  <link rel="stylesheet" href="styles.css?v=9c22cb33">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Tienda","description":"Apoya el proyecto Sabías que PR con artículos únicos: camisetas, tazas, gorras y más.","url":"https://sabiasquepr.com/tienda.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -186,7 +186,13 @@
         <div id="auth-logged-in" style="display:none;">
           <p class="user-greeting">Bienvenido/a,</p>
           <p class="user-email" id="user-email-display"></p>
-          <button type="button" id="btn-logout">Cerrar sesión</button>
+          <p class="foro-badge" id="user-status-badge"></p>
+          <nav class="account-menu">
+            <a href="mi-cuenta.html">Mi cuenta</a>
+            <a href="reset-password.html">Cambiar contraseña</a>
+            <a href="admin.html" id="link-admin-shortcut" style="display:none;">Panel de administración</a>
+          </nav>
+          <button type="button" id="btn-logout" class="btn-logout">Cerrar sesión</button>
         </div>
       </div>
     </div>

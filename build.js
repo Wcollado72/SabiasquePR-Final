@@ -156,7 +156,13 @@ const LOGIN_BOX = `
         <div id="auth-logged-in" style="display:none;">
           <p class="user-greeting">Bienvenido/a,</p>
           <p class="user-email" id="user-email-display"></p>
-          <button type="button" id="btn-logout">Cerrar sesión</button>
+          <p class="foro-badge" id="user-status-badge"></p>
+          <nav class="account-menu">
+            <a href="mi-cuenta.html">Mi cuenta</a>
+            <a href="reset-password.html">Cambiar contraseña</a>
+            <a href="admin.html" id="link-admin-shortcut" style="display:none;">Panel de administración</a>
+          </nav>
+          <button type="button" id="btn-logout" class="btn-logout">Cerrar sesión</button>
         </div>
       </div>`;
 
@@ -928,6 +934,42 @@ const PAGES = [
     extraScript: `<script src="editorial.js"></script>
   <script src="citas.js"></script>
   <script src="admin.js"></script>`,
+  },
+
+  {
+    file: 'mi-cuenta.html',
+    title: 'Sabías que PR — Mi cuenta',
+    description: 'Administra tu perfil y revisa el estado de tu cuenta en Sabías que PR.',
+    heroH2: 'Mi cuenta',
+    noHero: true,
+    noHeading: true,
+    hideRefs: true,
+    mainClass: 'main-block',
+    mainContent: `
+      <section class="box box-blog contact-box" id="cuenta-gate" style="max-width:460px;margin:0 auto;">
+        <p class="foro-loading">Verificando acceso...</p>
+      </section>
+
+      <section class="box box-blog contact-box" id="cuenta-panel" style="max-width:460px;margin:0 auto;display:none;">
+        <h3>Mi cuenta</h3>
+        <p class="admin-hint">Correo</p>
+        <p class="user-email" id="cuenta-email"></p>
+        <p class="foro-badge" id="cuenta-estado"></p>
+
+        <form id="cuenta-form">
+          <label for="cuenta-nombre">Nombre</label>
+          <input type="text" id="cuenta-nombre" maxlength="80" placeholder="Tu nombre" spellcheck="true" lang="es">
+          <button type="submit">Guardar cambios</button>
+        </form>
+        <p id="cuenta-status" class="form-status" aria-live="polite"></p>
+
+        <p class="admin-hint" style="margin-top:16px;">¿Necesitas cambiar tu contraseña?
+          <a href="reset-password.html">Restablécela aquí</a>.
+        </p>
+        <p style="margin-top:4px;"><a href="admin.html" id="cuenta-link-admin" style="display:none;">Ir al panel de administración →</a></p>
+        <p style="margin-top:14px;"><a href="index.html">← Volver al inicio</a></p>
+      </section>`,
+    extraScript: `<script src="mi-cuenta.js"></script>`,
   },
 
   {

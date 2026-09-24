@@ -31,10 +31,10 @@ async function requireAuth(req, res, next) {
       `INSERT INTO perfiles (id, email)
        VALUES ($1, $2)
        ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email
-       RETURNING id, email, rol`,
+       RETURNING id, email, rol, nombre`,
       [payload.sub, payload.email || null]
     );
-    req.user = rows[0]; // { id, email, rol }
+    req.user = rows[0]; // { id, email, rol, nombre }
     next();
   } catch (err) {
     res.status(401).json({ ok: false, error: 'Token invalido o expirado.' });

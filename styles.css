@@ -454,6 +454,8 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 }
 .foro-badge{ color:var(--brand); }
 .foro-badge-borrador{ color:var(--ink-mute); }
+.foro-badge-premium{ color:var(--premium); }
+.foro-badge-admin{ color:var(--accent); }
 
 .section-head{
   display:flex;
@@ -1265,6 +1267,9 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 }
 .user-greeting{ font-size:.8rem; color:var(--ink-mute); margin:0; }
 .user-email{ font-size:.9rem; font-weight:700; margin:2px 0 8px; word-break:break-all; }
+.account-menu{ display:flex; flex-direction:column; gap:2px; margin:8px 0 10px; }
+.account-menu a{ font-size:.85rem; color:var(--ink); font-weight:600; text-decoration:none; padding:4px 0; }
+.account-menu a:hover{ color:var(--brand); text-decoration:underline; }
 
 .toast{
   position:fixed;

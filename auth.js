@@ -11,6 +11,7 @@
 const cfg = window.SITE_CONFIG || {};
 const SUPABASE_URL = cfg.supabaseUrl || '';
 const SUPABASE_KEY = cfg.supabaseKey || '';
+const API_URL = cfg.apiUrl || 'http://localhost:3000';
 const isConfigured = SUPABASE_URL && !SUPABASE_URL.includes('YOUR_SUPABASE');
 
 let supabase = null;
@@ -31,7 +32,7 @@ async function initAuth() {
     await checkSession();
 
     supabase.auth.onAuthStateChange((_event, session) => {
-      updateLoginUI(session?.user ?? null);
+      updateLoginUI(session);
     });
   } catch (err) {
     console.warn('[Auth] Error al inicializar Supabase:', err.message);
@@ -42,15 +43,21 @@ async function initAuth() {
 // ── SESIÓN ──────────────────────────────────────────────────
 async function checkSession() {
   const { data: { session } } = await supabase.auth.getSession();
-  updateLoginUI(session?.user ?? null);
+  updateLoginUI(session);
 }
 
+const ESTADO_LABEL = { admin: 'Administrador', premium: 'Premium activo', usuario: 'Cuenta gratuita' };
+const ESTADO_CLASE = { admin: 'foro-badge-admin', premium: 'foro-badge-premium', usuario: '' };
+
 // ── UI — actualizar login box según estado ──────────────────
-function updateLoginUI(user) {
+async function updateLoginUI(session) {
+  const user = session?.user ?? null;
   const loggedOut    = document.getElementById('auth-logged-out');
   const loggedIn     = document.getElementById('auth-logged-in');
   const emailEl      = document.getElementById('user-email-display');
   const triggerLabel = document.getElementById('login-trigger-label');
+  const statusEl     = document.getElementById('user-status-badge');
+  const adminLink    = document.getElementById('link-admin-shortcut');
 
   if (loggedOut && loggedIn) {
     if (user) {
@@ -68,6 +75,27 @@ function updateLoginUI(user) {
     triggerLabel.textContent = user
       ? (user.email.length > 18 ? user.email.slice(0, 16) + '…' : user.email)
       : 'Iniciar sesión';
+  }
+
+  if (statusEl) statusEl.textContent = '';
+  if (adminLink) adminLink.style.display = 'none';
+  if (!user || !session?.access_token) return;
+
+  // El rol (premium/admin) vive en `perfiles`, no en el JWT de Supabase,
+  // asi que hace falta esta llamada aparte para saber que mostrar.
+  try {
+    const res = await fetch(API_URL + '/api/me', {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+    const data = await res.json();
+    if (!data.ok) return;
+    if (statusEl) {
+      statusEl.textContent = ESTADO_LABEL[data.user.rol] || ESTADO_LABEL.usuario;
+      statusEl.className = 'foro-badge ' + (ESTADO_CLASE[data.user.rol] || '');
+    }
+    if (adminLink && data.user.rol === 'admin') adminLink.style.display = '';
+  } catch (err) {
+    console.warn('[Auth] No se pudo obtener el rol del usuario:', err.message);
   }
 }
 

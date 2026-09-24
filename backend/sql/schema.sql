@@ -102,12 +102,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_perfiles_stripe_customer_id
 -- estilos CSS). Permite filtrar el feed de Noticias por tema.
 ALTER TABLE noticias ADD COLUMN IF NOT EXISTS categoria text NOT NULL DEFAULT 'general';
 
-ALTER TABLE noticias DROP CONSTRAINT IF EXISTS noticias_categoria_check;
-ALTER TABLE noticias ADD CONSTRAINT noticias_categoria_check
-  CHECK (categoria IN (
-    'general', 'internacionales', 'crimenes', 'salud', 'deportes',
-    'finanzas', 'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura'
-  ));
+-- (El CHECK de esta columna se define mas abajo, junto al rename
+-- 'crimenes' -> 'crimen': definirlo tambien aqui con la lista vieja
+-- rompia cada re-corrida del script en cuanto existia una fila con el
+-- valor nuevo.)
 
 CREATE INDEX IF NOT EXISTS idx_noticias_categoria ON noticias(categoria, fecha DESC);
 
@@ -279,3 +277,10 @@ ALTER TABLE noticias ADD CONSTRAINT noticias_divulgacion_ia_check
 -- comportamiento con esta migracion.
 -- ============================================================
 ALTER TABLE noticias ADD COLUMN IF NOT EXISTS publicado boolean NOT NULL DEFAULT true;
+
+-- ============================================================
+-- Nombre visible en `perfiles` (pagina "Mi cuenta"). Opcional: hasta
+-- ahora el perfil solo tenia email/rol, sin nada editable por el
+-- propio usuario.
+-- ============================================================
+ALTER TABLE perfiles ADD COLUMN IF NOT EXISTS nombre text;

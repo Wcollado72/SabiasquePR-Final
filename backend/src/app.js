@@ -9,6 +9,7 @@ const productosRoutes = require('./routes/productos');
 const stripeRoutes = require('./routes/stripe');
 const stripeWebhookRoutes = require('./routes/stripeWebhook');
 const adminRoutes = require('./routes/admin');
+const perfilRoutes = require('./routes/perfil');
 
 function buildApp() {
   const app = express();
@@ -50,6 +51,7 @@ function buildApp() {
   app.use('/api/productos', productosRoutes);
   app.use('/api/stripe', stripeRoutes);
   app.use('/api/admin', adminRoutes);
+  app.use('/api/perfil', perfilRoutes);
 
   // Manejador de errores (CORS rechazado, JSON malformado, etc.)
   app.use((err, _req, res, _next) => {
