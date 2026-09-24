@@ -597,7 +597,7 @@ const PAGES = [
         <div class="lh-author-text">
           <p class="eyebrow">Lógica Humana</p>
           <h3>Aliado Imperfekto</h3>
-          <p>Aliado Imperfekto no es un nombre, es una idea. No es una persona perfecta hablándote desde un pedestal — es alguien que ha cometido errores serios, que sigue cometiéndolos, y que no finge tener la moral resuelta. Lo único que puede ofrecer con certeza es una intención: estar del lado de lo que hace avanzar a la humanidad entera, no a un grupo, una tribu o una bandera. Estas son las ideas, dudas y contradicciones de alguien que sigue intentando, imperfectamente, ser mejor aliado que ayer.</p>
+          <p>Aliado Imperfekto no es un nombre, ni una persona real — es un movimiento, una idea. No es una persona perfecta hablándote desde un pedestal — es alguien que ha cometido errores serios, que sigue cometiéndolos, y que no finge tener la moral resuelta. Lo único que puede ofrecer con certeza es una intención: estar del lado de lo que hace avanzar a la humanidad entera, no a un grupo, una tribu o una bandera. Estas son las ideas, dudas y contradicciones de alguien que sigue intentando, imperfectamente, ser mejor aliado que ayer.</p>
           <a href="premium.html" class="btn btn-premium">Hazte Premium →</a>
         </div>
       </section>
