@@ -139,8 +139,11 @@
       + fuente
       + cita;
 
+    root.insertAdjacentHTML('afterend', '<div id="recurso-comentarios"></div>');
+
     updateMeta(item);
     document.title = item.titulo + ' — ' + SITE_NAME;
+    window.SQPR.initComentarios?.({ tipo: 'contenido', itemId: item.id, containerId: 'recurso-comentarios' });
   }
 
   function setMeta(selector, attr, value) {

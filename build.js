@@ -555,6 +555,7 @@ const PAGES = [
         <div class="card-grid" id="article-more-grid"></div>
       </section>`,
     extraScript: `<script src="editorial.js"></script>
+  <script src="comentarios.js"></script>
   <script src="articulo.js"></script>`,
   },
 
@@ -573,6 +574,7 @@ const PAGES = [
       </article>`,
     extraScript: `<script src="editorial.js"></script>
   <script src="citas.js"></script>
+  <script src="comentarios.js"></script>
   <script src="recurso.js"></script>`,
   },
 

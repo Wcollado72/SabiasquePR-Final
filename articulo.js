@@ -75,9 +75,12 @@
       + '<div class="article-body">' + paragraphs + '</div>'
       + source;
 
+    root.insertAdjacentHTML('afterend', '<div id="articulo-comentarios"></div>');
+
     updateMeta(art);
     trackProgress(root);
     document.title = art.titulo + ' — ' + SITE_NAME;
+    window.SQPR.initComentarios?.({ tipo: 'noticia', itemId: art.id, containerId: 'articulo-comentarios' });
   }
 
   // ── Metadatos (SEO / redes) ─────────────────────────────────
