@@ -37,8 +37,37 @@
       const data = await apiFetch('/api/me');
       renderPerfil(data.user);
       bindForm();
+      loadPedidos();
     } catch (err) {
       showGate('⚠️ ' + err.message);
+    }
+  }
+
+  const ESTADO_PEDIDO_LABEL = { pendiente: 'Pendiente', pagada: 'Pagada', cancelada: 'Cancelada' };
+
+  async function loadPedidos() {
+    const box = document.getElementById('cuenta-pedidos');
+    const list = document.getElementById('cuenta-pedidos-list');
+    if (!box || !list) return;
+    box.style.display = 'block';
+    try {
+      const data = await apiFetch('/api/ordenes');
+      if (data.ordenes.length === 0) {
+        list.innerHTML = '<p class="admin-hint">Todavía no tienes pedidos.</p>';
+        return;
+      }
+      list.innerHTML = `<div class="admin-list">${data.ordenes.map((o) => {
+        const fecha = new Date(o.creado_en).toLocaleDateString('es-PR', { year: 'numeric', month: 'long', day: 'numeric' });
+        const items = (o.items || []).map((i) => `${i.cantidad}× ${i.nombre}`).join(', ');
+        return `<div class="admin-item">
+          <div class="admin-item-info">
+            <p><strong>$${Number(o.total).toFixed(2)}</strong> — ${ESTADO_PEDIDO_LABEL[o.estado] || o.estado}</p>
+            <p class="admin-hint">${fecha} · ${items}</p>
+          </div>
+        </div>`;
+      }).join('')}</div>`;
+    } catch (err) {
+      list.innerHTML = `<p class="form-status error">${err.message}</p>`;
     }
   }
 

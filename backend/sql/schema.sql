@@ -284,3 +284,18 @@ ALTER TABLE noticias ADD COLUMN IF NOT EXISTS publicado boolean NOT NULL DEFAULT
 -- propio usuario.
 -- ============================================================
 ALTER TABLE perfiles ADD COLUMN IF NOT EXISTS nombre text;
+
+-- ============================================================
+-- Checkout unificado de Tienda: los Payment Links estaticos por
+-- producto no permiten combinar varios productos distintos en un solo
+-- pago, y ningun webhook los procesaba (ninguna compra quedaba
+-- registrada). Se agrega el Price ID real de Stripe por producto para
+-- que el backend arme una sesion de checkout con multiples line_items,
+-- igual que ya se hace con la suscripcion premium.
+-- ============================================================
+ALTER TABLE productos ADD COLUMN IF NOT EXISTS stripe_price_id text;
+
+-- Evita registrar el mismo pedido dos veces si Stripe reintenta la
+-- entrega del webhook (comportamiento normal y esperado de Stripe).
+CREATE UNIQUE INDEX IF NOT EXISTS idx_ordenes_stripe_session_id
+  ON ordenes(stripe_session_id) WHERE stripe_session_id IS NOT NULL;

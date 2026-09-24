@@ -899,7 +899,10 @@ const PAGES = [
               <input type="text" id="ap-imagen" required placeholder="images/mi-producto.webp">
               <label for="ap-imagen-alt">Texto alternativo de la imagen</label>
               <input type="text" id="ap-imagen-alt" required>
-              <label for="ap-stripe-link">Enlace de pago de Stripe (opcional)</label>
+              <label for="ap-stripe-price-id">Price ID de Stripe (para el checkout del carrito)</label>
+              <input type="text" id="ap-stripe-price-id" placeholder="price_...">
+              <p class="admin-hint">Créalo en Stripe → Product catalog → Add product (tipo "One time"), y pega aquí el Price ID (no el Product ID).</p>
+              <label for="ap-stripe-link">Enlace de pago directo de Stripe (opcional, respaldo)</label>
               <input type="url" id="ap-stripe-link">
               <label class="admin-checkbox"><input type="checkbox" id="ap-disponible" checked> Disponible en la tienda</label>
               <div class="admin-form-actions">
@@ -968,6 +971,11 @@ const PAGES = [
         </p>
         <p style="margin-top:4px;"><a href="admin.html" id="cuenta-link-admin" style="display:none;">Ir al panel de administración →</a></p>
         <p style="margin-top:14px;"><a href="index.html">← Volver al inicio</a></p>
+      </section>
+
+      <section class="box box-blog contact-box" id="cuenta-pedidos" style="max-width:460px;margin:24px auto 0;display:none;">
+        <h3>Mis pedidos</h3>
+        <div id="cuenta-pedidos-list"><p class="foro-loading">Cargando...</p></div>
       </section>`,
     extraScript: `<script src="mi-cuenta.js"></script>`,
   },

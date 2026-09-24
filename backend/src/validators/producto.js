@@ -12,6 +12,10 @@ function validateProducto(body, { partial = false } = {}) {
   if (body.precio !== undefined && (Number.isNaN(Number(body.precio)) || Number(body.precio) <= 0)) {
     errors.push('El precio debe ser un numero mayor que cero.');
   }
+  if (body.stripePriceId !== undefined && body.stripePriceId !== null && body.stripePriceId !== ''
+      && !body.stripePriceId.startsWith('price_')) {
+    errors.push('El Price ID de Stripe debe empezar con "price_".');
+  }
   return errors;
 }
 

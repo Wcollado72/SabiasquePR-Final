@@ -34,6 +34,20 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
             [session.customer, session.subscription, session.client_reference_id]
           );
         }
+        if (session.mode === 'payment' && session.client_reference_id && session.payment_status === 'paid') {
+          const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 100 });
+          const items = lineItems.data.map((li) => ({
+            nombre: li.description,
+            cantidad: li.quantity,
+            total: li.amount_total / 100,
+          }));
+          await pool.query(
+            `INSERT INTO ordenes (usuario_id, items, total, stripe_session_id, estado)
+             VALUES ($1, $2, $3, $4, 'pagada')
+             ON CONFLICT (stripe_session_id) WHERE stripe_session_id IS NOT NULL DO NOTHING`,
+            [session.client_reference_id, JSON.stringify(items), session.amount_total / 100, session.id]
+          );
+        }
         break;
       }
       case 'customer.subscription.updated': {

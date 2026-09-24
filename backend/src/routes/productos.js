@@ -8,6 +8,7 @@ const router = express.Router();
 
 function toRow(id, body, existing = {}) {
   const stripeLink = body.stripeLink !== undefined ? (body.stripeLink || null) : (existing.stripe_link ?? null);
+  const stripePriceId = body.stripePriceId !== undefined ? (body.stripePriceId || null) : (existing.stripe_price_id ?? null);
   const disponible = body.disponible !== undefined ? !!body.disponible : (existing.disponible ?? true);
   return [
     id,
@@ -18,6 +19,7 @@ function toRow(id, body, existing = {}) {
     body.imagenAlt ?? existing.imagen_alt,
     stripeLink,
     disponible,
+    stripePriceId,
   ];
 }
 
@@ -49,8 +51,8 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
 
     const values = toRow(id, req.body);
     const { rows } = await pool.query(
-      `INSERT INTO productos (id, nombre, descripcion, precio, imagen, imagen_alt, stripe_link, disponible)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      `INSERT INTO productos (id, nombre, descripcion, precio, imagen, imagen_alt, stripe_link, disponible, stripe_price_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
       values
     );
     res.status(201).json({ ok: true, producto: rows[0] });
@@ -67,7 +69,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
 
     const values = toRow(req.params.id, req.body, existingRows[0]);
     const { rows } = await pool.query(
-      `UPDATE productos SET nombre=$2, descripcion=$3, precio=$4, imagen=$5, imagen_alt=$6, stripe_link=$7, disponible=$8
+      `UPDATE productos SET nombre=$2, descripcion=$3, precio=$4, imagen=$5, imagen_alt=$6, stripe_link=$7, disponible=$8, stripe_price_id=$9
        WHERE id=$1 RETURNING *`,
       values
     );

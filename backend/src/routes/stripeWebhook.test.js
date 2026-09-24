@@ -1,5 +1,10 @@
 jest.mock('../db', () => ({ pool: { query: jest.fn() } }));
-jest.mock('../lib/stripe', () => ({ stripe: { webhooks: { constructEvent: jest.fn() } } }));
+jest.mock('../lib/stripe', () => ({
+  stripe: {
+    webhooks: { constructEvent: jest.fn() },
+    checkout: { sessions: { listLineItems: jest.fn() } },
+  },
+}));
 
 const request = require('supertest');
 const { buildApp } = require('../app');
@@ -11,6 +16,7 @@ const app = buildApp();
 beforeEach(() => {
   pool.query.mockReset();
   stripe.webhooks.constructEvent.mockReset();
+  stripe.checkout.sessions.listLineItems.mockReset();
 });
 
 describe('POST /api/stripe/webhook', () => {
@@ -60,6 +66,45 @@ describe('POST /api/stripe/webhook', () => {
     const res = await request(app).post('/api/stripe/webhook').send({});
     expect(res.status).toBe(200);
     expect(pool.query).not.toHaveBeenCalled();
+  });
+
+  test('checkout.session.completed (compra de Tienda) registra el pedido en ordenes', async () => {
+    stripe.webhooks.constructEvent.mockReturnValue({
+      type: 'checkout.session.completed',
+      data: { object: {
+        id: 'cs_1', mode: 'payment', client_reference_id: 'user-4',
+        payment_status: 'paid', amount_total: 3400,
+      } },
+    });
+    stripe.checkout.sessions.listLineItems.mockResolvedValue({
+      data: [
+        { description: 'Taza "Nuevos Humanos"', quantity: 2, amount_total: 2400 },
+        { description: 'Libreta "Educación y Lógica"', quantity: 1, amount_total: 1000 },
+      ],
+    });
+    pool.query.mockResolvedValueOnce({});
+    const res = await request(app).post('/api/stripe/webhook').send({});
+    expect(res.status).toBe(200);
+    const [sql, params] = pool.query.mock.calls[0];
+    expect(sql).toMatch(/INSERT INTO ordenes/);
+    expect(params[0]).toBe('user-4');
+    expect(JSON.parse(params[1])).toEqual([
+      { nombre: 'Taza "Nuevos Humanos"', cantidad: 2, total: 24 },
+      { nombre: 'Libreta "Educación y Lógica"', cantidad: 1, total: 10 },
+    ]);
+    expect(params[2]).toBe(34);
+    expect(params[3]).toBe('cs_1');
+  });
+
+  test('checkout.session.completed no registra pedido de Tienda si el pago no esta confirmado', async () => {
+    stripe.webhooks.constructEvent.mockReturnValue({
+      type: 'checkout.session.completed',
+      data: { object: { id: 'cs_2', mode: 'payment', client_reference_id: 'user-5', payment_status: 'unpaid' } },
+    });
+    const res = await request(app).post('/api/stripe/webhook').send({});
+    expect(res.status).toBe(200);
+    expect(pool.query).not.toHaveBeenCalled();
+    expect(stripe.checkout.sessions.listLineItems).not.toHaveBeenCalled();
   });
 
   test('customer.subscription.deleted regresa el rol a usuario', async () => {

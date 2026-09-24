@@ -723,6 +723,7 @@
     document.getElementById('ap-precio').value = item?.precio ?? '';
     document.getElementById('ap-imagen').value = item?.imagen || '';
     document.getElementById('ap-imagen-alt').value = item?.imagen_alt || '';
+    document.getElementById('ap-stripe-price-id').value = item?.stripe_price_id || '';
     document.getElementById('ap-stripe-link').value = item?.stripe_link || '';
     document.getElementById('ap-disponible').checked = item ? !!item.disponible : true;
     setStatus(document.getElementById('ap-status'), '', '');
@@ -746,6 +747,7 @@
       imagen: document.getElementById('ap-imagen').value.trim(),
       imagenAlt: document.getElementById('ap-imagen-alt').value.trim(),
       stripeLink: document.getElementById('ap-stripe-link').value.trim() || null,
+      stripePriceId: document.getElementById('ap-stripe-price-id').value.trim() || null,
       disponible: document.getElementById('ap-disponible').checked,
     };
     setStatus(statusEl, 'info', 'Guardando...');

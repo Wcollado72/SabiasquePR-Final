@@ -333,7 +333,10 @@
               <input type="text" id="ap-imagen" required placeholder="images/mi-producto.webp">
               <label for="ap-imagen-alt">Texto alternativo de la imagen</label>
               <input type="text" id="ap-imagen-alt" required>
-              <label for="ap-stripe-link">Enlace de pago de Stripe (opcional)</label>
+              <label for="ap-stripe-price-id">Price ID de Stripe (para el checkout del carrito)</label>
+              <input type="text" id="ap-stripe-price-id" placeholder="price_...">
+              <p class="admin-hint">Créalo en Stripe → Product catalog → Add product (tipo "One time"), y pega aquí el Price ID (no el Product ID).</p>
+              <label for="ap-stripe-link">Enlace de pago directo de Stripe (opcional, respaldo)</label>
               <input type="url" id="ap-stripe-link">
               <label class="admin-checkbox"><input type="checkbox" id="ap-disponible" checked> Disponible en la tienda</label>
               <div class="admin-form-actions">

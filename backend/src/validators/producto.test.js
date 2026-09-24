@@ -43,4 +43,14 @@ describe('validateProducto', () => {
     const errors = validateProducto({ precio: -1 }, { partial: true });
     expect(errors).toContain('El precio debe ser un numero mayor que cero.');
   });
+
+  test('acepta un stripePriceId valido y stripePriceId ausente', () => {
+    expect(validateProducto({ ...PRODUCTO_VALIDO, stripePriceId: 'price_123abc' })).toEqual([]);
+    expect(validateProducto(PRODUCTO_VALIDO)).toEqual([]);
+  });
+
+  test('rechaza un stripePriceId que no empieza con "price_"', () => {
+    const errors = validateProducto({ ...PRODUCTO_VALIDO, stripePriceId: 'prod_123abc' });
+    expect(errors).toContain('El Price ID de Stripe debe empezar con "price_".');
+  });
 });

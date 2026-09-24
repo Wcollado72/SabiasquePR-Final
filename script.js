@@ -183,39 +183,49 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCartUI();
   };
 
-  // Checkout → Stripe
-  // Si todos los productos tienen el mismo Stripe link → redirigir directo
-  // Si hay mezcla → mostrar lista con links individuales
-  cartCheckout?.addEventListener('click', () => {
+  // Checkout unificado → una sola sesion de Stripe con todos los productos
+  // del carrito como line_items, sin importar cuantos sean. Requiere sesion
+  // iniciada porque el pedido queda asociado a la cuenta (ver "Mis pedidos").
+  function waitForSharedSupabase(timeoutMs = 1500, intervalMs = 50) {
+    return new Promise((resolve) => {
+      const start = Date.now();
+      (function check() {
+        if (window.supabase) return resolve(window.supabase);
+        if (Date.now() - start >= timeoutMs) return resolve(null);
+        setTimeout(check, intervalMs);
+      })();
+    });
+  }
+
+  cartCheckout?.addEventListener('click', async () => {
     if (cart.length === 0) { showToast('Tu carrito está vacío.'); return; }
 
-    const realLinks = cart.filter(i => i.link && !i.link.startsWith('YOUR_'));
-
-    if (realLinks.length === 0) {
-      // Stripe no configurado aún
-      showToast('🛒 Pagos vía Stripe próximamente. ¡Gracias por tu interés!');
+    const supabase = await waitForSharedSupabase();
+    const { data: { session } = {} } = supabase ? await supabase.auth.getSession() : {};
+    if (!session) {
+      showToast('Inicia sesión para completar tu compra.');
+      closeCart();
+      window.openLoginModal?.();
       return;
     }
 
-    if (realLinks.length === 1 && cart.length === 1) {
-      // Un solo producto con link → ir directo
-      window.open(realLinks[0].link, '_blank');
-    } else {
-      // Múltiples productos → mostrar resumen con links individuales
-      const summary = cart.map(i => {
-        const hasLink = i.link && !i.link.startsWith('YOUR_');
-        return hasLink
-          ? `• <a href="${i.link}" target="_blank" rel="noopener">${i.name} x${i.qty} — $${(i.price*i.qty).toFixed(2)}</a>`
-          : `• ${i.name} x${i.qty} — $${(i.price*i.qty).toFixed(2)} (link próximamente)`;
-      }).join('<br>');
-      const div = cartItemsEl;
-      if (div) {
-        div.innerHTML = `<div class="checkout-summary">
-          <p style="font-weight:700;margin-bottom:8px;">Compra por producto:</p>
-          <p style="line-height:2;">${summary}</p>
-          <p style="margin-top:12px;font-size:0.78rem;color:#6b7280;">Nota: En la versión completa habrá un checkout unificado vía Stripe.</p>
-        </div>`;
-      }
+    const apiUrl = (window.SITE_CONFIG && window.SITE_CONFIG.apiUrl) || 'http://localhost:3000';
+    const originalLabel = cartCheckout.textContent;
+    cartCheckout.disabled = true;
+    cartCheckout.textContent = 'Procesando...';
+    try {
+      const res = await fetch(apiUrl + '/api/stripe/create-checkout-session-tienda', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ items: cart.map(i => ({ productId: i.id, qty: i.qty })) }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || 'No se pudo iniciar el pago.');
+      window.location.href = data.url;
+    } catch (err) {
+      showToast('⚠️ ' + err.message);
+      cartCheckout.disabled = false;
+      cartCheckout.textContent = originalLabel;
     }
   });
 
