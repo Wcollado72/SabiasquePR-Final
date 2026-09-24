@@ -32,3 +32,4 @@
   from = "/"
   to = "/nuevos-humanos.html"
   status = 200
+  force = true
