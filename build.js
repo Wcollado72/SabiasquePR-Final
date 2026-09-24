@@ -592,7 +592,7 @@ const PAGES = [
     mainContent: `
       <section class="lh-author-intro" id="rh-lh-intro">
         <div class="lh-author-photo-wrap">
-          <img src="images/aliado-imperfekto-retrato.webp" alt="Aliado Imperfekto: una figura encapuchada con ropa remendada sostiene un farol encendido, de pie frente a una multitud diversa que camina hacia la misma luz, con un mapa del mundo de fondo" class="lh-author-photo">
+          <img src="images/aliado-imperfekto-retrato-v2-sin-texto.webp" alt="Aliado Imperfekto: una figura encapuchada con el rostro oculto en sombra y una grieta dorada en el hombro, sostiene un farol encendido de espaldas al espectador, junto a una multitud diversa que camina hacia el horizonte al atardecer, con un mapa del mundo de fondo" class="lh-author-photo">
         </div>
         <div class="lh-author-text">
           <p class="eyebrow">Lógica Humana</p>
