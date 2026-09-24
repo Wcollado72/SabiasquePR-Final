@@ -562,6 +562,29 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   color:var(--premium-ink);
 }
 
+/* Muro de pago (vista previa parcial) en el detalle de un contenido premium */
+.paywall-teaser{
+  position:relative;
+  max-height:220px;
+  overflow:hidden;
+}
+.paywall-fade{
+  position:absolute;
+  bottom:0; left:0; right:0;
+  height:120px;
+  background:linear-gradient(to bottom, transparent, var(--bg));
+  pointer-events:none;
+}
+.paywall-cta{
+  margin-top:8px;
+  padding:20px;
+  text-align:center;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:var(--panel);
+}
+.paywall-cta p{ margin:0 0 12px; color:var(--ink-soft); }
+
 /* Bloque de identidad de autor de "Lógica Humana" (Revolución Humana) */
 .lh-author-intro{
   display:flex;

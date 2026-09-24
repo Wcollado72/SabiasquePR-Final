@@ -89,9 +89,20 @@
       ? '<div class="audio-embed"><audio controls src="' + S.escapeHtml(item.url_media) + '"></audio></div>'
       : '';
 
-    const cuerpo = item.cuerpo
-      ? '<div class="article-body">' + S.sanitizeHtml(item.cuerpo).split(/\n{2,}/).map((p) => '<p>' + p + '</p>').join('') + '</div>'
-      : '<div class="article-body"><p>' + S.escapeHtml(item.subtitulo_resumen) + '</p></div>';
+    const cuerpoTexto = item.cuerpo
+      ? S.sanitizeHtml(item.cuerpo).split(/\n{2,}/).map((p) => '<p>' + p + '</p>').join('')
+      : '<p>' + S.escapeHtml(item.subtitulo_resumen) + '</p>';
+
+    // Muro de pago: el backend ya trunco cuerpo/anulo url_media si
+    // item.bloqueado -- aqui solo se agrega la presentacion visual
+    // (vista previa cortada + degradado + CTA), nunca se decide el acceso.
+    const cuerpo = item.bloqueado
+      ? '<div class="article-body paywall-teaser">' + cuerpoTexto + '<div class="paywall-fade"></div></div>'
+        + '<div class="paywall-cta">'
+        + '<p>Este es contenido Premium. Suscríbete para seguir leyendo/viendo completo.</p>'
+        + '<a href="premium.html" class="btn btn-premium">Hazte Premium →</a>'
+        + '</div>'
+      : '<div class="article-body">' + cuerpoTexto + '</div>';
 
     const sourceUrl = S.safeUrl(item.fuente_url);
     const fuente = item.fuente_texto
