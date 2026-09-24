@@ -44,6 +44,18 @@ async function initAuth() {
 async function checkSession() {
   const { data: { session } } = await supabase.auth.getSession();
   updateLoginUI(session);
+
+  // Red de seguridad: en algunas cargas de pagina (ej. al volver de un
+  // redirect externo como Stripe) la primera lectura de sesion puede
+  // llegar vacia por una condicion de carrera del SDK, aunque el token
+  // siga guardado. Se vuelve a revisar una vez mas poco despues para
+  // corregir la UI si hacia falta, sin reintentar indefinidamente.
+  if (!session) {
+    setTimeout(async () => {
+      const { data: { session: retry } } = await supabase.auth.getSession();
+      if (retry) updateLoginUI(retry);
+    }, 1000);
+  }
 }
 
 const ESTADO_LABEL = { admin: 'Administrador', premium: 'Premium activo', usuario: 'Cuenta gratuita' };
@@ -52,6 +64,8 @@ const ESTADO_CLASE = { admin: 'foro-badge-admin', premium: 'foro-badge-premium',
 // ── UI — actualizar login box según estado ──────────────────
 async function updateLoginUI(session) {
   const user = session?.user ?? null;
+  if (user) armInactivityWatch(); else disarmInactivityWatch();
+
   const loggedOut    = document.getElementById('auth-logged-out');
   const loggedIn     = document.getElementById('auth-logged-in');
   const emailEl      = document.getElementById('user-email-display');
@@ -97,6 +111,30 @@ async function updateLoginUI(session) {
   } catch (err) {
     console.warn('[Auth] No se pudo obtener el rol del usuario:', err.message);
   }
+}
+
+// ── CIERRE DE SESIÓN POR INACTIVIDAD (30 min) ───────────────
+const INACTIVITY_LIMIT_MS = 30 * 60 * 1000;
+const ACTIVITY_EVENTS = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+let inactivityTimer = null;
+
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(async () => {
+    await signOut();
+    setAuthStatus('Tu sesión se cerró por inactividad.', 'info');
+  }, INACTIVITY_LIMIT_MS);
+}
+
+function armInactivityWatch() {
+  resetInactivityTimer();
+  ACTIVITY_EVENTS.forEach((evt) => document.addEventListener(evt, resetInactivityTimer, { passive: true }));
+}
+
+function disarmInactivityWatch() {
+  clearTimeout(inactivityTimer);
+  inactivityTimer = null;
+  ACTIVITY_EVENTS.forEach((evt) => document.removeEventListener(evt, resetInactivityTimer));
 }
 
 function setAuthStatus(msg, type = 'info') {
