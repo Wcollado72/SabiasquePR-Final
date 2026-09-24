@@ -64,6 +64,15 @@ describe('GET /api/contenidos', () => {
     expect(params).toEqual(['audio', 'podcast']);
   });
 
+  test('la lista tambien oculta url_media de un video premium bloqueado', async () => {
+    pool.query.mockResolvedValueOnce({
+      rows: [{ id: 'p1', es_premium: true, url_media: 'https://youtube.com/embed/x', cuerpo: 'x'.repeat(400) }],
+    });
+    const res = await request(app).get('/api/contenidos');
+    expect(res.body.contenidos[0].bloqueado).toBe(true);
+    expect(res.body.contenidos[0].url_media).toBeNull();
+  });
+
   test('filtra por subseccion', async () => {
     pool.query.mockResolvedValueOnce({ rows: [] });
     const res = await request(app).get('/api/contenidos?seccion=revolucion-humana&subseccion=logica-humana');

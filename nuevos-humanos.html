@@ -28,7 +28,7 @@
   <link rel="alternate" type="application/rss+xml" title="Sabías que PR — Noticias" href="https://sabiasquepr.com/rss.xml">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="images/icon-192.png">
-  <link rel="stylesheet" href="styles.css?v=9c22cb33">
+  <link rel="stylesheet" href="styles.css?v=1b380fb7">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Revolución Humana","description":"Videos, ensayos y noticias sobre lo que la humanidad está logrando, descubriendo y sanando.","url":"https://sabiasquepr.com/nuevos-humanos.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -90,8 +90,22 @@
 
     <main class="main main-block" id="main-content" tabindex="-1">
       
+      <section class="lh-author-intro" id="rh-lh-intro">
+        <img src="images/nuevoshumanos.webp" alt="" class="lh-author-photo">
+        <div class="lh-author-text">
+          <p class="eyebrow">Lógica Humana</p>
+          <h3>Sección de autor</h3>
+          <p>Ensayos, pódcasts y debates directos, sin filtro — mi mirada personal sobre lo que está pasando en Puerto Rico y el mundo. Esta es la sección que más sostiene el proyecto: suscribirte como Premium te da acceso completo.</p>
+          <a href="premium.html" class="btn btn-premium">Hazte Premium →</a>
+        </div>
+      </section>
+      <nav class="foro-filters" id="rh-subnav" data-filter-param="subseccion">
+        <button type="button" class="foro-filter-btn active" data-subseccion="">Todo</button>
+        <button type="button" class="foro-filter-btn" data-subseccion="logica-humana">Lógica Humana</button>
+        <button type="button" class="foro-filter-btn" data-subseccion="nuevo-pr">Nuevo PR</button>
+      </nav>
       <p class="home-hint" id="rh-hint" aria-live="polite"></p>
-      <div class="card-grid contenidos-grid" id="rh-list" data-seccion="revolucion-humana" data-hint="rh-hint" aria-live="polite" aria-busy="true"></div>
+      <div class="card-grid contenidos-grid" id="rh-list" data-seccion="revolucion-humana" data-filters="rh-subnav" data-hint="rh-hint" aria-live="polite" aria-busy="true"></div>
       <noscript><p class="empty-state">Activa JavaScript para ver este contenido.</p></noscript>
     </main>
 

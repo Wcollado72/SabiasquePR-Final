@@ -157,6 +157,9 @@
     const iaBadge = iaLabel
       ? '<span class="badge-ia ' + DIVULGACION_IA_CLASS[item.divulgacion_ia] + '">' + escapeHtml(iaLabel) + '</span>'
       : '';
+    const premiumBadge = item.es_premium
+      ? '<span class="badge-premium">🔒 Premium</span>'
+      : '';
 
     const body = '<div class="card-body">'
       + '<span class="eyebrow">' + escapeHtml(catLabel) + '</span>'
@@ -164,6 +167,7 @@
       + '<p class="card-dek">' + escapeHtml(item.subtitulo_resumen) + '</p>'
       + '<p class="card-meta">' + contenidoMetaLine(item) + '</p>'
       + iaBadge
+      + premiumBadge
       + '</div>';
 
     const reproducirLabel = REPRODUCIBLES[item.tipo_formato];

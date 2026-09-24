@@ -585,8 +585,22 @@ const PAGES = [
     heroClass: 'hero-positivo',
     mainClass: 'main-block',
     mainContent: `
+      <section class="lh-author-intro" id="rh-lh-intro">
+        <img src="images/nuevoshumanos.webp" alt="" class="lh-author-photo">
+        <div class="lh-author-text">
+          <p class="eyebrow">Lógica Humana</p>
+          <h3>Sección de autor</h3>
+          <p>Ensayos, pódcasts y debates directos, sin filtro — mi mirada personal sobre lo que está pasando en Puerto Rico y el mundo. Esta es la sección que más sostiene el proyecto: suscribirte como Premium te da acceso completo.</p>
+          <a href="premium.html" class="btn btn-premium">Hazte Premium →</a>
+        </div>
+      </section>
+      <nav class="foro-filters" id="rh-subnav" data-filter-param="subseccion">
+        <button type="button" class="foro-filter-btn active" data-subseccion="">Todo</button>
+        <button type="button" class="foro-filter-btn" data-subseccion="logica-humana">Lógica Humana</button>
+        <button type="button" class="foro-filter-btn" data-subseccion="nuevo-pr">Nuevo PR</button>
+      </nav>
       <p class="home-hint" id="rh-hint" aria-live="polite"></p>
-      <div class="card-grid contenidos-grid" id="rh-list" data-seccion="revolucion-humana" data-hint="rh-hint" aria-live="polite" aria-busy="true"></div>
+      <div class="card-grid contenidos-grid" id="rh-list" data-seccion="revolucion-humana" data-filters="rh-subnav" data-hint="rh-hint" aria-live="polite" aria-busy="true"></div>
       <noscript><p class="empty-state">Activa JavaScript para ver este contenido.</p></noscript>`,
     extraScript: `<script src="editorial.js"></script>
   <script src="contenidos.js"></script>`,

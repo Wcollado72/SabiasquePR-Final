@@ -547,6 +547,44 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 }
 .badge-ia-parcial{ background:color-mix(in srgb, var(--info) 18%, transparent); color:var(--info); }
 .badge-ia-generado{ background:color-mix(in srgb, var(--accent) 18%, transparent); color:var(--accent); }
+.badge-premium{
+  display:inline-block;
+  margin-top:6px;
+  margin-left:6px;
+  padding:3px 10px;
+  border-radius:999px;
+  font-family:var(--font-ui);
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  background:color-mix(in srgb, var(--premium) 22%, transparent);
+  color:var(--premium-ink);
+}
+
+/* Bloque de identidad de autor de "Lógica Humana" (Revolución Humana) */
+.lh-author-intro{
+  display:flex;
+  gap:18px;
+  align-items:center;
+  padding:18px;
+  margin-bottom:18px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:var(--panel);
+}
+.lh-author-photo{
+  width:72px;
+  height:72px;
+  border-radius:50%;
+  object-fit:cover;
+  flex-shrink:0;
+}
+.lh-author-text h3{ margin:2px 0 6px; }
+.lh-author-text p{ margin:0 0 10px; color:var(--ink-soft); }
+@media (max-width: 560px){
+  .lh-author-intro{ flex-direction:column; align-items:flex-start; text-align:left; }
+}
 
 /* Tarjetas de contenido multi-formato (video/ensayo/noticia/lectura corta):
    consumo dual — el botón de reproducir NO navega; el título/categoría sí.

@@ -84,8 +84,11 @@ async function saveContenido(id, seccion, destacado, values, sql) {
   }
 }
 
-// GET /api/contenidos?seccion=&categoria=&tipoFormato=&subformato=&subseccion=  -- lista, publico
-router.get('/', async (req, res) => {
+// GET /api/contenidos?seccion=&categoria=&tipoFormato=&subformato=&subseccion=
+// -- lista, publico (verifica sesion sin exigirla, mismo motivo que el
+// detalle: un video/audio premium no puede exponer su url_media real en
+// la grilla aunque el texto no se muestre ahi).
+router.get('/', tryAuth, async (req, res) => {
   try {
     const { seccion, categoria, tipoFormato, subformato, subseccion } = req.query;
     const params = [];
@@ -97,7 +100,7 @@ router.get('/', async (req, res) => {
     if (subseccion) { params.push(subseccion); where.push(`subseccion = $${params.length}`); }
     const sql = `SELECT * FROM contenidos ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY fecha_publicacion DESC, creado_en DESC`;
     const { rows } = await pool.query(sql, params);
-    res.json({ ok: true, contenidos: rows });
+    res.json({ ok: true, contenidos: rows.map((r) => aplicarMuroDePago(r, req.user)) });
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
