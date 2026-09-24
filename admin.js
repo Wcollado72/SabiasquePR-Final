@@ -596,6 +596,8 @@
     document.getElementById('ac-portada-alt').value = item?.portada_alt || '';
     document.getElementById('ac-fecha').value = item?.fecha_publicacion ? String(item.fecha_publicacion).slice(0, 10) : '';
     document.getElementById('ac-destacado').checked = Boolean(item?.destacado);
+    document.getElementById('ac-subseccion').value = item?.subseccion || '';
+    document.getElementById('ac-premium').checked = Boolean(item?.es_premium);
     document.getElementById('ac-cita-sin-fuente').checked = Boolean(item?.cita_sin_fuente_externa);
     document.getElementById('ac-cita-estilo').value = item?.cita_estilo || '';
     document.getElementById('ac-cita-autor').value = item?.cita_autor || '';
@@ -641,6 +643,8 @@
       portadaAlt: document.getElementById('ac-portada-alt').value.trim(),
       fechaPublicacion: document.getElementById('ac-fecha').value,
       destacado: document.getElementById('ac-destacado').checked,
+      subseccion: document.getElementById('ac-subseccion').value || null,
+      esPremium: document.getElementById('ac-premium').checked,
       citaSinFuenteExterna: sinFuente,
       citaEstilo: sinFuente ? null : (document.getElementById('ac-cita-estilo').value || null),
       citaAutor: sinFuente ? null : (document.getElementById('ac-cita-autor').value.trim() || null),

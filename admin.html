@@ -189,6 +189,14 @@
                 <option value="revolucion-humana">Revolución Humana</option>
                 <option value="educacion">Educación</option>
               </select>
+              <label for="ac-subseccion">Sub-sección de Revolución Humana (opcional)</label>
+              <select id="ac-subseccion">
+                <option value="">Ninguna</option>
+<option value="humanos-inhumanos">Humanos Inhumanos</option>
+<option value="logica-humana">Lógica Humana</option>
+<option value="nuevo-pr">Nuevo PR</option>
+<option value="revolucion-mundial">Revolución Mundial</option>
+              </select>
               <label for="ac-tipo-formato">Tipo de formato</label>
               <select id="ac-tipo-formato">
                 <option value="audio">Audio</option>
@@ -303,6 +311,7 @@
               <label for="ac-fecha">Fecha de publicación</label>
               <input type="date" id="ac-fecha" required>
               <label class="admin-checkbox"><input type="checkbox" id="ac-destacado"> Destacado en su sección (reemplaza al anterior de esa sección)</label>
+              <label class="admin-checkbox"><input type="checkbox" id="ac-premium"> Contenido premium (vista previa parcial para quien no sea premium/admin)</label>
               <div class="admin-form-actions">
                 <button type="submit">Guardar</button>
                 <button type="button" class="admin-btn-cancel" id="ac-cancel">Cancelar</button>

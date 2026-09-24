@@ -108,6 +108,13 @@ const CITA_ESTILOS = {
   apa: 'APA', mla: 'MLA', chicago: 'Chicago', turabian: 'Turabian', ama: 'AMA',
   vancouver: 'Vancouver', abnt: 'ABNT', icontec: 'ICONTEC', ieee: 'IEEE', bluebook: 'Bluebook',
 };
+// Sub-secciones de Revolución Humana. Solo "Lógica Humana" y "Nuevo PR"
+// tienen pestaña pública por ahora; las otras 2 ya se admiten en el
+// modelo/admin para no migrar de nuevo cuando se activen.
+const SUBSECCIONES = {
+  'humanos-inhumanos': 'Humanos Inhumanos', 'nuevo-pr': 'Nuevo PR',
+  'revolucion-mundial': 'Revolución Mundial', 'logica-humana': 'Lógica Humana',
+};
 
 // Botones de filtro por categoría, compartidos entre Noticias, Revolución
 // Humana y Educación. "Todas" siempre primero, sin ordenar (es el reset).
@@ -794,6 +801,10 @@ const PAGES = [
                 <option value="revolucion-humana">Revolución Humana</option>
                 <option value="educacion">Educación</option>
               </select>
+              <label for="ac-subseccion">Sub-sección de Revolución Humana (opcional)</label>
+              <select id="ac-subseccion">
+                ${optionsHtml(SUBSECCIONES, { includeEmpty: 'Ninguna' })}
+              </select>
               <label for="ac-tipo-formato">Tipo de formato</label>
               <select id="ac-tipo-formato">
                 ${optionsHtml(TIPOS_FORMATO)}
@@ -869,6 +880,7 @@ const PAGES = [
               <label for="ac-fecha">Fecha de publicación</label>
               <input type="date" id="ac-fecha" required>
               <label class="admin-checkbox"><input type="checkbox" id="ac-destacado"> Destacado en su sección (reemplaza al anterior de esa sección)</label>
+              <label class="admin-checkbox"><input type="checkbox" id="ac-premium"> Contenido premium (vista previa parcial para quien no sea premium/admin)</label>
               <div class="admin-form-actions">
                 <button type="submit">Guardar</button>
                 <button type="button" class="admin-btn-cancel" id="ac-cancel">Cancelar</button>
