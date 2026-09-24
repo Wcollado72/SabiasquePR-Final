@@ -308,3 +308,33 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_ordenes_stripe_session_id
 ALTER TABLE ordenes ADD COLUMN IF NOT EXISTS envio_nombre text;
 ALTER TABLE ordenes ADD COLUMN IF NOT EXISTS envio_direccion jsonb;
 ALTER TABLE ordenes ADD COLUMN IF NOT EXISTS facturacion_direccion jsonb;
+
+-- ============================================================
+-- Sub-secciones de Revolución Humana (solo 2 activas hoy en el frontend,
+-- las 4 se permiten en el modelo para no migrar de nuevo despues).
+-- ============================================================
+ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS subseccion text NULL;
+ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_subseccion_check;
+ALTER TABLE contenidos ADD CONSTRAINT contenidos_subseccion_check
+  CHECK (subseccion IS NULL OR subseccion IN (
+    'humanos-inhumanos', 'nuevo-pr', 'revolucion-mundial', 'logica-humana'
+  ));
+
+-- Contenido premium por pieza individual (no por seccion completa).
+ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS es_premium boolean NOT NULL DEFAULT false;
+
+-- Comentarios generalizados: aplican tanto a `noticias` como a `contenidos`
+-- (ambas tablas usan slug de texto como PK, por eso `item_id` es texto sin
+-- FK real -- no se puede tener una FK a dos tablas distintas). Se valida en
+-- el backend que el item exista antes de insertar. Mismo patron que
+-- foro_comentarios: sin edicion, solo crear/borrar.
+CREATE TABLE IF NOT EXISTS comentarios (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  tipo        text NOT NULL CHECK (tipo IN ('noticia', 'contenido')),
+  item_id     text NOT NULL,
+  autor_id    uuid NOT NULL REFERENCES perfiles(id) ON DELETE CASCADE,
+  cuerpo      text NOT NULL,
+  creado_en   timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_comentarios_item ON comentarios(tipo, item_id, creado_en ASC);
+ALTER TABLE comentarios ENABLE ROW LEVEL SECURITY;

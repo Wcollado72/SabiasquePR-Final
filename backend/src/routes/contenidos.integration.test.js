@@ -63,6 +63,15 @@ describe('GET /api/contenidos', () => {
     expect(sql).toMatch(/WHERE tipo_formato = \$1 AND subformato = \$2/);
     expect(params).toEqual(['audio', 'podcast']);
   });
+
+  test('filtra por subseccion', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] });
+    const res = await request(app).get('/api/contenidos?seccion=revolucion-humana&subseccion=logica-humana');
+    expect(res.status).toBe(200);
+    const [sql, params] = pool.query.mock.calls[0];
+    expect(sql).toMatch(/WHERE seccion = \$1 AND subseccion = \$2/);
+    expect(params).toEqual(['revolucion-humana', 'logica-humana']);
+  });
 });
 
 describe('GET /api/contenidos/:id', () => {
@@ -77,6 +86,45 @@ describe('GET /api/contenidos/:id', () => {
     const res = await request(app).get('/api/contenidos/a');
     expect(res.status).toBe(200);
     expect(res.body.contenido.id).toBe('a');
+  });
+
+  const PREMIUM_ROW = { id: 'p1', titulo: 'Ensayo premium', cuerpo: 'x'.repeat(500), url_media: 'https://youtube.com/embed/x', es_premium: true };
+
+  test('un contenido no-premium nunca esta bloqueado', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'a', titulo: 'A', cuerpo: 'texto completo', es_premium: false }] });
+    const res = await request(app).get('/api/contenidos/a');
+    expect(res.body.contenido.bloqueado).toBe(false);
+    expect(res.body.contenido.cuerpo).toBe('texto completo');
+  });
+
+  test('un contenido premium se trunca y oculta url_media sin sesion', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [PREMIUM_ROW] });
+    const res = await request(app).get('/api/contenidos/p1');
+    expect(res.body.contenido.bloqueado).toBe(true);
+    expect(res.body.contenido.cuerpo.length).toBeLessThan(310);
+    expect(res.body.contenido.cuerpo.endsWith('…')).toBe(true);
+    expect(res.body.contenido.url_media).toBeNull();
+  });
+
+  test('un contenido premium se trunca para un usuario regular (no premium)', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [PREMIUM_ROW] });
+    const res = await request(app).get('/api/contenidos/p1').set('x-test-user', USUARIO);
+    expect(res.body.contenido.bloqueado).toBe(true);
+  });
+
+  test('un contenido premium se ve completo para un usuario premium', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [PREMIUM_ROW] });
+    const PREMIUM_USER = JSON.stringify({ id: 'user-2', rol: 'premium' });
+    const res = await request(app).get('/api/contenidos/p1').set('x-test-user', PREMIUM_USER);
+    expect(res.body.contenido.bloqueado).toBe(false);
+    expect(res.body.contenido.cuerpo).toBe(PREMIUM_ROW.cuerpo);
+    expect(res.body.contenido.url_media).toBe(PREMIUM_ROW.url_media);
+  });
+
+  test('un contenido premium se ve completo para un admin', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [PREMIUM_ROW] });
+    const res = await request(app).get('/api/contenidos/p1').set('x-test-user', ADMIN);
+    expect(res.body.contenido.bloqueado).toBe(false);
   });
 });
 
@@ -142,9 +190,9 @@ describe('POST /api/contenidos', () => {
     expect(res.status).toBe(201);
     const [sql, values] = pool.query.mock.calls[1];
     expect(sql).toMatch(/subformato, divulgacion_ia, cita_estilo, cita_autor,\s*cita_anio, cita_titulo_original, cita_fecha_acceso, cita_sin_fuente_externa/);
-    // Posiciones 17-24 del array toRow(): subformato..citaSinFuenteExterna
+    // Posiciones 17-26 del array toRow(): subformato..citaSinFuenteExterna, subseccion, esPremium
     expect(values.slice(16)).toEqual([
-      'entrevista', 'parcial', 'apa', 'Jane Doe', '2026', 'Titulo original', '2026-09-23', false,
+      'entrevista', 'parcial', 'apa', 'Jane Doe', '2026', 'Titulo original', '2026-09-23', false, null, false,
     ]);
   });
 
@@ -211,9 +259,9 @@ describe('PUT /api/contenidos/:id', () => {
     const res = await request(app).put('/api/contenidos/a').set('x-test-user', ADMIN).send({ subformato: 'reportaje' });
     expect(res.status).toBe(200);
     const [, values] = pool.query.mock.calls[1];
-    // subformato..citaSinFuenteExterna son las ultimas 8 posiciones del array de toRow()
-    expect(values.slice(-8)).toEqual([
-      'reportaje', 'parcial', 'apa', 'Jane Doe', '2026', 'Original', '2026-09-20', false,
+    // subformato..citaSinFuenteExterna, subseccion, esPremium son las ultimas 10 posiciones de toRow()
+    expect(values.slice(-10)).toEqual([
+      'reportaje', 'parcial', 'apa', 'Jane Doe', '2026', 'Original', '2026-09-20', false, null, false,
     ]);
   });
 });

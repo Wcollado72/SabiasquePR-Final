@@ -149,4 +149,19 @@ describe('validateContenido', () => {
   test('un contenido sin ningun campo de cita sigue siendo valido (todo opcional)', () => {
     expect(validateContenido(BASE)).toEqual([]);
   });
+
+  test('acepta cada una de las 4 subsecciones, subseccion ausente, y rechaza invalida', () => {
+    for (const subseccion of ['humanos-inhumanos', 'nuevo-pr', 'revolucion-mundial', 'logica-humana']) {
+      expect(validateContenido({ ...BASE, subseccion })).toEqual([]);
+    }
+    expect(validateContenido(BASE)).toEqual([]);
+    expect(validateContenido({ ...BASE, subseccion: 'inventada' })).toContain('Subseccion no valida.');
+  });
+
+  test('acepta esPremium booleano y rechaza otros tipos', () => {
+    expect(validateContenido({ ...BASE, esPremium: true })).toEqual([]);
+    expect(validateContenido({ ...BASE, esPremium: false })).toEqual([]);
+    expect(validateContenido({ ...BASE, esPremium: 'si' }))
+      .toContain('El campo "esPremium" debe ser verdadero o falso.');
+  });
 });

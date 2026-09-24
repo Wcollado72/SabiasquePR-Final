@@ -12,6 +12,7 @@ const DIVULGACION_IA_VALIDAS = ['no', 'parcial', 'generado'];
 const CITA_ESTILOS_VALIDOS = [
   'apa', 'mla', 'chicago', 'turabian', 'ama', 'vancouver', 'abnt', 'icontec', 'ieee', 'bluebook',
 ];
+const SUBSECCIONES_VALIDAS = ['humanos-inhumanos', 'nuevo-pr', 'revolucion-mundial', 'logica-humana'];
 
 function validateContenido(body, { partial = false } = {}) {
   const errors = [];
@@ -58,6 +59,12 @@ function validateContenido(body, { partial = false } = {}) {
   if (body.destacado !== undefined && typeof body.destacado !== 'boolean') {
     errors.push('El campo "destacado" debe ser verdadero o falso.');
   }
+  if (body.subseccion !== undefined && body.subseccion !== null && !SUBSECCIONES_VALIDAS.includes(body.subseccion)) {
+    errors.push('Subseccion no valida.');
+  }
+  if (body.esPremium !== undefined && typeof body.esPremium !== 'boolean') {
+    errors.push('El campo "esPremium" debe ser verdadero o falso.');
+  }
   // El video y el audio necesitan de donde reproducirse
   const tipo = body.tipoFormato;
   if ((tipo === 'video' || tipo === 'audio') && !partial && !body.urlMedia) {
@@ -74,4 +81,5 @@ module.exports = {
   SUBFORMATOS_VALIDOS,
   DIVULGACION_IA_VALIDAS,
   CITA_ESTILOS_VALIDOS,
+  SUBSECCIONES_VALIDAS,
 };

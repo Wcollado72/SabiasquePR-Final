@@ -1,6 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
-const { requireAuth, requireAdmin } = require('../middleware/auth');
+const { requireAuth, requireAdmin, tryAuth } = require('../middleware/auth');
 const { slugify } = require('../util/slugify');
 const { validateContenido } = require('../validators/contenido');
 
@@ -32,7 +32,31 @@ function toRow(id, body, existing = {}) {
     body.citaTituloOriginal !== undefined ? body.citaTituloOriginal : (existing.cita_titulo_original ?? null),
     body.citaFechaAcceso !== undefined ? body.citaFechaAcceso : (existing.cita_fecha_acceso ?? null),
     body.citaSinFuenteExterna ?? existing.cita_sin_fuente_externa ?? false,
+    body.subseccion !== undefined ? body.subseccion : (existing.subseccion ?? null),
+    body.esPremium ?? existing.es_premium ?? false,
   ];
+}
+
+// Trunca `cuerpo` a los primeros ~300 caracteres (cortando en el ultimo
+// espacio antes del limite) para la vista previa de contenido premium.
+function truncarCuerpo(cuerpo) {
+  if (!cuerpo || cuerpo.length <= 300) return cuerpo;
+  const corte = cuerpo.slice(0, 300);
+  const ultimoEspacio = corte.lastIndexOf(' ');
+  return (ultimoEspacio > 0 ? corte.slice(0, ultimoEspacio) : corte) + '…';
+}
+
+// Si el contenido es premium y quien pregunta no tiene acceso (ni premium
+// ni admin), se trunca el cuerpo y se oculta el media real -- esto pasa
+// SIEMPRE en el servidor, nunca solo visualmente en el cliente, porque de
+// lo contrario cualquiera podria leer el cuerpo completo pegando la URL
+// de la API a mano.
+function aplicarMuroDePago(contenido, user) {
+  const tieneAcceso = user && (user.rol === 'premium' || user.rol === 'admin');
+  if (!contenido.es_premium || tieneAcceso) {
+    return { ...contenido, bloqueado: false };
+  }
+  return { ...contenido, cuerpo: truncarCuerpo(contenido.cuerpo), url_media: null, bloqueado: true };
 }
 
 // Guarda un contenido. Si se marca como destacado, limpia el anterior de la
@@ -60,28 +84,30 @@ async function saveContenido(id, seccion, destacado, values, sql) {
   }
 }
 
-// GET /api/contenidos?seccion=&categoria=&tipoFormato=&subformato=  -- lista, publico
+// GET /api/contenidos?seccion=&categoria=&tipoFormato=&subformato=&subseccion=  -- lista, publico
 router.get('/', async (req, res) => {
   try {
-    const { seccion, categoria, tipoFormato, subformato } = req.query;
+    const { seccion, categoria, tipoFormato, subformato, subseccion } = req.query;
     const params = [];
     const where = [];
     if (seccion) { params.push(seccion); where.push(`seccion = $${params.length}`); }
     if (categoria) { params.push(categoria); where.push(`categoria = $${params.length}`); }
     if (tipoFormato) { params.push(tipoFormato); where.push(`tipo_formato = $${params.length}`); }
     if (subformato) { params.push(subformato); where.push(`subformato = $${params.length}`); }
+    if (subseccion) { params.push(subseccion); where.push(`subseccion = $${params.length}`); }
     const sql = `SELECT * FROM contenidos ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY fecha_publicacion DESC, creado_en DESC`;
     const { rows } = await pool.query(sql, params);
     res.json({ ok: true, contenidos: rows });
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
-// GET /api/contenidos/:id -- detalle, publico
-router.get('/:id', async (req, res) => {
+// GET /api/contenidos/:id -- detalle, publico (verifica sesion sin exigirla,
+// para saber si aplica el muro de pago de contenido premium)
+router.get('/:id', tryAuth, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM contenidos WHERE id = $1', [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ ok: false, error: 'Contenido no encontrado.' });
-    res.json({ ok: true, contenido: rows[0] });
+    res.json({ ok: true, contenido: aplicarMuroDePago(rows[0], req.user) });
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
@@ -105,8 +131,9 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
          id, seccion, tipo_formato, categoria, titulo, subtitulo_resumen, cuerpo, autor,
          url_media, fuente_url, fuente_texto, duracion_min, url_portada, portada_alt,
          fecha_publicacion, destacado, subformato, divulgacion_ia, cita_estilo, cita_autor,
-         cita_anio, cita_titulo_original, cita_fecha_acceso, cita_sin_fuente_externa
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)
+         cita_anio, cita_titulo_original, cita_fecha_acceso, cita_sin_fuente_externa,
+         subseccion, es_premium
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26)
        RETURNING *`
     );
     res.status(201).json({ ok: true, contenido: rows[0] });
@@ -134,7 +161,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
          cuerpo=$7, autor=$8, url_media=$9, fuente_url=$10, fuente_texto=$11, duracion_min=$12,
          url_portada=$13, portada_alt=$14, fecha_publicacion=$15, destacado=$16, subformato=$17,
          divulgacion_ia=$18, cita_estilo=$19, cita_autor=$20, cita_anio=$21, cita_titulo_original=$22,
-         cita_fecha_acceso=$23, cita_sin_fuente_externa=$24
+         cita_fecha_acceso=$23, cita_sin_fuente_externa=$24, subseccion=$25, es_premium=$26
        WHERE id=$1 RETURNING *`
     );
     res.json({ ok: true, contenido: rows[0] });
