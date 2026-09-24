@@ -591,11 +591,13 @@ const PAGES = [
     mainClass: 'main-block',
     mainContent: `
       <section class="lh-author-intro" id="rh-lh-intro">
-        <img src="images/nuevoshumanos.webp" alt="" class="lh-author-photo">
+        <div class="lh-author-photo-wrap">
+          <img src="images/aliado-imperfekto-retrato.webp" alt="Aliado Imperfekto: una figura encapuchada con ropa remendada sostiene un farol encendido, de pie frente a una multitud diversa que camina hacia la misma luz, con un mapa del mundo de fondo" class="lh-author-photo">
+        </div>
         <div class="lh-author-text">
           <p class="eyebrow">Lógica Humana</p>
-          <h3>Sección de autor</h3>
-          <p>Ensayos, pódcasts y debates directos, sin filtro — mi mirada personal sobre lo que está pasando en Puerto Rico y el mundo. Esta es la sección que más sostiene el proyecto: suscribirte como Premium te da acceso completo.</p>
+          <h3>Aliado Imperfekto</h3>
+          <p>Aliado Imperfekto no es un nombre, es una idea. No es una persona perfecta hablándote desde un pedestal — es alguien que ha cometido errores serios, que sigue cometiéndolos, y que no finge tener la moral resuelta. Lo único que puede ofrecer con certeza es una intención: estar del lado de lo que hace avanzar a la humanidad entera, no a un grupo, una tribu o una bandera. Estas son las ideas, dudas y contradicciones de alguien que sigue intentando, imperfectamente, ser mejor aliado que ayer.</p>
           <a href="premium.html" class="btn btn-premium">Hazte Premium →</a>
         </div>
       </section>
