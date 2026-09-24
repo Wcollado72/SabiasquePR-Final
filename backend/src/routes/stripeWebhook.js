@@ -41,11 +41,18 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
             cantidad: li.quantity,
             total: li.amount_total / 100,
           }));
+          const envio = session.collected_information?.shipping_details;
+          const facturacion = session.customer_details?.address;
           await pool.query(
-            `INSERT INTO ordenes (usuario_id, items, total, stripe_session_id, estado)
-             VALUES ($1, $2, $3, $4, 'pagada')
+            `INSERT INTO ordenes (usuario_id, items, total, stripe_session_id, estado, envio_nombre, envio_direccion, facturacion_direccion)
+             VALUES ($1, $2, $3, $4, 'pagada', $5, $6, $7)
              ON CONFLICT (stripe_session_id) WHERE stripe_session_id IS NOT NULL DO NOTHING`,
-            [session.client_reference_id, JSON.stringify(items), session.amount_total / 100, session.id]
+            [
+              session.client_reference_id, JSON.stringify(items), session.amount_total / 100, session.id,
+              envio?.name || null,
+              envio?.address ? JSON.stringify(envio.address) : null,
+              facturacion ? JSON.stringify(facturacion) : null,
+            ]
           );
         }
         break;

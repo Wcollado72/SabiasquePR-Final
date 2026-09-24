@@ -68,6 +68,8 @@ router.post('/create-checkout-session-tienda', requireAuth, async (req, res) => 
       line_items: lineItems,
       client_reference_id: req.user.id,
       customer_email: req.user.email,
+      shipping_address_collection: { allowed_countries: ['US'] }, // PR entra como parte de US
+      billing_address_collection: 'required',
       success_url: `${frontendOrigin}/tienda.html?success=1`,
       cancel_url: `${frontendOrigin}/tienda.html?canceled=1`,
     });

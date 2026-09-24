@@ -59,10 +59,15 @@
       list.innerHTML = `<div class="admin-list">${data.ordenes.map((o) => {
         const fecha = new Date(o.creado_en).toLocaleDateString('es-PR', { year: 'numeric', month: 'long', day: 'numeric' });
         const items = (o.items || []).map((i) => `${i.cantidad}× ${i.nombre}`).join(', ');
+        const dir = o.envio_direccion;
+        const envio = dir
+          ? `${o.envio_nombre || ''} — ${[dir.line1, dir.line2, dir.city, dir.state, dir.postal_code].filter(Boolean).join(', ')}`
+          : null;
         return `<div class="admin-item">
           <div class="admin-item-info">
             <p><strong>$${Number(o.total).toFixed(2)}</strong> — ${ESTADO_PEDIDO_LABEL[o.estado] || o.estado}</p>
             <p class="admin-hint">${fecha} · ${items}</p>
+            ${envio ? `<p class="admin-hint">Envío a: ${envio}</p>` : ''}
           </div>
         </div>`;
       }).join('')}</div>`;

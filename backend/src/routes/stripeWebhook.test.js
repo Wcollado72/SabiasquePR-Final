@@ -68,12 +68,17 @@ describe('POST /api/stripe/webhook', () => {
     expect(pool.query).not.toHaveBeenCalled();
   });
 
-  test('checkout.session.completed (compra de Tienda) registra el pedido en ordenes', async () => {
+  test('checkout.session.completed (compra de Tienda) registra el pedido con direcciones en ordenes', async () => {
     stripe.webhooks.constructEvent.mockReturnValue({
       type: 'checkout.session.completed',
       data: { object: {
         id: 'cs_1', mode: 'payment', client_reference_id: 'user-4',
         payment_status: 'paid', amount_total: 3400,
+        collected_information: { shipping_details: {
+          name: 'William Collado',
+          address: { line1: '123 Calle Sol', city: 'Fajardo', state: 'PR', postal_code: '00738', country: 'US' },
+        } },
+        customer_details: { address: { line1: '123 Calle Sol', city: 'Fajardo', state: 'PR', postal_code: '00738', country: 'US' } },
       } },
     });
     stripe.checkout.sessions.listLineItems.mockResolvedValue({
@@ -94,6 +99,26 @@ describe('POST /api/stripe/webhook', () => {
     ]);
     expect(params[2]).toBe(34);
     expect(params[3]).toBe('cs_1');
+    expect(params[4]).toBe('William Collado');
+    expect(JSON.parse(params[5])).toEqual({ line1: '123 Calle Sol', city: 'Fajardo', state: 'PR', postal_code: '00738', country: 'US' });
+    expect(JSON.parse(params[6])).toEqual({ line1: '123 Calle Sol', city: 'Fajardo', state: 'PR', postal_code: '00738', country: 'US' });
+  });
+
+  test('checkout.session.completed (compra de Tienda) guarda direcciones null si Stripe no las envia', async () => {
+    stripe.webhooks.constructEvent.mockReturnValue({
+      type: 'checkout.session.completed',
+      data: { object: {
+        id: 'cs_9', mode: 'payment', client_reference_id: 'user-9',
+        payment_status: 'paid', amount_total: 500,
+      } },
+    });
+    stripe.checkout.sessions.listLineItems.mockResolvedValue({ data: [] });
+    pool.query.mockResolvedValueOnce({});
+    await request(app).post('/api/stripe/webhook').send({});
+    const [, params] = pool.query.mock.calls[0];
+    expect(params[4]).toBeNull();
+    expect(params[5]).toBeNull();
+    expect(params[6]).toBeNull();
   });
 
   test('checkout.session.completed no registra pedido de Tienda si el pago no esta confirmado', async () => {

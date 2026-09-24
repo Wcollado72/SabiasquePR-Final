@@ -299,3 +299,12 @@ ALTER TABLE productos ADD COLUMN IF NOT EXISTS stripe_price_id text;
 -- entrega del webhook (comportamiento normal y esperado de Stripe).
 CREATE UNIQUE INDEX IF NOT EXISTS idx_ordenes_stripe_session_id
   ON ordenes(stripe_session_id) WHERE stripe_session_id IS NOT NULL;
+
+-- ============================================================
+-- Direccion de envio/facturacion por pedido: los productos de Tienda
+-- son fisicos y el checkout no pedia ninguna direccion -- no habia
+-- forma de saber a donde enviar lo que se compraba.
+-- ============================================================
+ALTER TABLE ordenes ADD COLUMN IF NOT EXISTS envio_nombre text;
+ALTER TABLE ordenes ADD COLUMN IF NOT EXISTS envio_direccion jsonb;
+ALTER TABLE ordenes ADD COLUMN IF NOT EXISTS facturacion_direccion jsonb;

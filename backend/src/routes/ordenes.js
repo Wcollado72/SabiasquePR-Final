@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/', requireAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      'SELECT id, items, total, estado, creado_en FROM ordenes WHERE usuario_id = $1 ORDER BY creado_en DESC',
+      'SELECT id, items, total, estado, envio_nombre, envio_direccion, creado_en FROM ordenes WHERE usuario_id = $1 ORDER BY creado_en DESC',
       [req.user.id]
     );
     res.json({ ok: true, ordenes: rows });

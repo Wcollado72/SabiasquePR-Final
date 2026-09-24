@@ -97,6 +97,8 @@ describe('POST /api/stripe/create-checkout-session-tienda', () => {
       { price: 'price_taza', quantity: 2 },
       { price: 'price_libreta', quantity: 1 },
     ]);
+    expect(args.shipping_address_collection).toEqual({ allowed_countries: ['US'] });
+    expect(args.billing_address_collection).toBe('required');
   });
 
   test('nunca confia en el precio/cantidad que manda el cliente, solo el id', async () => {
