@@ -26,7 +26,7 @@
     'educacion': 'Educación',
   };
   const SECCION_HREF = {
-    'revolucion-humana': 'nuevos-humanos.html',
+    'revolucion-humana': 'revolucion-humana.html',
     'educacion': 'educacion.html',
   };
 

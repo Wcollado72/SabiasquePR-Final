@@ -34,6 +34,7 @@ function toRow(id, body, existing = {}) {
     body.citaSinFuenteExterna ?? existing.cita_sin_fuente_externa ?? false,
     body.subseccion !== undefined ? body.subseccion : (existing.subseccion ?? null),
     body.esPremium ?? existing.es_premium ?? false,
+    body.enfoque !== undefined ? body.enfoque : (existing.enfoque ?? null),
   ];
 }
 
@@ -46,14 +47,17 @@ function truncarCuerpo(cuerpo) {
   return (ultimoEspacio > 0 ? corte.slice(0, ultimoEspacio) : corte) + '…';
 }
 
-// Si el contenido es premium y quien pregunta no tiene acceso (ni premium
-// ni admin), se trunca el cuerpo y se oculta el media real -- esto pasa
+// Si el contenido es premium (por pieza, `es_premium`) o pertenece a la
+// sub-seccion Logica Humana (premium por completo, area personal de
+// Aliado Imperfekto) y quien pregunta no tiene acceso (ni premium ni
+// admin), se trunca el cuerpo y se oculta el media real -- esto pasa
 // SIEMPRE en el servidor, nunca solo visualmente en el cliente, porque de
 // lo contrario cualquiera podria leer el cuerpo completo pegando la URL
 // de la API a mano.
 function aplicarMuroDePago(contenido, user) {
   const tieneAcceso = user && (user.rol === 'premium' || user.rol === 'admin');
-  if (!contenido.es_premium || tieneAcceso) {
+  const requierePremium = contenido.es_premium || contenido.subseccion === 'logica-humana';
+  if (!requierePremium || tieneAcceso) {
     return { ...contenido, bloqueado: false };
   }
   return { ...contenido, cuerpo: truncarCuerpo(contenido.cuerpo), url_media: null, bloqueado: true };
@@ -90,7 +94,7 @@ async function saveContenido(id, seccion, destacado, values, sql) {
 // la grilla aunque el texto no se muestre ahi).
 router.get('/', tryAuth, async (req, res) => {
   try {
-    const { seccion, categoria, tipoFormato, subformato, subseccion } = req.query;
+    const { seccion, categoria, tipoFormato, subformato, subseccion, enfoque } = req.query;
     const params = [];
     const where = [];
     if (seccion) { params.push(seccion); where.push(`seccion = $${params.length}`); }
@@ -98,6 +102,7 @@ router.get('/', tryAuth, async (req, res) => {
     if (tipoFormato) { params.push(tipoFormato); where.push(`tipo_formato = $${params.length}`); }
     if (subformato) { params.push(subformato); where.push(`subformato = $${params.length}`); }
     if (subseccion) { params.push(subseccion); where.push(`subseccion = $${params.length}`); }
+    if (enfoque) { params.push(enfoque); where.push(`enfoque = $${params.length}`); }
     const sql = `SELECT * FROM contenidos ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY fecha_publicacion DESC, creado_en DESC`;
     const { rows } = await pool.query(sql, params);
     res.json({ ok: true, contenidos: rows.map((r) => aplicarMuroDePago(r, req.user)) });
@@ -135,8 +140,8 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
          url_media, fuente_url, fuente_texto, duracion_min, url_portada, portada_alt,
          fecha_publicacion, destacado, subformato, divulgacion_ia, cita_estilo, cita_autor,
          cita_anio, cita_titulo_original, cita_fecha_acceso, cita_sin_fuente_externa,
-         subseccion, es_premium
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26)
+         subseccion, es_premium, enfoque
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27)
        RETURNING *`
     );
     res.status(201).json({ ok: true, contenido: rows[0] });
@@ -164,7 +169,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
          cuerpo=$7, autor=$8, url_media=$9, fuente_url=$10, fuente_texto=$11, duracion_min=$12,
          url_portada=$13, portada_alt=$14, fecha_publicacion=$15, destacado=$16, subformato=$17,
          divulgacion_ia=$18, cita_estilo=$19, cita_autor=$20, cita_anio=$21, cita_titulo_original=$22,
-         cita_fecha_acceso=$23, cita_sin_fuente_externa=$24, subseccion=$25, es_premium=$26
+         cita_fecha_acceso=$23, cita_sin_fuente_externa=$24, subseccion=$25, es_premium=$26, enfoque=$27
        WHERE id=$1 RETURNING *`
     );
     res.json({ ok: true, contenido: rows[0] });

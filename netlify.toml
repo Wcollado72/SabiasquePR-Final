@@ -22,3 +22,27 @@
   to = "/404.html"
   status = 404
   force = true
+
+# El manifiesto se movio de su propia pagina a una seccion dentro de
+# Contacto -- 301 real (no rewrite) porque la URL visible SI cambia.
+[[redirects]]
+  from = "/manifiesto.html"
+  to = "/contacto.html#manifiesto"
+  status = 301
+  force = true
+
+# El Foro general se retiro como pagina propia -- su motor CRUD+JWT ahora
+# vive dentro del debate semanal de Corrupcion Humana en Revolucion Humana.
+[[redirects]]
+  from = "/foro.html"
+  to = "/revolucion-humana.html"
+  status = 301
+  force = true
+
+# La pagina se renombro de nuevos-humanos.html a revolucion-humana.html
+# (el nombre "Nuevos Humanos" se libero para usarlo como sub-seccion).
+[[redirects]]
+  from = "/nuevos-humanos.html"
+  to = "/revolucion-humana.html"
+  status = 301
+  force = true

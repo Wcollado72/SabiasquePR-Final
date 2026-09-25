@@ -981,6 +981,22 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .foro-word-counter{ font-size:.8rem; color:var(--ink-mute); margin:2px 0 8px; }
 .foro-word-counter.over-limit{ color:var(--err); font-weight:600; }
 
+/* Debate semanal (Corrupcion Humana): el titulo abre/cierra el post en vez
+   de navegar a otra pagina, asi que necesita su propio afordance visual. */
+.debate-seccion{ margin-top:40px; padding-top:24px; border-top:1px solid var(--line-strong); }
+.debate-post-toggle{ cursor:pointer; }
+.debate-post-toggle:hover{ text-decoration:underline; color:var(--brand); }
+.debate-post-body{ margin-top:10px; }
+.debate-disclaimer h3{ margin-top:0; }
+.debate-disclaimer .admin-checkbox{ margin:14px 0; }
+
+/* Logica Humana: "Herramientas" y el ensayo que abre "Logica". */
+.lh-herramientas-botones{ display:flex; gap:10px; flex-wrap:wrap; margin:14px 0; }
+.lh-ensayo{ margin-top:20px; padding-top:20px; border-top:1px solid var(--line); line-height:1.75; }
+.lh-ensayo h4{ font-size:1.25rem; margin:0 0 14px; }
+.lh-ensayo h5{ font-size:1rem; margin:22px 0 8px; }
+.lh-ensayo p{ margin:0 0 14px; }
+
 /* ===== 10. TIENDA ===== */
 .product-card{
   display:flex;

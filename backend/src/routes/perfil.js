@@ -21,4 +21,30 @@ router.put('/', requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
+// POST /api/perfil/confirmar-edad -- autoafirmacion de 18+ (checkbox, no
+// verificacion real con ID) para entrar a secciones 18+ como Corrupcion
+// Humana. Se guarda una sola vez en el perfil.
+router.post('/confirmar-edad', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'UPDATE perfiles SET edad_confirmada = true WHERE id = $1 RETURNING id, email, rol, nombre, edad_confirmada',
+      [req.user.id]
+    );
+    res.json({ ok: true, user: rows[0] });
+  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+});
+
+// POST /api/perfil/confirmar-terminos-logica-humana -- disclaimer propio de
+// Logica Humana (area personal de Aliado Imperfekto, solo premium),
+// separado del de edad -- se recuerda aparte, permanente en el perfil.
+router.post('/confirmar-terminos-logica-humana', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'UPDATE perfiles SET logica_humana_terminos_ok = true WHERE id = $1 RETURNING id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok',
+      [req.user.id]
+    );
+    res.json({ ok: true, user: rows[0] });
+  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+});
+
 module.exports = router;

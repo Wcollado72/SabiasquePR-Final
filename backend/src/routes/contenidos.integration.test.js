@@ -135,6 +135,23 @@ describe('GET /api/contenidos/:id', () => {
     const res = await request(app).get('/api/contenidos/p1').set('x-test-user', ADMIN);
     expect(res.body.contenido.bloqueado).toBe(false);
   });
+
+  const LOGICA_ROW = { id: 'lh1', titulo: 'Idea', cuerpo: 'x'.repeat(500), url_media: null, es_premium: false, subseccion: 'logica-humana' };
+
+  test('un contenido de logica-humana se trunca aunque es_premium sea false', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [LOGICA_ROW] });
+    const res = await request(app).get('/api/contenidos/lh1');
+    expect(res.body.contenido.bloqueado).toBe(true);
+    expect(res.body.contenido.cuerpo.length).toBeLessThan(310);
+  });
+
+  test('un contenido de logica-humana se ve completo para un usuario premium', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [LOGICA_ROW] });
+    const PREMIUM_USER = JSON.stringify({ id: 'user-2', rol: 'premium' });
+    const res = await request(app).get('/api/contenidos/lh1').set('x-test-user', PREMIUM_USER);
+    expect(res.body.contenido.bloqueado).toBe(false);
+    expect(res.body.contenido.cuerpo).toBe(LOGICA_ROW.cuerpo);
+  });
 });
 
 describe('POST /api/contenidos', () => {
@@ -199,9 +216,9 @@ describe('POST /api/contenidos', () => {
     expect(res.status).toBe(201);
     const [sql, values] = pool.query.mock.calls[1];
     expect(sql).toMatch(/subformato, divulgacion_ia, cita_estilo, cita_autor,\s*cita_anio, cita_titulo_original, cita_fecha_acceso, cita_sin_fuente_externa/);
-    // Posiciones 17-26 del array toRow(): subformato..citaSinFuenteExterna, subseccion, esPremium
+    // Posiciones 17-27 del array toRow(): subformato..citaSinFuenteExterna, subseccion, esPremium, enfoque
     expect(values.slice(16)).toEqual([
-      'entrevista', 'parcial', 'apa', 'Jane Doe', '2026', 'Titulo original', '2026-09-23', false, null, false,
+      'entrevista', 'parcial', 'apa', 'Jane Doe', '2026', 'Titulo original', '2026-09-23', false, null, false, null,
     ]);
   });
 
@@ -268,9 +285,9 @@ describe('PUT /api/contenidos/:id', () => {
     const res = await request(app).put('/api/contenidos/a').set('x-test-user', ADMIN).send({ subformato: 'reportaje' });
     expect(res.status).toBe(200);
     const [, values] = pool.query.mock.calls[1];
-    // subformato..citaSinFuenteExterna, subseccion, esPremium son las ultimas 10 posiciones de toRow()
-    expect(values.slice(-10)).toEqual([
-      'reportaje', 'parcial', 'apa', 'Jane Doe', '2026', 'Original', '2026-09-20', false, null, false,
+    // subformato..citaSinFuenteExterna, subseccion, esPremium, enfoque son las ultimas 11 posiciones de toRow()
+    expect(values.slice(-11)).toEqual([
+      'reportaje', 'parcial', 'apa', 'Jane Doe', '2026', 'Original', '2026-09-20', false, null, false, null,
     ]);
   });
 });

@@ -49,3 +49,41 @@ describe('PUT /api/perfil', () => {
     expect(params[0]).toBe('user-1');
   });
 });
+
+describe('POST /api/perfil/confirmar-edad', () => {
+  test('401 sin autenticacion', async () => {
+    const res = await request(app).post('/api/perfil/confirmar-edad');
+    expect(res.status).toBe(401);
+  });
+
+  test('200 confirma la edad del usuario autenticado', async () => {
+    pool.query.mockResolvedValueOnce({
+      rows: [{ id: 'user-1', email: 'a@ejemplo.com', rol: 'usuario', nombre: null, edad_confirmada: true }],
+    });
+    const res = await request(app).post('/api/perfil/confirmar-edad').set('x-test-user', USUARIO);
+    expect(res.status).toBe(200);
+    expect(res.body.user.edad_confirmada).toBe(true);
+    const [sql, params] = pool.query.mock.calls[0];
+    expect(sql).toMatch(/UPDATE perfiles SET edad_confirmada = true/);
+    expect(params).toEqual(['user-1']);
+  });
+});
+
+describe('POST /api/perfil/confirmar-terminos-logica-humana', () => {
+  test('401 sin autenticacion', async () => {
+    const res = await request(app).post('/api/perfil/confirmar-terminos-logica-humana');
+    expect(res.status).toBe(401);
+  });
+
+  test('200 confirma los terminos del usuario autenticado', async () => {
+    pool.query.mockResolvedValueOnce({
+      rows: [{ id: 'user-1', email: 'a@ejemplo.com', rol: 'usuario', nombre: null, edad_confirmada: true, logica_humana_terminos_ok: true }],
+    });
+    const res = await request(app).post('/api/perfil/confirmar-terminos-logica-humana').set('x-test-user', USUARIO);
+    expect(res.status).toBe(200);
+    expect(res.body.user.logica_humana_terminos_ok).toBe(true);
+    const [sql, params] = pool.query.mock.calls[0];
+    expect(sql).toMatch(/UPDATE perfiles SET logica_humana_terminos_ok = true/);
+    expect(params).toEqual(['user-1']);
+  });
+});

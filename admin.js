@@ -16,6 +16,7 @@
   let noticiasCache = [];
   let productosCache = [];
   let contenidosCache = [];
+  let reportesCache = [];
 
   document.addEventListener('DOMContentLoaded', init);
 
@@ -76,6 +77,7 @@
     loadNoticias();
     loadContenidos();
     loadProductos();
+    loadReportes();
   }
 
   // Los campos type="url" exigen un esquema completo (https://...) para que
@@ -122,6 +124,7 @@
         document.getElementById('admin-panel-noticias').style.display = tab === 'noticias' ? '' : 'none';
         document.getElementById('admin-panel-contenidos').style.display = tab === 'contenidos' ? '' : 'none';
         document.getElementById('admin-panel-productos').style.display = tab === 'productos' ? '' : 'none';
+        document.getElementById('admin-panel-reportes').style.display = tab === 'reportes' ? '' : 'none';
       });
     });
   }
@@ -597,6 +600,7 @@
     document.getElementById('ac-fecha').value = item?.fecha_publicacion ? String(item.fecha_publicacion).slice(0, 10) : '';
     document.getElementById('ac-destacado').checked = Boolean(item?.destacado);
     document.getElementById('ac-subseccion').value = item?.subseccion || '';
+    document.getElementById('ac-enfoque').value = item?.enfoque || '';
     document.getElementById('ac-premium').checked = Boolean(item?.es_premium);
     document.getElementById('ac-cita-sin-fuente').checked = Boolean(item?.cita_sin_fuente_externa);
     document.getElementById('ac-cita-estilo').value = item?.cita_estilo || '';
@@ -644,6 +648,7 @@
       fechaPublicacion: document.getElementById('ac-fecha').value,
       destacado: document.getElementById('ac-destacado').checked,
       subseccion: document.getElementById('ac-subseccion').value || null,
+      enfoque: document.getElementById('ac-enfoque').value || null,
       esPremium: document.getElementById('ac-premium').checked,
       citaSinFuenteExterna: sinFuente,
       citaEstilo: sinFuente ? null : (document.getElementById('ac-cita-estilo').value || null),
@@ -773,6 +778,69 @@
     try {
       await apiFetch(`/api/productos/${encodeURIComponent(id)}`, { method: 'DELETE' });
       loadProductos();
+    } catch (err) {
+      alert('' + err.message);
+    }
+  }
+
+  // ── REPORTES (debate de Corrupción Humana) ────────────────
+  const REPORTE_TIPO_LABEL = { debate_post: 'Publicación', debate_comentario: 'Comentario' };
+  const REPORTE_ESTADO_LABEL = { pendiente: 'Pendiente', revisado: 'Revisado', descartado: 'Descartado' };
+
+  async function loadReportes() {
+    const el = document.getElementById('admin-reportes-list');
+    el.innerHTML = '<p class="foro-loading">Cargando...</p>';
+    try {
+      const data = await apiFetch('/api/reportes');
+      reportesCache = data.reportes;
+      renderReportesList();
+    } catch (err) {
+      el.innerHTML = `<p class="foro-error">${escapeHtml(err.message)}</p>`;
+    }
+  }
+
+  function renderReportesList() {
+    const el = document.getElementById('admin-reportes-list');
+    el.innerHTML = reportesCache.length ? reportesCache.map((r) => `
+      <div class="admin-item">
+        <div class="admin-item-info">
+          <strong>${REPORTE_TIPO_LABEL[r.tipo] || r.tipo} reportada por ${escapeHtml(r.reportado_por_email)}</strong>
+          <span class="foro-badge${r.estado === 'pendiente' ? '' : ' foro-badge-borrador'}">${REPORTE_ESTADO_LABEL[r.estado] || r.estado}</span>
+          <span class="foro-meta">${escapeHtml(r.motivo)}</span>
+        </div>
+        <div class="admin-item-actions">
+          <button type="button" class="admin-btn-edit" data-accion="revisado" data-id="${r.id}">Marcar revisado</button>
+          <button type="button" class="admin-btn-edit" data-accion="descartado" data-id="${r.id}">Descartar</button>
+          <button type="button" class="admin-btn-delete foro-danger" data-tipo="${r.tipo}" data-item="${r.item_id}" data-reporte="${r.id}">Eliminar contenido</button>
+        </div>
+      </div>`).join('') : '<p class="foro-empty">Sin reportes.</p>';
+
+    el.querySelectorAll('[data-accion]').forEach((btn) => btn.addEventListener('click', () => {
+      actualizarEstadoReporte(btn.dataset.id, btn.dataset.accion);
+    }));
+    el.querySelectorAll('.admin-btn-delete[data-tipo]').forEach((btn) => btn.addEventListener('click', () => {
+      eliminarContenidoReportado(btn.dataset.tipo, btn.dataset.item, btn.dataset.reporte);
+    }));
+  }
+
+  async function actualizarEstadoReporte(id, estado) {
+    try {
+      await apiFetch(`/api/reportes/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ estado }) });
+      loadReportes();
+    } catch (err) {
+      alert('' + err.message);
+    }
+  }
+
+  async function eliminarContenidoReportado(tipo, itemId, reporteId) {
+    if (!confirm('¿Eliminar esta publicación/comentario del debate? Esta acción no se puede deshacer.')) return;
+    const endpoint = tipo === 'debate_post'
+      ? `/api/foro/posts/${encodeURIComponent(itemId)}`
+      : `/api/foro/comentarios/${encodeURIComponent(itemId)}`;
+    try {
+      await apiFetch(endpoint, { method: 'DELETE' });
+      await apiFetch(`/api/reportes/${encodeURIComponent(reporteId)}`, { method: 'PATCH', body: JSON.stringify({ estado: 'revisado' }) });
+      loadReportes();
     } catch (err) {
       alert('' + err.message);
     }

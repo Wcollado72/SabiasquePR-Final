@@ -310,15 +310,11 @@ ALTER TABLE ordenes ADD COLUMN IF NOT EXISTS envio_direccion jsonb;
 ALTER TABLE ordenes ADD COLUMN IF NOT EXISTS facturacion_direccion jsonb;
 
 -- ============================================================
--- Sub-secciones de Revolución Humana (solo 2 activas hoy en el frontend,
--- las 4 se permiten en el modelo para no migrar de nuevo despues).
+-- Sub-secciones de Revolución Humana. La definicion final del CHECK vive
+-- mas abajo, junto al eje `enfoque` -- esta ALTER solo agrega la columna
+-- (idempotente, no valida nada por si sola).
 -- ============================================================
 ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS subseccion text NULL;
-ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_subseccion_check;
-ALTER TABLE contenidos ADD CONSTRAINT contenidos_subseccion_check
-  CHECK (subseccion IS NULL OR subseccion IN (
-    'humanos-inhumanos', 'nuevo-pr', 'revolucion-mundial', 'logica-humana'
-  ));
 
 -- Contenido premium por pieza individual (no por seccion completa).
 ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS es_premium boolean NOT NULL DEFAULT false;
@@ -338,3 +334,76 @@ CREATE TABLE IF NOT EXISTS comentarios (
 );
 CREATE INDEX IF NOT EXISTS idx_comentarios_item ON comentarios(tipo, item_id, creado_en ASC);
 ALTER TABLE comentarios ENABLE ROW LEVEL SECURITY;
+
+-- ============================================================
+-- Corrupcion Humana: 5ta sub-seccion de Revolucion Humana. Reemplaza a
+-- la sub-seccion reservada 'humanos-inhumanos' (nunca activada) -- ese
+-- concepto pasa a ser el eje `enfoque` (institucional vs individual)
+-- dentro de Corrupcion Humana, no una sub-seccion propia.
+-- ============================================================
+ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_subseccion_check;
+ALTER TABLE contenidos ADD CONSTRAINT contenidos_subseccion_check
+  CHECK (subseccion IS NULL OR subseccion IN (
+    'nuevos-humanos', 'revolucion-mundial', 'logica-humana', 'corrupcion-humana'
+  ));
+
+-- `enfoque` es un segundo eje generico y reutilizable, con significado
+-- distinto segun la sub-seccion: institucional/individual dentro de
+-- Corrupcion Humana, o la region dentro de Nueva Humanidad. Un solo campo
+-- flexible en vez de una columna nueva por cada sub-seccion.
+ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS enfoque text NULL;
+ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_enfoque_check;
+ALTER TABLE contenidos ADD CONSTRAINT contenidos_enfoque_check
+  CHECK (enfoque IS NULL OR enfoque IN (
+    'institucional', 'individual',
+    'puerto-rico', 'estados-unidos', 'hispanoamerica', 'internacionales'
+  ));
+
+-- foro_posts/foro_comentarios se reutilizan como motor del debate semanal
+-- por sub-seccion (el Foro general se retira como pagina propia -- su
+-- CRUD+JWT sigue existiendo, solo cambia de proposito).
+ALTER TABLE foro_posts ADD COLUMN IF NOT EXISTS subseccion text NULL;
+ALTER TABLE foro_posts DROP CONSTRAINT IF EXISTS foro_posts_subseccion_check;
+ALTER TABLE foro_posts ADD CONSTRAINT foro_posts_subseccion_check
+  CHECK (subseccion IS NULL OR subseccion IN ('corrupcion-humana', 'nuevos-humanos'));
+
+ALTER TABLE foro_posts ADD COLUMN IF NOT EXISTS enfoque text NULL;
+ALTER TABLE foro_posts DROP CONSTRAINT IF EXISTS foro_posts_enfoque_check;
+ALTER TABLE foro_posts ADD CONSTRAINT foro_posts_enfoque_check
+  CHECK (enfoque IS NULL OR enfoque IN (
+    'institucional', 'individual',
+    'puerto-rico', 'estados-unidos', 'hispanoamerica', 'internacionales'
+  ));
+
+ALTER TABLE foro_posts ADD COLUMN IF NOT EXISTS tema_contenido_id text NULL
+  REFERENCES contenidos(id) ON DELETE SET NULL;
+ALTER TABLE foro_posts ADD COLUMN IF NOT EXISTS destacado boolean NOT NULL DEFAULT false;
+ALTER TABLE foro_posts ADD COLUMN IF NOT EXISTS enlace_media text NULL;
+ALTER TABLE foro_posts ADD COLUMN IF NOT EXISTS enlace_media_tipo text NULL;
+ALTER TABLE foro_posts DROP CONSTRAINT IF EXISTS foro_posts_enlace_media_tipo_check;
+ALTER TABLE foro_posts ADD CONSTRAINT foro_posts_enlace_media_tipo_check
+  CHECK (enlace_media_tipo IS NULL OR enlace_media_tipo IN ('imagen', 'audio', 'video'));
+
+-- Autoafirmacion de edad (checkbox del usuario, no verificacion real con
+-- ID) para secciones 18+ (Corrupcion Humana, Logica Humana). Compartida
+-- entre ambas -- es un hecho sobre la persona, no sobre el contenido.
+ALTER TABLE perfiles ADD COLUMN IF NOT EXISTS edad_confirmada boolean NOT NULL DEFAULT false;
+
+-- Logica Humana (area personal de Aliado Imperfekto, solo premium) pide
+-- ademas su propio disclaimer, separado del de edad -- se recuerda aparte
+-- porque el usuario quiere que cada paso del gate se confirme una sola vez
+-- y no se repita en sesiones futuras.
+ALTER TABLE perfiles ADD COLUMN IF NOT EXISTS logica_humana_terminos_ok boolean NOT NULL DEFAULT false;
+
+-- Reportes: generico (tipo + item_id), mismo patron que `comentarios`.
+CREATE TABLE IF NOT EXISTS reportes (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  tipo          text NOT NULL CHECK (tipo IN ('debate_post', 'debate_comentario')),
+  item_id       uuid NOT NULL,
+  reportado_por uuid NOT NULL REFERENCES perfiles(id) ON DELETE CASCADE,
+  motivo        text NOT NULL,
+  estado        text NOT NULL DEFAULT 'pendiente' CHECK (estado IN ('pendiente', 'revisado', 'descartado')),
+  creado_en     timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_reportes_estado ON reportes(estado, creado_en DESC);
+ALTER TABLE reportes ENABLE ROW LEVEL SECURITY;

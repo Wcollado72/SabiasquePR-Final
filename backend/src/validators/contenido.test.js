@@ -151,11 +151,19 @@ describe('validateContenido', () => {
   });
 
   test('acepta cada una de las 4 subsecciones, subseccion ausente, y rechaza invalida', () => {
-    for (const subseccion of ['humanos-inhumanos', 'nuevo-pr', 'revolucion-mundial', 'logica-humana']) {
+    for (const subseccion of ['nuevos-humanos', 'revolucion-mundial', 'logica-humana', 'corrupcion-humana']) {
       expect(validateContenido({ ...BASE, subseccion })).toEqual([]);
     }
     expect(validateContenido(BASE)).toEqual([]);
     expect(validateContenido({ ...BASE, subseccion: 'inventada' })).toContain('Subseccion no valida.');
+  });
+
+  test('acepta enfoque institucional/individual/regiones, ausente, y rechaza invalido', () => {
+    for (const enfoque of ['institucional', 'individual', 'puerto-rico', 'estados-unidos', 'hispanoamerica', 'internacionales']) {
+      expect(validateContenido({ ...BASE, enfoque })).toEqual([]);
+    }
+    expect(validateContenido(BASE)).toEqual([]);
+    expect(validateContenido({ ...BASE, enfoque: 'inventado' })).toContain('Enfoque no valido.');
   });
 
   test('acepta esPremium booleano y rechaza otros tipos', () => {

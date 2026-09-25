@@ -5,23 +5,42 @@ const { validatePost } = require('../validators/foroPost');
 
 const router = express.Router();
 
-// GET /api/foro/posts?categoria=&limit=&offset=  -- publico
+// El gate de edad 18+ solo aplica a sub-secciones de tono fuerte/moderacion
+// minima -- Nueva Humanidad (contenido positivo) no lo necesita.
+const SUBSECCIONES_18_MAS = ['corrupcion-humana'];
+
+// Campos que solo el admin puede fijar -- separado del resto del body para
+// no dejar que cualquier usuario se auto-destaque o enlace un tema oficial.
+function camposAdmin(body, rol) {
+  if (rol !== 'admin') return { destacado: false, temaContenidoId: null };
+  return {
+    destacado: Boolean(body.destacado),
+    temaContenidoId: body.temaContenidoId || null,
+  };
+}
+
+// GET /api/foro/posts?subseccion=&enfoque=&limit=&offset=  -- publico
+// (el gate de edad 18+ es de lectura visual en el frontend, no aqui --
+// bloquear la lectura del API mismo no aporta seguridad real y rompe la
+// posibilidad de moderar/enlazar desde el panel de admin).
 router.get('/posts', async (req, res) => {
   try {
-    const { categoria } = req.query;
+    const { subseccion, enfoque } = req.query;
+    if (!subseccion) return res.status(400).json({ ok: false, error: 'Falta el parametro subseccion.' });
     const limit = Math.min(parseInt(req.query.limit, 10) || 20, 50);
     const offset = parseInt(req.query.offset, 10) || 0;
-    const params = [];
-    let where = '';
-    if (categoria) { params.push(categoria); where = `WHERE p.categoria = $${params.length}`; }
+    const params = [subseccion];
+    let where = 'WHERE p.subseccion = $1';
+    if (enfoque) { params.push(enfoque); where += ` AND p.enfoque = $${params.length}`; }
     params.push(limit, offset);
 
     const { rows } = await pool.query(
-      `SELECT p.id, p.titulo, p.categoria, p.creado_en, p.editado_en, pf.email AS autor_email,
+      `SELECT p.id, p.titulo, p.subseccion, p.enfoque, p.destacado, p.tema_contenido_id,
+              p.enlace_media, p.enlace_media_tipo, p.creado_en, p.editado_en, pf.email AS autor_email,
               (SELECT COUNT(*) FROM foro_comentarios c WHERE c.post_id = p.id)::int AS comentarios_count
        FROM foro_posts p JOIN perfiles pf ON pf.id = p.autor_id
        ${where}
-       ORDER BY p.creado_en DESC
+       ORDER BY p.destacado DESC, p.creado_en DESC
        LIMIT $${params.length - 1} OFFSET $${params.length}`,
       params
     );
@@ -33,7 +52,8 @@ router.get('/posts', async (req, res) => {
 router.get('/posts/:id', async (req, res) => {
   try {
     const { rows: postRows } = await pool.query(
-      `SELECT p.id, p.titulo, p.cuerpo, p.categoria, p.autor_id, p.creado_en, p.editado_en, pf.email AS autor_email
+      `SELECT p.id, p.titulo, p.cuerpo, p.subseccion, p.enfoque, p.destacado, p.tema_contenido_id,
+              p.enlace_media, p.enlace_media_tipo, p.autor_id, p.creado_en, p.editado_en, pf.email AS autor_email
        FROM foro_posts p JOIN perfiles pf ON pf.id = p.autor_id WHERE p.id = $1`,
       [req.params.id]
     );
@@ -49,17 +69,21 @@ router.get('/posts/:id', async (req, res) => {
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
-// POST /api/foro/posts -- crear -- requiere sesion
+// POST /api/foro/posts -- crear -- requiere sesion y edad confirmada
 router.post('/posts', requireAuth, async (req, res) => {
-  const errors = validatePost(req.body);
+  if (SUBSECCIONES_18_MAS.includes(req.body.subseccion) && !req.user.edad_confirmada) {
+    return res.status(403).json({ ok: false, error: 'Debes confirmar que eres mayor de 18 años para participar en esta sección.' });
+  }
+  const errors = validatePost(req.body, req.user.rol);
   if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
   try {
-    const { titulo, cuerpo } = req.body;
-    const categoria = req.body.categoria || 'general';
+    const { titulo, cuerpo, subseccion, enfoque, enlaceMedia, enlaceMediaTipo } = req.body;
+    const { destacado, temaContenidoId } = camposAdmin(req.body, req.user.rol);
     const { rows } = await pool.query(
-      `INSERT INTO foro_posts (autor_id, titulo, cuerpo, categoria) VALUES ($1,$2,$3,$4)
-       RETURNING id, titulo, cuerpo, categoria, autor_id, creado_en, editado_en`,
-      [req.user.id, titulo.trim(), cuerpo.trim(), categoria]
+      `INSERT INTO foro_posts (autor_id, titulo, cuerpo, subseccion, enfoque, enlace_media, enlace_media_tipo, destacado, tema_contenido_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+       RETURNING id, titulo, cuerpo, subseccion, enfoque, enlace_media, enlace_media_tipo, destacado, tema_contenido_id, autor_id, creado_en, editado_en`,
+      [req.user.id, titulo.trim(), cuerpo.trim(), subseccion, enfoque || null, enlaceMedia || null, enlaceMediaTipo || null, destacado, temaContenidoId]
     );
     res.status(201).json({ ok: true, post: rows[0] });
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
@@ -73,14 +97,16 @@ router.patch('/posts/:id', requireAuth, async (req, res) => {
     if (existing[0].autor_id !== req.user.id && req.user.rol !== 'admin') {
       return res.status(403).json({ ok: false, error: 'No tienes permiso para editar esta publicacion.' });
     }
-    const errors = validatePost(req.body);
+    const errors = validatePost(req.body, req.user.rol);
     if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
 
-    const { titulo, cuerpo, categoria } = req.body;
+    const { titulo, cuerpo, subseccion, enfoque, enlaceMedia, enlaceMediaTipo } = req.body;
+    const { destacado, temaContenidoId } = camposAdmin(req.body, req.user.rol);
     const { rows } = await pool.query(
-      `UPDATE foro_posts SET titulo=$1, cuerpo=$2, categoria=$3, editado_en=now()
-       WHERE id=$4 RETURNING id, titulo, cuerpo, categoria, autor_id, creado_en, editado_en`,
-      [titulo.trim(), cuerpo.trim(), categoria || 'general', req.params.id]
+      `UPDATE foro_posts SET titulo=$1, cuerpo=$2, subseccion=$3, enfoque=$4, enlace_media=$5,
+         enlace_media_tipo=$6, destacado=$7, tema_contenido_id=$8, editado_en=now()
+       WHERE id=$9 RETURNING id, titulo, cuerpo, subseccion, enfoque, enlace_media, enlace_media_tipo, destacado, tema_contenido_id, autor_id, creado_en, editado_en`,
+      [titulo.trim(), cuerpo.trim(), subseccion, enfoque || null, enlaceMedia || null, enlaceMediaTipo || null, destacado, temaContenidoId, req.params.id]
     );
     res.json({ ok: true, post: rows[0] });
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
@@ -99,13 +125,16 @@ router.delete('/posts/:id', requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
-// POST /api/foro/posts/:postId/comentarios -- crear -- requiere sesion
+// POST /api/foro/posts/:postId/comentarios -- crear -- requiere sesion y edad confirmada
 router.post('/posts/:postId/comentarios', requireAuth, async (req, res) => {
   try {
     const cuerpo = (req.body.cuerpo || '').trim();
     if (cuerpo.length < 2) return res.status(400).json({ ok: false, error: 'El comentario es muy corto.' });
-    const { rows: postExists } = await pool.query('SELECT id FROM foro_posts WHERE id = $1', [req.params.postId]);
+    const { rows: postExists } = await pool.query('SELECT id, subseccion FROM foro_posts WHERE id = $1', [req.params.postId]);
     if (postExists.length === 0) return res.status(404).json({ ok: false, error: 'Publicacion no encontrada.' });
+    if (SUBSECCIONES_18_MAS.includes(postExists[0].subseccion) && !req.user.edad_confirmada) {
+      return res.status(403).json({ ok: false, error: 'Debes confirmar que eres mayor de 18 años para participar en esta sección.' });
+    }
 
     const { rows } = await pool.query(
       `INSERT INTO foro_comentarios (post_id, autor_id, cuerpo) VALUES ($1,$2,$3)

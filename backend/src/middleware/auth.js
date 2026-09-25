@@ -31,10 +31,10 @@ async function requireAuth(req, res, next) {
       `INSERT INTO perfiles (id, email)
        VALUES ($1, $2)
        ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email
-       RETURNING id, email, rol, nombre`,
+       RETURNING id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok`,
       [payload.sub, payload.email || null]
     );
-    req.user = rows[0]; // { id, email, rol, nombre }
+    req.user = rows[0]; // { id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok }
     next();
   } catch (err) {
     res.status(401).json({ ok: false, error: 'Token invalido o expirado.' });
@@ -61,7 +61,7 @@ async function tryAuth(req, _res, next) {
   try {
     const { payload } = await jwtVerify(token, getJWKS());
     if (!payload.sub) { req.user = null; return next(); }
-    const { rows } = await pool.query('SELECT id, email, rol FROM perfiles WHERE id = $1', [payload.sub]);
+    const { rows } = await pool.query('SELECT id, email, rol, edad_confirmada, logica_humana_terminos_ok FROM perfiles WHERE id = $1', [payload.sub]);
     req.user = rows[0] || null;
   } catch {
     req.user = null;

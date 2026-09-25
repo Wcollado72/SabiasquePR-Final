@@ -15,7 +15,7 @@ const SITE = {
   name:            'Sabías que PR',
   email:           'sabiasquepr@yahoo.com',
   phone:           '(787) 435-8872',
-  location:        'San Juan, Puerto Rico',
+  location:        'San Juan, PR 00901',
   ogImage:         'https://sabiasquepr.com/images/portada-social.webp',
 
   // ── Backend API (foro) ───────────────────────────────────
@@ -108,12 +108,28 @@ const CITA_ESTILOS = {
   apa: 'APA', mla: 'MLA', chicago: 'Chicago', turabian: 'Turabian', ama: 'AMA',
   vancouver: 'Vancouver', abnt: 'ABNT', icontec: 'ICONTEC', ieee: 'IEEE', bluebook: 'Bluebook',
 };
-// Sub-secciones de Revolución Humana. Solo "Lógica Humana" y "Nuevo PR"
-// tienen pestaña pública por ahora; las otras 2 ya se admiten en el
-// modelo/admin para no migrar de nuevo cuando se activen.
+// Sub-secciones de Revolución Humana. "Lógica Humana", "Nuevos Humanos" y
+// "Corrupción Humana" tienen pestaña pública; "Revolución Mundial" ya se
+// admite en el modelo/admin para no migrar de nuevo cuando se active.
+// "Nuevos Humanos" se llamó "Nueva Humanidad" hasta el 2026-09-25 -- el
+// nombre se liberó al renombrar la página nuevos-humanos.html a
+// revolucion-humana.html (habla más directo/personal, mejor conexión
+// emocional que el nombre genérico).
 const SUBSECCIONES = {
-  'humanos-inhumanos': 'Humanos Inhumanos', 'nuevo-pr': 'Nuevo PR',
-  'revolucion-mundial': 'Revolución Mundial', 'logica-humana': 'Lógica Humana',
+  'nuevos-humanos': 'Nuevos Humanos', 'revolucion-mundial': 'Revolución Mundial',
+  'logica-humana': 'Lógica Humana', 'corrupcion-humana': 'Corrupción Humana',
+};
+
+// Segundo eje, reutilizable, con significado distinto segun la sub-seccion:
+// institucional/individual dentro de Corrupcion Humana, o la region dentro
+// de Nuevos Humanos. Un solo campo/select en vez de uno por sub-seccion.
+const ENFOQUES = {
+  institucional: 'Institucional (Corrupción Humana)',
+  individual: 'Individual (Corrupción Humana)',
+  'puerto-rico': 'Puerto Rico (Nuevos Humanos)',
+  'estados-unidos': 'Estados Unidos (Nuevos Humanos)',
+  hispanoamerica: 'Hispanoamérica (Nuevos Humanos)',
+  internacionales: 'Internacionales (Nuevos Humanos)',
 };
 
 // Botones de filtro por categoría, compartidos entre Noticias, Revolución
@@ -188,19 +204,18 @@ const FOOTER = `
           <h2 class="footer-h">Secciones</h2>
           <ul>
             <li><a href="noticias.html">Noticias</a></li>
-            <li><a href="nuevos-humanos.html">Revolución Humana</a></li>
+            <li><a href="revolucion-humana.html">Revolución Humana</a></li>
             <li><a href="educacion.html">Educación</a></li>
-            <li><a href="foro.html">Foro</a></li>
             <li><a href="tienda.html">Tienda</a></li>
           </ul>
         </nav>
         <nav aria-label="Proyecto">
           <h2 class="footer-h">Proyecto</h2>
           <ul>
-            <li><a href="manifiesto.html">Manifiesto</a></li>
+            <li><a href="contacto.html#manifiesto">Manifiesto</a></li>
             <li><a href="details.html">Servicios</a></li>
             <li><a href="premium.html">Hazte premium</a></li>
-            <li><a href="contacto.html">Contacto</a></li>
+            <li><a href="contacto.html">Quiénes somos</a></li>
             <li><a href="rss.xml">RSS</a></li>
           </ul>
         </nav>
@@ -209,8 +224,7 @@ const FOOTER = `
           <address>
             <a href="mailto:${SITE.email}">${SITE.email}</a><br>
             ${SITE.phone}<br>
-            ${SITE.location}<br>
-            Universidad Interamericana de Puerto Rico, Recinto de Fajardo
+            ${SITE.location}
           </address>
         </div>
       </div>
@@ -310,11 +324,10 @@ function buildPage(p) {
           </button>
           <ul id="nav-menu" role="list">
             <li><a href="noticias.html">Noticias</a></li>
-            <li><a href="nuevos-humanos.html">Revolución Humana</a></li>
+            <li><a href="revolucion-humana.html">Revolución Humana</a></li>
             <li><a href="educacion.html">Educación</a></li>
-            <li><a href="foro.html">Foro</a></li>
             <li><a href="tienda.html">Tienda</a></li>
-            <li><a href="contacto.html">Contacto</a></li>
+            <li><a href="contacto.html">Quiénes somos</a></li>
             <li><a href="premium.html" class="nav-premium">Hazte premium</a></li>
           </ul>
         </nav>
@@ -451,7 +464,7 @@ const PAGES = [
           <p>Noticias internacionales con contexto y análisis: descubrimientos, ciencia, política y sociedad.</p>
         </div>
         <div class="strip-item">
-          <h3><a href="nuevos-humanos.html">Revolución Humana</a></h3>
+          <h3><a href="revolucion-humana.html">Revolución Humana</a></h3>
           <p>Lo que la humanidad está logrando, descubriendo y sanando.</p>
         </div>
         <div class="strip-item">
@@ -473,50 +486,11 @@ const PAGES = [
 
       <div class="section-head">
         <h2>Sobre el proyecto</h2>
-        <a href="manifiesto.html">Leer el manifiesto</a>
+        <a href="contacto.html#manifiesto">Leer el manifiesto</a>
       </div>
       <p class="home-about">Un proyecto para entender, cuestionar y mejorar la sociedad en la que vivimos.</p>`,
     extraScript: `<script src="editorial.js"></script>
   <script src="home.js"></script>`,
-  },
-
-  {
-    file: 'manifiesto.html',
-    title: 'Sabías que PR — Manifiesto',
-    description: 'Conoce la visión, misión y datos del proyecto Sabías que PR: despertar conciencias en todo el mundo.',
-    heroH2: 'Manifiesto',
-    heroP: 'Un proyecto para entender, cuestionar y mejorar la sociedad en la que vivimos.',
-    heroButtons: '',
-    mainContent: `
-      <section class="manifiesto-split manifiesto-split-flip">
-        <figure class="manifiesto-media">
-          <img src="images/manifiesto-vision.webp" alt="Amanecer visto desde un mirador en la costa de Puerto Rico, con el sol saliendo sobre el mar" width="1000" height="750" loading="lazy">
-        </figure>
-        <div class="manifiesto-text">
-          <h2>Visión del proyecto</h2>
-          <p>Sabías que PR es una iniciativa social dedicada al despertar de la conciencia humana. Nació en Puerto Rico, pero su misión no conoce fronteras: mediante herramientas creativas y accesibles, buscamos comprender el entorno actual para formar individuos comprometidos con un futuro mejor para toda la humanidad. Está dirigido a cualquier persona, en cualquier parte del mundo, dispuesta a fomentar su evolución integral —mental, física y espiritual— en un ambiente de inclusión libre de distinciones por raza, género, credo, ideología, nacionalidad o condición social.</p>
-          <p>A través de la lógica, la ingeniería inversa y el pensamiento crítico, facilitamos los recursos para cuestionar el entorno y mejorar la toma de decisiones diaria. Nuestro objetivo final es que más seres humanos, sin importar dónde vivan, se reconozcan como agentes de cambio capaces de construir un planeta más justo, solidario y consciente.</p>
-        </div>
-      </section>
-      <section class="manifiesto-split">
-        <figure class="manifiesto-media">
-          <img src="images/manifiesto-datos.webp" alt="Libreta en blanco sobre un escritorio de madera, junto a café, una lupa y un mapa" width="1000" height="750" loading="lazy">
-        </figure>
-        <div class="manifiesto-text">
-          <h2>Datos del proyecto</h2>
-          <p><strong>Nombre:</strong> Sabías que PR</p>
-          <p><strong>Año de inicio:</strong> 2025</p>
-          <p><strong>Origen:</strong> Proyecto independiente creado en Puerto Rico, inspirado en la necesidad de entender mejor la realidad social, política y económica del mundo — y con la ambición de servir a cualquier persona, en cualquier lugar.</p>
-          <p><strong>Enfoques principales:</strong></p>
-          <ul>
-            <li>Noticias y reportajes con contexto histórico y social.</li>
-            <li>Educación y recursos para el pensamiento crítico.</li>
-            <li>Investigación, datos y análisis de largo plazo.</li>
-            <li>Espacios para la participación y la reflexión comunitaria.</li>
-          </ul>
-          <p><strong>Público al que se dirige:</strong> cualquier persona, en cualquier país, interesada en comprender la realidad desde una perspectiva humana, crítica y solidaria — y dispuesta a ser parte del cambio.</p>
-        </div>
-      </section>`,
   },
 
   {
@@ -582,7 +556,7 @@ const PAGES = [
   },
 
   {
-    file: 'nuevos-humanos.html',
+    file: 'revolucion-humana.html',
     title: 'Sabías que PR — Revolución Humana',
     description: 'Videos, ensayos y noticias sobre lo que la humanidad está logrando, descubriendo y sanando.',
     heroH2: 'Revolución Humana',
@@ -601,14 +575,26 @@ const PAGES = [
         </div>
       </section>
       <nav class="foro-filters" id="rh-subnav" data-filter-param="subseccion">
-        <button type="button" class="foro-filter-btn active" aria-pressed="true" data-subseccion="logica-humana">Lógica Humana</button>
-        <button type="button" class="foro-filter-btn" aria-pressed="false" data-subseccion="nuevo-pr">Nuevo PR</button>
+        <button type="button" class="foro-filter-btn active" aria-pressed="true" data-subseccion="nuevos-humanos">Nuevos Humanos</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-subseccion="logica-humana">Lógica Humana</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-subseccion="corrupcion-humana">Corrupción Humana</button>
       </nav>
+      <nav class="foro-filters foro-filters-sub" id="rh-enfoque-filter" data-filter-param="enfoque" hidden>
+        <button type="button" class="foro-filter-btn active" aria-pressed="true" data-enfoque="">Todos</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="puerto-rico">Puerto Rico</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="estados-unidos">Estados Unidos</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="hispanoamerica">Hispanoamérica</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="internacionales">Internacionales</button>
+      </nav>
+      <section class="debate-seccion" id="rh-logica-gate" hidden></section>
       <p class="home-hint" id="rh-hint" aria-live="polite"></p>
-      <div class="card-grid contenidos-grid" id="rh-list" data-seccion="revolucion-humana" data-filters="rh-subnav" data-hint="rh-hint" aria-live="polite" aria-busy="true"></div>
-      <noscript><p class="empty-state">Activa JavaScript para ver este contenido.</p></noscript>`,
+      <div class="card-grid contenidos-grid" id="rh-list" data-seccion="revolucion-humana" data-filters="rh-subnav rh-enfoque-filter" data-hint="rh-hint" aria-live="polite" aria-busy="true"></div>
+      <noscript><p class="empty-state">Activa JavaScript para ver este contenido.</p></noscript>
+      <section class="debate-seccion" id="rh-debate" hidden></section>`,
     extraScript: `<script src="editorial.js"></script>
-  <script src="contenidos.js"></script>`,
+  <script src="contenidos.js"></script>
+  <script src="debate.js"></script>
+  <script src="logica-humana.js"></script>`,
   },
 
   {
@@ -642,54 +628,6 @@ const PAGES = [
   },
 
   {
-    file: 'foro.html',
-    title: 'Sabías que PR — Foro de la comunidad',
-    description: 'Foro de la comunidad de Sabías que PR: comparte ideas, preguntas y descubrimientos sobre tecnología, crítica internacional, nuevos humanos y educación.',
-    heroH2: 'Foro de la Comunidad',
-    heroP: 'Comparte, pregunta y debate con otros lectores de Sabías que PR.',
-    mainClass: 'main-stack',
-    mainContent: `
-      <section class="box box-blog foro-intro">
-        <h3>Foro de la comunidad</h3>
-        <p>Comparte ideas, preguntas y descubrimientos con la comunidad. Inicia sesión para publicar.</p>
-      </section>
-
-      <section class="box box-blog contact-box foro-new-post" id="foro-new-post" style="display:none;">
-        <h3>Nueva publicación</h3>
-        <form id="foro-post-form">
-          <label for="foro-titulo">Título</label>
-          <input type="text" id="foro-titulo" required maxlength="140">
-          <label for="foro-categoria">Categoría</label>
-          <select id="foro-categoria">
-            <option value="general">General</option>
-            <option value="tecnologia">Tecnología</option>
-            <option value="internacionales">Internacionales</option>
-            <option value="nuevos-humanos">Revolución Humana</option>
-            <option value="educacion">Educación</option>
-          </select>
-          <label for="foro-cuerpo">Mensaje</label>
-          <textarea id="foro-cuerpo" rows="4" required minlength="10"></textarea>
-          <p id="foro-cuerpo-counter" class="foro-word-counter"></p>
-          <button type="submit" id="foro-submit-btn">Publicar</button>
-          <p id="foro-form-status" class="form-status" aria-live="polite"></p>
-        </form>
-      </section>
-      <p id="foro-login-hint" class="foro-login-hint"><a href="#" class="login-modal-trigger">Inicia sesión</a> para publicar en el foro.</p>
-
-      <section class="foro-filters" id="foro-filters">
-        <button type="button" class="foro-filter-btn active" data-categoria="">Todos</button>
-        <button type="button" class="foro-filter-btn" data-categoria="tecnologia">Tecnología</button>
-        <button type="button" class="foro-filter-btn" data-categoria="internacionales">Internacionales</button>
-        <button type="button" class="foro-filter-btn" data-categoria="nuevos-humanos">Revolución Humana</button>
-        <button type="button" class="foro-filter-btn" data-categoria="educacion">Educación</button>
-      </section>
-
-      <div id="foro-post-list" class="foro-post-list"><p class="foro-loading">Cargando publicaciones...</p></div>
-      <div id="foro-post-detail" class="foro-post-detail" style="display:none;"></div>`,
-    extraScript: `<script src="foro.js"></script>`,
-  },
-
-  {
     file: 'premium.html',
     title: 'Sabías que PR — Premium',
     description: 'Hazte miembro premium de Sabías que PR y accede al contenido completo de Revolución Humana.',
@@ -716,9 +654,6 @@ const PAGES = [
     description: 'Apoya el proyecto Sabías que PR con artículos únicos: camisetas, tazas, gorras y más.',
     heroH2: 'Tienda Sabías que PR',
     heroP: 'Artículos para apoyar el proyecto y llevar el mensaje a todas partes.',
-    heroButtons: `
-          <a href="#productos" class="btn btn-alt">Ver productos</a>
-          <a href="manifiesto.html" class="btn btn-alt">Sobre el proyecto</a>`,
     mainClass: 'tienda-main',
     mainContent: `<div id="productos"><p class="foro-loading">Cargando productos...</p></div>`,
     extraScript: `<script src="productos.js"></script>`,
@@ -743,6 +678,7 @@ const PAGES = [
           <button type="button" class="foro-filter-btn active" data-tab="noticias">Noticias</button>
           <button type="button" class="foro-filter-btn" data-tab="contenidos">Contenidos</button>
           <button type="button" class="foro-filter-btn" data-tab="productos">Productos</button>
+          <button type="button" class="foro-filter-btn" data-tab="reportes">Reportes</button>
         </nav>
 
         <section class="admin-tab-panel" id="admin-panel-noticias">
@@ -823,6 +759,10 @@ const PAGES = [
               <label for="ac-subseccion">Sub-sección de Revolución Humana (opcional)</label>
               <select id="ac-subseccion">
                 ${optionsHtml(SUBSECCIONES, { includeEmpty: 'Ninguna' })}
+              </select>
+              <label for="ac-enfoque">Enfoque (solo aplica dentro de Corrupción Humana)</label>
+              <select id="ac-enfoque">
+                ${optionsHtml(ENFOQUES, { includeEmpty: 'Ninguno' })}
               </select>
               <label for="ac-tipo-formato">Tipo de formato</label>
               <select id="ac-tipo-formato">
@@ -944,6 +884,11 @@ const PAGES = [
             </form>
           </section>
         </section>
+
+        <section class="admin-tab-panel" id="admin-panel-reportes" style="display:none;">
+          <p class="admin-hint">Reportes del debate de Corrupción Humana. Revisa el contenido reportado antes de decidir.</p>
+          <div id="admin-reportes-list" class="admin-list"></div>
+        </section>
       </div>
 
       <div class="image-picker-modal" id="image-picker-modal" hidden>
@@ -1045,11 +990,40 @@ const PAGES = [
 
   {
     file: 'contacto.html',
-    title: 'Sabías que PR — Contacto',
-    description: 'Contáctanos para ideas, colaboraciones o sugerencias. Puente directo con el equipo de Sabías que PR.',
-    heroH2: 'Contacto',
-    heroP: 'Puente directo para ideas, sugerencias y colaboraciones.',
+    title: 'Sabías que PR — Quiénes somos',
+    description: 'Conoce la visión, misión y datos del proyecto Sabías que PR, y contáctanos para ideas, colaboraciones o sugerencias.',
+    heroH2: 'Quiénes somos',
+    heroP: 'Nuestra visión, misión, y el puente directo para ideas, sugerencias y colaboraciones.',
     mainContent: `
+      <section class="manifiesto-split manifiesto-split-flip" id="manifiesto">
+        <figure class="manifiesto-media">
+          <img src="images/manifiesto-vision.webp" alt="Amanecer visto desde un mirador en la costa de Puerto Rico, con el sol saliendo sobre el mar" width="1000" height="750" loading="lazy">
+        </figure>
+        <div class="manifiesto-text">
+          <h2>Visión del proyecto</h2>
+          <p>Sabías que PR es una iniciativa social dedicada al despertar de la conciencia humana. Nació en Puerto Rico, pero su misión no conoce fronteras: mediante herramientas creativas y accesibles, buscamos comprender el entorno actual para formar individuos comprometidos con un futuro mejor para toda la humanidad. Está dirigido a cualquier persona, en cualquier parte del mundo, dispuesta a fomentar su evolución integral —mental, física y espiritual— en un ambiente de inclusión libre de distinciones por raza, género, credo, ideología, nacionalidad o condición social.</p>
+          <p>A través de la lógica, la ingeniería inversa y el pensamiento crítico, facilitamos los recursos para cuestionar el entorno y mejorar la toma de decisiones diaria. Nuestro objetivo final es que más seres humanos, sin importar dónde vivan, se reconozcan como agentes de cambio capaces de construir un planeta más justo, solidario y consciente.</p>
+        </div>
+      </section>
+      <section class="manifiesto-split">
+        <figure class="manifiesto-media">
+          <img src="images/manifiesto-datos.webp" alt="Libreta en blanco sobre un escritorio de madera, junto a café, una lupa y un mapa" width="1000" height="750" loading="lazy">
+        </figure>
+        <div class="manifiesto-text">
+          <h2>Datos del proyecto</h2>
+          <p><strong>Nombre:</strong> Sabías que PR</p>
+          <p><strong>Año de inicio:</strong> 2025</p>
+          <p><strong>Origen:</strong> Proyecto independiente creado en Puerto Rico, inspirado en la necesidad de entender mejor la realidad social, política y económica del mundo — y con la ambición de servir a cualquier persona, en cualquier lugar.</p>
+          <p><strong>Enfoques principales:</strong></p>
+          <ul>
+            <li>Noticias y reportajes con contexto histórico y social.</li>
+            <li>Educación y recursos para el pensamiento crítico.</li>
+            <li>Investigación, datos y análisis de largo plazo.</li>
+            <li>Espacios para la participación y la reflexión comunitaria.</li>
+          </ul>
+          <p><strong>Público al que se dirige:</strong> cualquier persona, en cualquier país, interesada en comprender la realidad desde una perspectiva humana, crítica y solidaria — y dispuesta a ser parte del cambio.</p>
+        </div>
+      </section>
       <section class="box box-blog contact-box">
         <h3>Cómo comunicarte</h3>
         <ul>
@@ -1057,7 +1031,7 @@ const PAGES = [
           <li><strong>Teléfono:</strong> ${SITE.phone}</li>
           <li><strong>Ubicación:</strong> ${SITE.location}</li>
         </ul>
-        <p>Puedes escribirnos para enviar ideas, reportar errores, proponer colaboraciones o compartir investigaciones.</p>
+        <p>Este es el canal directo con Sabías que PR: escríbenos para dejarnos una idea, pedir información sobre el proyecto, reportar un error, o proponer una colaboración — desde una investigación compartida hasta una conferencia o charla. Léelo como una invitación abierta, no como un simple formulario de soporte.</p>
         <h3>Envíanos un mensaje</h3>
         <form id="contact-form"
               action="https://formspree.io/f/${SITE.formspreeId}"

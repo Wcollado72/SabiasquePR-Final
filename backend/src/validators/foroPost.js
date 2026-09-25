@@ -1,22 +1,47 @@
-const CATEGORIAS_VALIDAS = ['general', 'tecnologia', 'internacionales', 'nuevos-humanos', 'educacion'];
-// El foro es un canal abierto (ideas, solicitudes de info/conferencias), no
-// un beneficio premium -- el limite de palabras es el mismo para todos.
-const WORD_LIMIT = 500;
+// El "foro" evoluciono de un foro general (retirado, ver git history) al
+// motor del debate semanal 18+ de Revolucion Humana -- sigue siendo el
+// mismo CRUD+JWT, ahora acotado por sub-seccion y con reglas por rol.
+const SUBSECCIONES_VALIDAS = ['corrupcion-humana', 'nuevos-humanos'];
+const ENFOQUES_VALIDOS = [
+  'institucional', 'individual',
+  'puerto-rico', 'estados-unidos', 'hispanoamerica', 'internacionales',
+];
+const ENLACE_MEDIA_TIPOS_VALIDOS = ['imagen', 'audio', 'video'];
+const WORD_LIMITS = { usuario: 500, premium: 1500, admin: 1500 };
 
 function countWords(text) {
   return (text || '').trim().split(/\s+/).filter(Boolean).length;
 }
 
-function validatePost({ titulo, cuerpo, categoria }) {
+function validatePost({ titulo, cuerpo, subseccion, enfoque, enlaceMedia, enlaceMediaTipo }, rol = 'usuario') {
   const errors = [];
   if (!titulo || titulo.trim().length < 3) errors.push('El titulo debe tener al menos 3 caracteres.');
   if (titulo && titulo.length > 140) errors.push('El titulo no puede superar 140 caracteres.');
   if (!cuerpo || cuerpo.trim().length < 10) errors.push('El mensaje debe tener al menos 10 caracteres.');
-  if (cuerpo && countWords(cuerpo) > WORD_LIMIT) {
-    errors.push(`El mensaje no puede superar ${WORD_LIMIT} palabras.`);
+  const limit = WORD_LIMITS[rol] || WORD_LIMITS.usuario;
+  if (cuerpo && countWords(cuerpo) > limit) {
+    errors.push(`El mensaje no puede superar ${limit} palabras.`);
   }
-  if (categoria && !CATEGORIAS_VALIDAS.includes(categoria)) errors.push('Categoria no valida.');
+  if (!subseccion || !SUBSECCIONES_VALIDAS.includes(subseccion)) errors.push('Sub-seccion no valida.');
+  if (enfoque !== undefined && enfoque !== null && enfoque !== '' && !ENFOQUES_VALIDOS.includes(enfoque)) {
+    errors.push('Enfoque no valido.');
+  }
+  if (enlaceMedia || enlaceMediaTipo) {
+    if (rol !== 'premium' && rol !== 'admin') {
+      errors.push('Solo las cuentas premium pueden anadir un enlace multimedia.');
+    }
+    if (!enlaceMediaTipo || !ENLACE_MEDIA_TIPOS_VALIDOS.includes(enlaceMediaTipo)) {
+      errors.push('Indica un tipo de enlace multimedia valido (imagen, audio o video).');
+    }
+    if (!enlaceMedia) {
+      errors.push('Falta la URL del enlace multimedia.');
+    } else {
+      try { new URL(enlaceMedia); } catch { errors.push('El enlace multimedia no es una URL valida.'); }
+    }
+  }
   return errors;
 }
 
-module.exports = { validatePost, CATEGORIAS_VALIDAS, WORD_LIMIT, countWords };
+module.exports = {
+  validatePost, SUBSECCIONES_VALIDAS, ENFOQUES_VALIDOS, ENLACE_MEDIA_TIPOS_VALIDOS, WORD_LIMITS, countWords,
+};

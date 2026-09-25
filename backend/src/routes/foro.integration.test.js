@@ -7,20 +7,26 @@ const { pool } = require('../db');
 
 const app = buildApp();
 
-const AUTOR = JSON.stringify({ id: 'user-autor', rol: 'usuario' });
-const OTRO_USUARIO = JSON.stringify({ id: 'user-otro', rol: 'usuario' });
-const ADMIN = JSON.stringify({ id: 'admin-1', rol: 'admin' });
+const AUTOR = JSON.stringify({ id: 'user-autor', rol: 'usuario', edad_confirmada: true });
+const OTRO_USUARIO = JSON.stringify({ id: 'user-otro', rol: 'usuario', edad_confirmada: true });
+const ADMIN = JSON.stringify({ id: 'admin-1', rol: 'admin', edad_confirmada: true });
+const SIN_EDAD_CONFIRMADA = JSON.stringify({ id: 'user-menor', rol: 'usuario', edad_confirmada: false });
 
-const POST_VALIDO = { titulo: 'Un titulo valido', cuerpo: 'Un mensaje suficientemente largo.' };
+const POST_VALIDO = { titulo: 'Un titulo valido', cuerpo: 'Un mensaje suficientemente largo.', subseccion: 'corrupcion-humana' };
 
 beforeEach(() => {
   pool.query.mockReset();
 });
 
 describe('GET /api/foro/posts', () => {
-  test('devuelve la lista de publicaciones', async () => {
-    pool.query.mockResolvedValueOnce({ rows: [{ id: 'p1', titulo: 'Hola' }] });
+  test('400 si falta el parametro subseccion', async () => {
     const res = await request(app).get('/api/foro/posts');
+    expect(res.status).toBe(400);
+  });
+
+  test('devuelve la lista de publicaciones de una subseccion', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'p1', titulo: 'Hola' }] });
+    const res = await request(app).get('/api/foro/posts?subseccion=corrupcion-humana');
     expect(res.status).toBe(200);
     expect(res.body.posts).toHaveLength(1);
   });
@@ -49,7 +55,7 @@ describe('POST /api/foro/posts', () => {
     const res = await request(app)
       .post('/api/foro/posts')
       .set('x-test-user', AUTOR)
-      .send({ titulo: 'Titulo valido', cuerpo });
+      .send({ titulo: 'Titulo valido', cuerpo, subseccion: 'corrupcion-humana' });
     expect(res.status).toBe(400);
     expect(res.body.error).toContain('500 palabras');
   });
@@ -60,7 +66,37 @@ describe('POST /api/foro/posts', () => {
     const res = await request(app)
       .post('/api/foro/posts')
       .set('x-test-user', AUTOR)
-      .send({ titulo: 'Titulo valido', cuerpo });
+      .send({ titulo: 'Titulo valido', cuerpo, subseccion: 'corrupcion-humana' });
+    expect(res.status).toBe(201);
+  });
+
+  test('201 si un premium publica hasta 1500 palabras con enlace multimedia', async () => {
+    const cuerpo = Array(1200).fill('palabra').join(' ');
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'p1', autor_id: 'user-premium', titulo: 'Titulo valido', cuerpo }] });
+    const res = await request(app)
+      .post('/api/foro/posts')
+      .set('x-test-user', JSON.stringify({ id: 'user-premium', rol: 'premium', edad_confirmada: true }))
+      .send({
+        titulo: 'Titulo valido', cuerpo, subseccion: 'corrupcion-humana',
+        enlaceMedia: 'https://example.com/video.mp4', enlaceMediaTipo: 'video',
+      });
+    expect(res.status).toBe(201);
+  });
+
+  test('403 si no ha confirmado ser mayor de edad en corrupcion-humana', async () => {
+    const res = await request(app)
+      .post('/api/foro/posts')
+      .set('x-test-user', SIN_EDAD_CONFIRMADA)
+      .send(POST_VALIDO);
+    expect(res.status).toBe(403);
+  });
+
+  test('201 en nuevos-humanos sin confirmar edad (no la exige)', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'p1', autor_id: 'user-menor', titulo: 'Titulo valido' }] });
+    const res = await request(app)
+      .post('/api/foro/posts')
+      .set('x-test-user', SIN_EDAD_CONFIRMADA)
+      .send({ titulo: 'Titulo valido', cuerpo: 'Un mensaje suficientemente largo.', subseccion: 'nuevos-humanos' });
     expect(res.status).toBe(201);
   });
 });
@@ -91,7 +127,7 @@ describe('PATCH /api/foro/posts/:id (permisos)', () => {
     const res = await request(app)
       .patch('/api/foro/posts/p1')
       .set('x-test-user', AUTOR)
-      .send({ titulo: 'Editado', cuerpo: POST_VALIDO.cuerpo });
+      .send({ titulo: 'Editado', cuerpo: POST_VALIDO.cuerpo, subseccion: 'corrupcion-humana' });
     expect(res.status).toBe(200);
   });
 
@@ -102,7 +138,7 @@ describe('PATCH /api/foro/posts/:id (permisos)', () => {
     const res = await request(app)
       .patch('/api/foro/posts/p1')
       .set('x-test-user', ADMIN)
-      .send({ titulo: 'Editado por admin', cuerpo: POST_VALIDO.cuerpo });
+      .send({ titulo: 'Editado por admin', cuerpo: POST_VALIDO.cuerpo, subseccion: 'corrupcion-humana' });
     expect(res.status).toBe(200);
   });
 });
@@ -158,6 +194,26 @@ describe('DELETE /api/foro/comentarios/:id (permisos)', () => {
 });
 
 describe('POST /api/foro/posts/:postId/comentarios', () => {
+  test('403 si no ha confirmado ser mayor de edad en un post de corrupcion-humana', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'p1', subseccion: 'corrupcion-humana' }] });
+    const res = await request(app)
+      .post('/api/foro/posts/p1/comentarios')
+      .set('x-test-user', SIN_EDAD_CONFIRMADA)
+      .send({ cuerpo: 'Un comentario' });
+    expect(res.status).toBe(403);
+  });
+
+  test('201 al comentar en nuevos-humanos sin confirmar edad (no la exige)', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'p2', subseccion: 'nuevos-humanos' }] })
+      .mockResolvedValueOnce({ rows: [{ id: 'c1', post_id: 'p2', cuerpo: 'Un comentario' }] });
+    const res = await request(app)
+      .post('/api/foro/posts/p2/comentarios')
+      .set('x-test-user', SIN_EDAD_CONFIRMADA)
+      .send({ cuerpo: 'Un comentario' });
+    expect(res.status).toBe(201);
+  });
+
   test('404 si la publicacion no existe', async () => {
     pool.query.mockResolvedValueOnce({ rows: [] });
     const res = await request(app)

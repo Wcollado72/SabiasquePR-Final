@@ -12,6 +12,7 @@ const adminRoutes = require('./routes/admin');
 const perfilRoutes = require('./routes/perfil');
 const ordenesRoutes = require('./routes/ordenes');
 const comentariosRoutes = require('./routes/comentarios');
+const reportesRoutes = require('./routes/reportes');
 
 function buildApp() {
   const app = express();
@@ -56,6 +57,7 @@ function buildApp() {
   app.use('/api/perfil', perfilRoutes);
   app.use('/api/ordenes', ordenesRoutes);
   app.use('/api/comentarios', comentariosRoutes);
+  app.use('/api/reportes', reportesRoutes);
 
   // Manejador de errores (CORS rechazado, JSON malformado, etc.)
   app.use((err, _req, res, _next) => {

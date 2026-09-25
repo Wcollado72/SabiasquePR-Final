@@ -152,7 +152,11 @@
     const formatoTexto = subformatoLabel ? formatoLabel + ' · ' + subformatoLabel : formatoLabel;
     const catLabel = CATEGORIAS[item.categoria] || item.categoria;
     const img = '<img src="' + escapeHtml(item.url_portada) + '" alt="' + escapeHtml(item.portada_alt || '') + '" width="600" height="400" loading="lazy">';
-    const badge = '<span class="card-format">' + escapeHtml(formatoTexto) + '</span>';
+    // Categoria + formato combinados en una sola pastilla sobre la imagen
+    // (antes eran dos piezas sueltas: esta pastilla solo con el formato, y
+    // la categoria aparte como texto suelto debajo de la imagen -- se veia
+    // desordenado, sobre todo con imagenes que ya traen su propio diseño).
+    const badge = '<span class="card-format">' + escapeHtml(catLabel) + ' · ' + escapeHtml(formatoTexto) + '</span>';
     const iaLabel = item.divulgacion_ia && DIVULGACION_IA_LABEL[item.divulgacion_ia];
     const iaBadge = iaLabel
       ? '<span class="badge-ia ' + DIVULGACION_IA_CLASS[item.divulgacion_ia] + '">' + escapeHtml(iaLabel) + '</span>'
@@ -162,7 +166,6 @@
       : '';
 
     const body = '<div class="card-body">'
-      + '<span class="eyebrow">' + escapeHtml(catLabel) + '</span>'
       + '<h3 class="card-title">' + escapeHtml(item.titulo) + '</h3>'
       + '<p class="card-dek">' + escapeHtml(item.subtitulo_resumen) + '</p>'
       + '<p class="card-meta">' + contenidoMetaLine(item) + '</p>'

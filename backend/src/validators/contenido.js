@@ -12,7 +12,13 @@ const DIVULGACION_IA_VALIDAS = ['no', 'parcial', 'generado'];
 const CITA_ESTILOS_VALIDOS = [
   'apa', 'mla', 'chicago', 'turabian', 'ama', 'vancouver', 'abnt', 'icontec', 'ieee', 'bluebook',
 ];
-const SUBSECCIONES_VALIDAS = ['humanos-inhumanos', 'nuevo-pr', 'revolucion-mundial', 'logica-humana'];
+const SUBSECCIONES_VALIDAS = ['nuevos-humanos', 'revolucion-mundial', 'logica-humana', 'corrupcion-humana'];
+// `enfoque` es un segundo eje reutilizable: institucional/individual dentro
+// de Corrupcion Humana, o la region dentro de Nueva Humanidad.
+const ENFOQUES_VALIDOS = [
+  'institucional', 'individual',
+  'puerto-rico', 'estados-unidos', 'hispanoamerica', 'internacionales',
+];
 
 function validateContenido(body, { partial = false } = {}) {
   const errors = [];
@@ -65,6 +71,9 @@ function validateContenido(body, { partial = false } = {}) {
   if (body.esPremium !== undefined && typeof body.esPremium !== 'boolean') {
     errors.push('El campo "esPremium" debe ser verdadero o falso.');
   }
+  if (body.enfoque !== undefined && body.enfoque !== null && body.enfoque !== '' && !ENFOQUES_VALIDOS.includes(body.enfoque)) {
+    errors.push('Enfoque no valido.');
+  }
   // El video y el audio necesitan de donde reproducirse
   const tipo = body.tipoFormato;
   if ((tipo === 'video' || tipo === 'audio') && !partial && !body.urlMedia) {
@@ -82,4 +91,5 @@ module.exports = {
   DIVULGACION_IA_VALIDAS,
   CITA_ESTILOS_VALIDOS,
   SUBSECCIONES_VALIDAS,
+  ENFOQUES_VALIDOS,
 };
