@@ -22,14 +22,3 @@
   to = "/404.html"
   status = 404
   force = true
-
-# La pagina de entrada del sitio ahora es Revolucion Humana en vez de la
-# portada general. Se usa un rewrite (status 200), no un redirect, para
-# que sabiasquepr.com se mantenga como URL visible en el navegador y para
-# compartir -- index.html se conserva en el repo por si se necesita una
-# portada general mas adelante, solo dejo de ser lo que ve el visitante.
-[[redirects]]
-  from = "/"
-  to = "/nuevos-humanos.html"
-  status = 200
-  force = true

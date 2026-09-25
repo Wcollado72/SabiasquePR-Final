@@ -40,30 +40,14 @@ describe('validatePost', () => {
     expect(errors.length).toBe(2);
   });
 
-  test('acepta hasta 100 palabras para un usuario regular', () => {
-    const cuerpo = Array(100).fill('palabra').join(' ');
-    expect(validatePost({ titulo: 'Titulo valido', cuerpo }, 'usuario')).toEqual([]);
-  });
-
-  test('rechaza mas de 100 palabras para un usuario regular', () => {
-    const cuerpo = Array(101).fill('palabra').join(' ');
-    const errors = validatePost({ titulo: 'Titulo valido', cuerpo }, 'usuario');
-    expect(errors).toContain('El mensaje no puede superar 100 palabras.');
-  });
-
-  test('permite hasta 500 palabras para un usuario premium', () => {
+  test('acepta hasta 500 palabras para cualquier usuario', () => {
     const cuerpo = Array(500).fill('palabra').join(' ');
-    expect(validatePost({ titulo: 'Titulo valido', cuerpo }, 'premium')).toEqual([]);
+    expect(validatePost({ titulo: 'Titulo valido', cuerpo })).toEqual([]);
   });
 
-  test('permite hasta 500 palabras para un admin', () => {
-    const cuerpo = Array(500).fill('palabra').join(' ');
-    expect(validatePost({ titulo: 'Titulo valido', cuerpo }, 'admin')).toEqual([]);
-  });
-
-  test('usa el limite de usuario regular si no se especifica rol', () => {
-    const cuerpo = Array(101).fill('palabra').join(' ');
+  test('rechaza mas de 500 palabras', () => {
+    const cuerpo = Array(501).fill('palabra').join(' ');
     const errors = validatePost({ titulo: 'Titulo valido', cuerpo });
-    expect(errors).toContain('El mensaje no puede superar 100 palabras.');
+    expect(errors).toContain('El mensaje no puede superar 500 palabras.');
   });
 });

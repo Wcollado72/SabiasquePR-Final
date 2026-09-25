@@ -31,11 +31,16 @@
 
   function initGrid(grid) {
     const seccion = grid.dataset.seccion;
-    filtroPorGrid.set(grid, '');
 
     const filtersId = grid.dataset.filters;
     const filtersEl = filtersId ? document.getElementById(filtersId) : null;
     const filterParam = (filtersEl && filtersEl.dataset.filterParam) || 'categoria';
+
+    // El filtro inicial es el del boton marcado "active" en el HTML (por
+    // defecto es el de "reset" -- ej. "Todas" -- pero una grilla puede
+    // arrancar en otra pestaña, como Revolucion Humana en "Logica Humana").
+    const activeBtn = filtersEl && filtersEl.querySelector('.foro-filter-btn.active');
+    filtroPorGrid.set(grid, (activeBtn && activeBtn.dataset[filterParam]) || '');
 
     if (filtersEl) {
       filtersEl.addEventListener('click', (e) => {

@@ -10,7 +10,6 @@ const app = buildApp();
 const AUTOR = JSON.stringify({ id: 'user-autor', rol: 'usuario' });
 const OTRO_USUARIO = JSON.stringify({ id: 'user-otro', rol: 'usuario' });
 const ADMIN = JSON.stringify({ id: 'admin-1', rol: 'admin' });
-const PREMIUM = JSON.stringify({ id: 'user-premium', rol: 'premium' });
 
 const POST_VALIDO = { titulo: 'Un titulo valido', cuerpo: 'Un mensaje suficientemente largo.' };
 
@@ -45,22 +44,22 @@ describe('POST /api/foro/posts', () => {
     expect(res.body.post.id).toBe('p1');
   });
 
-  test('400 si un usuario regular supera las 100 palabras', async () => {
-    const cuerpo = Array(101).fill('palabra').join(' ');
+  test('400 si un usuario regular supera las 500 palabras', async () => {
+    const cuerpo = Array(501).fill('palabra').join(' ');
     const res = await request(app)
       .post('/api/foro/posts')
       .set('x-test-user', AUTOR)
       .send({ titulo: 'Titulo valido', cuerpo });
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('100 palabras');
+    expect(res.body.error).toContain('500 palabras');
   });
 
-  test('201 si un usuario premium publica mas de 100 palabras', async () => {
+  test('201 si un usuario regular publica hasta 500 palabras', async () => {
     const cuerpo = Array(300).fill('palabra').join(' ');
-    pool.query.mockResolvedValueOnce({ rows: [{ id: 'p1', autor_id: 'user-premium', titulo: 'Titulo valido', cuerpo }] });
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'p1', autor_id: 'user-autor', titulo: 'Titulo valido', cuerpo }] });
     const res = await request(app)
       .post('/api/foro/posts')
-      .set('x-test-user', PREMIUM)
+      .set('x-test-user', AUTOR)
       .send({ titulo: 'Titulo valido', cuerpo });
     expect(res.status).toBe(201);
   });

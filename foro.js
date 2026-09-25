@@ -12,9 +12,10 @@
   const isSupabaseConfigured = cfg.supabaseUrl && !cfg.supabaseUrl.includes('YOUR_SUPABASE');
   let supabase = null;
   let currentUser = null;
-  let currentUserRol = 'usuario';
 
-  const WORD_LIMITS = { usuario: 100, premium: 500, admin: 500 };
+  // El foro es un canal abierto (ideas, solicitudes de info/conferencias),
+  // no un beneficio premium -- el limite de palabras es el mismo para todos.
+  const WORD_LIMIT = 500;
   function countWords(text) {
     return (text || '').trim().split(/\s+/).filter(Boolean).length;
   }
@@ -60,12 +61,10 @@
         }
         const { data: { session } } = await supabase.auth.getSession();
         currentUser = session?.user ?? null;
-        await refreshCurrentUserRol();
 
         supabase.auth.onAuthStateChange((_event, session) => {
           currentUser = session?.user ?? null;
           updateAuthUI();
-          refreshCurrentUserRol();
           route();
         });
       } catch (err) {
@@ -76,17 +75,6 @@
     bindNewPostForm();
     bindFilters();
     route();
-  }
-
-  async function refreshCurrentUserRol() {
-    if (!currentUser) { currentUserRol = 'usuario'; updateWordCounters(); return; }
-    try {
-      const data = await apiFetch('/api/me');
-      currentUserRol = data.user?.rol || 'usuario';
-    } catch {
-      currentUserRol = 'usuario';
-    }
-    updateWordCounters();
   }
 
   function updateAuthUI() {
@@ -104,10 +92,9 @@
     const ta = document.getElementById(textareaId);
     const counter = document.getElementById(counterId);
     if (!ta || !counter) return;
-    const limit = WORD_LIMITS[currentUserRol] || WORD_LIMITS.usuario;
     const n = countWords(ta.value);
-    counter.textContent = `${n}/${limit} palabras${currentUserRol !== 'usuario' ? ' (premium)' : ''}`;
-    counter.classList.toggle('over-limit', n > limit);
+    counter.textContent = `${n}/${WORD_LIMIT} palabras`;
+    counter.classList.toggle('over-limit', n > WORD_LIMIT);
   }
   function bindWordCounter(textareaId, counterId) {
     const ta = document.getElementById(textareaId);

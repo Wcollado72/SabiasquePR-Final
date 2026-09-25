@@ -601,8 +601,8 @@ const PAGES = [
         </div>
       </section>
       <nav class="foro-filters" id="rh-subnav" data-filter-param="subseccion">
-        <button type="button" class="foro-filter-btn" data-subseccion="logica-humana">Lógica Humana</button>
-        <button type="button" class="foro-filter-btn" data-subseccion="nuevo-pr">Nuevo PR</button>
+        <button type="button" class="foro-filter-btn active" aria-pressed="true" data-subseccion="logica-humana">Lógica Humana</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-subseccion="nuevo-pr">Nuevo PR</button>
       </nav>
       <p class="home-hint" id="rh-hint" aria-live="polite"></p>
       <div class="card-grid contenidos-grid" id="rh-list" data-seccion="revolucion-humana" data-filters="rh-subnav" data-hint="rh-hint" aria-live="polite" aria-busy="true"></div>
@@ -692,15 +692,15 @@ const PAGES = [
   {
     file: 'premium.html',
     title: 'Sabías que PR — Premium',
-    description: 'Hazte miembro premium de Sabías que PR y publica mensajes más largos en el foro de la comunidad.',
+    description: 'Hazte miembro premium de Sabías que PR y accede al contenido completo de Revolución Humana.',
     heroH2: 'Sabías que PR Premium',
-    heroP: 'Publica mensajes más largos en el foro y apoya el proyecto.',
+    heroP: 'Acceso completo al contenido premium y apoya el proyecto.',
     mainClass: 'main-stack',
     mainContent: `
       <section class="box box-blog foro-intro">
         <h3>Beneficios premium</h3>
         <ul>
-          <li>Publica hasta <strong>500 palabras</strong> por mensaje en el foro (en vez de 100).</li>
+          <li>Acceso completo a los artículos, videos y pódcasts marcados como premium en Revolución Humana (sin vista previa cortada).</li>
           <li>Apoyas directamente el sostenimiento del proyecto.</li>
         </ul>
         <p id="premium-status" class="form-status" aria-live="polite"></p>

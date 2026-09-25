@@ -112,8 +112,10 @@ hr{ border:0; border-top:1px solid var(--line); }
   border-bottom:1px solid var(--line);
 }
 .site-header-inner{
-  max-width:var(--wrap);
-  margin:0 auto;
+  /* A diferencia del resto del sitio (limitado a --wrap para legibilidad),
+     la barra de navegacion usa todo el ancho de la pantalla -- si se
+     limitaba a --wrap quedaba un bloque angosto centrado con mucho espacio
+     vacio a los lados en pantallas anchas (reportado como "desbalanceado"). */
   padding:0 var(--gutter);
   min-height:var(--header-h);
   display:flex;
