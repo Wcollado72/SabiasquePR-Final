@@ -595,14 +595,11 @@ const PAGES = [
           <img src="images/aliado-imperfekto-retrato-v2-sin-texto.webp" alt="Aliado Imperfekto: una figura encapuchada con el rostro oculto en sombra y una grieta dorada en el hombro, sostiene un farol encendido de espaldas al espectador, junto a una multitud diversa que camina hacia el horizonte al atardecer, con un mapa del mundo de fondo" class="lh-author-photo">
         </div>
         <div class="lh-author-text">
-          <p class="eyebrow">Lógica Humana</p>
           <h3>Aliado Imperfekto</h3>
           <p>Aliado Imperfekto no es un nombre, ni una persona real — es un movimiento, una idea. No es una persona perfecta hablándote desde un pedestal — es alguien que ha cometido errores serios, que sigue cometiéndolos, y que no finge tener la moral resuelta. Lo único que puede ofrecer con certeza es una intención: estar del lado de lo que hace avanzar a la humanidad entera, no a un grupo, una tribu o una bandera. Estas son las ideas, dudas y contradicciones de alguien que sigue intentando, imperfectamente, ser mejor aliado que ayer.</p>
-          <a href="premium.html" class="btn btn-premium">Hazte Premium →</a>
         </div>
       </section>
       <nav class="foro-filters" id="rh-subnav" data-filter-param="subseccion">
-        <button type="button" class="foro-filter-btn active" data-subseccion="">Todo</button>
         <button type="button" class="foro-filter-btn" data-subseccion="logica-humana">Lógica Humana</button>
         <button type="button" class="foro-filter-btn" data-subseccion="nuevo-pr">Nuevo PR</button>
       </nav>

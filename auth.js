@@ -86,8 +86,12 @@ async function updateLoginUI(session) {
 
   // Botón del header: muestra el correo cuando hay sesión activa.
   if (triggerLabel) {
+    // Recortado a 14 caracteres (mismo largo que "Iniciar sesión") para que el
+    // boton del header nunca sea mas ancho logueado que deslogueado -- un
+    // correo largo empujaba el menu por encima del icono de tema (bug real,
+    // reportado por el usuario, solo visible con sesion iniciada).
     triggerLabel.textContent = user
-      ? (user.email.length > 18 ? user.email.slice(0, 16) + '…' : user.email)
+      ? (user.email.length > 14 ? user.email.slice(0, 12) + '…' : user.email)
       : 'Iniciar sesión';
   }
 
