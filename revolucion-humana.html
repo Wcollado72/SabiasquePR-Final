@@ -31,7 +31,7 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon-96.png" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=a8f16c57">
+  <link rel="stylesheet" href="styles.css?v=a96f8d8b">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Revolución Humana","description":"Videos, ensayos y noticias sobre lo que la humanidad está logrando, descubriendo y sanando.","url":"https://sabiasquepr.com/revolucion-humana.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -100,6 +100,10 @@
           <h3>Aliado Imperfekto</h3>
           <p>Aliado Imperfekto no es un nombre, ni una persona real — es un movimiento, una idea. No es una persona perfecta hablándote desde un pedestal — es alguien que ha cometido errores serios, que sigue cometiéndolos, y que no finge tener la moral resuelta. Lo único que puede ofrecer con certeza es una intención: estar del lado de lo que hace avanzar a la humanidad entera, no a un grupo, una tribu o una bandera. Estas son las ideas, dudas y contradicciones de alguien que sigue intentando, imperfectamente, ser mejor aliado que ayer.</p>
           <p>No busca seguidores, busca cómplices — personas dispuestas a cuestionar tanto al mundo como a sí mismas. Cada ensayo, cada pódcast, cada idea publicada aquí parte de una sola pregunta: ¿esto ayuda a que avancemos todos, o solo a unos pocos? Cuando la respuesta no sea clara, se dirá igual — con humildad, no con certeza falsa.</p>
+          <div class="lh-herramientas-botones">
+            <button type="button" class="btn btn-alt" id="rh-btn-significado" aria-expanded="false">Detrás del farol</button>
+          </div>
+          <div id="rh-imagen-significado" hidden></div>
         </div>
       </section>
       <nav class="foro-filters" id="rh-subnav" data-filter-param="subseccion">
@@ -108,8 +112,7 @@
         <button type="button" class="foro-filter-btn" aria-pressed="false" data-subseccion="corrupcion-humana">Corrupción Humana</button>
       </nav>
       <nav class="foro-filters foro-filters-sub" id="rh-enfoque-filter" data-filter-param="enfoque" hidden>
-        <button type="button" class="foro-filter-btn active" aria-pressed="true" data-enfoque="">Todos</button>
-        <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="puerto-rico">Puerto Rico</button>
+        <button type="button" class="foro-filter-btn active" aria-pressed="true" data-enfoque="puerto-rico">Puerto Rico</button>
         <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="estados-unidos">Estados Unidos</button>
         <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="hispanoamerica">Hispanoamérica</button>
         <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="internacionales">Internacionales</button>
@@ -256,6 +259,7 @@
   <script src="contenidos.js"></script>
   <script src="debate.js"></script>
   <script src="logica-humana.js"></script>
+  <script src="rh-significado.js"></script>
   <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>

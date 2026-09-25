@@ -152,10 +152,10 @@
     const formatoTexto = subformatoLabel ? formatoLabel + ' · ' + subformatoLabel : formatoLabel;
     const catLabel = CATEGORIAS[item.categoria] || item.categoria;
     const img = '<img src="' + escapeHtml(item.url_portada) + '" alt="' + escapeHtml(item.portada_alt || '') + '" width="600" height="400" loading="lazy">';
-    // Categoria + formato combinados en una sola pastilla sobre la imagen
-    // (antes eran dos piezas sueltas: esta pastilla solo con el formato, y
-    // la categoria aparte como texto suelto debajo de la imagen -- se veia
-    // desordenado, sobre todo con imagenes que ya traen su propio diseño).
+    // Categoria + formato combinados en una sola linea de texto, entre la
+    // imagen y el titulo (no encima de la imagen -- se probo como pastilla
+    // superpuesta y en imagenes con su propio diseño/texto tapaba parte de
+    // la portada, sobre todo al hacer zoom en hover).
     const badge = '<span class="card-format">' + escapeHtml(catLabel) + ' · ' + escapeHtml(formatoTexto) + '</span>';
     const iaLabel = item.divulgacion_ia && DIVULGACION_IA_LABEL[item.divulgacion_ia];
     const iaBadge = iaLabel
@@ -166,6 +166,7 @@
       : '';
 
     const body = '<div class="card-body">'
+      + badge
       + '<h3 class="card-title">' + escapeHtml(item.titulo) + '</h3>'
       + '<p class="card-dek">' + escapeHtml(item.subtitulo_resumen) + '</p>'
       + '<p class="card-meta">' + contenidoMetaLine(item) + '</p>'
@@ -176,7 +177,7 @@
     const reproducirLabel = REPRODUCIBLES[item.tipo_formato];
     if (reproducirLabel && item.url_media) {
       return '<article class="card">'
-        + '<div class="card-media">' + badge + img
+        + '<div class="card-media">' + img
         + '<button type="button" class="card-play" data-url="' + escapeHtml(item.url_media) + '" data-formato="' + escapeHtml(item.tipo_formato) + '" aria-label="' + reproducirLabel + ': ' + escapeHtml(item.titulo) + '">' + PLAY_ICON + '</button>'
         + '</div>'
         + '<a class="card-title-link" href="' + contenidoHref(item) + '">' + body + '</a>'
@@ -185,7 +186,7 @@
 
     return '<article class="card">'
       + '<a class="card-link" href="' + contenidoHref(item) + '">'
-      + '<div class="card-media">' + badge + img + '</div>'
+      + '<div class="card-media">' + img + '</div>'
       + body
       + '</a></article>';
   }
@@ -253,12 +254,16 @@
   }
 
   // Tarjeta estándar (rejilla). `opts.featured` = versión grande para portada.
+  // `noticias` (la tabla, distinta de `contenidos`) es siempre formato
+  // "Noticia" -- mismo formato combinado categoria+formato que
+  // contenidoCardHtml, entre la imagen y el titulo, para verse consistente
+  // en toda la página principal y "Lo más reciente".
   function cardHtml(art, opts) {
     const o = opts || {};
     const tag = o.featured ? 'h2' : 'h3';
     const inner = mediaHtml(art, o.featured ? { w: 960, h: 540, eager: true } : {})
       + '<div class="card-body">'
-      + '<span class="eyebrow">' + escapeHtml(categoriaLabel(art)) + '</span>'
+      + '<span class="card-format">' + escapeHtml(categoriaLabel(art)) + ' · Noticia</span>'
       + '<' + tag + ' class="card-title">' + escapeHtml(art.titulo) + '</' + tag + '>'
       + '<p class="card-dek">' + escapeHtml(dek(art, o.featured ? 260 : 170)) + '</p>'
       + '<p class="card-meta">' + metaLine(art) + '</p>'

@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const { pool } = require('./db');
 const { requireAuth } = require('./middleware/auth');
 const foroRoutes = require('./routes/foro');
@@ -33,6 +34,37 @@ function buildApp() {
   app.use('/api/stripe', stripeWebhookRoutes);
 
   app.use(express.json());
+
+  // Prevencion de bots/abuso, gratis: limite general generoso para toda la
+  // API (lectura), y uno mas estricto solo para escribir (crear/editar/
+  // borrar) -- ahi es donde importa frenar spam, no en las consultas.
+  // No hay formulario anonimo que pase por nuestro backend (contacto va a
+  // Formspree, newsletter a Mailchimp, ambos externos) y todo lo que
+  // escribe ya exige `requireAuth` con un JWT real de Supabase -- eso ya
+  // filtra bots simples; el rate limit frena abuso desde una cuenta real.
+  // Desactivado en pruebas (Jest fija NODE_ENV=test) -- si no, los tests de
+  // integracion que hacen muchos POST/PATCH/DELETE seguidos empezarian a
+  // fallar con 429 en vez de probar la logica real de cada ruta.
+  if (process.env.NODE_ENV !== 'test') {
+    app.use('/api', rateLimit({
+      windowMs: 15 * 60 * 1000,
+      max: 300,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: { ok: false, error: 'Demasiadas solicitudes. Intenta de nuevo en unos minutos.' },
+    }));
+    const escrituraLimiter = rateLimit({
+      windowMs: 15 * 60 * 1000,
+      max: 20,
+      standardHeaders: true,
+      legacyHeaders: false,
+      skip: (req) => !['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method),
+      message: { ok: false, error: 'Demasiadas publicaciones en poco tiempo. Espera unos minutos.' },
+    });
+    app.use('/api/foro', escrituraLimiter);
+    app.use('/api/comentarios', escrituraLimiter);
+    app.use('/api/reportes', escrituraLimiter);
+  }
 
   app.get('/api/health', async (_req, res) => {
     try {

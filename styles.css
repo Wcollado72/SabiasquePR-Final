@@ -507,7 +507,6 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   transition:transform .5s ease;
 }
 .card-link:hover .card-media img{ transform:scale(1.03); }
-.card .eyebrow{ margin-bottom:8px; }
 .card-title{
   margin:0 0 8px;
   font-size:1.3rem;
@@ -621,20 +620,19 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
    Por eso .card-media no va dentro de <a> cuando hay video (evita anidar
    <button> dentro de <a>, inválido en HTML y confuso para lectores de pantalla). */
 .card-media{ position:relative; }
+/* Categoria + formato combinados ("Cultura · Video"): texto simple entre la
+   imagen y el titulo, no una pastilla encima de la imagen -- se probo
+   superpuesta y en portadas con texto/diseño propio (ej. tarjetas
+   editoriales de noticias) tapaba parte de la imagen. */
 .card-format{
-  position:absolute;
-  top:10px;
-  left:10px;
-  z-index:1;
-  padding:3px 10px;
-  background:color-mix(in srgb, var(--ink) 82%, transparent);
-  color:var(--bg);
+  display:block;
+  margin-bottom:8px;
   font-family:var(--font-ui);
-  font-size:.66rem;
+  font-size:.68rem;
   font-weight:700;
-  letter-spacing:.08em;
+  letter-spacing:.1em;
   text-transform:uppercase;
-  border-radius:999px;
+  color:var(--accent);
 }
 .card-play{
   position:absolute;
@@ -694,6 +692,10 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   align-items:center;
 }
 .featured .card-media{ aspect-ratio:16 / 9; margin:0; }
+/* La portada destacada puede traer texto propio pegado al borde (portadas
+   editoriales tipo "tarjeta") -- el zoom al pasar el cursor lo recortaba
+   contra .card-media{overflow:hidden}. Se desactiva solo aqui. */
+.featured .card-link:hover .card-media img{ transform:none; }
 .featured .card-title{
   font-size:clamp(1.9rem, 3.6vw, 2.9rem);
   font-weight:500;
