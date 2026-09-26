@@ -288,10 +288,12 @@ document.addEventListener('DOMContentLoaded', () => {
   window.closeLoginModal = closeLoginModal;
 
   // ══════════════════════════════════════════════════════════
-  // 5. NEWSLETTER — Mailchimp JSONP
+  // 5. NEWSLETTER — Beehiiv, via nuestro propio backend
   // ══════════════════════════════════════════════════════════
-  const cfg = window.SITE_CONFIG || {};
-
+  // La llave de Beehiiv es secreta y nunca puede llegar al navegador (a
+  // diferencia del truco JSONP que usaba Mailchimp con solo un id publico)
+  // -- por eso este formulario le manda el correo a nuestra propia API
+  // (/api/newsletter/subscribe), y es el backend quien habla con Beehiiv.
   document.querySelectorAll('.newsletter-form').forEach(form => {
     const statusEl = form.parentElement?.querySelector('.newsletter-status');
 
@@ -306,24 +308,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
       setNLStatus(statusEl, 'Suscribiendo...', 'info');
 
-      if (!cfg.mcUser || cfg.mcUser === 'YOUR_MC_USER') {
-        // Mailchimp no configurado aún
-        setTimeout(() => {
-          setNLStatus(statusEl, '¡Gracias! Te avisaremos cuando el boletín esté activo.', 'ok');
-          form.reset();
-        }, 600);
-        return;
-      }
-
-      // JSONP real a Mailchimp
       try {
-        const result = await subscribeMailchimp(email, cfg.mcUser, cfg.mcList, cfg.mcServer);
-        if (result.ok) {
+        const apiUrl = (window.SITE_CONFIG && window.SITE_CONFIG.apiUrl) || 'http://localhost:3000';
+        const res = await fetch(apiUrl + '/api/newsletter/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.ok) {
           setNLStatus(statusEl, '¡Suscripción exitosa! Revisa tu correo para confirmar.', 'ok');
           form.reset();
         } else {
-          const msg = result.msg?.replace(/<[^>]*>/g, '') || 'Error desconocido.';
-          setNLStatus(statusEl, '' + msg, 'error');
+          setNLStatus(statusEl, data.error || 'No se pudo completar la suscripción.', 'error');
         }
       } catch {
         setNLStatus(statusEl, 'Error de conexión. Inténtalo de nuevo.', 'error');
@@ -335,38 +332,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!el) return;
     el.textContent = msg;
     el.className = 'newsletter-status ' + type;
-  }
-
-  function subscribeMailchimp(email, user, list, server) {
-    return new Promise(resolve => {
-      const cbName = 'mc_cb_' + Date.now();
-      const scriptId = cbName + '_script';
-
-      window[cbName] = data => {
-        delete window[cbName];
-        document.getElementById(scriptId)?.remove();
-        resolve({ ok: data.result === 'success', msg: data.msg });
-      };
-
-      const url = `https://${server}.list-manage.com/subscribe/post-json` +
-        `?u=${encodeURIComponent(user)}&id=${encodeURIComponent(list)}` +
-        `&EMAIL=${encodeURIComponent(email)}&c=${cbName}`;
-
-      const script = document.createElement('script');
-      script.id  = scriptId;
-      script.src = url;
-      script.onerror = () => resolve({ ok: false, msg: 'Error de red.' });
-      document.body.appendChild(script);
-
-      // Timeout de seguridad
-      setTimeout(() => {
-        if (window[cbName]) {
-          delete window[cbName];
-          document.getElementById(scriptId)?.remove();
-          resolve({ ok: false, msg: 'Tiempo de espera agotado.' });
-        }
-      }, 8000);
-    });
   }
 
   // ══════════════════════════════════════════════════════════

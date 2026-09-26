@@ -14,6 +14,7 @@ const perfilRoutes = require('./routes/perfil');
 const ordenesRoutes = require('./routes/ordenes');
 const comentariosRoutes = require('./routes/comentarios');
 const reportesRoutes = require('./routes/reportes');
+const newsletterRoutes = require('./routes/newsletter');
 
 function buildApp() {
   const app = express();
@@ -64,6 +65,9 @@ function buildApp() {
     app.use('/api/foro', escrituraLimiter);
     app.use('/api/comentarios', escrituraLimiter);
     app.use('/api/reportes', escrituraLimiter);
+    // Publica y sin sesion (cualquiera puede suscribirse, no solo cuentas
+    // logueadas) -- mas expuesta a spam que las de arriba, mismo limite.
+    app.use('/api/newsletter', escrituraLimiter);
   }
 
   app.get('/api/health', async (_req, res) => {
@@ -90,6 +94,7 @@ function buildApp() {
   app.use('/api/ordenes', ordenesRoutes);
   app.use('/api/comentarios', comentariosRoutes);
   app.use('/api/reportes', reportesRoutes);
+  app.use('/api/newsletter', newsletterRoutes);
 
   // Manejador de errores (CORS rechazado, JSON malformado, etc.)
   app.use((err, _req, res, _next) => {

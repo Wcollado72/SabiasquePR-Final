@@ -39,12 +39,10 @@ const SITE = {
   supabaseUrl:     'https://qmlhjacduuvptxglqxqn.supabase.co',
   supabaseKey:     'sb_publishable_xeRmzsC6kmPflMm7FimG4g_-4mDoSbi',
 
-  // ── Mailchimp (newsletter) ───────────────────────────────
-  // 1. En Mailchimp: Audience → Signup forms → Embedded forms
-  // 2. Del código embed, extraer u=XXXX&id=XXXX y server (us1, us2…)
-  mcUser:          'YOUR_MC_USER',
-  mcList:          'YOUR_MC_LIST',
-  mcServer:        'us1',
+  // Newsletter: Beehiiv (reemplazo de Mailchimp, 2026-09-27). La llave de
+  // API y el Publication ID viven en el backend (BEEHIIV_API_KEY,
+  // BEEHIIV_PUBLICATION_ID en .env / Render) -- nunca aqui, el frontend
+  // solo le manda el correo a /api/newsletter/subscribe.
 
   // ── Cloudflare Turnstile (anti-bot en el debate) ─────────
   // Site Key: publica, segura de tener en el codigo. La Secret Key
@@ -411,9 +409,6 @@ function buildPage(p) {
       supabaseUrl: '${SITE.supabaseUrl}',
       supabaseKey: '${SITE.supabaseKey}',
       apiUrl:      '${SITE.apiUrl}',
-      mcUser:      '${SITE.mcUser}',
-      mcList:      '${SITE.mcList}',
-      mcServer:    '${SITE.mcServer}',
       youtubeApiKey: '${SITE.youtubeApiKey}',
       turnstileSiteKey: '${SITE.turnstileSiteKey}'
     };
@@ -1417,7 +1412,7 @@ const PAGES = [
         <h3>1. Qué datos recopilamos</h3>
         <ul>
           <li><strong>Formulario de contacto:</strong> nombre, correo electrónico y mensaje, procesados por <a href="https://formspree.io" target="_blank" rel="noopener noreferrer">Formspree</a>.</li>
-          <li><strong>Boletín / Newsletter:</strong> tu correo electrónico, gestionado por <a href="https://mailchimp.com" target="_blank" rel="noopener noreferrer">Mailchimp</a>.</li>
+          <li><strong>Boletín / Newsletter:</strong> tu correo electrónico, gestionado por <a href="https://www.beehiiv.com" target="_blank" rel="noopener noreferrer">beehiiv</a>.</li>
           <li><strong>Cuenta de usuario (login):</strong> correo y contraseña (cifrada), gestionados por <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">Supabase</a>.</li>
           <li><strong>Analítica de navegación:</strong> páginas visitadas, dispositivo y ubicación aproximada, mediante <a href="https://analytics.google.com" target="_blank" rel="noopener noreferrer">Google Analytics 4</a>.</li>
           <li><strong>Compras en la tienda:</strong> los pagos son procesados directamente por <a href="https://stripe.com" target="_blank" rel="noopener noreferrer">Stripe</a>; nosotros no almacenamos datos de tarjetas.</li>
@@ -1433,7 +1428,7 @@ const PAGES = [
         </ul>
 
         <h3>3. Con quién compartimos datos</h3>
-        <p>No vendemos tu información. Solo la compartimos con los proveedores de servicio mencionados arriba (Formspree, Mailchimp, Supabase, Google Analytics, Stripe), únicamente para cumplir la función por la que los usas.</p>
+        <p>No vendemos tu información. Solo la compartimos con los proveedores de servicio mencionados arriba (Formspree, beehiiv, Supabase, Google Analytics, Stripe), únicamente para cumplir la función por la que los usas.</p>
 
         <h3>4. Cookies</h3>
         <p>Usamos almacenamiento local del navegador (localStorage) para recordar tu preferencia de modo oscuro/claro, y cookies de Google Analytics para estadísticas de visitas.</p>
@@ -1604,4 +1599,4 @@ fs.writeFileSync('images-manifest.json', generateImagesManifest(), 'utf8');
 console.log('  ✓ images-manifest.json');
 
 console.log(`\n✅ Build completo — ${PAGES.length} páginas generadas.`);
-console.log('   Configurar en SITE: formspreeId · ga4Id · supabaseUrl · supabaseKey · mcUser · mcList\n');
+console.log('   Configurar en SITE: formspreeId · ga4Id · supabaseUrl · supabaseKey\n');

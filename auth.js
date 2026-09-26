@@ -267,7 +267,7 @@ function handleRegister() {
   const email = document.getElementById('login-email')?.value.trim();
   const pass  = document.getElementById('login-pass')?.value;
   if (!email || !pass) { setAuthStatus('Completa todos los campos.', 'error'); return; }
-  if (pass.length < 6)  { setAuthStatus('La contraseña debe tener al menos 6 caracteres.', 'error'); return; }
+  if (pass.length < 8)  { setAuthStatus('La contraseña debe tener al menos 8 caracteres.', 'error'); return; }
   signUp(email, pass);
 }
 
