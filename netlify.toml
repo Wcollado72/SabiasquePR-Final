@@ -67,6 +67,14 @@
 # - www.youtube.com: reproductor embebido de Contenidos + oEmbed del admin
 # - www.googleapis.com: YouTube Data API (selector de canal en el admin)
 # - formspree.io: el formulario de contacto envia ahi directamente (form-action)
+# - cdn.jsdelivr.net: import() dinamico del cliente de Supabase
+#   (@supabase/supabase-js) -- lo usan auth.js, debate.js, admin.js y
+#   logica-humana.js. CORREGIDO 2026-09-26: se me paso en el primer
+#   inventario (solo habia un <link rel="preconnect">, sin <script src>
+#   estatico visible en build.js) y esto rompio el login en produccion por
+#   unos minutos hasta esta correccion -- la leccion: un import() dinamico
+#   dentro de un .js no aparece grepeando el HTML generado, hay que buscar
+#   tambien import(...) y .src = dentro de todos los .js de pagina.
 #
 # OJO al activar Mailchimp (hoy sigue con el placeholder YOUR_MC_USER en
 # build.js): el newsletter usa JSONP a "<mcServer>.list-manage.com" -- hay
@@ -75,7 +83,7 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://qmlhjacduuvptxglqxqn.supabase.co https://sabiasquepr-backend-uufz.onrender.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://www.youtube.com https://www.googleapis.com; frame-src 'self' https://www.youtube.com https://challenges.cloudflare.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self' https://formspree.io"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://qmlhjacduuvptxglqxqn.supabase.co https://sabiasquepr-backend-uufz.onrender.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://www.youtube.com https://www.googleapis.com; frame-src 'self' https://www.youtube.com https://challenges.cloudflare.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self' https://formspree.io"
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
