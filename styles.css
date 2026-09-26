@@ -1276,6 +1276,84 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   text-align:left;
 }
 
+/* Ayuda del panel admin: tooltip al pasar el cursor + manual integrado
+   (boton "?"). Diseno neutro (no oscuro ni synthwave) porque flota sobre
+   temas distintos segun el tab -- una sola fuente de datos (AYUDA en
+   admin.js) alimenta ambos, ver comentario ahi. */
+.ayuda-btn{
+  position:fixed;
+  right:24px;
+  bottom:24px;
+  z-index:410;
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  background:var(--ink);
+  color:var(--bg);
+  border:none;
+  font-size:1.1rem;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,0,0,.25);
+}
+.ayuda-btn:hover{ background:var(--accent); }
+.ayuda-tooltip{
+  position:absolute;
+  z-index:420;
+  width:300px;
+  max-width:calc(100vw - 16px);
+  padding:12px 14px;
+  background:#161616;
+  color:#f6f4ee;
+  border-radius:var(--radius);
+  box-shadow:0 8px 24px rgba(0,0,0,.35);
+  font-size:.8rem;
+  line-height:1.5;
+  pointer-events:none;
+}
+.ayuda-tooltip .ayuda-titulo{ margin:0 0 4px; font-weight:700; font-size:.85rem; }
+.ayuda-tooltip .ayuda-desc{ margin:0 0 6px; color:#d8d5cc; }
+.ayuda-tooltip .ayuda-incluir{ margin:0; color:#b8b4a8; }
+.ayuda-badge{
+  display:inline-block;
+  font-size:.62rem;
+  font-weight:700;
+  letter-spacing:.04em;
+  color:#ffd76b;
+  border:1px solid #ffd76b;
+  border-radius:999px;
+  padding:1px 8px;
+  vertical-align:middle;
+  margin-left:4px;
+}
+.ayuda-modal{
+  position:fixed;
+  inset:0;
+  z-index:430;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:rgba(0,0,0,.55);
+}
+.ayuda-modal-box{
+  width:100%;
+  max-width:640px;
+  max-height:80vh;
+  overflow:auto;
+  padding:22px 26px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+}
+.ayuda-modal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.ayuda-modal-head h3{ margin:0; }
+.ayuda-modal-item{ padding:14px 0; border-bottom:1px solid var(--line); }
+.ayuda-modal-item:last-child{ border-bottom:none; }
+.ayuda-modal-item .ayuda-titulo{ margin:0 0 4px; font-weight:700; color:var(--ink); }
+.ayuda-modal-item .ayuda-desc{ margin:0 0 6px; color:var(--ink-soft); }
+.ayuda-modal-item .ayuda-incluir{ margin:0; color:var(--ink-mute); font-size:.85rem; }
+
 /* Citación de fuentes */
 .citation-group{
   display:flex;

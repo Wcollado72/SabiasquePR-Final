@@ -767,6 +767,17 @@ const PAGES = [
       </section>
 
       <div id="admin-panel" style="display:none;">
+        <button type="button" id="ayuda-btn" class="ayuda-btn" aria-label="Abrir manual de ayuda" title="Manual de ayuda">?</button>
+        <div class="ayuda-modal" id="ayuda-modal" hidden>
+          <div class="ayuda-modal-box">
+            <div class="ayuda-modal-head">
+              <h3>Manual de ayuda</h3>
+              <button type="button" id="ayuda-modal-close" class="admin-btn-cancel" aria-label="Cerrar manual">Cerrar ✕</button>
+            </div>
+            <div id="ayuda-modal-body"></div>
+          </div>
+        </div>
+        <div class="ayuda-tooltip" id="ayuda-tooltip" role="tooltip" hidden></div>
         <nav class="foro-filters admin-tabs">
           <button type="button" class="foro-filter-btn active" data-tab="noticias">Noticias</button>
           <button type="button" class="foro-filter-btn" data-tab="contenidos">Contenidos</button>
@@ -1089,7 +1100,7 @@ const PAGES = [
               <span class="ag-status-ok" id="ag-ia-costo-mes">Cargando...</span>
             </div>
             <div class="ag-grid ag-grid-2">
-              <div class="ag-tile ag-tile-row">
+              <div class="ag-tile ag-tile-row" data-help="investigador">
                 <div>
                   <p class="ag-tile-title">Investigador</p>
                   <p class="ag-tile-desc">Organiza una fuente (URL o texto pegado) en notas de investigación. Búsqueda web opcional.</p>
@@ -1097,7 +1108,7 @@ const PAGES = [
                 </div>
                 <button type="button" class="ag-btn-piloto" id="ag-ir-contenidos-investigador">Ir a Contenidos →</button>
               </div>
-              <div class="ag-tile ag-tile-row">
+              <div class="ag-tile ag-tile-row" data-help="redactor">
                 <div>
                   <p class="ag-tile-title">Redactor</p>
                   <p class="ag-tile-desc">Redacta el borrador final con el tono de cada sección, listo para revisar.</p>
@@ -1108,7 +1119,7 @@ const PAGES = [
             </div>
           </div>
 
-          <div class="ag-section">
+          <div class="ag-section" data-help="reportes">
             <div class="ag-section-head">
               <h3>Moderación · Reportes</h3>
               <span class="ag-status-pendiente" id="ag-reportes-resumen">Cargando...</span>

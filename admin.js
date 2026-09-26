@@ -73,6 +73,7 @@
     document.getElementById('admin-panel').style.display = 'block';
     bindTabs();
     bindAgentes();
+    bindAyuda();
     loadReportes();
     loadEstadoSeguridad();
     loadUsoIa();
@@ -1021,19 +1022,97 @@
 
   function renderEstadoSeguridad(d) {
     const grid = document.getElementById('ag-seguridad-grid');
-    const tile = (label, valor, claseValor, desc) => `
-      <div class="ag-tile">
+    const tile = (key, label, valor, claseValor, desc) => `
+      <div class="ag-tile" data-help="${key}">
         <p class="ag-tile-label">${label}</p>
         <p class="ag-tile-valor ${claseValor}">${valor}</p>
         <p class="ag-tile-desc">${desc}</p>
       </div>`;
     grid.innerHTML = [
-      tile('Turnstile', d.turnstileActivo ? 'Activo' : 'Inactivo', d.turnstileActivo ? 'ok' : 'off', 'CAPTCHA invisible en el debate'),
-      tile('Honeypot', 'Activo', 'ok', 'Campo oculto en cada formulario'),
-      tile('Rate limit', 'Activo', 'ok', `${d.rateLimitConfig.general}/${d.rateLimitConfig.escritura} cada ${d.rateLimitConfig.ventanaMin}min`),
-      tile('Cooldown', d.cooldownActivos, d.cooldownActivos > 0 ? 'warn' : 'ok', `cuentas &lt; ${d.cooldownHoras}h esperando`),
-      tile('Edad 18+', d.edadConfirmadasTotal, 'ok', 'confirmaciones totales'),
+      tile('turnstile', 'Turnstile', d.turnstileActivo ? 'Activo' : 'Inactivo', d.turnstileActivo ? 'ok' : 'off', 'CAPTCHA invisible en el debate'),
+      tile('honeypot', 'Honeypot', 'Activo', 'ok', 'Campo oculto en cada formulario'),
+      tile('rate-limit', 'Rate limit', 'Activo', 'ok', `${d.rateLimitConfig.general}/${d.rateLimitConfig.escritura} cada ${d.rateLimitConfig.ventanaMin}min`),
+      tile('cooldown', 'Cooldown', d.cooldownActivos, d.cooldownActivos > 0 ? 'warn' : 'ok', `cuentas &lt; ${d.cooldownHoras}h esperando`),
+      tile('edad', 'Edad 18+', d.edadConfirmadasTotal, 'ok', 'confirmaciones totales'),
     ].join('');
+  }
+
+  // ── AYUDA: tooltips + manual integrado ───────────────────
+  // Una sola fuente de datos alimenta el tooltip al pasar el cursor Y el
+  // manual completo del boton "?" -- agregar un agente/panel nuevo mas
+  // adelante solo necesita una entrada nueva aqui, nada mas se toca.
+  const AYUDA = {
+    clasificacion: { titulo: 'Clasificación', desc: 'Decide en qué parte del sitio vive este contenido.', incluir: 'Sección, sub-sección (si aplica), enfoque (solo Corrupción Humana), tipo de formato y categoría.', agentivo: false },
+    contenido: { titulo: 'Contenido', desc: 'El texto que se publica tal cual, sin editar después.', incluir: 'Título, resumen de 2-3 oraciones, cuerpo (opcional), autor, y si se usó IA.', agentivo: false },
+    multimedia: { titulo: 'Multimedia', desc: 'El video/audio embebido y la imagen de portada del contenido.', incluir: 'Enlace de video/audio (si el tipo lo requiere), imagen de portada y su texto alternativo.', agentivo: false },
+    ia: { titulo: 'Investigador + Redactor', desc: 'Asistente opcional que organiza una fuente y redacta un primer borrador.', incluir: 'Pega una URL o un texto/transcripción — el resultado llena Título/Resumen/Cuerpo y, si puede, los datos de Citación.', agentivo: true },
+    citacion: { titulo: 'Citación', desc: 'De dónde salió la información, para dar crédito correctamente.', incluir: 'URL y nombre de la fuente, autor, año, estilo de citación y fecha de acceso (esta última siempre la pones tú).', agentivo: false },
+    turnstile: { titulo: 'Turnstile', desc: 'Verifica que quien publica en el debate es una persona, no un bot.', incluir: null, agentivo: false },
+    honeypot: { titulo: 'Honeypot', desc: 'Campo oculto en los formularios que atrapa bots que los llenan automáticamente.', incluir: null, agentivo: false },
+    'rate-limit': { titulo: 'Rate limit', desc: 'Evita que una sola cuenta inunde el sitio de solicitudes en poco tiempo.', incluir: null, agentivo: false },
+    cooldown: { titulo: 'Cooldown', desc: 'Una cuenta recién creada no puede publicar ni comentar de inmediato.', incluir: null, agentivo: false },
+    edad: { titulo: 'Edad 18+', desc: 'Verifica que el usuario autoafirma ser mayor de edad antes de entrar a Corrupción Humana.', incluir: null, agentivo: false },
+    investigador: { titulo: 'Investigador', desc: 'Organiza una fuente (URL o texto pegado) en notas de investigación.', incluir: 'Se usa desde el Nivel 4 del formulario de Contenidos.', agentivo: true },
+    redactor: { titulo: 'Redactor', desc: 'Escribe el borrador final con el tono propio de cada sección.', incluir: 'Se usa después del Investigador, en el mismo Nivel 4.', agentivo: true },
+    reportes: { titulo: 'Moderación · Reportes', desc: 'Cola de publicaciones y comentarios del debate reportados por usuarios.', incluir: null, agentivo: false },
+  };
+
+  function ayudaHtml(clave) {
+    const a = AYUDA[clave];
+    if (!a) return '';
+    return `
+      <p class="ayuda-titulo">${escapeHtml(a.titulo)}${a.agentivo ? ' <span class="ayuda-badge">🤖 AGENTIVO</span>' : ''}</p>
+      <p class="ayuda-desc">${escapeHtml(a.desc)}</p>
+      ${a.incluir ? `<p class="ayuda-incluir"><strong>Incluye:</strong> ${escapeHtml(a.incluir)}</p>` : ''}`;
+  }
+
+  function claveAyuda(el) {
+    return el ? (el.dataset.help || el.dataset.panel) : null;
+  }
+
+  function mostrarAyudaTooltip(el) {
+    const clave = claveAyuda(el);
+    if (!clave || !AYUDA[clave]) return;
+    const tooltip = document.getElementById('ayuda-tooltip');
+    tooltip.innerHTML = ayudaHtml(clave);
+    tooltip.hidden = false;
+    const rect = el.getBoundingClientRect();
+    tooltip.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 320)) + 'px';
+    tooltip.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+  }
+
+  function bindAyuda() {
+    const panel = document.getElementById('admin-panel');
+    const tooltip = document.getElementById('ayuda-tooltip');
+
+    panel.addEventListener('mouseover', (e) => {
+      const el = e.target.closest('[data-help], .synth-level-card');
+      if (el) mostrarAyudaTooltip(el);
+    });
+    panel.addEventListener('mouseout', (e) => {
+      const el = e.target.closest('[data-help], .synth-level-card');
+      if (el && !el.contains(e.relatedTarget)) tooltip.hidden = true;
+    });
+    panel.addEventListener('focusin', (e) => {
+      const el = e.target.closest('[data-help], .synth-level-card');
+      if (el) mostrarAyudaTooltip(el);
+    });
+    panel.addEventListener('focusout', (e) => {
+      const el = e.target.closest('[data-help], .synth-level-card');
+      if (el) tooltip.hidden = true;
+    });
+
+    document.getElementById('ayuda-btn').addEventListener('click', () => {
+      document.getElementById('ayuda-modal-body').innerHTML = Object.keys(AYUDA)
+        .map((clave) => `<section class="ayuda-modal-item">${ayudaHtml(clave)}</section>`).join('');
+      document.getElementById('ayuda-modal').hidden = false;
+    });
+    document.getElementById('ayuda-modal-close').addEventListener('click', () => {
+      document.getElementById('ayuda-modal').hidden = true;
+    });
+    document.getElementById('ayuda-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'ayuda-modal') document.getElementById('ayuda-modal').hidden = true;
+    });
   }
 
   // ── UTILIDADES ───────────────────────────────────────────
