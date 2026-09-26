@@ -1,5 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
+const { enviarError500 } = require('../util/errores');
 const { requireAuth } = require('../middleware/auth');
 const { validateComentario } = require('../validators/comentario');
 
@@ -20,7 +21,7 @@ router.get('/', async (req, res) => {
       [tipo, itemId]
     );
     res.json({ ok: true, comentarios: rows });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // POST /api/comentarios -- crear, requiere sesion
@@ -38,7 +39,7 @@ router.post('/', requireAuth, async (req, res) => {
       [req.body.tipo, req.body.itemId, req.user.id, req.body.cuerpo.trim()]
     );
     res.status(201).json({ ok: true, comentario: { ...rows[0], autor_email: req.user.email } });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // DELETE /api/comentarios/:id -- el dueño, un admin o un moderador
@@ -52,7 +53,7 @@ router.delete('/:id', requireAuth, async (req, res) => {
     }
     await pool.query('DELETE FROM comentarios WHERE id = $1', [req.params.id]);
     res.json({ ok: true });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 module.exports = router;

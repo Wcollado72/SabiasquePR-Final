@@ -1,5 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
+const { enviarError500 } = require('../util/errores');
 const { requireAuth } = require('../middleware/auth');
 const { validatePerfil } = require('../validators/perfil');
 
@@ -18,7 +19,7 @@ router.put('/', requireAuth, async (req, res) => {
       [req.user.id, nombre]
     );
     res.json({ ok: true, user: rows[0] });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // POST /api/perfil/confirmar-edad -- autoafirmacion de 18+ (checkbox, no
@@ -31,7 +32,7 @@ router.post('/confirmar-edad', requireAuth, async (req, res) => {
       [req.user.id]
     );
     res.json({ ok: true, user: rows[0] });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // POST /api/perfil/confirmar-terminos-logica-humana -- disclaimer propio de
@@ -44,7 +45,7 @@ router.post('/confirmar-terminos-logica-humana', requireAuth, async (req, res) =
       [req.user.id]
     );
     res.json({ ok: true, user: rows[0] });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 module.exports = router;

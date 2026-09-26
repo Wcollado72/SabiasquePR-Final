@@ -36,7 +36,13 @@ function validatePost({ titulo, cuerpo, subseccion, enfoque, enlaceMedia, enlace
     if (!enlaceMedia) {
       errors.push('Falta la URL del enlace multimedia.');
     } else {
-      try { new URL(enlaceMedia); } catch { errors.push('El enlace multimedia no es una URL valida.'); }
+      // Solo http(s): "new URL()" por si sola acepta esquemas como
+      // "javascript:" o "data:", que si se dejaran pasar aqui se guardarian
+      // en foro_posts y luego se renderizan como <a href> real en debate.js
+      // -- eso abriria un XSS almacenado contra quien haga clic en el enlace.
+      let esquemaValido = false;
+      try { esquemaValido = ['http:', 'https:'].includes(new URL(enlaceMedia).protocol); } catch { /* invalida */ }
+      if (!esquemaValido) errors.push('El enlace multimedia debe ser una URL http:// o https:// valida.');
     }
   }
   return errors;

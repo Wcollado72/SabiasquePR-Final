@@ -1,5 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
+const { enviarError500 } = require('../util/errores');
 const { stripe } = require('../lib/stripe');
 
 const router = express.Router();
@@ -83,7 +84,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     }
     res.json({ received: true });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    enviarError500(res, err);
   }
 });
 

@@ -1,5 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
+const { enviarError500 } = require('../util/errores');
 const { requireAuth, requireModerador } = require('../middleware/auth');
 const { validateReporte } = require('../validators/reporte');
 
@@ -25,7 +26,7 @@ router.post('/', requireAuth, async (req, res) => {
       [tipo, itemId, req.user.id, motivo.trim()]
     );
     res.status(201).json({ ok: true, reporte: rows[0] });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // GET /api/reportes?estado=pendiente -- admin o moderador
@@ -43,7 +44,7 @@ router.get('/', requireAuth, requireModerador, async (req, res) => {
       params
     );
     res.json({ ok: true, reportes: rows });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // PATCH /api/reportes/:id -- admin o moderador, cambia el estado
@@ -59,7 +60,7 @@ router.patch('/:id', requireAuth, requireModerador, async (req, res) => {
     );
     if (rows.length === 0) return res.status(404).json({ ok: false, error: 'Reporte no encontrado.' });
     res.json({ ok: true, reporte: rows[0] });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 module.exports = router;

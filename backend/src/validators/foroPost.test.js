@@ -98,6 +98,13 @@ describe('validatePost', () => {
     expect(validatePost({ ...BASE, enlaceMedia: 'https://example.com/foto.jpg' }, 'premium'))
       .toContain('Indica un tipo de enlace multimedia valido (imagen, audio o video).');
     expect(validatePost({ ...BASE, enlaceMedia: 'no-es-una-url', enlaceMediaTipo: 'imagen' }, 'premium'))
-      .toContain('El enlace multimedia no es una URL valida.');
+      .toContain('El enlace multimedia debe ser una URL http:// o https:// valida.');
+  });
+
+  test('rechaza esquemas peligrosos (javascript:, data:) en el enlace multimedia', () => {
+    expect(validatePost({ ...BASE, enlaceMedia: 'javascript:alert(1)', enlaceMediaTipo: 'imagen' }, 'premium'))
+      .toContain('El enlace multimedia debe ser una URL http:// o https:// valida.');
+    expect(validatePost({ ...BASE, enlaceMedia: 'data:text/html,<script>alert(1)</script>', enlaceMediaTipo: 'imagen' }, 'admin'))
+      .toContain('El enlace multimedia debe ser una URL http:// o https:// valida.');
   });
 });

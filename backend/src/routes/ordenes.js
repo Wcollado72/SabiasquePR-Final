@@ -1,5 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
+const { enviarError500 } = require('../util/errores');
 const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
@@ -12,7 +13,7 @@ router.get('/', requireAuth, async (req, res) => {
       [req.user.id]
     );
     res.json({ ok: true, ordenes: rows });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 module.exports = router;

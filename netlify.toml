@@ -46,3 +46,37 @@
   to = "/revolucion-humana.html"
   status = 301
   force = true
+
+# Cabeceras de seguridad (AUDITORIA-SEGURIDAD.md, Hallazgo 2). El backend
+# Express solo sirve /api/*, asi que estas cabeceras van aqui, no en helmet.
+#
+# script-src/style-src llevan 'unsafe-inline' porque el sitio usa scripts y
+# estilos en linea en muchas paginas (window.SITE_CONFIG, atributos style="")
+# -- quitarlo requeriria mover todo eso a archivos externos o hashes, tarea
+# aparte. No es ideal, pero el resto de la politica (frame-ancestors, los
+# allowlist por dominio, object-src) sigue siendo proteccion real, y el sitio
+# ya escapa correctamente el contenido de usuarios (ver Hallazgos "ya esta
+# bien construido" en la auditoria) -- este CSP es una capa extra, no la unica.
+#
+# Dominios permitidos, verificados leyendo el codigo real (no adivinados):
+# - challenges.cloudflare.com: widget de Turnstile (script + iframe del reto)
+# - googletagmanager.com / google-analytics.com / analytics.google.com: GA4
+# - fonts.googleapis.com / fonts.gstatic.com: Google Fonts
+# - qmlhjacduuvptxglqxqn.supabase.co: Supabase (auth + datos)
+# - sabiasquepr-backend-uufz.onrender.com: la API propia (la que usa Netlify)
+# - www.youtube.com: reproductor embebido de Contenidos + oEmbed del admin
+# - www.googleapis.com: YouTube Data API (selector de canal en el admin)
+# - formspree.io: el formulario de contacto envia ahi directamente (form-action)
+#
+# OJO al activar Mailchimp (hoy sigue con el placeholder YOUR_MC_USER en
+# build.js): el newsletter usa JSONP a "<mcServer>.list-manage.com" -- hay
+# que agregar ese dominio a script-src cuando se configure de verdad, o el
+# formulario de newsletter se rompe en silencio.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://qmlhjacduuvptxglqxqn.supabase.co https://sabiasquepr-backend-uufz.onrender.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://www.youtube.com https://www.googleapis.com; frame-src 'self' https://www.youtube.com https://challenges.cloudflare.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self' https://formspree.io"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"

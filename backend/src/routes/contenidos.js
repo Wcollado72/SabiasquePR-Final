@@ -1,5 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
+const { enviarError500 } = require('../util/errores');
 const { requireAuth, requireAdmin, tryAuth } = require('../middleware/auth');
 const { slugify } = require('../util/slugify');
 const { validateContenido } = require('../validators/contenido');
@@ -106,7 +107,7 @@ router.get('/', tryAuth, async (req, res) => {
     const sql = `SELECT * FROM contenidos ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY fecha_publicacion DESC, creado_en DESC`;
     const { rows } = await pool.query(sql, params);
     res.json({ ok: true, contenidos: rows.map((r) => aplicarMuroDePago(r, req.user)) });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // GET /api/contenidos/:id -- detalle, publico (verifica sesion sin exigirla,
@@ -116,7 +117,7 @@ router.get('/:id', tryAuth, async (req, res) => {
     const { rows } = await pool.query('SELECT * FROM contenidos WHERE id = $1', [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ ok: false, error: 'Contenido no encontrado.' });
     res.json({ ok: true, contenido: aplicarMuroDePago(rows[0], req.user) });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // POST /api/contenidos -- crear, solo admin
@@ -145,7 +146,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
        RETURNING *`
     );
     res.status(201).json({ ok: true, contenido: rows[0] });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // PUT /api/contenidos/:id -- editar, solo admin
@@ -173,7 +174,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
        WHERE id=$1 RETURNING *`
     );
     res.json({ ok: true, contenido: rows[0] });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // DELETE /api/contenidos/:id -- solo admin
@@ -182,7 +183,7 @@ router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
     const { rowCount } = await pool.query('DELETE FROM contenidos WHERE id = $1', [req.params.id]);
     if (rowCount === 0) return res.status(404).json({ ok: false, error: 'Contenido no encontrado.' });
     res.json({ ok: true });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 module.exports = router;

@@ -99,6 +99,13 @@ describe('validateContenido', () => {
     expect(errors).toEqual([]);
   });
 
+  test('rechaza esquemas peligrosos en urlMedia (se pinta como iframe en una pagina publica)', () => {
+    expect(validateContenido({ ...BASE, tipoFormato: 'video', urlMedia: 'javascript:alert(1)' }))
+      .toContain('"urlMedia" debe ser una URL http:// o https:// valida.');
+    expect(validateContenido({ ...BASE, tipoFormato: 'video', urlMedia: 'data:text/html,<script>alert(1)</script>' }))
+      .toContain('"urlMedia" debe ser una URL http:// o https:// valida.');
+  });
+
   test('no exige urlMedia para video en modo parcial', () => {
     const errors = validateContenido({ tipoFormato: 'video' }, { partial: true });
     expect(errors).not.toContain('Los contenidos de tipo "video" o "audio" requieren "urlMedia".');

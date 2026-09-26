@@ -1,5 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
+const { enviarError500 } = require('../util/errores');
 const { requireAuth, requireAdmin, tryAuth } = require('../middleware/auth');
 const { slugify } = require('../util/slugify');
 const { validateNoticia } = require('../validators/noticia');
@@ -65,7 +66,7 @@ router.get('/', tryAuth, async (req, res) => {
     const sql = `SELECT * FROM noticias ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY fecha DESC, creado_en DESC`;
     const { rows } = await pool.query(sql, params);
     res.json({ ok: true, noticias: rows });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // GET /api/noticias/:id -- detalle. Un borrador no publicado se trata como
@@ -79,7 +80,7 @@ router.get('/:id', tryAuth, async (req, res) => {
       return res.status(404).json({ ok: false, error: 'Noticia no encontrada.' });
     }
     res.json({ ok: true, noticia });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // POST /api/noticias -- crear, solo admin
@@ -101,7 +102,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12,$13,$14,$15) RETURNING *`
     );
     res.status(201).json({ ok: true, noticia: rows[0] });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // PUT /api/noticias/:id -- editar, solo admin
@@ -124,7 +125,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
        WHERE id=$1 RETURNING *`
     );
     res.json({ ok: true, noticia: rows[0] });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // DELETE /api/noticias/:id -- solo admin
@@ -133,7 +134,7 @@ router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
     const { rowCount } = await pool.query('DELETE FROM noticias WHERE id = $1', [req.params.id]);
     if (rowCount === 0) return res.status(404).json({ ok: false, error: 'Noticia no encontrada.' });
     res.json({ ok: true });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 module.exports = router;

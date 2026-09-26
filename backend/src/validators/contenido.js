@@ -80,6 +80,15 @@ function validateContenido(body, { partial = false } = {}) {
   if ((tipo === 'video' || tipo === 'audio') && !partial && !body.urlMedia) {
     errors.push('Los contenidos de tipo "video" o "audio" requieren "urlMedia".');
   }
+  // recurso.js/editorial.js pintan esto como <iframe src="urlMedia"> en una
+  // pagina publica -- sin esta validacion, "javascript:" o "data:" pasarian
+  // como URL "valida" y se ejecutarian dentro del iframe (mismo tipo de hueco
+  // que el enlaceMedia del debate, ver foroPost.js).
+  if (body.urlMedia) {
+    let esquemaValido = false;
+    try { esquemaValido = ['http:', 'https:'].includes(new URL(body.urlMedia).protocol); } catch { /* invalida */ }
+    if (!esquemaValido) errors.push('"urlMedia" debe ser una URL http:// o https:// valida.');
+  }
   return errors;
 }
 

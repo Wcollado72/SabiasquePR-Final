@@ -1,5 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
+const { enviarError500 } = require('../util/errores');
 const { requireAuth } = require('../middleware/auth');
 const { validatePost } = require('../validators/foroPost');
 
@@ -94,7 +95,7 @@ router.get('/posts', async (req, res) => {
       params
     );
     res.json({ ok: true, posts: rows });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // GET /api/foro/posts/:id -- detalle + comentarios -- publico
@@ -115,7 +116,7 @@ router.get('/posts/:id', async (req, res) => {
       [req.params.id]
     );
     res.json({ ok: true, post: postRows[0], comentarios });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // POST /api/foro/posts -- crear -- requiere sesion y edad confirmada
@@ -142,7 +143,7 @@ router.post('/posts', requireAuth, async (req, res) => {
       [req.user.id, titulo.trim(), cuerpo.trim(), subseccion, enfoque || null, enlaceMedia || null, enlaceMediaTipo || null, destacado, temaContenidoId]
     );
     res.status(201).json({ ok: true, post: rows[0] });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // PATCH /api/foro/posts/:id -- editar -- dueno, admin o moderador
@@ -165,7 +166,7 @@ router.patch('/posts/:id', requireAuth, async (req, res) => {
       [titulo.trim(), cuerpo.trim(), subseccion, enfoque || null, enlaceMedia || null, enlaceMediaTipo || null, destacado, temaContenidoId, req.params.id]
     );
     res.json({ ok: true, post: rows[0] });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // DELETE /api/foro/posts/:id -- dueno, admin o moderador (cascada borra comentarios)
@@ -178,7 +179,7 @@ router.delete('/posts/:id', requireAuth, async (req, res) => {
     }
     await pool.query('DELETE FROM foro_posts WHERE id = $1', [req.params.id]);
     res.json({ ok: true });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // POST /api/foro/posts/:postId/comentarios -- crear -- requiere sesion y edad confirmada
@@ -205,7 +206,7 @@ router.post('/posts/:postId/comentarios', requireAuth, async (req, res) => {
       [req.params.postId, req.user.id, cuerpo]
     );
     res.status(201).json({ ok: true, comentario: rows[0] });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // DELETE /api/foro/comentarios/:id -- dueno, admin o moderador
@@ -218,7 +219,7 @@ router.delete('/comentarios/:id', requireAuth, async (req, res) => {
     }
     await pool.query('DELETE FROM foro_comentarios WHERE id = $1', [req.params.id]);
     res.json({ ok: true });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 module.exports = router;

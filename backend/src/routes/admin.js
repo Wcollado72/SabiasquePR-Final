@@ -1,5 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
+const { enviarError500 } = require('../util/errores');
 const { requireAuth, requireAdmin, requireModerador } = require('../middleware/auth');
 const { extraerArticulo } = require('../services/articleExtractor');
 const { redactarDesdeArticulo } = require('../services/anthropic');
@@ -32,7 +33,7 @@ router.get('/estado-seguridad', requireAuth, requireModerador, async (req, res) 
       turnstileActivo: Boolean(process.env.TURNSTILE_SECRET_KEY),
       rateLimitConfig: RATE_LIMIT_CONFIG,
     });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // POST /api/admin/autocompletar-ia -- solo admin. Recibe { url }, descarga
@@ -164,7 +165,7 @@ router.get('/uso-ia', requireAuth, requireModerador, async (req, res) => {
       costoMesActual: mes.rows[0].costo_mes,
       ultimas: ultimas.rows,
     });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 module.exports = router;

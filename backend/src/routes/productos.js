@@ -1,5 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
+const { enviarError500 } = require('../util/errores');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 const { slugify } = require('../util/slugify');
 const { validateProducto } = require('../validators/producto');
@@ -28,7 +29,7 @@ router.get('/', async (_req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM productos ORDER BY creado_en DESC');
     res.json({ ok: true, productos: rows });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // GET /api/productos/:id -- detalle, publico
@@ -37,7 +38,7 @@ router.get('/:id', async (req, res) => {
     const { rows } = await pool.query('SELECT * FROM productos WHERE id = $1', [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ ok: false, error: 'Producto no encontrado.' });
     res.json({ ok: true, producto: rows[0] });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // POST /api/productos -- crear, solo admin
@@ -56,7 +57,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
       values
     );
     res.status(201).json({ ok: true, producto: rows[0] });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // PUT /api/productos/:id -- editar, solo admin
@@ -74,7 +75,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
       values
     );
     res.json({ ok: true, producto: rows[0] });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 // DELETE /api/productos/:id -- solo admin
@@ -83,7 +84,7 @@ router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
     const { rowCount } = await pool.query('DELETE FROM productos WHERE id = $1', [req.params.id]);
     if (rowCount === 0) return res.status(404).json({ ok: false, error: 'Producto no encontrado.' });
     res.json({ ok: true });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  } catch (err) { enviarError500(res, err); }
 });
 
 module.exports = router;

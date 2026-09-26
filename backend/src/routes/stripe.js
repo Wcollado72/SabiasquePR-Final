@@ -1,5 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
+const { enviarError500 } = require('../util/errores');
 const { requireAuth } = require('../middleware/auth');
 const { stripe } = require('../lib/stripe');
 
@@ -28,7 +29,7 @@ router.post('/create-checkout-session', requireAuth, async (req, res) => {
 
     res.json({ ok: true, url: session.url });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    enviarError500(res, err);
   }
 });
 
@@ -76,7 +77,7 @@ router.post('/create-checkout-session-tienda', requireAuth, async (req, res) => 
 
     res.json({ ok: true, url: session.url });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    enviarError500(res, err);
   }
 });
 
