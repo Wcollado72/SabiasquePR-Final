@@ -31,7 +31,7 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon-96.png" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=a96f8d8b">
+  <link rel="stylesheet" href="styles.css?v=e3512064">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Panel de administración","description":"Panel de administración de Sabías que PR: gestión de noticias y productos.","url":"https://sabiasquepr.com/admin.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -44,6 +44,7 @@
         <a class="brand" href="index.html" aria-label="Sabías que PR — Inicio">
           <img class="brand-mark" src="images/Coqui-sm.webp" alt="" width="32" height="32">
           <span class="brand-name">Sabías que PR</span>
+          <span class="beta-badge" title="El sitio sigue en desarrollo activo">BETA</span>
         </a>
         <nav class="nav" aria-label="Principal">
           <button class="nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Abrir menú">
@@ -102,6 +103,7 @@
           <button type="button" class="foro-filter-btn" data-tab="contenidos">Contenidos</button>
           <button type="button" class="foro-filter-btn" data-tab="productos">Productos</button>
           <button type="button" class="foro-filter-btn" data-tab="reportes">Reportes</button>
+          <button type="button" class="foro-filter-btn" data-tab="agentes">Agentes</button>
         </nav>
 
         <section class="admin-tab-panel" id="admin-panel-noticias">
@@ -132,11 +134,15 @@
 <option value="cultura">Cultura</option>
 <option value="deportes">Deportes</option>
 <option value="descubrimientos">Descubrimientos</option>
+<option value="estudiantes-sobresalientes">Estudiantes sobresalientes</option>
 <option value="finanzas">Finanzas</option>
 <option value="general">General</option>
 <option value="internacionales">Internacionales</option>
+<option value="leyes-educativas">Leyes educativas</option>
 <option value="politica">Política</option>
+<option value="programas-educativos">Programas educativos destacados</option>
 <option value="salud">Salud</option>
+<option value="sistemas-mundiales">Sistemas educativos mundiales</option>
 <option value="tecnologia">Tecnología</option>
               </select>
               <label for="an-fecha">Fecha</label>
@@ -182,46 +188,77 @@
           </div>
           <div id="admin-contenidos-list" class="admin-list"></div>
 
-          <section class="box box-blog contact-box admin-form" id="admin-contenidos-form-box" style="display:none;">
+          <section class="box contact-box admin-form synth-theme" id="admin-contenidos-form-box" style="display:none;">
             <h3 id="admin-contenidos-form-title">Nuevo contenido</h3>
             <form id="admin-contenidos-form">
               <input type="hidden" id="ac-id">
-              <label for="ac-seccion">Sección</label>
-              <select id="ac-seccion">
-                <option value="noticias">Noticias</option>
-                <option value="revolucion-humana">Revolución Humana</option>
-                <option value="educacion">Educación</option>
-              </select>
-              <label for="ac-subseccion">Sub-sección de Revolución Humana (opcional)</label>
-              <select id="ac-subseccion">
-                <option value="">Ninguna</option>
+
+              <nav class="synth-levels" id="synth-levels" aria-label="Niveles del formulario">
+                <button type="button" class="synth-level-card active" data-panel="clasificacion">
+                  <span class="synth-level-icon" aria-hidden="true">🕹️</span>
+                  <span class="synth-level-title">Clasificación</span>
+                  <span class="synth-level-status" data-status="clasificacion">● ACTIVO</span>
+                </button>
+                <button type="button" class="synth-level-card" data-panel="contenido">
+                  <span class="synth-level-icon" aria-hidden="true">📜</span>
+                  <span class="synth-level-title">Contenido</span>
+                  <span class="synth-level-status" data-status="contenido">○ PENDIENTE</span>
+                </button>
+                <button type="button" class="synth-level-card" data-panel="multimedia">
+                  <span class="synth-level-icon" aria-hidden="true">🎬</span>
+                  <span class="synth-level-title">Multimedia</span>
+                  <span class="synth-level-status" data-status="multimedia">○ PENDIENTE</span>
+                </button>
+                <button type="button" class="synth-level-card synth-level-ia" data-panel="ia">
+                  <span class="synth-level-icon" aria-hidden="true">🤖</span>
+                  <span class="synth-level-title">Investigador + Redactor</span>
+                  <span class="synth-level-status" data-status="ia">✦ LISTO</span>
+                </button>
+                <button type="button" class="synth-level-card" data-panel="citacion">
+                  <span class="synth-level-icon" aria-hidden="true">📚</span>
+                  <span class="synth-level-title">Citación</span>
+                  <span class="synth-level-status" data-status="citacion">○ PENDIENTE</span>
+                </button>
+              </nav>
+
+              <section class="synth-panel" data-panel="clasificacion">
+                <h4 class="synth-panel-title">🕹️ NIVEL 1 — CLASIFICACIÓN</h4>
+                <label for="ac-seccion">Sección</label>
+                <select id="ac-seccion">
+                  <option value="noticias">Noticias</option>
+                  <option value="revolucion-humana">Revolución Humana</option>
+                  <option value="educacion">Educación</option>
+                </select>
+                <label for="ac-subseccion">Sub-sección de Revolución Humana (opcional)</label>
+                <select id="ac-subseccion">
+                  <option value="">Ninguna</option>
 <option value="corrupcion-humana">Corrupción Humana</option>
 <option value="logica-humana">Lógica Humana</option>
 <option value="nuevos-humanos">Nuevos Humanos</option>
 <option value="revolucion-mundial">Revolución Mundial</option>
-              </select>
-              <label for="ac-enfoque">Enfoque (solo aplica dentro de Corrupción Humana)</label>
-              <select id="ac-enfoque">
-                <option value="">Ninguno</option>
+                </select>
+                <label for="ac-enfoque">Enfoque (solo aplica dentro de Corrupción Humana)</label>
+                <select id="ac-enfoque">
+                  <option value="">Ninguno</option>
 <option value="estados-unidos">Estados Unidos (Nuevos Humanos)</option>
 <option value="hispanoamerica">Hispanoamérica (Nuevos Humanos)</option>
 <option value="individual">Individual (Corrupción Humana)</option>
 <option value="institucional">Institucional (Corrupción Humana)</option>
 <option value="internacionales">Internacionales (Nuevos Humanos)</option>
 <option value="puerto-rico">Puerto Rico (Nuevos Humanos)</option>
-              </select>
-              <label for="ac-tipo-formato">Tipo de formato</label>
-              <select id="ac-tipo-formato">
-                <option value="audio">Audio</option>
+                </select>
+                <label for="ac-tipo-formato">Tipo de formato</label>
+                <select id="ac-tipo-formato">
+                  <option value="audio">Audio</option>
 <option value="ensayo">Ensayo</option>
 <option value="foto">Foto</option>
 <option value="lectura_corta">Lectura corta</option>
 <option value="noticia">Noticia</option>
 <option value="video">Video</option>
-              </select>
-              <label for="ac-subformato">Subformato (opcional)</label>
-              <select id="ac-subformato">
-                <option value="">Ninguno</option>
+                </select>
+                <label for="ac-subformato">Subformato (opcional)</label>
+                <select id="ac-subformato">
+                  <option value="">Ninguno</option>
 <option value="columna">Columna</option>
 <option value="cronica">Crónica</option>
 <option value="documental">Documental</option>
@@ -233,58 +270,113 @@
 <option value="podcast">Podcast</option>
 <option value="reportaje">Reportaje</option>
 <option value="tutorial">Tutorial</option>
-              </select>
-              <label for="ac-categoria">Categoría</label>
-              <select id="ac-categoria">
-                <option value="ciencia">Ciencia</option>
+                </select>
+                <label for="ac-categoria">Categoría</label>
+                <select id="ac-categoria">
+                  <option value="ciencia">Ciencia</option>
 <option value="clima">Clima y Medio Ambiente</option>
 <option value="crimen">Crimen</option>
 <option value="cultura">Cultura</option>
 <option value="deportes">Deportes</option>
 <option value="descubrimientos">Descubrimientos</option>
+<option value="estudiantes-sobresalientes">Estudiantes sobresalientes</option>
 <option value="finanzas">Finanzas</option>
 <option value="general">General</option>
 <option value="internacionales">Internacionales</option>
+<option value="leyes-educativas">Leyes educativas</option>
 <option value="politica">Política</option>
+<option value="programas-educativos">Programas educativos destacados</option>
 <option value="salud">Salud</option>
+<option value="sistemas-mundiales">Sistemas educativos mundiales</option>
 <option value="tecnologia">Tecnología</option>
-              </select>
-              <label for="ac-titulo">Título</label>
-              <input type="text" id="ac-titulo" required minlength="3" maxlength="160" spellcheck="true" lang="es">
-              <label for="ac-subtitulo">Resumen (2-3 oraciones, redacción propia)</label>
-              <textarea id="ac-subtitulo" rows="3" required minlength="10" spellcheck="true" lang="es"></textarea>
-              <div class="spellcheck-actions"><button type="button" class="admin-btn-cancel" data-revisar="ac-subtitulo">Revisar texto</button></div>
-              <ul class="suggestion-list" id="ac-subtitulo-suggestions"></ul>
-              <label for="ac-cuerpo">Cuerpo del texto (opcional — solo ensayo/lectura corta con texto propio)</label>
-              <textarea id="ac-cuerpo" rows="6" spellcheck="true" lang="es"></textarea>
-              <div class="spellcheck-actions"><button type="button" class="admin-btn-cancel" data-revisar="ac-cuerpo">Revisar texto</button></div>
-              <ul class="suggestion-list" id="ac-cuerpo-suggestions"></ul>
-              <label for="ac-autor">Autor (opcional)</label>
-              <input type="text" id="ac-autor">
-              <label for="ac-divulgacion-ia">Divulgación de uso de IA</label>
-              <select id="ac-divulgacion-ia">
-                <option value="parcial">Asistencia parcial de IA</option>
+                </select>
+              </section>
+
+              <section class="synth-panel" data-panel="contenido" hidden>
+                <h4 class="synth-panel-title">📜 NIVEL 2 — CONTENIDO</h4>
+                <label for="ac-titulo">Título</label>
+                <input type="text" id="ac-titulo" required minlength="3" maxlength="160" spellcheck="true" lang="es">
+                <label for="ac-subtitulo">Resumen (2-3 oraciones, redacción propia)</label>
+                <textarea id="ac-subtitulo" rows="3" required minlength="10" spellcheck="true" lang="es"></textarea>
+                <div class="spellcheck-actions"><button type="button" class="admin-btn-cancel" data-revisar="ac-subtitulo">Revisar texto</button></div>
+                <ul class="suggestion-list" id="ac-subtitulo-suggestions"></ul>
+                <label for="ac-cuerpo">Cuerpo del texto (opcional — solo ensayo/lectura corta con texto propio)</label>
+                <textarea id="ac-cuerpo" rows="6" spellcheck="true" lang="es"></textarea>
+                <div class="spellcheck-actions"><button type="button" class="admin-btn-cancel" data-revisar="ac-cuerpo">Revisar texto</button></div>
+                <ul class="suggestion-list" id="ac-cuerpo-suggestions"></ul>
+                <label for="ac-autor">Autor (opcional)</label>
+                <input type="text" id="ac-autor">
+                <label for="ac-divulgacion-ia">Divulgación de uso de IA</label>
+                <select id="ac-divulgacion-ia">
+                  <option value="parcial">Asistencia parcial de IA</option>
 <option value="generado">Generado principalmente con IA</option>
 <option value="no">No se usó IA</option>
-              </select>
-              <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir este contenido. Se muestra públicamente en la tarjeta y el artículo.</p>
-              <label for="ac-url-media">Video/audio embebible (obligatorio si el tipo es Video o Audio, ej. https://www.youtube.com/embed/ID)</label>
-              <input type="url" id="ac-url-media" placeholder="Pega cualquier enlace de YouTube (watch, youtu.be, embed...)">
-              <div class="admin-image-actions">
-                <button type="button" id="ac-autocompletar-youtube" class="admin-btn-cancel">Autocompletar desde YouTube</button>
-                <button type="button" id="ac-elegir-video-canal" class="admin-btn-cancel">Elegir de mi canal de YouTube</button>
-              </div>
-              <p class="admin-hint" id="ac-youtube-status"></p>
-              <label for="ac-fuente-url">URL de la fuente (opcional)</label>
-              <input type="url" id="ac-fuente-url">
-              <label for="ac-fuente-texto">Nombre de la fuente (opcional)</label>
-              <input type="text" id="ac-fuente-texto">
-              <fieldset class="citation-group" id="ac-citation-group">
-                <legend>Citación de la fuente</legend>
-                <label class="admin-checkbox"><input type="checkbox" id="ac-cita-sin-fuente"> Sin fuente externa / contenido 100% original</label>
-                <label for="ac-cita-estilo">Estilo de citación</label>
-                <select id="ac-cita-estilo">
-                  <option value="">Seleccionar estilo...</option>
+                </select>
+                <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir este contenido. Se muestra públicamente en la tarjeta y el artículo.</p>
+              </section>
+
+              <section class="synth-panel" data-panel="multimedia" hidden>
+                <h4 class="synth-panel-title">🎬 NIVEL 3 — MULTIMEDIA</h4>
+                <label for="ac-url-media">Video/audio embebible (obligatorio si el tipo es Video o Audio, ej. https://www.youtube.com/embed/ID)</label>
+                <input type="url" id="ac-url-media" placeholder="Pega cualquier enlace de YouTube (watch, youtu.be, embed...)">
+                <div class="admin-image-actions">
+                  <button type="button" id="ac-autocompletar-youtube" class="admin-btn-cancel">Autocompletar desde YouTube</button>
+                  <button type="button" id="ac-elegir-video-canal" class="admin-btn-cancel">Elegir de mi canal de YouTube</button>
+                </div>
+                <p class="admin-hint" id="ac-youtube-status"></p>
+                <label for="ac-url-portada">Imagen de portada (ruta o URL)</label>
+                <input type="text" id="ac-url-portada" required placeholder="images/mi-imagen.webp">
+                <div class="admin-image-actions">
+                  <button type="button" id="ac-usar-imagen-categoria" class="admin-btn-cancel">Usar imagen de la categoría seleccionada</button>
+                  <button type="button" id="ac-elegir-imagen" class="admin-btn-cancel">Elegir imagen de la galería</button>
+                </div>
+                <img id="ac-url-portada-preview" class="admin-image-preview" alt="" hidden>
+                <label for="ac-portada-alt">Texto alternativo de la imagen</label>
+                <input type="text" id="ac-portada-alt" required>
+              </section>
+
+              <section class="synth-panel" data-panel="ia" hidden>
+                <h4 class="synth-panel-title">🤖 NIVEL 4 — INVESTIGADOR + REDACTOR</h4>
+                <div class="ia-asistente-box">
+                  <p class="admin-hint">Elige primero la Sección/Sub-sección/Categoría del Nivel 1 (el tono de redacción depende de eso), luego dale una fuente al Investigador. También intenta identificar autor, año y el estilo de citación de la fuente (solo si tiene confianza razonable) — la fecha de acceso siempre la pones tú.</p>
+                  <div class="ia-fuente-toggle" id="ia-fuente-toggle">
+                    <button type="button" class="foro-filter-btn active" data-fuente="url">URL</button>
+                    <button type="button" class="foro-filter-btn" data-fuente="texto">Texto pegado (video/audio)</button>
+                  </div>
+                  <div id="ia-fuente-url-box">
+                    <label for="ia-url">URL de la fuente</label>
+                    <input type="url" id="ia-url" placeholder="https://...">
+                  </div>
+                  <div id="ia-fuente-texto-box" style="display:none;">
+                    <label for="ia-texto">Texto o transcripción pegada</label>
+                    <textarea id="ia-texto" rows="6" placeholder="Pega aquí la transcripción del video/audio, o cualquier texto fuente"></textarea>
+                    <label for="ia-titulo-sugerido">Título sugerido de la fuente (opcional)</label>
+                    <input type="text" id="ia-titulo-sugerido">
+                  </div>
+                  <label class="admin-checkbox"><input type="checkbox" id="ia-usar-busqueda"> Usar búsqueda web (~$0.01-0.03 extra por uso, máximo 3 búsquedas)</label>
+                  <button type="button" class="admin-btn-cancel" id="ia-investigar-btn">Investigar</button>
+                  <p class="admin-hint" id="ia-investigar-status" aria-live="polite"></p>
+                  <div id="ia-notas-box" style="display:none;">
+                    <label for="ia-notas">Notas de investigación (edítalas si hace falta antes de redactar)</label>
+                    <textarea id="ia-notas" rows="8"></textarea>
+                    <button type="button" class="admin-btn-cancel" id="ia-redactar-btn">Redactar con IA</button>
+                    <p class="admin-hint" id="ia-redactar-status" aria-live="polite"></p>
+                  </div>
+                </div>
+              </section>
+
+              <section class="synth-panel" data-panel="citacion" hidden>
+                <h4 class="synth-panel-title">📚 NIVEL 5 — CITACIÓN</h4>
+                <label for="ac-fuente-url">URL de la fuente (opcional)</label>
+                <input type="url" id="ac-fuente-url">
+                <label for="ac-fuente-texto">Nombre de la fuente (opcional)</label>
+                <input type="text" id="ac-fuente-texto">
+                <fieldset class="citation-group" id="ac-citation-group">
+                  <legend>Citación de la fuente</legend>
+                  <label class="admin-checkbox"><input type="checkbox" id="ac-cita-sin-fuente"> Sin fuente externa / contenido 100% original</label>
+                  <label for="ac-cita-estilo">Estilo de citación</label>
+                  <select id="ac-cita-estilo">
+                    <option value="">Seleccionar estilo...</option>
 <option value="abnt">ABNT</option>
 <option value="ama">AMA</option>
 <option value="apa">APA</option>
@@ -295,40 +387,39 @@
 <option value="mla">MLA</option>
 <option value="turabian">Turabian</option>
 <option value="vancouver">Vancouver</option>
-                </select>
-                <label for="ac-cita-autor">Autor de la fuente</label>
-                <input type="text" id="ac-cita-autor" spellcheck="true" lang="es">
-                <label for="ac-cita-anio">Año</label>
-                <input type="text" id="ac-cita-anio" placeholder="2026">
-                <label for="ac-cita-titulo-original">Título del artículo original</label>
-                <input type="text" id="ac-cita-titulo-original" spellcheck="true" lang="es">
-                <label for="ac-cita-fecha-acceso">Fecha de acceso</label>
-                <input type="date" id="ac-cita-fecha-acceso">
-                <p class="citation-preview" id="ac-cita-preview" aria-live="polite"></p>
-              </fieldset>
-              <label for="ac-duracion">Duración (minutos de lectura, video o audio)</label>
-              <input type="number" id="ac-duracion" required min="1" step="1" value="1" list="ac-duracion-presets">
-              <datalist id="ac-duracion-presets">
-                <option value="3"><option value="5"><option value="8"><option value="10">
-                <option value="15"><option value="20"><option value="30"><option value="45"><option value="60">
-              </datalist>
-              <label for="ac-url-portada">Imagen de portada (ruta o URL)</label>
-              <input type="text" id="ac-url-portada" required placeholder="images/mi-imagen.webp">
-              <div class="admin-image-actions">
-                <button type="button" id="ac-usar-imagen-categoria" class="admin-btn-cancel">Usar imagen de la categoría seleccionada</button>
-                <button type="button" id="ac-elegir-imagen" class="admin-btn-cancel">Elegir imagen de la galería</button>
-              </div>
-              <img id="ac-url-portada-preview" class="admin-image-preview" alt="" hidden>
-              <label for="ac-portada-alt">Texto alternativo de la imagen</label>
-              <input type="text" id="ac-portada-alt" required>
-              <label for="ac-fecha">Fecha de publicación</label>
-              <input type="date" id="ac-fecha" required>
-              <label class="admin-checkbox"><input type="checkbox" id="ac-destacado"> Destacado en su sección (reemplaza al anterior de esa sección)</label>
-              <label class="admin-checkbox"><input type="checkbox" id="ac-premium"> Contenido premium (vista previa parcial para quien no sea premium/admin)</label>
-              <div class="admin-form-actions">
-                <button type="submit">Guardar</button>
-                <button type="button" class="admin-btn-cancel" id="ac-cancel">Cancelar</button>
-              </div>
+                  </select>
+                  <label for="ac-cita-autor">Autor de la fuente</label>
+                  <input type="text" id="ac-cita-autor" spellcheck="true" lang="es">
+                  <label for="ac-cita-anio">Año</label>
+                  <input type="text" id="ac-cita-anio" placeholder="2026">
+                  <label for="ac-cita-titulo-original">Título del artículo original</label>
+                  <input type="text" id="ac-cita-titulo-original" spellcheck="true" lang="es">
+                  <label for="ac-cita-fecha-acceso">Fecha de acceso</label>
+                  <input type="date" id="ac-cita-fecha-acceso">
+                  <p class="citation-preview" id="ac-cita-preview" aria-live="polite"></p>
+                </fieldset>
+              </section>
+
+              <footer class="synth-publish-bar">
+                <div class="synth-publish-field">
+                  <label for="ac-fecha">📅 Fecha</label>
+                  <input type="date" id="ac-fecha" required>
+                </div>
+                <div class="synth-publish-field">
+                  <label for="ac-duracion">⏱ Duración</label>
+                  <input type="number" id="ac-duracion" required min="1" step="1" value="1" list="ac-duracion-presets">
+                  <datalist id="ac-duracion-presets">
+                    <option value="3"><option value="5"><option value="8"><option value="10">
+                    <option value="15"><option value="20"><option value="30"><option value="45"><option value="60">
+                  </datalist>
+                </div>
+                <label class="admin-checkbox synth-publish-check" title="Destacado en su sección (reemplaza al anterior de esa sección)"><input type="checkbox" id="ac-destacado"> ★ Destacado</label>
+                <label class="admin-checkbox synth-publish-check" title="Contenido premium (vista previa parcial para quien no sea premium/admin)"><input type="checkbox" id="ac-premium"> 💎 Premium</label>
+                <div class="synth-publish-actions">
+                  <button type="submit" class="synth-btn-guardar">▶ GUARDAR</button>
+                  <button type="button" class="admin-btn-cancel" id="ac-cancel">Cancelar</button>
+                </div>
+              </footer>
               <p id="ac-status" class="form-status" aria-live="polite"></p>
             </form>
           </section>
@@ -371,8 +462,60 @@
         </section>
 
         <section class="admin-tab-panel" id="admin-panel-reportes" style="display:none;">
-          <p class="admin-hint">Reportes del debate de Corrupción Humana. Revisa el contenido reportado antes de decidir.</p>
+          <p class="admin-hint">Reportes del debate (Corrupción Humana, Nuevos Humanos, Educación). Revisa el contenido reportado antes de decidir.</p>
           <div id="admin-reportes-list" class="admin-list"></div>
+        </section>
+
+        <section class="admin-tab-panel admin-agentes" id="admin-panel-agentes" style="display:none;">
+          <div class="ag-header">
+            <div>
+              <h2>Agentes &amp; Moderación</h2>
+              <p class="ag-sub">Estado real de las defensas del sitio y de la cola de moderación.</p>
+            </div>
+          </div>
+
+          <div class="ag-section">
+            <div class="ag-section-head">
+              <h3>Agentes de seguridad</h3>
+              <span class="ag-status-ok" id="ag-estado-resumen">Cargando...</span>
+            </div>
+            <div class="ag-grid" id="ag-seguridad-grid">
+              <p class="admin-hint">Cargando estado de seguridad...</p>
+            </div>
+          </div>
+
+          <div class="ag-section">
+            <div class="ag-section-head">
+              <h3>Agentes de contenido (IA)</h3>
+              <span class="ag-status-ok" id="ag-ia-costo-mes">Cargando...</span>
+            </div>
+            <div class="ag-grid ag-grid-2">
+              <div class="ag-tile ag-tile-row">
+                <div>
+                  <p class="ag-tile-title">Investigador</p>
+                  <p class="ag-tile-desc">Organiza una fuente (URL o texto pegado) en notas de investigación. Búsqueda web opcional.</p>
+                  <p class="ag-tile-desc" id="ag-ia-investigador-uso">—</p>
+                </div>
+                <button type="button" class="ag-btn-piloto" id="ag-ir-contenidos-investigador">Ir a Contenidos →</button>
+              </div>
+              <div class="ag-tile ag-tile-row">
+                <div>
+                  <p class="ag-tile-title">Redactor</p>
+                  <p class="ag-tile-desc">Redacta el borrador final con el tono de cada sección, listo para revisar.</p>
+                  <p class="ag-tile-desc" id="ag-ia-redactor-uso">—</p>
+                </div>
+                <button type="button" class="ag-btn-piloto" id="ag-ir-contenidos-redactor">Ir a Contenidos →</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ag-section">
+            <div class="ag-section-head">
+              <h3>Moderación · Reportes</h3>
+              <span class="ag-status-pendiente" id="ag-reportes-resumen">Cargando...</span>
+            </div>
+            <button type="button" class="ag-btn-piloto" id="ag-ir-reportes">Ir a la cola de reportes →</button>
+          </div>
         </section>
       </div>
 
@@ -523,11 +666,13 @@
       mcUser:      'YOUR_MC_USER',
       mcList:      'YOUR_MC_LIST',
       mcServer:    'us1',
-      youtubeApiKey: ''
+      youtubeApiKey: '',
+      turnstileSiteKey: '0x4AAAAAAFD1ChRrVsC9PVWd'
     };
   </script>
   <script src="auth.js" type="module"></script>
   <script src="script.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&display=swap">
   <script src="editorial.js"></script>
   <script src="citas.js"></script>
   <script src="admin.js"></script>

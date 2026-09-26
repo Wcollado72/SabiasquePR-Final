@@ -46,6 +46,12 @@ const SITE = {
   mcList:          'YOUR_MC_LIST',
   mcServer:        'us1',
 
+  // ── Cloudflare Turnstile (anti-bot en el debate) ─────────
+  // Site Key: publica, segura de tener en el codigo. La Secret Key
+  // NUNCA va aqui -- vive solo como variable de entorno TURNSTILE_SECRET_KEY
+  // en Render (backend), y el backend la usa para verificar el token.
+  turnstileSiteKey: '0x4AAAAAAFD1ChRrVsC9PVWd',
+
   // ── YouTube Data API (panel admin — elegir video del canal) ──
   // Llave PÚBLICA restringida por dominio (HTTP referrer) en Google
   // Cloud Console — es seguro exponerla en el navegador solo si está
@@ -88,10 +94,21 @@ function optionsHtml(map, { includeEmpty } = {}) {
 // Taxonomía compartida por Noticias, Contenidos, Revolución Humana y
 // Educación. Deben coincidir con los CHECK de backend/sql/schema.sql y
 // con editorial.js (CATEGORIAS / FORMATO_LABEL / etc.).
-const CATEGORIAS = {
+// Categorias de Noticias (las unicas que se ofrecen como boton de filtro --
+// ver CATEGORIA_FILTER_BUTTONS mas abajo, que usa esta lista explicita, no
+// el mapa CATEGORIAS completo, para que las categorias de Educacion no se
+// cuelen como filtro de Noticias).
+const CATEGORIAS_NOTICIAS_FILTRO = {
   general: 'General', internacionales: 'Internacionales', crimen: 'Crimen', salud: 'Salud',
   deportes: 'Deportes', finanzas: 'Finanzas', tecnologia: 'Tecnología', descubrimientos: 'Descubrimientos',
   politica: 'Política', clima: 'Clima y Medio Ambiente', cultura: 'Cultura', ciencia: 'Ciencia',
+};
+// Mapa completo de etiquetas (Noticias + Educacion) -- lo usan el badge de
+// las tarjetas y el <select> de categoria del panel de admin.
+const CATEGORIAS = {
+  ...CATEGORIAS_NOTICIAS_FILTRO,
+  'leyes-educativas': 'Leyes educativas', 'estudiantes-sobresalientes': 'Estudiantes sobresalientes',
+  'sistemas-mundiales': 'Sistemas educativos mundiales', 'programas-educativos': 'Programas educativos destacados',
 };
 const TIPOS_FORMATO = {
   video: 'Video', audio: 'Audio', foto: 'Foto', ensayo: 'Ensayo', noticia: 'Noticia', lectura_corta: 'Lectura corta',
@@ -132,10 +149,11 @@ const ENFOQUES = {
   internacionales: 'Internacionales (Nuevos Humanos)',
 };
 
-// Botones de filtro por categoría, compartidos entre Noticias, Revolución
-// Humana y Educación. "Todas" siempre primero, sin ordenar (es el reset).
+// Botones de filtro por categoría de Noticias. "Todas" siempre primero,
+// sin ordenar (es el reset). Educación ya no usa este filtro -- tiene su
+// propia identidad sin botones.
 const CATEGORIA_FILTER_BUTTONS = `<button type="button" class="foro-filter-btn active" data-categoria="">Todas</button>\n`
-  + sortLabelEntries(CATEGORIAS).map(([v, l]) => `        <button type="button" class="foro-filter-btn" data-categoria="${v}">${l}</button>`).join('\n');
+  + sortLabelEntries(CATEGORIAS_NOTICIAS_FILTRO).map(([v, l]) => `        <button type="button" class="foro-filter-btn" data-categoria="${v}">${l}</button>`).join('\n');
 
 const SOCIAL_ICONS = `
         <div class="social-links">
@@ -315,6 +333,7 @@ function buildPage(p) {
         <a class="brand" href="index.html" aria-label="Sabías que PR — Inicio">
           <img class="brand-mark" src="images/Coqui-sm.webp" alt="" width="32" height="32">
           <span class="brand-name">Sabías que PR</span>
+          <span class="beta-badge" title="El sitio sigue en desarrollo activo">BETA</span>
         </a>
         <nav class="nav" aria-label="Principal">
           <button class="nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Abrir menú">
@@ -395,7 +414,8 @@ function buildPage(p) {
       mcUser:      '${SITE.mcUser}',
       mcList:      '${SITE.mcList}',
       mcServer:    '${SITE.mcServer}',
-      youtubeApiKey: '${SITE.youtubeApiKey}'
+      youtubeApiKey: '${SITE.youtubeApiKey}',
+      turnstileSiteKey: '${SITE.turnstileSiteKey}'
     };
   </script>
   <script src="auth.js" type="module"></script>
@@ -594,7 +614,8 @@ const PAGES = [
       <div class="card-grid contenidos-grid" id="rh-list" data-seccion="revolucion-humana" data-filters="rh-subnav rh-enfoque-filter" data-hint="rh-hint" aria-live="polite" aria-busy="true"></div>
       <noscript><p class="empty-state">Activa JavaScript para ver este contenido.</p></noscript>
       <section class="debate-seccion" id="rh-debate" hidden></section>`,
-    extraScript: `<script src="editorial.js"></script>
+    extraScript: `<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script src="editorial.js"></script>
   <script src="contenidos.js"></script>
   <script src="debate.js"></script>
   <script src="logica-humana.js"></script>
@@ -604,15 +625,81 @@ const PAGES = [
   {
     file: 'educacion.html',
     title: 'Sabías que PR — Educación',
-    description: 'Videos, ensayos y lecturas curadas para aprender, cuestionar y transformar nuestra realidad.',
+    description: 'Noticias, videos, ensayos y programas sobre educación — leyes, estudiantes sobresalientes, sistemas educativos del mundo y el foro de discusión de la sección.',
     heroH2: 'Educación',
-    heroP: 'Recursos, lecturas y proyectos para aprender, cuestionar y transformar nuestra realidad.',
+    heroP: 'Noticias, leyes, estudiantes sobresalientes y sistemas educativos del mundo — todo lo que ayuda y lo que afecta a la educación.',
     mainClass: 'main-block',
     mainContent: `
-      <div class="foro-filters" id="edu-filters">${CATEGORIA_FILTER_BUTTONS}</div>
+      <div class="card-grid contenidos-grid" id="edu-list" data-seccion="educacion" data-hint="edu-hint" aria-live="polite" aria-busy="true"></div>
       <p class="home-hint" id="edu-hint" aria-live="polite"></p>
-      <div class="card-grid contenidos-grid" id="edu-list" data-seccion="educacion" data-filters="edu-filters" data-hint="edu-hint" aria-live="polite" aria-busy="true"></div>
       <noscript><p class="empty-state">Activa JavaScript para ver este contenido.</p></noscript>
+
+      <section class="section-head" id="edu-mundo">
+        <h2>Educación en el mundo</h2>
+      </section>
+      <p class="edu-rankings-intro">Las 10 naciones con mejor desempeño educativo del mundo, y los 10 mejores estados de Estados Unidos — con la posición real de Puerto Rico donde existe un dato comparable.</p>
+
+      <div class="edu-ranking-box">
+        <table class="edu-ranking-table">
+          <caption>Top 10 mundial — PISA 2022 (OCDE), puntaje promedio en matemáticas, lectura y ciencias</caption>
+          <thead>
+            <tr><th scope="col">Lugar</th><th scope="col">País / economía</th><th scope="col">Puntaje</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>Singapur</td><td>559.7</td></tr>
+            <tr><td>2</td><td>Macao (China)</td><td>535.0</td></tr>
+            <tr><td>3</td><td>Taiwán</td><td>533.0</td></tr>
+            <tr><td>4</td><td>Japón</td><td>533.0</td></tr>
+            <tr><td>5</td><td>Corea del Sur</td><td>523.3</td></tr>
+            <tr><td>6</td><td>Hong Kong (China)</td><td>520.0</td></tr>
+            <tr><td>7</td><td>Estonia</td><td>515.7</td></tr>
+            <tr><td>8</td><td>Canadá</td><td>506.3</td></tr>
+            <tr><td>9</td><td>Irlanda</td><td>504.0</td></tr>
+            <tr><td>10</td><td>Suiza</td><td>498.0</td></tr>
+          </tbody>
+        </table>
+        <div class="edu-pr-callout">
+          <p class="edu-pr-callout-label">Puerto Rico</p>
+          <p>No participó en la ronda PISA 2022. Su última participación fue en 2018 (79 sistemas evaluados): quedó <strong>último en lectura</strong> (401 puntos frente a un promedio OCDE de 487), y muy por debajo del promedio también en matemáticas (353 vs. 489) y ciencias (403 vs. 489). No ha vuelto a participar desde entonces.</p>
+        </div>
+        <p class="edu-ranking-fuente">Fuente: <a href="https://www.oecd.org/en/publications/pisa-2022-results-volume-i_53f23881-en.html" target="_blank" rel="noopener noreferrer">OCDE — Resultados PISA 2022</a>. Datos de Puerto Rico: <a href="https://nces.ed.gov/surveys/pisa/pisa2015/pisa2015highlights_7c_1.asp" target="_blank" rel="noopener noreferrer">National Center for Education Statistics (NCES)</a>.</p>
+      </div>
+
+      <div class="edu-ranking-box">
+        <table class="edu-ranking-table">
+          <caption>Top 10 estados de EE.UU. — U.S. News &amp; World Report (Pre-K–12 + educación superior)</caption>
+          <thead>
+            <tr><th scope="col">Lugar</th><th scope="col">Estado</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>New Jersey</td></tr>
+            <tr><td>2</td><td>Florida</td></tr>
+            <tr><td>3</td><td>Colorado</td></tr>
+            <tr><td>4</td><td>Utah</td></tr>
+            <tr><td>5</td><td>Massachusetts</td></tr>
+            <tr><td>6</td><td>Wyoming</td></tr>
+            <tr><td>7</td><td>Wisconsin</td></tr>
+            <tr><td>8</td><td>South Dakota</td></tr>
+            <tr><td>9</td><td>Washington</td></tr>
+            <tr><td>10</td><td>Connecticut</td></tr>
+          </tbody>
+        </table>
+        <div class="edu-pr-callout">
+          <p class="edu-pr-callout-label">Puerto Rico</p>
+          <p>No tiene una posición oficial en este ranking: la prueba federal NAEP evalúa a Puerto Rico por separado, con una escala distinta, porque sus preguntas estándar no se alinean bien con el currículo de la isla — por eso no aparece junto a los 50 estados. Lo que sí se sabe: sus puntuaciones históricas están muy por debajo del promedio nacional, aunque el NAEP 2024 mostró una mejora en matemáticas de 4to grado.</p>
+        </div>
+        <p class="edu-ranking-fuente">Fuente: <a href="https://worldpopulationreview.com/state-rankings/best-states-for-education" target="_blank" rel="noopener noreferrer">U.S. News &amp; World Report — Best States for Education</a>. Datos de Puerto Rico: <a href="https://nces.ed.gov/nationsreportcard/puertorico/" target="_blank" rel="noopener noreferrer">NAEP — Puerto Rico Studies (NCES)</a>.</p>
+      </div>
+
+      <section class="edu-reglas-banner" aria-labelledby="edu-reglas-h">
+        <p class="edu-reglas-badge">12+</p>
+        <div>
+          <h3 id="edu-reglas-h">Reglas del foro de Educación</h3>
+          <p>Este espacio es para todas las edades a partir de 12 años. No se tolera lenguaje ofensivo, contenido sexual, ni ataques personales — el tono debe ser constructivo, igual que el resto de esta sección. Cualquier publicación o comentario que rompa estas reglas puede reportarse con el botón "Reportar"; el equipo de Sabías que PR lo revisa y actúa.</p>
+        </div>
+      </section>
+      <section class="debate-seccion" id="edu-debate"></section>
+
       <section class="newsletter">
         <h3>Recibe nuevo contenido educativo</h3>
         <p>Déjanos tu correo para avisarte cuando publiquemos nuevas guías, videos y recursos.</p>
@@ -627,8 +714,10 @@ const PAGES = [
         <h3>¿Tienes ideas o sugerencias?</h3>
         <p>Escríbenos: <a href="mailto:${SITE.email}">${SITE.email}</a></p>
       </section>`,
-    extraScript: `<script src="editorial.js"></script>
-  <script src="contenidos.js"></script>`,
+    extraScript: `<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script src="editorial.js"></script>
+  <script src="contenidos.js"></script>
+  <script src="debate.js"></script>`,
   },
 
   {
@@ -683,6 +772,7 @@ const PAGES = [
           <button type="button" class="foro-filter-btn" data-tab="contenidos">Contenidos</button>
           <button type="button" class="foro-filter-btn" data-tab="productos">Productos</button>
           <button type="button" class="foro-filter-btn" data-tab="reportes">Reportes</button>
+          <button type="button" class="foro-filter-btn" data-tab="agentes">Agentes</button>
         </nav>
 
         <section class="admin-tab-panel" id="admin-panel-noticias">
@@ -750,104 +840,185 @@ const PAGES = [
           </div>
           <div id="admin-contenidos-list" class="admin-list"></div>
 
-          <section class="box box-blog contact-box admin-form" id="admin-contenidos-form-box" style="display:none;">
+          <section class="box contact-box admin-form synth-theme" id="admin-contenidos-form-box" style="display:none;">
             <h3 id="admin-contenidos-form-title">Nuevo contenido</h3>
             <form id="admin-contenidos-form">
               <input type="hidden" id="ac-id">
-              <label for="ac-seccion">Sección</label>
-              <select id="ac-seccion">
-                <option value="noticias">Noticias</option>
-                <option value="revolucion-humana">Revolución Humana</option>
-                <option value="educacion">Educación</option>
-              </select>
-              <label for="ac-subseccion">Sub-sección de Revolución Humana (opcional)</label>
-              <select id="ac-subseccion">
-                ${optionsHtml(SUBSECCIONES, { includeEmpty: 'Ninguna' })}
-              </select>
-              <label for="ac-enfoque">Enfoque (solo aplica dentro de Corrupción Humana)</label>
-              <select id="ac-enfoque">
-                ${optionsHtml(ENFOQUES, { includeEmpty: 'Ninguno' })}
-              </select>
-              <label for="ac-tipo-formato">Tipo de formato</label>
-              <select id="ac-tipo-formato">
-                ${optionsHtml(TIPOS_FORMATO)}
-              </select>
-              <label for="ac-subformato">Subformato (opcional)</label>
-              <select id="ac-subformato">
-                ${optionsHtml(SUBFORMATOS, { includeEmpty: 'Ninguno' })}
-              </select>
-              <label for="ac-categoria">Categoría</label>
-              <select id="ac-categoria">
-                ${optionsHtml(CATEGORIAS)}
-              </select>
-              <label for="ac-titulo">Título</label>
-              <input type="text" id="ac-titulo" required minlength="3" maxlength="160" spellcheck="true" lang="es">
-              <label for="ac-subtitulo">Resumen (2-3 oraciones, redacción propia)</label>
-              <textarea id="ac-subtitulo" rows="3" required minlength="10" spellcheck="true" lang="es"></textarea>
-              <div class="spellcheck-actions"><button type="button" class="admin-btn-cancel" data-revisar="ac-subtitulo">Revisar texto</button></div>
-              <ul class="suggestion-list" id="ac-subtitulo-suggestions"></ul>
-              <label for="ac-cuerpo">Cuerpo del texto (opcional — solo ensayo/lectura corta con texto propio)</label>
-              <textarea id="ac-cuerpo" rows="6" spellcheck="true" lang="es"></textarea>
-              <div class="spellcheck-actions"><button type="button" class="admin-btn-cancel" data-revisar="ac-cuerpo">Revisar texto</button></div>
-              <ul class="suggestion-list" id="ac-cuerpo-suggestions"></ul>
-              <label for="ac-autor">Autor (opcional)</label>
-              <input type="text" id="ac-autor">
-              <label for="ac-divulgacion-ia">Divulgación de uso de IA</label>
-              <select id="ac-divulgacion-ia">
-                ${optionsHtml(DIVULGACION_IA)}
-              </select>
-              <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir este contenido. Se muestra públicamente en la tarjeta y el artículo.</p>
-              <label for="ac-url-media">Video/audio embebible (obligatorio si el tipo es Video o Audio, ej. https://www.youtube.com/embed/ID)</label>
-              <input type="url" id="ac-url-media" placeholder="Pega cualquier enlace de YouTube (watch, youtu.be, embed...)">
-              <div class="admin-image-actions">
-                <button type="button" id="ac-autocompletar-youtube" class="admin-btn-cancel">Autocompletar desde YouTube</button>
-                <button type="button" id="ac-elegir-video-canal" class="admin-btn-cancel">Elegir de mi canal de YouTube</button>
-              </div>
-              <p class="admin-hint" id="ac-youtube-status"></p>
-              <label for="ac-fuente-url">URL de la fuente (opcional)</label>
-              <input type="url" id="ac-fuente-url">
-              <label for="ac-fuente-texto">Nombre de la fuente (opcional)</label>
-              <input type="text" id="ac-fuente-texto">
-              <fieldset class="citation-group" id="ac-citation-group">
-                <legend>Citación de la fuente</legend>
-                <label class="admin-checkbox"><input type="checkbox" id="ac-cita-sin-fuente"> Sin fuente externa / contenido 100% original</label>
-                <label for="ac-cita-estilo">Estilo de citación</label>
-                <select id="ac-cita-estilo">
-                  ${optionsHtml(CITA_ESTILOS, { includeEmpty: 'Seleccionar estilo...' })}
+
+              <nav class="synth-levels" id="synth-levels" aria-label="Niveles del formulario">
+                <button type="button" class="synth-level-card active" data-panel="clasificacion">
+                  <span class="synth-level-icon" aria-hidden="true">🕹️</span>
+                  <span class="synth-level-title">Clasificación</span>
+                  <span class="synth-level-status" data-status="clasificacion">● ACTIVO</span>
+                </button>
+                <button type="button" class="synth-level-card" data-panel="contenido">
+                  <span class="synth-level-icon" aria-hidden="true">📜</span>
+                  <span class="synth-level-title">Contenido</span>
+                  <span class="synth-level-status" data-status="contenido">○ PENDIENTE</span>
+                </button>
+                <button type="button" class="synth-level-card" data-panel="multimedia">
+                  <span class="synth-level-icon" aria-hidden="true">🎬</span>
+                  <span class="synth-level-title">Multimedia</span>
+                  <span class="synth-level-status" data-status="multimedia">○ PENDIENTE</span>
+                </button>
+                <button type="button" class="synth-level-card synth-level-ia" data-panel="ia">
+                  <span class="synth-level-icon" aria-hidden="true">🤖</span>
+                  <span class="synth-level-title">Investigador + Redactor</span>
+                  <span class="synth-level-status" data-status="ia">✦ LISTO</span>
+                </button>
+                <button type="button" class="synth-level-card" data-panel="citacion">
+                  <span class="synth-level-icon" aria-hidden="true">📚</span>
+                  <span class="synth-level-title">Citación</span>
+                  <span class="synth-level-status" data-status="citacion">○ PENDIENTE</span>
+                </button>
+              </nav>
+
+              <section class="synth-panel" data-panel="clasificacion">
+                <h4 class="synth-panel-title">🕹️ NIVEL 1 — CLASIFICACIÓN</h4>
+                <label for="ac-seccion">Sección</label>
+                <select id="ac-seccion">
+                  <option value="noticias">Noticias</option>
+                  <option value="revolucion-humana">Revolución Humana</option>
+                  <option value="educacion">Educación</option>
                 </select>
-                <label for="ac-cita-autor">Autor de la fuente</label>
-                <input type="text" id="ac-cita-autor" spellcheck="true" lang="es">
-                <label for="ac-cita-anio">Año</label>
-                <input type="text" id="ac-cita-anio" placeholder="2026">
-                <label for="ac-cita-titulo-original">Título del artículo original</label>
-                <input type="text" id="ac-cita-titulo-original" spellcheck="true" lang="es">
-                <label for="ac-cita-fecha-acceso">Fecha de acceso</label>
-                <input type="date" id="ac-cita-fecha-acceso">
-                <p class="citation-preview" id="ac-cita-preview" aria-live="polite"></p>
-              </fieldset>
-              <label for="ac-duracion">Duración (minutos de lectura, video o audio)</label>
-              <input type="number" id="ac-duracion" required min="1" step="1" value="1" list="ac-duracion-presets">
-              <datalist id="ac-duracion-presets">
-                <option value="3"><option value="5"><option value="8"><option value="10">
-                <option value="15"><option value="20"><option value="30"><option value="45"><option value="60">
-              </datalist>
-              <label for="ac-url-portada">Imagen de portada (ruta o URL)</label>
-              <input type="text" id="ac-url-portada" required placeholder="images/mi-imagen.webp">
-              <div class="admin-image-actions">
-                <button type="button" id="ac-usar-imagen-categoria" class="admin-btn-cancel">Usar imagen de la categoría seleccionada</button>
-                <button type="button" id="ac-elegir-imagen" class="admin-btn-cancel">Elegir imagen de la galería</button>
-              </div>
-              <img id="ac-url-portada-preview" class="admin-image-preview" alt="" hidden>
-              <label for="ac-portada-alt">Texto alternativo de la imagen</label>
-              <input type="text" id="ac-portada-alt" required>
-              <label for="ac-fecha">Fecha de publicación</label>
-              <input type="date" id="ac-fecha" required>
-              <label class="admin-checkbox"><input type="checkbox" id="ac-destacado"> Destacado en su sección (reemplaza al anterior de esa sección)</label>
-              <label class="admin-checkbox"><input type="checkbox" id="ac-premium"> Contenido premium (vista previa parcial para quien no sea premium/admin)</label>
-              <div class="admin-form-actions">
-                <button type="submit">Guardar</button>
-                <button type="button" class="admin-btn-cancel" id="ac-cancel">Cancelar</button>
-              </div>
+                <label for="ac-subseccion">Sub-sección de Revolución Humana (opcional)</label>
+                <select id="ac-subseccion">
+                  ${optionsHtml(SUBSECCIONES, { includeEmpty: 'Ninguna' })}
+                </select>
+                <label for="ac-enfoque">Enfoque (solo aplica dentro de Corrupción Humana)</label>
+                <select id="ac-enfoque">
+                  ${optionsHtml(ENFOQUES, { includeEmpty: 'Ninguno' })}
+                </select>
+                <label for="ac-tipo-formato">Tipo de formato</label>
+                <select id="ac-tipo-formato">
+                  ${optionsHtml(TIPOS_FORMATO)}
+                </select>
+                <label for="ac-subformato">Subformato (opcional)</label>
+                <select id="ac-subformato">
+                  ${optionsHtml(SUBFORMATOS, { includeEmpty: 'Ninguno' })}
+                </select>
+                <label for="ac-categoria">Categoría</label>
+                <select id="ac-categoria">
+                  ${optionsHtml(CATEGORIAS)}
+                </select>
+              </section>
+
+              <section class="synth-panel" data-panel="contenido" hidden>
+                <h4 class="synth-panel-title">📜 NIVEL 2 — CONTENIDO</h4>
+                <label for="ac-titulo">Título</label>
+                <input type="text" id="ac-titulo" required minlength="3" maxlength="160" spellcheck="true" lang="es">
+                <label for="ac-subtitulo">Resumen (2-3 oraciones, redacción propia)</label>
+                <textarea id="ac-subtitulo" rows="3" required minlength="10" spellcheck="true" lang="es"></textarea>
+                <div class="spellcheck-actions"><button type="button" class="admin-btn-cancel" data-revisar="ac-subtitulo">Revisar texto</button></div>
+                <ul class="suggestion-list" id="ac-subtitulo-suggestions"></ul>
+                <label for="ac-cuerpo">Cuerpo del texto (opcional — solo ensayo/lectura corta con texto propio)</label>
+                <textarea id="ac-cuerpo" rows="6" spellcheck="true" lang="es"></textarea>
+                <div class="spellcheck-actions"><button type="button" class="admin-btn-cancel" data-revisar="ac-cuerpo">Revisar texto</button></div>
+                <ul class="suggestion-list" id="ac-cuerpo-suggestions"></ul>
+                <label for="ac-autor">Autor (opcional)</label>
+                <input type="text" id="ac-autor">
+                <label for="ac-divulgacion-ia">Divulgación de uso de IA</label>
+                <select id="ac-divulgacion-ia">
+                  ${optionsHtml(DIVULGACION_IA)}
+                </select>
+                <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir este contenido. Se muestra públicamente en la tarjeta y el artículo.</p>
+              </section>
+
+              <section class="synth-panel" data-panel="multimedia" hidden>
+                <h4 class="synth-panel-title">🎬 NIVEL 3 — MULTIMEDIA</h4>
+                <label for="ac-url-media">Video/audio embebible (obligatorio si el tipo es Video o Audio, ej. https://www.youtube.com/embed/ID)</label>
+                <input type="url" id="ac-url-media" placeholder="Pega cualquier enlace de YouTube (watch, youtu.be, embed...)">
+                <div class="admin-image-actions">
+                  <button type="button" id="ac-autocompletar-youtube" class="admin-btn-cancel">Autocompletar desde YouTube</button>
+                  <button type="button" id="ac-elegir-video-canal" class="admin-btn-cancel">Elegir de mi canal de YouTube</button>
+                </div>
+                <p class="admin-hint" id="ac-youtube-status"></p>
+                <label for="ac-url-portada">Imagen de portada (ruta o URL)</label>
+                <input type="text" id="ac-url-portada" required placeholder="images/mi-imagen.webp">
+                <div class="admin-image-actions">
+                  <button type="button" id="ac-usar-imagen-categoria" class="admin-btn-cancel">Usar imagen de la categoría seleccionada</button>
+                  <button type="button" id="ac-elegir-imagen" class="admin-btn-cancel">Elegir imagen de la galería</button>
+                </div>
+                <img id="ac-url-portada-preview" class="admin-image-preview" alt="" hidden>
+                <label for="ac-portada-alt">Texto alternativo de la imagen</label>
+                <input type="text" id="ac-portada-alt" required>
+              </section>
+
+              <section class="synth-panel" data-panel="ia" hidden>
+                <h4 class="synth-panel-title">🤖 NIVEL 4 — INVESTIGADOR + REDACTOR</h4>
+                <div class="ia-asistente-box">
+                  <p class="admin-hint">Elige primero la Sección/Sub-sección/Categoría del Nivel 1 (el tono de redacción depende de eso), luego dale una fuente al Investigador. También intenta identificar autor, año y el estilo de citación de la fuente (solo si tiene confianza razonable) — la fecha de acceso siempre la pones tú.</p>
+                  <div class="ia-fuente-toggle" id="ia-fuente-toggle">
+                    <button type="button" class="foro-filter-btn active" data-fuente="url">URL</button>
+                    <button type="button" class="foro-filter-btn" data-fuente="texto">Texto pegado (video/audio)</button>
+                  </div>
+                  <div id="ia-fuente-url-box">
+                    <label for="ia-url">URL de la fuente</label>
+                    <input type="url" id="ia-url" placeholder="https://...">
+                  </div>
+                  <div id="ia-fuente-texto-box" style="display:none;">
+                    <label for="ia-texto">Texto o transcripción pegada</label>
+                    <textarea id="ia-texto" rows="6" placeholder="Pega aquí la transcripción del video/audio, o cualquier texto fuente"></textarea>
+                    <label for="ia-titulo-sugerido">Título sugerido de la fuente (opcional)</label>
+                    <input type="text" id="ia-titulo-sugerido">
+                  </div>
+                  <label class="admin-checkbox"><input type="checkbox" id="ia-usar-busqueda"> Usar búsqueda web (~$0.01-0.03 extra por uso, máximo 3 búsquedas)</label>
+                  <button type="button" class="admin-btn-cancel" id="ia-investigar-btn">Investigar</button>
+                  <p class="admin-hint" id="ia-investigar-status" aria-live="polite"></p>
+                  <div id="ia-notas-box" style="display:none;">
+                    <label for="ia-notas">Notas de investigación (edítalas si hace falta antes de redactar)</label>
+                    <textarea id="ia-notas" rows="8"></textarea>
+                    <button type="button" class="admin-btn-cancel" id="ia-redactar-btn">Redactar con IA</button>
+                    <p class="admin-hint" id="ia-redactar-status" aria-live="polite"></p>
+                  </div>
+                </div>
+              </section>
+
+              <section class="synth-panel" data-panel="citacion" hidden>
+                <h4 class="synth-panel-title">📚 NIVEL 5 — CITACIÓN</h4>
+                <label for="ac-fuente-url">URL de la fuente (opcional)</label>
+                <input type="url" id="ac-fuente-url">
+                <label for="ac-fuente-texto">Nombre de la fuente (opcional)</label>
+                <input type="text" id="ac-fuente-texto">
+                <fieldset class="citation-group" id="ac-citation-group">
+                  <legend>Citación de la fuente</legend>
+                  <label class="admin-checkbox"><input type="checkbox" id="ac-cita-sin-fuente"> Sin fuente externa / contenido 100% original</label>
+                  <label for="ac-cita-estilo">Estilo de citación</label>
+                  <select id="ac-cita-estilo">
+                    ${optionsHtml(CITA_ESTILOS, { includeEmpty: 'Seleccionar estilo...' })}
+                  </select>
+                  <label for="ac-cita-autor">Autor de la fuente</label>
+                  <input type="text" id="ac-cita-autor" spellcheck="true" lang="es">
+                  <label for="ac-cita-anio">Año</label>
+                  <input type="text" id="ac-cita-anio" placeholder="2026">
+                  <label for="ac-cita-titulo-original">Título del artículo original</label>
+                  <input type="text" id="ac-cita-titulo-original" spellcheck="true" lang="es">
+                  <label for="ac-cita-fecha-acceso">Fecha de acceso</label>
+                  <input type="date" id="ac-cita-fecha-acceso">
+                  <p class="citation-preview" id="ac-cita-preview" aria-live="polite"></p>
+                </fieldset>
+              </section>
+
+              <footer class="synth-publish-bar">
+                <div class="synth-publish-field">
+                  <label for="ac-fecha">📅 Fecha</label>
+                  <input type="date" id="ac-fecha" required>
+                </div>
+                <div class="synth-publish-field">
+                  <label for="ac-duracion">⏱ Duración</label>
+                  <input type="number" id="ac-duracion" required min="1" step="1" value="1" list="ac-duracion-presets">
+                  <datalist id="ac-duracion-presets">
+                    <option value="3"><option value="5"><option value="8"><option value="10">
+                    <option value="15"><option value="20"><option value="30"><option value="45"><option value="60">
+                  </datalist>
+                </div>
+                <label class="admin-checkbox synth-publish-check" title="Destacado en su sección (reemplaza al anterior de esa sección)"><input type="checkbox" id="ac-destacado"> ★ Destacado</label>
+                <label class="admin-checkbox synth-publish-check" title="Contenido premium (vista previa parcial para quien no sea premium/admin)"><input type="checkbox" id="ac-premium"> 💎 Premium</label>
+                <div class="synth-publish-actions">
+                  <button type="submit" class="synth-btn-guardar">▶ GUARDAR</button>
+                  <button type="button" class="admin-btn-cancel" id="ac-cancel">Cancelar</button>
+                </div>
+              </footer>
               <p id="ac-status" class="form-status" aria-live="polite"></p>
             </form>
           </section>
@@ -890,8 +1061,60 @@ const PAGES = [
         </section>
 
         <section class="admin-tab-panel" id="admin-panel-reportes" style="display:none;">
-          <p class="admin-hint">Reportes del debate de Corrupción Humana. Revisa el contenido reportado antes de decidir.</p>
+          <p class="admin-hint">Reportes del debate (Corrupción Humana, Nuevos Humanos, Educación). Revisa el contenido reportado antes de decidir.</p>
           <div id="admin-reportes-list" class="admin-list"></div>
+        </section>
+
+        <section class="admin-tab-panel admin-agentes" id="admin-panel-agentes" style="display:none;">
+          <div class="ag-header">
+            <div>
+              <h2>Agentes &amp; Moderación</h2>
+              <p class="ag-sub">Estado real de las defensas del sitio y de la cola de moderación.</p>
+            </div>
+          </div>
+
+          <div class="ag-section">
+            <div class="ag-section-head">
+              <h3>Agentes de seguridad</h3>
+              <span class="ag-status-ok" id="ag-estado-resumen">Cargando...</span>
+            </div>
+            <div class="ag-grid" id="ag-seguridad-grid">
+              <p class="admin-hint">Cargando estado de seguridad...</p>
+            </div>
+          </div>
+
+          <div class="ag-section">
+            <div class="ag-section-head">
+              <h3>Agentes de contenido (IA)</h3>
+              <span class="ag-status-ok" id="ag-ia-costo-mes">Cargando...</span>
+            </div>
+            <div class="ag-grid ag-grid-2">
+              <div class="ag-tile ag-tile-row">
+                <div>
+                  <p class="ag-tile-title">Investigador</p>
+                  <p class="ag-tile-desc">Organiza una fuente (URL o texto pegado) en notas de investigación. Búsqueda web opcional.</p>
+                  <p class="ag-tile-desc" id="ag-ia-investigador-uso">—</p>
+                </div>
+                <button type="button" class="ag-btn-piloto" id="ag-ir-contenidos-investigador">Ir a Contenidos →</button>
+              </div>
+              <div class="ag-tile ag-tile-row">
+                <div>
+                  <p class="ag-tile-title">Redactor</p>
+                  <p class="ag-tile-desc">Redacta el borrador final con el tono de cada sección, listo para revisar.</p>
+                  <p class="ag-tile-desc" id="ag-ia-redactor-uso">—</p>
+                </div>
+                <button type="button" class="ag-btn-piloto" id="ag-ir-contenidos-redactor">Ir a Contenidos →</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ag-section">
+            <div class="ag-section-head">
+              <h3>Moderación · Reportes</h3>
+              <span class="ag-status-pendiente" id="ag-reportes-resumen">Cargando...</span>
+            </div>
+            <button type="button" class="ag-btn-piloto" id="ag-ir-reportes">Ir a la cola de reportes →</button>
+          </div>
         </section>
       </div>
 
@@ -914,7 +1137,8 @@ const PAGES = [
           <div class="image-picker-grid" id="youtube-picker-grid"></div>
         </div>
       </div>`,
-    extraScript: `<script src="editorial.js"></script>
+    extraScript: `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&display=swap">
+  <script src="editorial.js"></script>
   <script src="citas.js"></script>
   <script src="admin.js"></script>`,
   },
@@ -1005,8 +1229,8 @@ const PAGES = [
         </figure>
         <div class="manifiesto-text">
           <h2>Visión del proyecto</h2>
-          <p>Sabías que PR es una iniciativa social dedicada al despertar de la conciencia humana. Nació en Puerto Rico, pero su misión no conoce fronteras: mediante herramientas creativas y accesibles, buscamos comprender el entorno actual para formar individuos comprometidos con un futuro mejor para toda la humanidad. Está dirigido a cualquier persona, en cualquier parte del mundo, dispuesta a fomentar su evolución integral —mental, física y espiritual— en un ambiente de inclusión libre de distinciones por raza, género, credo, ideología, nacionalidad o condición social.</p>
-          <p>A través de la lógica, la ingeniería inversa y el pensamiento crítico, facilitamos los recursos para cuestionar el entorno y mejorar la toma de decisiones diaria. Nuestro objetivo final es que más seres humanos, sin importar dónde vivan, se reconozcan como agentes de cambio capaces de construir un planeta más justo, solidario y consciente.</p>
+          <p>Sabías que PR es una iniciativa dedicada al despertar de la conciencia humana. Nació en Puerto Rico, pero su misión no conoce fronteras: con espacios de análisis, debate y educación, buscamos entender el entorno actual para formar personas comprometidas con un futuro mejor para toda la humanidad. Es para cualquiera, en cualquier parte del mundo, dispuesto a cuestionar su realidad sin distinción de raza, género, credo, ideología, nacionalidad o condición social.</p>
+          <p>A través de la lógica, el pensamiento crítico y la disposición a cuestionarnos a nosotros mismos primero, ofrecemos las herramientas para tomar mejores decisiones — personales y colectivas. El objetivo no es tener la razón, es que más personas se reconozcan como agentes de cambio capaces de construir un planeta más justo, solidario y consciente.</p>
         </div>
       </section>
       <section class="manifiesto-split">
@@ -1020,10 +1244,10 @@ const PAGES = [
           <p><strong>Origen:</strong> Proyecto independiente creado en Puerto Rico, inspirado en la necesidad de entender mejor la realidad social, política y económica del mundo — y con la ambición de servir a cualquier persona, en cualquier lugar.</p>
           <p><strong>Enfoques principales:</strong></p>
           <ul>
-            <li>Noticias y reportajes con contexto histórico y social.</li>
-            <li>Educación y recursos para el pensamiento crítico.</li>
-            <li>Investigación, datos y análisis de largo plazo.</li>
-            <li>Espacios para la participación y la reflexión comunitaria.</li>
+            <li>Noticias variadas en distintos formatos y categorías, con el compromiso de un 95%+ de confiabilidad en cada dato.</li>
+            <li>Revolución Humana: lo mejor de la humanidad (Nuevos Humanos), lo que le falla (Corrupción Humana), y las ideas personales de Aliado Imperfekto (Lógica Humana).</li>
+            <li>Educación con datos reales — desde rankings educativos mundiales hasta leyes, estudiantes y programas que están cambiando la enseñanza.</li>
+            <li>Foros de discusión moderados en cada sección, para pensar en comunidad, no solo leer en solitario.</li>
           </ul>
           <p><strong>Público al que se dirige:</strong> cualquier persona, en cualquier país, interesada en comprender la realidad desde una perspectiva humana, crítica y solidaria — y dispuesta a ser parte del cambio.</p>
         </div>

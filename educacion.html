@@ -4,19 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sabías que PR — Educación</title>
-  <meta name="description" content="Videos, ensayos y lecturas curadas para aprender, cuestionar y transformar nuestra realidad.">
+  <meta name="description" content="Noticias, videos, ensayos y programas sobre educación — leyes, estudiantes sobresalientes, sistemas educativos del mundo y el foro de discusión de la sección.">
   <meta name="author" content="Aliado Imperfekto">
   <link rel="canonical" href="https://sabiasquepr.com/educacion.html">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://sabiasquepr.com/educacion.html">
   <meta property="og:title" content="Sabías que PR — Educación">
-  <meta property="og:description" content="Videos, ensayos y lecturas curadas para aprender, cuestionar y transformar nuestra realidad.">
+  <meta property="og:description" content="Noticias, videos, ensayos y programas sobre educación — leyes, estudiantes sobresalientes, sistemas educativos del mundo y el foro de discusión de la sección.">
   <meta property="og:image" content="https://sabiasquepr.com/images/portada-social.webp">
   <meta property="og:locale" content="es_PR">
   <meta property="og:site_name" content="Sabías que PR">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Sabías que PR — Educación">
-  <meta name="twitter:description" content="Videos, ensayos y lecturas curadas para aprender, cuestionar y transformar nuestra realidad.">
+  <meta name="twitter:description" content="Noticias, videos, ensayos y programas sobre educación — leyes, estudiantes sobresalientes, sistemas educativos del mundo y el foro de discusión de la sección.">
   <meta name="twitter:image" content="https://sabiasquepr.com/images/portada-social.webp">
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://www.googletagmanager.com">
@@ -31,8 +31,8 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon-96.png" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=a96f8d8b">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Educación","description":"Videos, ensayos y lecturas curadas para aprender, cuestionar y transformar nuestra realidad.","url":"https://sabiasquepr.com/educacion.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
+  <link rel="stylesheet" href="styles.css?v=e3512064">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Educación","description":"Noticias, videos, ensayos y programas sobre educación — leyes, estudiantes sobresalientes, sistemas educativos del mundo y el foro de discusión de la sección.","url":"https://sabiasquepr.com/educacion.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
 </head>
@@ -44,6 +44,7 @@
         <a class="brand" href="index.html" aria-label="Sabías que PR — Inicio">
           <img class="brand-mark" src="images/Coqui-sm.webp" alt="" width="32" height="32">
           <span class="brand-name">Sabías que PR</span>
+          <span class="beta-badge" title="El sitio sigue en desarrollo activo">BETA</span>
         </a>
         <nav class="nav" aria-label="Principal">
           <button class="nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Abrir menú">
@@ -85,29 +86,83 @@
       <div class="hero-content">
         
         <h1>Educación</h1>
-        <p>Recursos, lecturas y proyectos para aprender, cuestionar y transformar nuestra realidad.</p>
+        <p>Noticias, leyes, estudiantes sobresalientes y sistemas educativos del mundo — todo lo que ayuda y lo que afecta a la educación.</p>
         <div class="hero-buttons"></div>
       </div>
     </section>
 
     <main class="main main-block" id="main-content" tabindex="-1">
       
-      <div class="foro-filters" id="edu-filters"><button type="button" class="foro-filter-btn active" data-categoria="">Todas</button>
-        <button type="button" class="foro-filter-btn" data-categoria="ciencia">Ciencia</button>
-        <button type="button" class="foro-filter-btn" data-categoria="clima">Clima y Medio Ambiente</button>
-        <button type="button" class="foro-filter-btn" data-categoria="crimen">Crimen</button>
-        <button type="button" class="foro-filter-btn" data-categoria="cultura">Cultura</button>
-        <button type="button" class="foro-filter-btn" data-categoria="deportes">Deportes</button>
-        <button type="button" class="foro-filter-btn" data-categoria="descubrimientos">Descubrimientos</button>
-        <button type="button" class="foro-filter-btn" data-categoria="finanzas">Finanzas</button>
-        <button type="button" class="foro-filter-btn" data-categoria="general">General</button>
-        <button type="button" class="foro-filter-btn" data-categoria="internacionales">Internacionales</button>
-        <button type="button" class="foro-filter-btn" data-categoria="politica">Política</button>
-        <button type="button" class="foro-filter-btn" data-categoria="salud">Salud</button>
-        <button type="button" class="foro-filter-btn" data-categoria="tecnologia">Tecnología</button></div>
+      <div class="card-grid contenidos-grid" id="edu-list" data-seccion="educacion" data-hint="edu-hint" aria-live="polite" aria-busy="true"></div>
       <p class="home-hint" id="edu-hint" aria-live="polite"></p>
-      <div class="card-grid contenidos-grid" id="edu-list" data-seccion="educacion" data-filters="edu-filters" data-hint="edu-hint" aria-live="polite" aria-busy="true"></div>
       <noscript><p class="empty-state">Activa JavaScript para ver este contenido.</p></noscript>
+
+      <section class="section-head" id="edu-mundo">
+        <h2>Educación en el mundo</h2>
+      </section>
+      <p class="edu-rankings-intro">Las 10 naciones con mejor desempeño educativo del mundo, y los 10 mejores estados de Estados Unidos — con la posición real de Puerto Rico donde existe un dato comparable.</p>
+
+      <div class="edu-ranking-box">
+        <table class="edu-ranking-table">
+          <caption>Top 10 mundial — PISA 2022 (OCDE), puntaje promedio en matemáticas, lectura y ciencias</caption>
+          <thead>
+            <tr><th scope="col">Lugar</th><th scope="col">País / economía</th><th scope="col">Puntaje</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>Singapur</td><td>559.7</td></tr>
+            <tr><td>2</td><td>Macao (China)</td><td>535.0</td></tr>
+            <tr><td>3</td><td>Taiwán</td><td>533.0</td></tr>
+            <tr><td>4</td><td>Japón</td><td>533.0</td></tr>
+            <tr><td>5</td><td>Corea del Sur</td><td>523.3</td></tr>
+            <tr><td>6</td><td>Hong Kong (China)</td><td>520.0</td></tr>
+            <tr><td>7</td><td>Estonia</td><td>515.7</td></tr>
+            <tr><td>8</td><td>Canadá</td><td>506.3</td></tr>
+            <tr><td>9</td><td>Irlanda</td><td>504.0</td></tr>
+            <tr><td>10</td><td>Suiza</td><td>498.0</td></tr>
+          </tbody>
+        </table>
+        <div class="edu-pr-callout">
+          <p class="edu-pr-callout-label">Puerto Rico</p>
+          <p>No participó en la ronda PISA 2022. Su última participación fue en 2018 (79 sistemas evaluados): quedó <strong>último en lectura</strong> (401 puntos frente a un promedio OCDE de 487), y muy por debajo del promedio también en matemáticas (353 vs. 489) y ciencias (403 vs. 489). No ha vuelto a participar desde entonces.</p>
+        </div>
+        <p class="edu-ranking-fuente">Fuente: <a href="https://www.oecd.org/en/publications/pisa-2022-results-volume-i_53f23881-en.html" target="_blank" rel="noopener noreferrer">OCDE — Resultados PISA 2022</a>. Datos de Puerto Rico: <a href="https://nces.ed.gov/surveys/pisa/pisa2015/pisa2015highlights_7c_1.asp" target="_blank" rel="noopener noreferrer">National Center for Education Statistics (NCES)</a>.</p>
+      </div>
+
+      <div class="edu-ranking-box">
+        <table class="edu-ranking-table">
+          <caption>Top 10 estados de EE.UU. — U.S. News &amp; World Report (Pre-K–12 + educación superior)</caption>
+          <thead>
+            <tr><th scope="col">Lugar</th><th scope="col">Estado</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>New Jersey</td></tr>
+            <tr><td>2</td><td>Florida</td></tr>
+            <tr><td>3</td><td>Colorado</td></tr>
+            <tr><td>4</td><td>Utah</td></tr>
+            <tr><td>5</td><td>Massachusetts</td></tr>
+            <tr><td>6</td><td>Wyoming</td></tr>
+            <tr><td>7</td><td>Wisconsin</td></tr>
+            <tr><td>8</td><td>South Dakota</td></tr>
+            <tr><td>9</td><td>Washington</td></tr>
+            <tr><td>10</td><td>Connecticut</td></tr>
+          </tbody>
+        </table>
+        <div class="edu-pr-callout">
+          <p class="edu-pr-callout-label">Puerto Rico</p>
+          <p>No tiene una posición oficial en este ranking: la prueba federal NAEP evalúa a Puerto Rico por separado, con una escala distinta, porque sus preguntas estándar no se alinean bien con el currículo de la isla — por eso no aparece junto a los 50 estados. Lo que sí se sabe: sus puntuaciones históricas están muy por debajo del promedio nacional, aunque el NAEP 2024 mostró una mejora en matemáticas de 4to grado.</p>
+        </div>
+        <p class="edu-ranking-fuente">Fuente: <a href="https://worldpopulationreview.com/state-rankings/best-states-for-education" target="_blank" rel="noopener noreferrer">U.S. News &amp; World Report — Best States for Education</a>. Datos de Puerto Rico: <a href="https://nces.ed.gov/nationsreportcard/puertorico/" target="_blank" rel="noopener noreferrer">NAEP — Puerto Rico Studies (NCES)</a>.</p>
+      </div>
+
+      <section class="edu-reglas-banner" aria-labelledby="edu-reglas-h">
+        <p class="edu-reglas-badge">12+</p>
+        <div>
+          <h3 id="edu-reglas-h">Reglas del foro de Educación</h3>
+          <p>Este espacio es para todas las edades a partir de 12 años. No se tolera lenguaje ofensivo, contenido sexual, ni ataques personales — el tono debe ser constructivo, igual que el resto de esta sección. Cualquier publicación o comentario que rompa estas reglas puede reportarse con el botón "Reportar"; el equipo de Sabías que PR lo revisa y actúa.</p>
+        </div>
+      </section>
+      <section class="debate-seccion" id="edu-debate"></section>
+
       <section class="newsletter">
         <h3>Recibe nuevo contenido educativo</h3>
         <p>Déjanos tu correo para avisarte cuando publiquemos nuevas guías, videos y recursos.</p>
@@ -250,13 +305,16 @@
       mcUser:      'YOUR_MC_USER',
       mcList:      'YOUR_MC_LIST',
       mcServer:    'us1',
-      youtubeApiKey: ''
+      youtubeApiKey: '',
+      turnstileSiteKey: '0x4AAAAAAFD1ChRrVsC9PVWd'
     };
   </script>
   <script src="auth.js" type="module"></script>
   <script src="script.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <script src="editorial.js"></script>
   <script src="contenidos.js"></script>
+  <script src="debate.js"></script>
   <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>

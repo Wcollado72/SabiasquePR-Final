@@ -108,4 +108,13 @@ describe('DELETE /api/comentarios/:id', () => {
     const res = await request(app).delete('/api/comentarios/c1').set('x-test-user', ADMIN);
     expect(res.status).toBe(200);
   });
+
+  test('200 si es moderador borrando el comentario de otro', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ autor_id: 'user-1' }] })
+      .mockResolvedValueOnce({});
+    const res = await request(app).delete('/api/comentarios/c1')
+      .set('x-test-user', JSON.stringify({ id: 'mod-1', rol: 'moderador' }));
+    expect(res.status).toBe(200);
+  });
 });

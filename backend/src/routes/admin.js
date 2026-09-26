@@ -1,9 +1,39 @@
 const express = require('express');
-const { requireAuth, requireAdmin } = require('../middleware/auth');
+const { pool } = require('../db');
+const { requireAuth, requireAdmin, requireModerador } = require('../middleware/auth');
 const { extraerArticulo } = require('../services/articleExtractor');
 const { redactarDesdeArticulo } = require('../services/anthropic');
+const { investigarDesdeUrl, investigarDesdeTexto } = require('../services/investigador');
+const { redactarDesdeNotas } = require('../services/redactor');
 
 const router = express.Router();
+
+// Limites configurados en app.js (rate limiting) -- se muestran como dato de
+// configuracion, no de uso en vivo: express-rate-limit usa un MemoryStore
+// interno no expuesto fuera de app.js, asi que no hay forma honesta de leer
+// "uso actual %" sin instrumentar un store custom (fuera de alcance hoy).
+const RATE_LIMIT_CONFIG = { general: 300, escritura: 20, ventanaMin: 15 };
+const COOLDOWN_HORAS_CUENTA_NUEVA = 1;
+
+// GET /api/admin/estado-seguridad -- admin o moderador. Solo devuelve datos
+// que se pueden calcular de verdad hoy (ver comentarios de cada campo) --
+// nunca numeros de ejemplo/inventados.
+router.get('/estado-seguridad', requireAuth, requireModerador, async (req, res) => {
+  try {
+    const [cooldown, edad] = await Promise.all([
+      pool.query(`SELECT COUNT(*)::int AS n FROM perfiles WHERE creado_en > now() - interval '${COOLDOWN_HORAS_CUENTA_NUEVA} hour'`),
+      pool.query('SELECT COUNT(*)::int AS n FROM perfiles WHERE edad_confirmada = true'),
+    ]);
+    res.json({
+      ok: true,
+      cooldownActivos: cooldown.rows[0].n,
+      cooldownHoras: COOLDOWN_HORAS_CUENTA_NUEVA,
+      edadConfirmadasTotal: edad.rows[0].n,
+      turnstileActivo: Boolean(process.env.TURNSTILE_SECRET_KEY),
+      rateLimitConfig: RATE_LIMIT_CONFIG,
+    });
+  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+});
 
 // POST /api/admin/autocompletar-ia -- solo admin. Recibe { url }, descarga
 // y extrae el articulo, y le pide a Claude un resumen/parrafos originales
@@ -27,6 +57,114 @@ router.post('/autocompletar-ia', requireAuth, requireAdmin, async (req, res) => 
   } catch (err) {
     res.status(400).json({ ok: false, error: err.message });
   }
+});
+
+// Registra cada llamada a los agentes de IA de contenido con el costo REAL
+// reportado por la API (nunca un estimado de antemano) -- alimenta el tile
+// de gasto en el dashboard de Agentes.
+async function registrarUsoIa({ agente, fuenteTipo, usarBusquedaWeb, usage, creadoPor }) {
+  try {
+    await pool.query(
+      `INSERT INTO ia_generaciones (agente, fuente_tipo, uso_busqueda_web, busquedas_realizadas, tokens_entrada, tokens_salida, costo_estimado_usd, creado_por)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [
+        agente, fuenteTipo, Boolean(usarBusquedaWeb), usage.busquedasRealizadas || 0,
+        usage.tokensEntrada || 0, usage.tokensSalida || 0, usage.costoEstimadoUsd || 0, creadoPor,
+      ]
+    );
+  } catch (err) {
+    // No tumbar la respuesta al admin por un fallo al loguear el gasto --
+    // solo se pierde visibilidad de esa llamada puntual en el dashboard.
+    console.error('No se pudo registrar el uso de IA:', err.message);
+  }
+}
+
+// POST /api/admin/investigar -- solo admin. Recibe { url } o { texto,
+// tituloSugerido }, mas usarBusquedaWeb. Nunca guarda contenido, solo notas
+// para que el admin revise antes de redactar.
+router.post('/investigar', requireAuth, requireAdmin, async (req, res) => {
+  const { url, texto, tituloSugerido, usarBusquedaWeb } = req.body || {};
+  if (!url && !texto) {
+    return res.status(400).json({ ok: false, error: 'Falta la URL o el texto de la fuente.' });
+  }
+  try {
+    const resultado = url
+      ? await investigarDesdeUrl(url, { usarBusquedaWeb: Boolean(usarBusquedaWeb) })
+      : await investigarDesdeTexto(texto, { tituloSugerido, usarBusquedaWeb: Boolean(usarBusquedaWeb) });
+
+    await registrarUsoIa({
+      agente: 'investigador',
+      fuenteTipo: resultado.fuenteTipo,
+      usarBusquedaWeb: Boolean(usarBusquedaWeb),
+      usage: resultado.usage,
+      creadoPor: req.user.id,
+    });
+
+    res.json({
+      ok: true,
+      notas: resultado.notas,
+      tituloOriginal: resultado.tituloOriginal,
+      fuenteTexto: resultado.fuenteTexto,
+      fuenteUrl: resultado.fuenteUrl,
+      citaAutor: resultado.citaAutor,
+      citaAnio: resultado.citaAnio,
+      citaEstiloSugerido: resultado.citaEstiloSugerido,
+    });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: err.message });
+  }
+});
+
+// POST /api/admin/redactar -- solo admin. Recibe las notas (ya revisadas
+// por el admin) mas la clasificacion que el admin ya eligio en el
+// formulario -- el Redactor nunca adivina seccion/subseccion/categoria.
+router.post('/redactar', requireAuth, requireAdmin, async (req, res) => {
+  const { notas, seccion, subseccion, categoria, tipoFormato, fuenteTexto, fuenteUrl } = req.body || {};
+  if (!notas || typeof notas !== 'string') {
+    return res.status(400).json({ ok: false, error: 'Faltan las notas de investigación.' });
+  }
+  try {
+    const redactado = await redactarDesdeNotas({ notas, seccion, subseccion, categoria, tipoFormato, fuenteTexto, fuenteUrl });
+
+    await registrarUsoIa({
+      agente: 'redactor',
+      fuenteTipo: 'notas',
+      usarBusquedaWeb: false,
+      usage: redactado.usage,
+      creadoPor: req.user.id,
+    });
+
+    res.json({
+      ok: true,
+      titulo: redactado.titulo,
+      subtituloResumen: redactado.subtituloResumen,
+      parrafos: redactado.parrafos,
+      duracionMinEstimado: redactado.duracionMinEstimado,
+    });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: err.message });
+  }
+});
+
+// GET /api/admin/uso-ia -- admin o moderador (es solo lectura de gasto, no
+// gestion de contenido). Agrega ia_generaciones para el tile del dashboard.
+router.get('/uso-ia', requireAuth, requireModerador, async (req, res) => {
+  try {
+    const [totales, mes, ultimas] = await Promise.all([
+      pool.query(`SELECT agente, COUNT(*)::int AS llamadas, COALESCE(SUM(costo_estimado_usd), 0)::float AS costo_total
+                  FROM ia_generaciones GROUP BY agente`),
+      pool.query(`SELECT COALESCE(SUM(costo_estimado_usd), 0)::float AS costo_mes
+                  FROM ia_generaciones WHERE creado_en >= date_trunc('month', now())`),
+      pool.query(`SELECT agente, fuente_tipo, uso_busqueda_web, costo_estimado_usd, creado_en
+                  FROM ia_generaciones ORDER BY creado_en DESC LIMIT 10`),
+    ]);
+    res.json({
+      ok: true,
+      porAgente: totales.rows,
+      costoMesActual: mes.rows[0].costo_mes,
+      ultimas: ultimas.rows,
+    });
+  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
 module.exports = router;

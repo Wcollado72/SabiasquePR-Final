@@ -46,6 +46,10 @@ describe('validatePost', () => {
     }
   });
 
+  test('acepta la subseccion educacion', () => {
+    expect(validatePost({ ...BASE, subseccion: 'educacion' })).toEqual([]);
+  });
+
   test('acumula varios errores a la vez', () => {
     const errors = validatePost({ titulo: 'a', cuerpo: 'x' });
     expect(errors.length).toBeGreaterThanOrEqual(2);

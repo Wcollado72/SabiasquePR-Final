@@ -95,6 +95,14 @@ ALTER TABLE perfiles DROP CONSTRAINT IF EXISTS perfiles_rol_check;
 ALTER TABLE perfiles ADD CONSTRAINT perfiles_rol_check
   CHECK (rol IN ('usuario', 'admin', 'premium'));
 
+-- Rol moderador: puede revisar/actuar sobre reportes y borrar contenido
+-- reportado del debate (foro_posts/foro_comentarios), pero NO tiene acceso
+-- a la gestion de contenido editorial (CRUD de noticias/contenidos/
+-- productos) ni al autocompletar con IA -- eso sigue siendo admin-only.
+ALTER TABLE perfiles DROP CONSTRAINT IF EXISTS perfiles_rol_check;
+ALTER TABLE perfiles ADD CONSTRAINT perfiles_rol_check
+  CHECK (rol IN ('usuario', 'admin', 'premium', 'moderador'));
+
 CREATE UNIQUE INDEX IF NOT EXISTS idx_perfiles_stripe_customer_id
   ON perfiles(stripe_customer_id) WHERE stripe_customer_id IS NOT NULL;
 
@@ -203,7 +211,10 @@ ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_categoria_check;
 ALTER TABLE contenidos ADD CONSTRAINT contenidos_categoria_check
   CHECK (categoria IN (
     'general', 'internacionales', 'crimen', 'salud', 'deportes', 'finanzas',
-    'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura', 'ciencia'
+    'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura', 'ciencia',
+    -- Especificas de Educacion (seccion='educacion') -- no se agregan al
+    -- filtro de Noticias, solo quedan disponibles como valor/etiqueta.
+    'leyes-educativas', 'estudiantes-sobresalientes', 'sistemas-mundiales', 'programas-educativos'
   ));
 
 -- ============================================================
@@ -365,7 +376,7 @@ ALTER TABLE contenidos ADD CONSTRAINT contenidos_enfoque_check
 ALTER TABLE foro_posts ADD COLUMN IF NOT EXISTS subseccion text NULL;
 ALTER TABLE foro_posts DROP CONSTRAINT IF EXISTS foro_posts_subseccion_check;
 ALTER TABLE foro_posts ADD CONSTRAINT foro_posts_subseccion_check
-  CHECK (subseccion IS NULL OR subseccion IN ('corrupcion-humana', 'nuevos-humanos'));
+  CHECK (subseccion IS NULL OR subseccion IN ('corrupcion-humana', 'nuevos-humanos', 'educacion'));
 
 ALTER TABLE foro_posts ADD COLUMN IF NOT EXISTS enfoque text NULL;
 ALTER TABLE foro_posts DROP CONSTRAINT IF EXISTS foro_posts_enfoque_check;
@@ -407,3 +418,21 @@ CREATE TABLE IF NOT EXISTS reportes (
 );
 CREATE INDEX IF NOT EXISTS idx_reportes_estado ON reportes(estado, creado_en DESC);
 ALTER TABLE reportes ENABLE ROW LEVEL SECURITY;
+
+-- Bitacora de uso/costo real de los agentes de IA de contenido (Investigador
+-- y Redactor). El costo se calcula SIEMPRE a partir del `usage` real que
+-- devuelve la API de Claude en cada llamada, nunca estimado de antemano --
+-- este es el dato que alimenta el dashboard de Agentes con gasto real.
+CREATE TABLE IF NOT EXISTS ia_generaciones (
+  id                    uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  agente                text NOT NULL CHECK (agente IN ('investigador', 'redactor')),
+  fuente_tipo           text NOT NULL CHECK (fuente_tipo IN ('url', 'texto', 'notas')),
+  uso_busqueda_web      boolean NOT NULL DEFAULT false,
+  busquedas_realizadas  int NOT NULL DEFAULT 0,
+  tokens_entrada        int NOT NULL DEFAULT 0,
+  tokens_salida         int NOT NULL DEFAULT 0,
+  costo_estimado_usd    numeric(10,4) NOT NULL DEFAULT 0,
+  creado_por            uuid NOT NULL REFERENCES perfiles(id) ON DELETE CASCADE,
+  creado_en             timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_ia_generaciones_creado_en ON ia_generaciones(creado_en DESC);

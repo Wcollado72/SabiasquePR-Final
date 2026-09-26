@@ -1,6 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
-const { requireAuth, requireAdmin } = require('../middleware/auth');
+const { requireAuth, requireModerador } = require('../middleware/auth');
 const { validateReporte } = require('../validators/reporte');
 
 const router = express.Router();
@@ -28,8 +28,8 @@ router.post('/', requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
-// GET /api/reportes?estado=pendiente -- solo admin
-router.get('/', requireAuth, requireAdmin, async (req, res) => {
+// GET /api/reportes?estado=pendiente -- admin o moderador
+router.get('/', requireAuth, requireModerador, async (req, res) => {
   try {
     const estado = req.query.estado;
     const params = [];
@@ -46,8 +46,8 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
-// PATCH /api/reportes/:id -- solo admin, cambia el estado
-router.patch('/:id', requireAuth, requireAdmin, async (req, res) => {
+// PATCH /api/reportes/:id -- admin o moderador, cambia el estado
+router.patch('/:id', requireAuth, requireModerador, async (req, res) => {
   const estado = req.body.estado;
   if (!['pendiente', 'revisado', 'descartado'].includes(estado)) {
     return res.status(400).json({ ok: false, error: 'Estado no valido.' });

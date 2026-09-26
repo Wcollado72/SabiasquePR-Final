@@ -19,6 +19,10 @@
     clima: 'Clima y Medio Ambiente',
     cultura: 'Cultura',
     ciencia: 'Ciencia',
+    'leyes-educativas': 'Leyes educativas',
+    'estudiantes-sobresalientes': 'Estudiantes sobresalientes',
+    'sistemas-mundiales': 'Sistemas educativos mundiales',
+    'programas-educativos': 'Programas educativos destacados',
   };
 
   // Ilustración genérica por categoría (fondo/portada de respaldo cuando una

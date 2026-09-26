@@ -145,6 +145,17 @@ hr{ border:0; border-top:1px solid var(--line); }
   letter-spacing:-0.015em;
   white-space:nowrap;
 }
+.beta-badge{
+  font-family:var(--font-ui);
+  font-size:.6rem;
+  font-weight:700;
+  letter-spacing:.06em;
+  color:var(--ink-mute);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:2px 7px;
+  white-space:nowrap;
+}
 .nav{ position:static; flex:1; min-width:0; }
 .nav ul{
   list-style:none;
@@ -443,6 +454,21 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 }
 .foro-filter-btn:hover{ border-color:var(--ink); color:var(--ink); }
 .foro-filter-btn.active{ background:var(--ink); border-color:var(--ink); color:var(--bg); }
+
+/* Fila de sub-filtro (ej. regiones dentro de Nuevos Humanos): se ve
+   anidada bajo la fila de categorias, no como otra fila de tabs igual. */
+.foro-filters-sub{
+  margin:-2px 0 8px 6px;
+  padding-left:14px;
+  border-left:2px solid var(--line);
+}
+.foro-filters-sub .foro-filter-btn{
+  padding:4px 12px;
+  font-size:.72rem;
+  color:var(--ink-mute);
+}
+.foro-filters-sub .foro-filter-btn:hover{ border-color:var(--ink); color:var(--ink); }
+.foro-filters-sub .foro-filter-btn.active{ background:var(--ink-soft); border-color:var(--ink-soft); color:var(--bg); }
 
 /* ===== 6. TARJETAS Y PORTADA ===== */
 .eyebrow,
@@ -983,6 +1009,19 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .foro-word-counter{ font-size:.8rem; color:var(--ink-mute); margin:2px 0 8px; }
 .foro-word-counter.over-limit{ color:var(--err); font-weight:600; }
 
+/* Honeypot: campo trampa para bots, invisible y no alcanzable para una
+   persona real (ni por mouse ni por teclado). No usar display:none --
+   algunos bots lo detectan y lo saltan; esto lo saca de pantalla en vez. */
+.hp-field{
+  position:absolute;
+  left:-9999px;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+}
+
+.cf-turnstile-box{ margin:4px 0; }
+
 /* Debate semanal (Corrupcion Humana): el titulo abre/cierra el post en vez
    de navegar a otra pagina, asi que necesita su propio afordance visual. */
 .debate-seccion{ margin-top:40px; padding-top:24px; border-top:1px solid var(--line-strong); }
@@ -998,6 +1037,93 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .lh-ensayo h4{ font-size:1.25rem; margin:0 0 14px; }
 .lh-ensayo h5{ font-size:1rem; margin:22px 0 8px; }
 .lh-ensayo p{ margin:0 0 14px; }
+
+/* Educacion: tablas de ranking mundial + banner de reglas 12+. */
+.edu-rankings-intro{ color:var(--ink-soft); max-width:var(--measure); margin:0 0 24px; }
+.edu-ranking-box{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:24px;
+  margin:0 0 28px;
+}
+.edu-ranking-table{ width:100%; border-collapse:collapse; }
+.edu-ranking-table caption{
+  text-align:left;
+  font-family:var(--font-display);
+  font-size:1.05rem;
+  font-weight:600;
+  margin-bottom:16px;
+  color:var(--ink);
+}
+.edu-ranking-table th{
+  text-align:left;
+  font-family:var(--font-ui);
+  font-size:.72rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--ink-mute);
+  padding:8px 10px;
+  border-bottom:1px solid var(--line-strong);
+}
+.edu-ranking-table td{ padding:10px; border-bottom:1px solid var(--line); }
+.edu-ranking-table td:first-child{
+  font-family:var(--font-display);
+  font-weight:600;
+  color:var(--accent);
+  width:60px;
+}
+.edu-ranking-table tbody tr:last-child td{ border-bottom:none; }
+.edu-ranking-table tbody tr:hover{ background:color-mix(in srgb, var(--ink) 4%, transparent); }
+.edu-pr-callout{
+  margin-top:18px;
+  padding:14px 18px;
+  border-left:3px solid var(--brand);
+  background:color-mix(in srgb, var(--brand) 10%, transparent);
+  border-radius:0 var(--radius) var(--radius) 0;
+}
+.edu-pr-callout-label{
+  margin:0 0 4px;
+  font-family:var(--font-ui);
+  font-size:.72rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--brand);
+}
+.edu-pr-callout p{ margin:0; color:var(--ink-soft); line-height:1.6; }
+.edu-pr-callout p + p{ margin-top:8px; }
+.edu-ranking-fuente{ margin:14px 0 0; font-size:.76rem; color:var(--ink-mute); }
+.edu-ranking-fuente a{ color:var(--ink-mute); text-decoration:underline; }
+
+.edu-reglas-banner{
+  display:flex;
+  gap:18px;
+  align-items:flex-start;
+  background:color-mix(in srgb, var(--premium) 14%, transparent);
+  border:1px solid color-mix(in srgb, var(--premium) 40%, var(--line));
+  border-radius:var(--radius);
+  padding:20px 22px;
+  margin:0 0 24px;
+}
+.edu-reglas-badge{
+  flex-shrink:0;
+  margin:0;
+  width:44px;
+  height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:var(--premium);
+  color:var(--premium-ink);
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:.95rem;
+}
+.edu-reglas-banner h3{ margin:0 0 6px; font-size:1.05rem; }
+.edu-reglas-banner p{ margin:0; color:var(--ink-soft); line-height:1.6; }
 
 /* ===== 10. TIENDA ===== */
 .product-card{
@@ -1080,6 +1206,18 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .admin-checkbox{ display:flex; align-items:center; gap:8px; font-weight:600; }
 .admin-checkbox input{ width:auto; }
 .admin-hint{ margin:-2px 0 4px; font-size:.82rem; color:var(--ink-mute); }
+.ia-asistente-box{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  border:1px dashed var(--line);
+  border-radius:var(--radius);
+  padding:14px 16px;
+  margin:4px 0 8px;
+  background:color-mix(in srgb, var(--brand) 5%, transparent);
+}
+.ia-asistente-box h4{ margin:0; font-size:.9rem; }
+.ia-fuente-toggle{ display:flex; gap:8px; margin:2px 0; }
 .admin-image-actions{ display:flex; flex-wrap:wrap; gap:8px; }
 .admin-image-preview{
   display:block;
@@ -1183,6 +1321,183 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   cursor:pointer;
 }
 .suggestion-item button:hover{ background:var(--ink); color:var(--bg); }
+
+/* Tab "Agentes" del admin: isla visual oscura/mono-espaciada ("Grid Mision"),
+   contenida solo dentro de #admin-panel-agentes -- el resto de admin.html
+   sigue con el tema claro normal del sitio. */
+.admin-agentes{
+  background:#05080a;
+  color:#d8e0e0;
+  font-family:ui-monospace, 'SF Mono', 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+  border-radius:var(--radius);
+  padding:22px;
+  margin:0 -4px;
+}
+.ag-header{ margin-bottom:20px; }
+.admin-agentes h2{ margin:0 0 4px; font-size:1.05rem; color:#ffb238; }
+.ag-sub{ margin:0; font-size:.76rem; color:#5f6e6e; }
+.ag-section{ margin-bottom:24px; }
+.ag-section-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:12px; }
+.admin-agentes h3{
+  margin:0;
+  font-size:.72rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#8b95a0;
+}
+.ag-status-ok{ font-size:.7rem; color:#4fd671; }
+.ag-status-pendiente{ font-size:.7rem; color:#5f6e6e; }
+.ag-grid{ display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:10px; }
+.ag-grid-2{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+.ag-tile{ background:#0d1214; border:1px solid #1a2226; border-radius:4px; padding:12px; }
+.ag-tile-label{ font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; color:#5f6e6e; margin:0 0 8px; }
+.ag-tile-valor{ font-size:1.3rem; font-weight:700; margin:0; }
+.ag-tile-valor.ok{ color:#4fd671; }
+.ag-tile-valor.warn{ color:#ffb238; }
+.ag-tile-valor.off{ color:#ff5c5c; }
+.ag-tile-desc{ margin:4px 0 0; font-size:.68rem; color:#5f6e6e; }
+.ag-tile-dashed{ display:flex; align-items:center; justify-content:space-between; gap:14px; border-style:dashed; padding:16px; }
+.ag-tile-row{ display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px; }
+.ag-tile-title{ margin:0 0 4px; font-size:.8rem; font-weight:700; color:#d8e0e0; }
+.ag-btn-piloto{
+  padding:7px 14px;
+  border-radius:4px;
+  border:1px solid #ffb238;
+  background:transparent;
+  color:#ffb238;
+  font-size:.68rem;
+  font-weight:700;
+  font-family:inherit;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.ag-btn-piloto:disabled{ opacity:.45; cursor:not-allowed; border-color:#5f6e6e; color:#5f6e6e; }
+.ag-btn-piloto:not(:disabled):hover{ background:#ffb238; color:#05080a; }
+@media (max-width:820px){
+  .ag-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .ag-grid-2{ grid-template-columns:1fr; }
+}
+
+/* Formulario de Contenidos: isla "Synthwave Arcade" contenida a
+   #admin-contenidos-form-box -- el resto de admin.html sigue con el tema
+   normal del sitio. Los ids de cada campo no cambian, solo su agrupacion
+   visual en "niveles" tipo acordeon (ver bindSynthPanels en admin.js). */
+.synth-theme{
+  max-width:1040px;
+  background:linear-gradient(180deg,#1a0b2e 0%,#2b0f4a 55%,#3d1160 100%);
+  border:1px solid #4a2a7a;
+  border-radius:var(--radius);
+  padding:26px 30px;
+  color:#f5e9ff;
+  font-family:'Rajdhani',sans-serif;
+}
+.synth-theme h3{
+  font-family:'Orbitron',sans-serif;
+  font-size:1.1rem;
+  letter-spacing:.06em;
+  color:#fff;
+  text-shadow:0 0 10px #ff2fb0;
+  margin:0 0 18px;
+}
+.synth-theme label{ color:#b39ddb; font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; font-weight:600; }
+.synth-theme input,
+.synth-theme select,
+.synth-theme textarea{
+  background:#1a0b2e;
+  border:2px solid #4a2a7a;
+  color:#f5e9ff;
+  font-family:'Rajdhani',sans-serif;
+  font-weight:600;
+}
+.synth-theme input:focus,
+.synth-theme select:focus,
+.synth-theme textarea:focus{ border-color:#00e5ff; outline:none; box-shadow:0 0 0 3px rgba(0,229,255,.25); }
+.synth-theme .admin-hint{ color:#9d8bc4; }
+.synth-theme .admin-btn-cancel,
+.synth-theme .foro-filter-btn{
+  background:transparent;
+  border:2px solid #4a2a7a;
+  color:#f5e9ff;
+  font-family:'Rajdhani',sans-serif;
+  font-weight:700;
+}
+.synth-theme .foro-filter-btn.active{ background:#00e5ff; border-color:#00e5ff; color:#1a0b2e; }
+.synth-theme .citation-group{ border-color:#4a2a7a; }
+.synth-theme .citation-preview{ color:#9d8bc4; }
+
+.synth-levels{ display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:10px; margin-bottom:18px; }
+.synth-level-card{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:4px;
+  padding:12px;
+  background:#241442;
+  border:2px solid #4a2a7a;
+  border-radius:8px;
+  cursor:pointer;
+  text-align:left;
+}
+.synth-level-card.active{ border-color:#00e5ff; box-shadow:0 0 18px rgba(0,229,255,.3); }
+.synth-level-card.synth-level-ia{ border-style:dashed; }
+.synth-level-card.synth-level-ia.active{ border-color:#ff2fb0; box-shadow:0 0 18px rgba(255,47,176,.35); }
+.synth-level-icon{ font-size:20px; }
+.synth-level-title{ font-family:'Orbitron',sans-serif; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:#f5e9ff; }
+.synth-level-status{ font-size:.66rem; color:#7a6a9a; }
+.synth-level-card.active .synth-level-status{ color:#6ef7ff; }
+
+.synth-panel{
+  background:#241442;
+  border:2px solid #00e5ff;
+  border-radius:8px;
+  padding:20px 24px;
+  margin-bottom:16px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.synth-panel-title{ font-family:'Orbitron',sans-serif; font-size:.85rem; color:#00e5ff; letter-spacing:.04em; margin:0 0 6px; }
+
+.synth-theme .ia-asistente-box{
+  background:rgba(255,47,176,.08);
+  border-color:#ff2fb0;
+}
+
+.synth-publish-bar{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:18px;
+  padding:16px 20px;
+  margin-top:6px;
+  background:#150a26;
+  border:2px solid #ff2fb0;
+  border-radius:8px;
+}
+.synth-publish-field{ display:flex; flex-direction:column; gap:4px; }
+.synth-publish-field label{ margin:0; }
+.synth-publish-field input{ width:130px; }
+.synth-publish-check{ display:flex; align-items:center; gap:6px; font-size:.78rem; margin:0; }
+.synth-publish-actions{ margin-left:auto; display:flex; gap:10px; }
+#admin-contenidos-form-box .synth-btn-guardar{
+  padding:12px 30px;
+  background:linear-gradient(90deg,#ff2fb0,#ff6fd8);
+  border:none;
+  border-radius:999px;
+  color:#1a0b2e;
+  font-family:'Orbitron',sans-serif;
+  font-weight:800;
+  font-size:.8rem;
+  letter-spacing:.06em;
+  box-shadow:0 0 20px rgba(255,47,176,.6);
+  cursor:pointer;
+}
+#admin-contenidos-form-box .synth-btn-guardar:hover{ background:linear-gradient(90deg,#ff6fd8,#ff2fb0); color:#1a0b2e; }
+@media (max-width:820px){
+  .synth-levels{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .synth-publish-actions{ margin-left:0; width:100%; }
+}
 
 /* ===== 12. CARRITO Y MODAL DE LOGIN ===== */
 .cart-drawer{
@@ -1510,6 +1825,7 @@ html[data-theme="dark"] .social-links img{ filter:invert(1) hue-rotate(180deg); 
 }
 @media (max-width:400px){
   .brand-name{ display:none; }
+  .beta-badge{ display:none; }
 }
 
 @media (prefers-reduced-motion:reduce){

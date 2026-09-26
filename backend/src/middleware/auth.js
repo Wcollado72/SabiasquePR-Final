@@ -31,10 +31,10 @@ async function requireAuth(req, res, next) {
       `INSERT INTO perfiles (id, email)
        VALUES ($1, $2)
        ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email
-       RETURNING id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok`,
+       RETURNING id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok, creado_en`,
       [payload.sub, payload.email || null]
     );
-    req.user = rows[0]; // { id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok }
+    req.user = rows[0]; // { id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok, creado_en }
     next();
   } catch (err) {
     res.status(401).json({ ok: false, error: 'Token invalido o expirado.' });
@@ -45,6 +45,16 @@ async function requireAuth(req, res, next) {
 function requireAdmin(req, res, next) {
   if (req.user?.rol !== 'admin') {
     return res.status(403).json({ ok: false, error: 'Requiere rol de administrador.' });
+  }
+  next();
+}
+
+// Moderacion (reportes, borrar contenido reportado del debate): admin y
+// moderador pasan. Gestion de contenido editorial sigue usando requireAdmin
+// a secas -- el moderador no tiene acceso ahi.
+function requireModerador(req, res, next) {
+  if (req.user?.rol !== 'admin' && req.user?.rol !== 'moderador') {
+    return res.status(403).json({ ok: false, error: 'Requiere rol de administrador o moderador.' });
   }
   next();
 }
@@ -61,7 +71,7 @@ async function tryAuth(req, _res, next) {
   try {
     const { payload } = await jwtVerify(token, getJWKS());
     if (!payload.sub) { req.user = null; return next(); }
-    const { rows } = await pool.query('SELECT id, email, rol, edad_confirmada, logica_humana_terminos_ok FROM perfiles WHERE id = $1', [payload.sub]);
+    const { rows } = await pool.query('SELECT id, email, rol, edad_confirmada, logica_humana_terminos_ok, creado_en FROM perfiles WHERE id = $1', [payload.sub]);
     req.user = rows[0] || null;
   } catch {
     req.user = null;
@@ -69,4 +79,4 @@ async function tryAuth(req, _res, next) {
   next();
 }
 
-module.exports = { requireAuth, requireAdmin, tryAuth };
+module.exports = { requireAuth, requireAdmin, requireModerador, tryAuth };

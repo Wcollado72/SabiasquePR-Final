@@ -41,12 +41,13 @@ router.post('/', requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
-// DELETE /api/comentarios/:id -- el dueño o un admin
+// DELETE /api/comentarios/:id -- el dueño, un admin o un moderador
 router.delete('/:id', requireAuth, async (req, res) => {
   try {
     const { rows: existing } = await pool.query('SELECT autor_id FROM comentarios WHERE id = $1', [req.params.id]);
     if (existing.length === 0) return res.status(404).json({ ok: false, error: 'Comentario no encontrado.' });
-    if (existing[0].autor_id !== req.user.id && req.user.rol !== 'admin') {
+    const esModeracion = req.user.rol === 'admin' || req.user.rol === 'moderador';
+    if (existing[0].autor_id !== req.user.id && !esModeracion) {
       return res.status(403).json({ ok: false, error: 'No tienes permiso para borrar este comentario.' });
     }
     await pool.query('DELETE FROM comentarios WHERE id = $1', [req.params.id]);

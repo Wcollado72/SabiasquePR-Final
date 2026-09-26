@@ -3,6 +3,7 @@ const TIPOS_VALIDOS = ['video', 'ensayo', 'noticia', 'lectura_corta', 'audio', '
 const CATEGORIAS_VALIDAS = [
   'general', 'internacionales', 'crimen', 'salud', 'deportes',
   'finanzas', 'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura', 'ciencia',
+  'leyes-educativas', 'estudiantes-sobresalientes', 'sistemas-mundiales', 'programas-educativos',
 ];
 const SUBFORMATOS_VALIDOS = [
   'podcast', 'entrevista', 'galeria', 'opinion', 'reportaje',

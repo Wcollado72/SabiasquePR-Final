@@ -56,10 +56,12 @@
       return;
     }
 
+    let rol;
     try {
       const data = await apiFetch('/api/me');
-      if (data.user.rol !== 'admin') {
-        showGate('⛔ Tu cuenta no tiene permisos de administrador.');
+      rol = data.user.rol;
+      if (!['admin', 'moderador'].includes(rol)) {
+        showGate('⛔ Tu cuenta no tiene permisos de administrador ni de moderador.');
         return;
       }
     } catch (err) {
@@ -70,14 +72,26 @@
     document.getElementById('admin-gate').style.display = 'none';
     document.getElementById('admin-panel').style.display = 'block';
     bindTabs();
-    bindNoticias();
-    bindContenidos();
-    bindProductos();
-    bindUrlNormalizer();
-    loadNoticias();
-    loadContenidos();
-    loadProductos();
+    bindAgentes();
     loadReportes();
+    loadEstadoSeguridad();
+    loadUsoIa();
+
+    if (rol === 'admin') {
+      bindNoticias();
+      bindContenidos();
+      bindProductos();
+      bindUrlNormalizer();
+      loadNoticias();
+      loadContenidos();
+      loadProductos();
+    } else {
+      // Moderador: sin acceso a gestion de contenido editorial (el backend
+      // ya lo rechaza igual, esto solo evita mostrar tabs que no puede usar).
+      document.querySelectorAll('.admin-tabs [data-tab="noticias"], .admin-tabs [data-tab="contenidos"], .admin-tabs [data-tab="productos"]')
+        .forEach((btn) => { btn.style.display = 'none'; });
+      activarTab('reportes');
+    }
   }
 
   // Los campos type="url" exigen un esquema completo (https://...) para que
@@ -115,17 +129,18 @@
   }
 
   // ── PESTAÑAS ─────────────────────────────────────────────
+  function activarTab(tab) {
+    document.querySelectorAll('.admin-tabs .foro-filter-btn').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
+    document.getElementById('admin-panel-noticias').style.display = tab === 'noticias' ? '' : 'none';
+    document.getElementById('admin-panel-contenidos').style.display = tab === 'contenidos' ? '' : 'none';
+    document.getElementById('admin-panel-productos').style.display = tab === 'productos' ? '' : 'none';
+    document.getElementById('admin-panel-reportes').style.display = tab === 'reportes' ? '' : 'none';
+    document.getElementById('admin-panel-agentes').style.display = tab === 'agentes' ? '' : 'none';
+  }
+
   function bindTabs() {
     document.querySelectorAll('.admin-tabs .foro-filter-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.admin-tabs .foro-filter-btn').forEach((b) => b.classList.remove('active'));
-        btn.classList.add('active');
-        const tab = btn.dataset.tab;
-        document.getElementById('admin-panel-noticias').style.display = tab === 'noticias' ? '' : 'none';
-        document.getElementById('admin-panel-contenidos').style.display = tab === 'contenidos' ? '' : 'none';
-        document.getElementById('admin-panel-productos').style.display = tab === 'productos' ? '' : 'none';
-        document.getElementById('admin-panel-reportes').style.display = tab === 'reportes' ? '' : 'none';
-      });
+      btn.addEventListener('click', () => activarTab(btn.dataset.tab));
     });
   }
 
@@ -304,6 +319,116 @@
     document.querySelectorAll('[data-revisar]').forEach((btn) => btn.addEventListener('click', () => {
       revisarTexto(btn.dataset.revisar, btn.dataset.revisar + '-suggestions');
     }));
+
+    bindInvestigadorRedactor();
+    bindSynthPanels();
+  }
+
+  // ── FORMULARIO DE CONTENIDOS: NIVELES SYNTHWAVE ──────────
+  // Acordeon puramente visual -- reagrupa los mismos campos/ids de siempre
+  // en 5 "niveles"; un panel abierto a la vez. No cambia validacion ni el
+  // envio del formulario (submitContenido sigue leyendo los mismos ids).
+  function activarSynthPanel(nombre) {
+    document.querySelectorAll('#synth-levels .synth-level-card').forEach((card) => {
+      card.classList.toggle('active', card.dataset.panel === nombre);
+    });
+    document.querySelectorAll('.synth-panel').forEach((panel) => {
+      panel.hidden = panel.dataset.panel !== nombre;
+    });
+  }
+
+  function bindSynthPanels() {
+    document.querySelectorAll('#synth-levels .synth-level-card').forEach((card) => {
+      card.addEventListener('click', () => activarSynthPanel(card.dataset.panel));
+    });
+  }
+
+  // ── ASISTENTE DE REDACCIÓN: INVESTIGADOR + REDACTOR ──────
+  // Mismo patrón de autofill que autocompletarNoticiaConIA, en dos pasos
+  // con revisión humana en medio. Nunca guarda ni publica nada -- solo
+  // llena los campos del formulario de Contenidos que el admin ya tiene
+  // abierto (la clasificación -- sección/sub-sección/enfoque/categoría --
+  // la elige el admin en los <select> de arriba, la IA no la adivina).
+  function bindInvestigadorRedactor() {
+    document.querySelectorAll('#ia-fuente-toggle .foro-filter-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#ia-fuente-toggle .foro-filter-btn').forEach((b) => b.classList.toggle('active', b === btn));
+        const esUrl = btn.dataset.fuente === 'url';
+        document.getElementById('ia-fuente-url-box').style.display = esUrl ? '' : 'none';
+        document.getElementById('ia-fuente-texto-box').style.display = esUrl ? 'none' : '';
+      });
+    });
+
+    document.getElementById('ia-investigar-btn').addEventListener('click', investigarFuente);
+    document.getElementById('ia-redactar-btn').addEventListener('click', redactarConIA);
+  }
+
+  async function investigarFuente() {
+    const statusEl = document.getElementById('ia-investigar-status');
+    const esUrl = document.querySelector('#ia-fuente-toggle .foro-filter-btn.active').dataset.fuente === 'url';
+    const usarBusquedaWeb = document.getElementById('ia-usar-busqueda').checked;
+    const body = { usarBusquedaWeb };
+    if (esUrl) {
+      const url = document.getElementById('ia-url').value.trim();
+      if (!url) { statusEl.textContent = 'Pega primero la URL de la fuente.'; return; }
+      body.url = url;
+    } else {
+      const texto = document.getElementById('ia-texto').value.trim();
+      if (!texto) { statusEl.textContent = 'Pega primero el texto o la transcripción.'; return; }
+      body.texto = texto;
+      body.tituloSugerido = document.getElementById('ia-titulo-sugerido').value.trim();
+    }
+    statusEl.textContent = 'Investigando' + (usarBusquedaWeb ? ' (con búsqueda web, puede tardar más)...' : '...');
+    try {
+      const data = await apiFetch('/api/admin/investigar', { method: 'POST', body: JSON.stringify(body) });
+      document.getElementById('ia-notas').value = data.notas || '';
+      document.getElementById('ia-notas-box').style.display = '';
+      if (data.fuenteUrl) document.getElementById('ac-fuente-url').value = data.fuenteUrl;
+      if (data.fuenteTexto) document.getElementById('ac-fuente-texto').value = data.fuenteTexto;
+      // Datos de citacion: el Investigador solo los manda si tuvo confianza
+      // razonable (nunca inventa autor/año/estilo) -- fecha de acceso queda
+      // siempre para que el admin la ponga a mano.
+      if (data.tituloOriginal) document.getElementById('ac-cita-titulo-original').value = data.tituloOriginal;
+      if (data.citaAutor) document.getElementById('ac-cita-autor').value = data.citaAutor;
+      if (data.citaAnio) document.getElementById('ac-cita-anio').value = data.citaAnio;
+      if (data.citaEstiloSugerido) document.getElementById('ac-cita-estilo').value = data.citaEstiloSugerido;
+      if (data.citaAutor || data.citaAnio || data.citaEstiloSugerido || data.fuenteUrl) {
+        document.getElementById('ac-cita-sin-fuente').checked = false;
+        toggleCitationFields();
+        updateCitationPreview();
+      }
+      statusEl.textContent = 'Listo — revisa/edita las notas y la citación, luego dale a "Redactar con IA".';
+    } catch (err) {
+      statusEl.textContent = 'No se pudo investigar: ' + err.message;
+    }
+  }
+
+  async function redactarConIA() {
+    const statusEl = document.getElementById('ia-redactar-status');
+    const notas = document.getElementById('ia-notas').value.trim();
+    if (!notas) { statusEl.textContent = 'No hay notas para redactar.'; return; }
+    statusEl.textContent = 'Redactando...';
+    try {
+      const data = await apiFetch('/api/admin/redactar', {
+        method: 'POST',
+        body: JSON.stringify({
+          notas,
+          seccion: document.getElementById('ac-seccion').value,
+          subseccion: document.getElementById('ac-subseccion').value || null,
+          categoria: document.getElementById('ac-categoria').value,
+          tipoFormato: document.getElementById('ac-tipo-formato').value,
+          fuenteTexto: document.getElementById('ac-fuente-texto').value,
+          fuenteUrl: document.getElementById('ac-fuente-url').value,
+        }),
+      });
+      document.getElementById('ac-titulo').value = data.titulo || '';
+      document.getElementById('ac-subtitulo').value = data.subtituloResumen || '';
+      document.getElementById('ac-cuerpo').value = (data.parrafos || []).join('\n\n');
+      if (data.duracionMinEstimado) document.getElementById('ac-duracion').value = data.duracionMinEstimado;
+      statusEl.textContent = 'Listo — revisa el título, el resumen y el cuerpo antes de guardar.';
+    } catch (err) {
+      statusEl.textContent = 'No se pudo redactar: ' + err.message;
+    }
   }
 
   // Revisión ortográfica/gramatical con LanguageTool (API pública gratuita,
@@ -614,6 +739,7 @@
     updateCitationPreview();
     updateImagePreview('ac-url-portada', 'ac-url-portada-preview');
     setStatus(document.getElementById('ac-status'), '', '');
+    activarSynthPanel('clasificacion');
     document.getElementById('admin-contenidos-form-box').style.display = 'block';
     document.getElementById('admin-contenidos-form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -801,6 +927,11 @@
 
   function renderReportesList() {
     const el = document.getElementById('admin-reportes-list');
+    const resumen = document.getElementById('ag-reportes-resumen');
+    if (resumen) {
+      const pendientes = reportesCache.filter((r) => r.estado === 'pendiente').length;
+      resumen.textContent = pendientes === 0 ? 'Sin pendientes' : `${pendientes} pendiente${pendientes === 1 ? '' : 's'}`;
+    }
     el.innerHTML = reportesCache.length ? reportesCache.map((r) => `
       <div class="admin-item">
         <div class="admin-item-info">
@@ -844,6 +975,65 @@
     } catch (err) {
       alert('' + err.message);
     }
+  }
+
+  // ── AGENTES & MODERACIÓN ─────────────────────────────────
+  function bindAgentes() {
+    document.getElementById('ag-ir-reportes').addEventListener('click', () => activarTab('reportes'));
+    const irAContenidos = () => {
+      activarTab('contenidos');
+      document.getElementById('admin-contenidos-new').click();
+    };
+    document.getElementById('ag-ir-contenidos-investigador').addEventListener('click', irAContenidos);
+    document.getElementById('ag-ir-contenidos-redactor').addEventListener('click', irAContenidos);
+  }
+
+  async function loadUsoIa() {
+    try {
+      const data = await apiFetch('/api/admin/uso-ia');
+      const porAgente = {};
+      (data.porAgente || []).forEach((r) => { porAgente[r.agente] = r; });
+      const linea = (agente) => {
+        const r = porAgente[agente];
+        if (!r || !r.llamadas) return 'Sin usos todavía';
+        return `${r.llamadas} uso${r.llamadas === 1 ? '' : 's'} · $${r.costo_total.toFixed(3)} acumulado`;
+      };
+      document.getElementById('ag-ia-investigador-uso').textContent = linea('investigador');
+      document.getElementById('ag-ia-redactor-uso').textContent = linea('redactor');
+      document.getElementById('ag-ia-costo-mes').textContent = `$${data.costoMesActual.toFixed(3)} este mes`;
+    } catch (err) {
+      document.getElementById('ag-ia-costo-mes').textContent = 'Error al cargar gasto';
+    }
+  }
+
+  async function loadEstadoSeguridad() {
+    const grid = document.getElementById('ag-seguridad-grid');
+    const resumen = document.getElementById('ag-estado-resumen');
+    try {
+      const data = await apiFetch('/api/admin/estado-seguridad');
+      renderEstadoSeguridad(data);
+      resumen.textContent = 'Actualizado';
+    } catch (err) {
+      grid.innerHTML = `<p class="admin-hint">No se pudo cargar el estado: ${escapeHtml(err.message)}</p>`;
+      resumen.textContent = 'Error';
+    }
+  }
+
+  function renderEstadoSeguridad(d) {
+    const grid = document.getElementById('ag-seguridad-grid');
+    const tile = (label, valor, claseValor, desc) => `
+      <div class="ag-tile">
+        <p class="ag-tile-label">${label}</p>
+        <p class="ag-tile-valor ${claseValor}">${valor}</p>
+        <p class="ag-tile-desc">${desc}</p>
+      </div>`;
+    grid.innerHTML = [
+      tile('Turnstile', d.turnstileActivo ? 'Activo' : 'Inactivo', d.turnstileActivo ? 'ok' : 'off', 'CAPTCHA invisible en el debate'),
+      tile('Honeypot', 'Activo', 'ok', 'Campo oculto en cada formulario'),
+      tile('Rate limit', 'Activo', 'ok', `${d.rateLimitConfig.general}/${d.rateLimitConfig.escritura} cada ${d.rateLimitConfig.ventanaMin}min`),
+      tile('Cooldown', d.cooldownActivos, d.cooldownActivos > 0 ? 'warn' : 'ok', `cuentas &lt; ${d.cooldownHoras}h esperando`),
+      tile('Edad 18+', d.edadConfirmadasTotal, 'ok', 'confirmaciones totales'),
+    ].join('');
   }
 
   // ── UTILIDADES ───────────────────────────────────────────

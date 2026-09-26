@@ -13,6 +13,7 @@
 (function () {
   const cfg = window.SITE_CONFIG || {};
   const API_URL = cfg.apiUrl || 'http://localhost:3000';
+  const TURNSTILE_SITE_KEY = cfg.turnstileSiteKey || '';
   const isSupabaseConfigured = cfg.supabaseUrl && !cfg.supabaseUrl.includes('YOUR_SUPABASE');
   let supabase = null;
   let currentUser = null;
@@ -83,6 +84,30 @@
     if (!el) return;
     el.textContent = msg;
     el.className = 'form-status ' + type;
+  }
+
+  // Widgets de Cloudflare Turnstile por id de contenedor -- se guarda el
+  // widgetId que devuelve turnstile.render() para poder leer el token y
+  // reiniciarlo despues de cada envio (un token solo sirve una vez).
+  const turnstileWidgets = {};
+  function renderTurnstile(containerId) {
+    if (!TURNSTILE_SITE_KEY) return;
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const intentar = () => {
+      if (!window.turnstile) { setTimeout(intentar, 200); return; }
+      turnstileWidgets[containerId] = window.turnstile.render('#' + containerId, { sitekey: TURNSTILE_SITE_KEY });
+    };
+    intentar();
+  }
+  function turnstileToken(containerId) {
+    if (!TURNSTILE_SITE_KEY || !window.turnstile) return '';
+    const widgetId = turnstileWidgets[containerId];
+    return widgetId !== undefined ? (window.turnstile.getResponse(widgetId) || '') : '';
+  }
+  function turnstileReset(containerId) {
+    const widgetId = turnstileWidgets[containerId];
+    if (window.turnstile && widgetId !== undefined) window.turnstile.reset(widgetId);
   }
 
   function formatDate(iso) {
@@ -180,6 +205,10 @@
       <section class="box box-blog contact-box">
         <h3>Nueva publicación</h3>
         <form id="debate-post-form">
+          <div class="hp-field" aria-hidden="true">
+            <label for="debate-sitio-web">Sitio web</label>
+            <input type="text" id="debate-sitio-web" name="sitioWeb" tabindex="-1" autocomplete="off">
+          </div>
           <label for="debate-titulo">Título</label>
           <input type="text" id="debate-titulo" required maxlength="140" placeholder="Ej.: tema de esta semana">
           <label for="debate-enfoque">Enfoque</label>
@@ -203,11 +232,13 @@
           <label class="admin-checkbox"><input type="checkbox" id="debate-destacado"> Fijar como tema oficial de la semana</label>
           <label for="debate-tema-contenido">ID del contenido relacionado (opcional)</label>
           <input type="text" id="debate-tema-contenido" placeholder="slug del contenido en Revolución Humana">` : ''}
+          ${TURNSTILE_SITE_KEY ? '<div id="debate-turnstile" class="cf-turnstile-box"></div>' : ''}
           <button type="submit">Publicar</button>
           <p id="debate-form-status" class="form-status" aria-live="polite"></p>
         </form>
       </section>`;
 
+    renderTurnstile('debate-turnstile');
     const cuerpoTa = document.getElementById('debate-cuerpo');
     const counter = document.getElementById('debate-cuerpo-counter');
     cuerpoTa.addEventListener('input', () => {
@@ -222,7 +253,8 @@
       const titulo = document.getElementById('debate-titulo').value.trim();
       const cuerpo = cuerpoTa.value.trim();
       const enfoque = document.getElementById('debate-enfoque').value || undefined;
-      const body = { titulo, cuerpo, subseccion, enfoque };
+      const sitioWeb = document.getElementById('debate-sitio-web').value;
+      const body = { titulo, cuerpo, subseccion, enfoque, sitioWeb, turnstileToken: turnstileToken('debate-turnstile') };
       if (esPremium) {
         const enlaceMedia = document.getElementById('debate-enlace-media').value.trim();
         const enlaceMediaTipo = document.getElementById('debate-enlace-media-tipo').value;
@@ -233,13 +265,21 @@
         const temaContenidoId = document.getElementById('debate-tema-contenido').value.trim();
         if (temaContenidoId) body.temaContenidoId = temaContenidoId;
       }
+      if (TURNSTILE_SITE_KEY && !body.turnstileToken) {
+        setStatus(statusEl, 'error', 'Completa la verificación antes de publicar.');
+        return;
+      }
       setStatus(statusEl, 'info', 'Publicando...');
       try {
         await apiFetch('/api/foro/posts', { method: 'POST', body: JSON.stringify(body) });
         document.getElementById('debate-post-form').reset();
+        turnstileReset('debate-turnstile');
         setStatus(statusEl, 'ok', '¡Publicado!');
         await loadPosts(root, subseccion);
-      } catch (err) { setStatus(statusEl, 'error', '' + err.message); }
+      } catch (err) {
+        turnstileReset('debate-turnstile');
+        setStatus(statusEl, 'error', '' + err.message);
+      }
     });
   }
 
@@ -306,7 +346,12 @@
       </div>
       ${currentUser ? `
       <form class="debate-comment-form" data-post-id="${post.id}">
+        <div class="hp-field" aria-hidden="true">
+          <label for="debate-comment-sitio-web-${post.id}">Sitio web</label>
+          <input type="text" id="debate-comment-sitio-web-${post.id}" name="sitioWeb" tabindex="-1" autocomplete="off">
+        </div>
         <textarea rows="2" required minlength="2" placeholder="Comentar..."></textarea>
+        ${TURNSTILE_SITE_KEY ? `<div id="debate-turnstile-c-${post.id}" class="cf-turnstile-box"></div>` : ''}
         <button type="submit">Comentar</button>
         <p class="form-status" aria-live="polite"></p>
       </form>` : '<p class="foro-login-hint"><a href="#" class="login-modal-trigger">Inicia sesión</a> para comentar.</p>'}
@@ -322,17 +367,29 @@
         </div>`).join('')
         : '<p class="foro-empty">Sé el primero en comentar.</p>'}</div>`;
 
+    const tsCommentId = 'debate-turnstile-c-' + post.id;
+    renderTurnstile(tsCommentId);
+
     body.querySelector('.debate-comment-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const form = e.target;
       const ta = form.querySelector('textarea');
       const statusEl = form.querySelector('.form-status');
       const cuerpo = ta.value.trim();
+      const sitioWeb = form.querySelector('input[name="sitioWeb"]').value;
+      const token = turnstileToken(tsCommentId);
+      if (TURNSTILE_SITE_KEY && !token) {
+        setStatus(statusEl, 'error', 'Completa la verificación antes de comentar.');
+        return;
+      }
       try {
-        await apiFetch(`/api/foro/posts/${post.id}/comentarios`, { method: 'POST', body: JSON.stringify({ cuerpo }) });
+        await apiFetch(`/api/foro/posts/${post.id}/comentarios`, { method: 'POST', body: JSON.stringify({ cuerpo, sitioWeb, turnstileToken: token }) });
         const data = await apiFetch(`/api/foro/posts/${encodeURIComponent(post.id)}`);
         renderPostDetail(body, data.post, data.comentarios, root, subseccion);
-      } catch (err) { setStatus(statusEl, 'error', '' + err.message); }
+      } catch (err) {
+        turnstileReset(tsCommentId);
+        setStatus(statusEl, 'error', '' + err.message);
+      }
     });
 
     body.querySelectorAll('.debate-borrar-comentario').forEach((btn) => btn.addEventListener('click', async () => {
@@ -397,6 +454,16 @@
 
     const activeBtn = subnav.querySelector('.foro-filter-btn.active');
     if (activeBtn) activar(activeBtn.dataset.subseccion || '');
+  });
+
+  // Auto-wiring para educacion.html: pagina de una sola sub-seccion, sin
+  // tabs -- el foro se inicializa directo al cargar, sin logica de cambio
+  // de pestana ni filtro de enfoque (esta pagina no los tiene).
+  document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('rh-subnav')) return; // ya lo maneja el bloque de arriba
+    const container = document.getElementById('edu-debate');
+    if (!container) return;
+    initDebate({ subseccion: 'educacion', containerId: 'edu-debate' });
   });
 
   window.SQPR = window.SQPR || {};

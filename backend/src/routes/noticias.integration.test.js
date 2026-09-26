@@ -112,6 +112,14 @@ describe('POST /api/noticias', () => {
     expect(res.status).toBe(403);
   });
 
+  test('403 si el usuario es moderador (no tiene acceso a gestion de contenido)', async () => {
+    const res = await request(app)
+      .post('/api/noticias')
+      .set('x-test-user', JSON.stringify({ id: 'mod-1', rol: 'moderador' }))
+      .send(NOTICIA_VALIDA);
+    expect(res.status).toBe(403);
+  });
+
   test('400 si el cuerpo es invalido', async () => {
     const res = await request(app)
       .post('/api/noticias')

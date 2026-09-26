@@ -22,6 +22,13 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+function requireModerador(req, res, next) {
+  if (req.user?.rol !== 'admin' && req.user?.rol !== 'moderador') {
+    return res.status(403).json({ ok: false, error: 'Requiere rol de administrador o moderador.' });
+  }
+  next();
+}
+
 // Version "suave" para pruebas: igual que requireAuth pero nunca rechaza --
 // sin x-test-user o con uno invalido, sigue con req.user = null.
 function tryAuth(req, _res, next) {
@@ -35,4 +42,4 @@ function tryAuth(req, _res, next) {
   next();
 }
 
-module.exports = { requireAuth, requireAdmin, tryAuth };
+module.exports = { requireAuth, requireAdmin, requireModerador, tryAuth };

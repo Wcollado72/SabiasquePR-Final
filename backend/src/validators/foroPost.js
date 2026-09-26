@@ -1,7 +1,7 @@
 // El "foro" evoluciono de un foro general (retirado, ver git history) al
 // motor del debate semanal 18+ de Revolucion Humana -- sigue siendo el
 // mismo CRUD+JWT, ahora acotado por sub-seccion y con reglas por rol.
-const SUBSECCIONES_VALIDAS = ['corrupcion-humana', 'nuevos-humanos'];
+const SUBSECCIONES_VALIDAS = ['corrupcion-humana', 'nuevos-humanos', 'educacion'];
 const ENFOQUES_VALIDOS = [
   'institucional', 'individual',
   'puerto-rico', 'estados-unidos', 'hispanoamerica', 'internacionales',

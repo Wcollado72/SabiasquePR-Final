@@ -9,6 +9,7 @@ const app = buildApp();
 
 const USUARIO = JSON.stringify({ id: 'user-1', email: 'a@ejemplo.com', rol: 'usuario' });
 const ADMIN = JSON.stringify({ id: 'admin-1', email: 'admin@ejemplo.com', rol: 'admin' });
+const MODERADOR = JSON.stringify({ id: 'mod-1', email: 'mod@ejemplo.com', rol: 'moderador' });
 
 beforeEach(() => {
   pool.query.mockReset();
@@ -75,6 +76,13 @@ describe('GET /api/reportes', () => {
     expect(res.status).toBe(200);
     expect(res.body.reportes).toHaveLength(1);
   });
+
+  test('200 con la lista para un moderador', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'r1', estado: 'pendiente' }] });
+    const res = await request(app).get('/api/reportes').set('x-test-user', MODERADOR);
+    expect(res.status).toBe(200);
+    expect(res.body.reportes).toHaveLength(1);
+  });
 });
 
 describe('PATCH /api/reportes/:id', () => {
@@ -99,5 +107,11 @@ describe('PATCH /api/reportes/:id', () => {
     const res = await request(app).patch('/api/reportes/r1').set('x-test-user', ADMIN).send({ estado: 'revisado' });
     expect(res.status).toBe(200);
     expect(res.body.reporte.estado).toBe('revisado');
+  });
+
+  test('200 al marcar un reporte como revisado (moderador)', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'r1', estado: 'revisado' }] });
+    const res = await request(app).patch('/api/reportes/r1').set('x-test-user', MODERADOR).send({ estado: 'revisado' });
+    expect(res.status).toBe(200);
   });
 });

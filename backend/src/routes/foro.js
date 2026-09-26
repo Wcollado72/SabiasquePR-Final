@@ -9,6 +9,55 @@ const router = express.Router();
 // minima -- Nueva Humanidad (contenido positivo) no lo necesita.
 const SUBSECCIONES_18_MAS = ['corrupcion-humana'];
 
+// Admin y moderador pueden editar/borrar cualquier post o comentario del
+// debate (moderacion real) -- el moderador NO tiene acceso al CRUD de
+// contenido editorial (noticias/contenidos/productos), eso sigue siendo
+// solo admin via requireAdmin en esas rutas.
+function esModeracion(rol) {
+  return rol === 'admin' || rol === 'moderador';
+}
+
+// Anti-bots gratis para el debate publico (sin CAPTCHA): honeypot + cooldown
+// de cuenta nueva. Ambos son capas adicionales sobre requireAuth + el rate
+// limit ya activo en /api/foro -- ninguno reemplaza a los otros.
+const COOLDOWN_HORAS_CUENTA_NUEVA = 1;
+
+// Campo oculto (nunca visible ni accesible para un humano real, ver
+// debate.js/estilos) que un bot que llena todos los inputs de un formulario
+// va a completar. Si llega con contenido, se rechaza en silencio.
+function esHoneypot(body) {
+  return Boolean(body.sitioWeb && String(body.sitioWeb).trim());
+}
+
+function cuentaEnCooldown(user) {
+  if (!user.creado_en) return false;
+  const horas = (Date.now() - new Date(user.creado_en).getTime()) / 3_600_000;
+  return horas < COOLDOWN_HORAS_CUENTA_NUEVA;
+}
+
+// Cloudflare Turnstile: verifica el token que el frontend obtiene del
+// widget contra la API de Cloudflare, usando la Secret Key (nunca en el
+// codigo -- variable de entorno TURNSTILE_SECRET_KEY en Render). Sin esa
+// variable configurada (desarrollo local, tests) se deja pasar sin
+// verificar, para no romper el flujo local por falta de una cuenta de
+// Cloudflare -- en produccion la variable siempre debe estar puesta.
+async function verificarTurnstile(token) {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) return true;
+  if (!token) return false;
+  try {
+    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ secret, response: token }),
+    });
+    const data = await res.json();
+    return Boolean(data.success);
+  } catch {
+    return false;
+  }
+}
+
 // Campos que solo el admin puede fijar -- separado del resto del body para
 // no dejar que cualquier usuario se auto-destaque o enlace un tema oficial.
 function camposAdmin(body, rol) {
@@ -71,8 +120,15 @@ router.get('/posts/:id', async (req, res) => {
 
 // POST /api/foro/posts -- crear -- requiere sesion y edad confirmada
 router.post('/posts', requireAuth, async (req, res) => {
+  if (esHoneypot(req.body)) return res.status(400).json({ ok: false, error: 'No se pudo procesar la solicitud.' });
+  if (cuentaEnCooldown(req.user)) {
+    return res.status(403).json({ ok: false, error: `Tu cuenta debe tener al menos ${COOLDOWN_HORAS_CUENTA_NUEVA} hora(s) de creada para publicar aquí.` });
+  }
   if (SUBSECCIONES_18_MAS.includes(req.body.subseccion) && !req.user.edad_confirmada) {
     return res.status(403).json({ ok: false, error: 'Debes confirmar que eres mayor de 18 años para participar en esta sección.' });
+  }
+  if (!(await verificarTurnstile(req.body.turnstileToken))) {
+    return res.status(400).json({ ok: false, error: 'No se pudo verificar que eres una persona. Intenta de nuevo.' });
   }
   const errors = validatePost(req.body, req.user.rol);
   if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
@@ -89,12 +145,12 @@ router.post('/posts', requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
-// PATCH /api/foro/posts/:id -- editar -- dueno o admin
+// PATCH /api/foro/posts/:id -- editar -- dueno, admin o moderador
 router.patch('/posts/:id', requireAuth, async (req, res) => {
   try {
     const { rows: existing } = await pool.query('SELECT autor_id FROM foro_posts WHERE id = $1', [req.params.id]);
     if (existing.length === 0) return res.status(404).json({ ok: false, error: 'Publicacion no encontrada.' });
-    if (existing[0].autor_id !== req.user.id && req.user.rol !== 'admin') {
+    if (existing[0].autor_id !== req.user.id && !esModeracion(req.user.rol)) {
       return res.status(403).json({ ok: false, error: 'No tienes permiso para editar esta publicacion.' });
     }
     const errors = validatePost(req.body, req.user.rol);
@@ -112,12 +168,12 @@ router.patch('/posts/:id', requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
-// DELETE /api/foro/posts/:id -- dueno o admin (cascada borra comentarios)
+// DELETE /api/foro/posts/:id -- dueno, admin o moderador (cascada borra comentarios)
 router.delete('/posts/:id', requireAuth, async (req, res) => {
   try {
     const { rows: existing } = await pool.query('SELECT autor_id FROM foro_posts WHERE id = $1', [req.params.id]);
     if (existing.length === 0) return res.status(404).json({ ok: false, error: 'Publicacion no encontrada.' });
-    if (existing[0].autor_id !== req.user.id && req.user.rol !== 'admin') {
+    if (existing[0].autor_id !== req.user.id && !esModeracion(req.user.rol)) {
       return res.status(403).json({ ok: false, error: 'No tienes permiso para eliminar esta publicacion.' });
     }
     await pool.query('DELETE FROM foro_posts WHERE id = $1', [req.params.id]);
@@ -127,6 +183,13 @@ router.delete('/posts/:id', requireAuth, async (req, res) => {
 
 // POST /api/foro/posts/:postId/comentarios -- crear -- requiere sesion y edad confirmada
 router.post('/posts/:postId/comentarios', requireAuth, async (req, res) => {
+  if (esHoneypot(req.body)) return res.status(400).json({ ok: false, error: 'No se pudo procesar la solicitud.' });
+  if (cuentaEnCooldown(req.user)) {
+    return res.status(403).json({ ok: false, error: `Tu cuenta debe tener al menos ${COOLDOWN_HORAS_CUENTA_NUEVA} hora(s) de creada para comentar aquí.` });
+  }
+  if (!(await verificarTurnstile(req.body.turnstileToken))) {
+    return res.status(400).json({ ok: false, error: 'No se pudo verificar que eres una persona. Intenta de nuevo.' });
+  }
   try {
     const cuerpo = (req.body.cuerpo || '').trim();
     if (cuerpo.length < 2) return res.status(400).json({ ok: false, error: 'El comentario es muy corto.' });
@@ -145,12 +208,12 @@ router.post('/posts/:postId/comentarios', requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
-// DELETE /api/foro/comentarios/:id -- dueno o admin
+// DELETE /api/foro/comentarios/:id -- dueno, admin o moderador
 router.delete('/comentarios/:id', requireAuth, async (req, res) => {
   try {
     const { rows: existing } = await pool.query('SELECT autor_id FROM foro_comentarios WHERE id = $1', [req.params.id]);
     if (existing.length === 0) return res.status(404).json({ ok: false, error: 'Comentario no encontrado.' });
-    if (existing[0].autor_id !== req.user.id && req.user.rol !== 'admin') {
+    if (existing[0].autor_id !== req.user.id && !esModeracion(req.user.rol)) {
       return res.status(403).json({ ok: false, error: 'No tienes permiso para eliminar este comentario.' });
     }
     await pool.query('DELETE FROM foro_comentarios WHERE id = $1', [req.params.id]);

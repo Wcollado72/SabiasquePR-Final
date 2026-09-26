@@ -46,6 +46,12 @@ describe('validateContenido', () => {
     expect(validateContenido({ ...BASE, categoria: 'crimenes' })).toContain('Categoria no valida.');
   });
 
+  test('acepta las categorias especificas de Educacion', () => {
+    for (const categoria of ['leyes-educativas', 'estudiantes-sobresalientes', 'sistemas-mundiales', 'programas-educativos']) {
+      expect(validateContenido({ ...BASE, categoria })).toEqual([]);
+    }
+  });
+
   test('rechaza tipoFormato no valido', () => {
     const errors = validateContenido({ ...BASE, tipoFormato: 'podcast' });
     expect(errors).toContain('Tipo de formato no valido.');
