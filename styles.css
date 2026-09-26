@@ -1462,7 +1462,7 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
    normal del sitio. Los ids de cada campo no cambian, solo su agrupacion
    visual en "niveles" tipo acordeon (ver bindSynthPanels en admin.js). */
 .synth-theme{
-  max-width:1040px;
+  max-width:1280px;
   background:linear-gradient(180deg,#1a0b2e 0%,#2b0f4a 55%,#3d1160 100%);
   border:1px solid #4a2a7a;
   border-radius:var(--radius);
@@ -1470,6 +1470,7 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   color:#f5e9ff;
   font-family:'Rajdhani',sans-serif;
 }
+.synth-theme form{ max-width:none; }
 .synth-theme h3{
   font-family:'Orbitron',sans-serif;
   font-size:1.1rem;

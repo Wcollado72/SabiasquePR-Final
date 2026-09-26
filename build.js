@@ -851,7 +851,7 @@ const PAGES = [
           </div>
           <div id="admin-contenidos-list" class="admin-list"></div>
 
-          <section class="box contact-box admin-form synth-theme" id="admin-contenidos-form-box" style="display:none;">
+          <section class="box admin-form synth-theme" id="admin-contenidos-form-box" style="display:none;">
             <h3 id="admin-contenidos-form-title">Nuevo contenido</h3>
             <form id="admin-contenidos-form">
               <input type="hidden" id="ac-id">
