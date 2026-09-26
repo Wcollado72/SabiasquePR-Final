@@ -314,13 +314,15 @@
   const SUBSECCION_LABEL = { 'nuevos-humanos': 'Nuevos Humanos', 'revolucion-mundial': 'Revolución Mundial', 'logica-humana': 'Lógica Humana', 'corrupcion-humana': 'Corrupción Humana' };
 
   // ── "UN FORMULARIO, VARIAS PIELES" ────────────────────────
-  // Nuevos Humanos y Corrupcion Humana ya tienen tema propio (Constelacion /
-  // paleta Newsroom); Educacion tiene el suyo (Biblioteca). Revolucion
-  // Mundial y Logica Humana se quedan en Synthwave (la paleta original) --
-  // Logica Humana a proposito, hasta disenar algo inspirado en la identidad
-  // de Aliado Imperfekto. Mismo mapa lo usa el formulario (data-tema en
-  // #admin-contenidos-form-box) y cada tarjeta de la lista (.synth-item).
-  const TEMA_POR_SUBSECCION = { 'nuevos-humanos': 'constelacion', 'corrupcion-humana': 'corrupcion' };
+  // Nuevos Humanos, Corrupcion Humana y Logica Humana ya tienen tema propio
+  // (Constelacion / paleta Newsroom / Kintsugi -- este ultimo inspirado en
+  // la identidad de Aliado Imperfekto: grieta dorada, "el error se integra,
+  // no se esconde"); Educacion tiene el suyo (Biblioteca). Revolucion
+  // Mundial y cualquier categoria nueva se quedan en Synthwave (la paleta
+  // original, el estandar por defecto). Mismo mapa lo usa el formulario
+  // (data-tema en #admin-contenidos-form-box) y cada tarjeta de la lista
+  // (.synth-item).
+  const TEMA_POR_SUBSECCION = { 'nuevos-humanos': 'constelacion', 'corrupcion-humana': 'corrupcion', 'logica-humana': 'kintsugi' };
   function temaParaClasificacion(seccion, subseccion) {
     if (seccion === 'educacion') return 'biblioteca';
     if (seccion === 'revolucion-humana' && subseccion && TEMA_POR_SUBSECCION[subseccion]) return TEMA_POR_SUBSECCION[subseccion];
@@ -892,12 +894,16 @@
     const q = (document.getElementById('admin-productos-search').value || '').toLowerCase();
     const items = productosCache.filter((p) => p.nombre.toLowerCase().includes(q));
     el.innerHTML = items.length ? items.map((p) => `
-      <div class="admin-item">
-        <div class="admin-item-info">
+      <div class="synth-item">
+        <div class="synth-item-thumb" style="background-image:url('${escapeHtml(p.imagen || '')}')"></div>
+        <div class="synth-item-info">
           <strong>${escapeHtml(p.nombre)}</strong>
-          <span class="foro-meta">$${Number(p.precio).toFixed(2)} · ${p.disponible ? 'disponible' : 'oculto'}</span>
+          <div class="synth-item-badges">
+            <span class="synth-badge synth-badge-premium">$${Number(p.precio).toFixed(2)}</span>
+            ${p.disponible ? '' : '<span class="synth-badge synth-badge-destacado">Oculto</span>'}
+          </div>
         </div>
-        <div class="admin-item-actions">
+        <div class="synth-item-actions">
           <button type="button" class="admin-btn-edit" data-id="${p.id}">Editar</button>
           <button type="button" class="admin-btn-delete foro-danger" data-id="${p.id}">Eliminar</button>
         </div>
@@ -993,13 +999,15 @@
       resumen.textContent = pendientes === 0 ? 'Sin pendientes' : `${pendientes} pendiente${pendientes === 1 ? '' : 's'}`;
     }
     el.innerHTML = reportesCache.length ? reportesCache.map((r) => `
-      <div class="admin-item">
-        <div class="admin-item-info">
+      <div class="synth-item">
+        <div class="synth-item-info">
           <strong>${REPORTE_TIPO_LABEL[r.tipo] || r.tipo} reportada por ${escapeHtml(r.reportado_por_email)}</strong>
-          <span class="foro-badge${r.estado === 'pendiente' ? '' : ' foro-badge-borrador'}">${REPORTE_ESTADO_LABEL[r.estado] || r.estado}</span>
-          <span class="foro-meta">${escapeHtml(r.motivo)}</span>
+          <div class="synth-item-badges">
+            <span class="synth-badge ${r.estado === 'pendiente' ? 'synth-badge-destacado' : 'synth-badge-seccion'}">${REPORTE_ESTADO_LABEL[r.estado] || r.estado}</span>
+          </div>
+          <span class="synth-item-meta">${escapeHtml(r.motivo)}</span>
         </div>
-        <div class="admin-item-actions">
+        <div class="synth-item-actions">
           <button type="button" class="admin-btn-edit" data-accion="revisado" data-id="${r.id}">Marcar revisado</button>
           <button type="button" class="admin-btn-edit" data-accion="descartado" data-id="${r.id}">Descartar</button>
           <button type="button" class="admin-btn-delete foro-danger" data-tipo="${r.tipo}" data-item="${r.item_id}" data-reporte="${r.id}">Eliminar contenido</button>
@@ -1114,6 +1122,12 @@
     investigador: { titulo: 'Investigador', desc: 'Organiza una fuente (URL o texto pegado) en notas de investigación.', incluir: 'Se usa desde el Nivel 4 del formulario de Contenidos.', agentivo: true },
     redactor: { titulo: 'Redactor', desc: 'Escribe el borrador final con el tono propio de cada sección.', incluir: 'Se usa después del Investigador, en el mismo Nivel 4.', agentivo: true },
     reportes: { titulo: 'Moderación · Reportes', desc: 'Cola de publicaciones y comentarios del debate reportados por usuarios.', incluir: null, agentivo: false },
+    'noticias-clasificacion': { titulo: 'Clasificación', desc: 'La categoría bajo la que aparece esta noticia.', incluir: 'Categoría (la fecha vive en la barra de publicación, abajo del todo).', agentivo: false },
+    'noticias-contenido': { titulo: 'Contenido', desc: 'El texto que se publica tal cual, sin editar después.', incluir: 'Título, párrafos (uno por línea) y si se usó IA.', agentivo: false },
+    'noticias-multimedia': { titulo: 'Multimedia', desc: 'La imagen que acompaña la noticia.', incluir: 'Imagen, texto alternativo y pie de imagen (opcional).', agentivo: false },
+    'noticias-ia': { titulo: 'Autocompletar con IA', desc: 'Pega la URL del artículo original y la IA redacta un primer borrador completo de una sola vez.', incluir: 'Solo pide la URL — llena título, párrafos y fuente automáticamente; tú revisas antes de publicar.', agentivo: true },
+    'noticias-fuente': { titulo: 'Fuente', desc: 'De dónde salió la información original.', incluir: 'URL y nombre de la fuente.', agentivo: false },
+    productos: { titulo: 'Productos', desc: 'Artículos de la tienda — lo que aparece en /tienda con su botón de compra.', incluir: 'Nombre, descripción, precio, imagen y el Price ID de Stripe para que el checkout funcione.', agentivo: false },
   };
 
   function ayudaHtml(clave) {
@@ -1144,20 +1158,21 @@
     const panel = document.getElementById('admin-panel');
     const tooltip = document.getElementById('ayuda-tooltip');
 
+    const AYUDA_HOVER_SELECTOR = '[data-help], .synth-level-card, .news-level-card';
     panel.addEventListener('mouseover', (e) => {
-      const el = e.target.closest('[data-help], .synth-level-card');
+      const el = e.target.closest(AYUDA_HOVER_SELECTOR);
       if (el) mostrarAyudaTooltip(el);
     });
     panel.addEventListener('mouseout', (e) => {
-      const el = e.target.closest('[data-help], .synth-level-card');
+      const el = e.target.closest(AYUDA_HOVER_SELECTOR);
       if (el && !el.contains(e.relatedTarget)) tooltip.hidden = true;
     });
     panel.addEventListener('focusin', (e) => {
-      const el = e.target.closest('[data-help], .synth-level-card');
+      const el = e.target.closest(AYUDA_HOVER_SELECTOR);
       if (el) mostrarAyudaTooltip(el);
     });
     panel.addEventListener('focusout', (e) => {
-      const el = e.target.closest('[data-help], .synth-level-card');
+      const el = e.target.closest(AYUDA_HOVER_SELECTOR);
       if (el) tooltip.hidden = true;
     });
 

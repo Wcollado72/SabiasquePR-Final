@@ -1512,6 +1512,15 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   --tema-btn-bg:#e2231a; --tema-btn-ink:#fff; --tema-ia-bg:rgba(226,35,26,.08);
   --tema-glow-accent:none; --tema-glow-accent2:none; --tema-shadow-text:none;
 }
+/* Logica Humana -- "Kintsugi", inspirado en la identidad de Aliado
+   Imperfekto (grieta dorada: "el error se integra, no se esconde"). */
+[data-tema="kintsugi"]{
+  --tema-bg:#14101a; --tema-border:#362c44; --tema-ink:#e6dfe8; --tema-label:#8a7f95;
+  --tema-accent:#c9a13a; --tema-accent2:#c9a13a; --tema-panel-bg:#1e1826; --tema-input-bg:#14101a;
+  --tema-font-head:'Cormorant Garamond',serif; --tema-font-body:'Work Sans',sans-serif;
+  --tema-btn-bg:#c9a13a; --tema-btn-ink:#14101a; --tema-ia-bg:rgba(201,161,58,.08);
+  --tema-glow-accent:none; --tema-glow-accent2:none; --tema-shadow-text:none;
+}
 
 .synth-theme{
   max-width:1280px;
@@ -1759,14 +1768,18 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
    sus formularios (Synthwave / Newsroom), con miniatura + badges. El
    buscador y el boton "+ Nuevo..." de arriba se quedan con el tema normal
    del panel -- solo la lista en si combina con el formulario. */
-#admin-contenidos-list{
+#admin-contenidos-list,
+#admin-productos-list,
+#admin-reportes-list{
   background:#15151a;
   border:1px solid #2a2a30;
   border-radius:var(--radius);
   padding:16px;
   gap:10px;
 }
-#admin-contenidos-list .foro-empty{ color:#9a9aa8; margin:0; }
+#admin-contenidos-list .foro-empty,
+#admin-productos-list .foro-empty,
+#admin-reportes-list .foro-empty{ color:#9a9aa8; margin:0; }
 .synth-item{
   display:flex;
   align-items:center;
@@ -1792,7 +1805,7 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .synth-badge-premium{ background:var(--tema-ia-bg); color:var(--tema-accent); border:1px solid var(--tema-accent); }
 .synth-badge-seccion{ background:var(--tema-panel-bg); color:var(--tema-label); border:1px solid var(--tema-border); }
 .synth-item-meta{ color:var(--tema-label); font-size:.72rem; }
-.synth-item-actions{ display:flex; gap:8px; flex-shrink:0; }
+.synth-item-actions{ display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; flex-shrink:0; max-width:220px; }
 .synth-item-actions .admin-btn-edit,
 .synth-item-actions .admin-btn-delete{
   background:transparent; border:2px solid var(--tema-border); color:var(--tema-ink);

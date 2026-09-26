@@ -800,23 +800,23 @@ const PAGES = [
               <input type="hidden" id="an-id">
 
               <nav id="news-levels" class="news-levels">
-                <button type="button" class="news-level-card" data-panel="clasificacion">
+                <button type="button" class="news-level-card" data-panel="clasificacion" data-help="noticias-clasificacion">
                   <span class="news-level-title">Clasificación</span>
                   <span class="news-level-status" data-status="clasificacion">● ACTIVO</span>
                 </button>
-                <button type="button" class="news-level-card" data-panel="contenido">
+                <button type="button" class="news-level-card" data-panel="contenido" data-help="noticias-contenido">
                   <span class="news-level-title">Contenido</span>
                   <span class="news-level-status" data-status="contenido">○ PENDIENTE</span>
                 </button>
-                <button type="button" class="news-level-card" data-panel="multimedia">
+                <button type="button" class="news-level-card" data-panel="multimedia" data-help="noticias-multimedia">
                   <span class="news-level-title">Multimedia</span>
                   <span class="news-level-status" data-status="multimedia">○ PENDIENTE</span>
                 </button>
-                <button type="button" class="news-level-card news-level-ia" data-panel="ia">
+                <button type="button" class="news-level-card news-level-ia" data-panel="ia" data-help="noticias-ia">
                   <span class="news-level-title">🤖 Asistente IA</span>
                   <span class="news-level-status" data-status="ia">✦ LISTO</span>
                 </button>
-                <button type="button" class="news-level-card" data-panel="fuente">
+                <button type="button" class="news-level-card" data-panel="fuente" data-help="noticias-fuente">
                   <span class="news-level-title">Fuente</span>
                   <span class="news-level-status" data-status="fuente">○ PENDIENTE</span>
                 </button>
@@ -1091,7 +1091,7 @@ const PAGES = [
           </div>
           <div id="admin-productos-list" class="admin-list"></div>
 
-          <section class="box box-blog contact-box admin-form" id="admin-productos-form-box" style="display:none;">
+          <section class="box box-blog contact-box admin-form" id="admin-productos-form-box" style="display:none;" data-help="productos">
             <h3 id="admin-productos-form-title">Nuevo producto</h3>
             <form id="admin-productos-form">
               <input type="hidden" id="ap-id">
@@ -1120,7 +1120,7 @@ const PAGES = [
           </section>
         </section>
 
-        <section class="admin-tab-panel" id="admin-panel-reportes" style="display:none;">
+        <section class="admin-tab-panel" id="admin-panel-reportes" style="display:none;" data-help="reportes">
           <p class="admin-hint">Reportes del debate (Corrupción Humana, Nuevos Humanos, Educación). Revisa el contenido reportado antes de decidir.</p>
           <div id="admin-reportes-list" class="admin-list"></div>
         </section>
@@ -1197,7 +1197,7 @@ const PAGES = [
           <div class="image-picker-grid" id="youtube-picker-grid"></div>
         </div>
       </div>`,
-    extraScript: `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=Karla:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap">
+    extraScript: `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=Karla:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap">
   <script src="editorial.js"></script>
   <script src="citas.js"></script>
   <script src="admin.js"></script>`,
