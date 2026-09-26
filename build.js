@@ -793,52 +793,101 @@ const PAGES = [
           </div>
           <div id="admin-noticias-list" class="admin-list"></div>
 
-          <section class="box box-blog contact-box admin-form" id="admin-noticias-form-box" style="display:none;">
+          <section class="box admin-form news-theme" id="admin-noticias-form-box" style="display:none;">
+            <div class="news-ticker"><span class="news-ticker-dot" aria-hidden="true"></span>EN VIVO · PANEL DE NOTICIAS</div>
             <h3 id="admin-noticias-form-title">Nueva noticia</h3>
             <form id="admin-noticias-form">
               <input type="hidden" id="an-id">
-              <fieldset class="citation-group" id="an-autocompletar-group">
-                <legend>Autocompletar con IA (opcional)</legend>
-                <label for="an-autocompletar-url">URL del artículo original</label>
-                <input type="url" id="an-autocompletar-url" placeholder="https://ejemplo.com/articulo">
-                <button type="button" id="an-autocompletar-ia" class="admin-btn-cancel">Autocompletar con IA</button>
-                <p class="admin-hint" id="an-autocompletar-status" aria-live="polite"></p>
-              </fieldset>
-              <label for="an-titulo">Título</label>
-              <input type="text" id="an-titulo" required minlength="3" maxlength="160">
-              <label for="an-categoria">Categoría</label>
-              <select id="an-categoria">
-                ${optionsHtml(CATEGORIAS)}
-              </select>
-              <label for="an-fecha">Fecha</label>
-              <input type="date" id="an-fecha" required>
-              <label for="an-imagen">Imagen (ruta o URL)</label>
-              <input type="text" id="an-imagen" required placeholder="images/mi-imagen.webp">
-              <div class="admin-image-actions">
-                <button type="button" id="an-elegir-imagen" class="admin-btn-cancel">Elegir imagen de la galería</button>
-              </div>
-              <img id="an-imagen-preview" class="admin-image-preview" alt="" hidden>
-              <label for="an-imagen-alt">Texto alternativo de la imagen</label>
-              <input type="text" id="an-imagen-alt" required>
-              <label for="an-imagen-caption">Pie de imagen (opcional)</label>
-              <input type="text" id="an-imagen-caption">
-              <label for="an-fuente-url">URL de la fuente</label>
-              <input type="url" id="an-fuente-url" required>
-              <label for="an-fuente-texto">Nombre de la fuente</label>
-              <input type="text" id="an-fuente-texto" required>
-              <label for="an-parrafos">Párrafos (uno por línea)</label>
-              <textarea id="an-parrafos" rows="6" required></textarea>
-              <label for="an-divulgacion-ia">Divulgación de uso de IA</label>
-              <select id="an-divulgacion-ia">
-                ${optionsHtml(DIVULGACION_IA)}
-              </select>
-              <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir esta noticia. Se muestra públicamente.</p>
-              <label class="admin-checkbox"><input type="checkbox" id="an-publicado" checked> Publicado (desmárcalo para guardar como borrador, visible solo en el panel)</label>
-              <label class="admin-checkbox"><input type="checkbox" id="an-destacado"> Artículo destacado en la portada (reemplaza al anterior)</label>
-              <div class="admin-form-actions">
-                <button type="submit">Guardar</button>
-                <button type="button" class="admin-btn-cancel" id="an-cancel">Cancelar</button>
-              </div>
+
+              <nav id="news-levels" class="news-levels">
+                <button type="button" class="news-level-card" data-panel="clasificacion">
+                  <span class="news-level-title">Clasificación</span>
+                  <span class="news-level-status" data-status="clasificacion">● ACTIVO</span>
+                </button>
+                <button type="button" class="news-level-card" data-panel="contenido">
+                  <span class="news-level-title">Contenido</span>
+                  <span class="news-level-status" data-status="contenido">○ PENDIENTE</span>
+                </button>
+                <button type="button" class="news-level-card" data-panel="multimedia">
+                  <span class="news-level-title">Multimedia</span>
+                  <span class="news-level-status" data-status="multimedia">○ PENDIENTE</span>
+                </button>
+                <button type="button" class="news-level-card news-level-ia" data-panel="ia">
+                  <span class="news-level-title">🤖 Asistente IA</span>
+                  <span class="news-level-status" data-status="ia">✦ LISTO</span>
+                </button>
+                <button type="button" class="news-level-card" data-panel="fuente">
+                  <span class="news-level-title">Fuente</span>
+                  <span class="news-level-status" data-status="fuente">○ PENDIENTE</span>
+                </button>
+              </nav>
+
+              <section class="news-panel" data-panel="clasificacion">
+                <h4 class="news-panel-title">Clasificación</h4>
+                <label for="an-categoria">Categoría</label>
+                <select id="an-categoria">
+                  ${optionsHtml(CATEGORIAS)}
+                </select>
+              </section>
+
+              <section class="news-panel" data-panel="contenido" hidden>
+                <h4 class="news-panel-title">Contenido</h4>
+                <label for="an-titulo">Título</label>
+                <input type="text" id="an-titulo" required minlength="3" maxlength="160">
+                <label for="an-parrafos">Párrafos (uno por línea)</label>
+                <textarea id="an-parrafos" rows="6" required></textarea>
+                <label for="an-divulgacion-ia">Divulgación de uso de IA</label>
+                <select id="an-divulgacion-ia">
+                  ${optionsHtml(DIVULGACION_IA)}
+                </select>
+                <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir esta noticia. Se muestra públicamente.</p>
+              </section>
+
+              <section class="news-panel" data-panel="multimedia" hidden>
+                <h4 class="news-panel-title">Multimedia</h4>
+                <label for="an-imagen">Imagen (ruta o URL)</label>
+                <input type="text" id="an-imagen" required placeholder="images/mi-imagen.webp">
+                <div class="admin-image-actions">
+                  <button type="button" id="an-elegir-imagen" class="admin-btn-cancel">Elegir imagen de la galería</button>
+                </div>
+                <img id="an-imagen-preview" class="admin-image-preview" alt="" hidden>
+                <label for="an-imagen-alt">Texto alternativo de la imagen</label>
+                <input type="text" id="an-imagen-alt" required>
+                <label for="an-imagen-caption">Pie de imagen (opcional)</label>
+                <input type="text" id="an-imagen-caption">
+              </section>
+
+              <section class="news-panel" data-panel="ia" hidden>
+                <h4 class="news-panel-title">🤖 Asistente IA</h4>
+                <fieldset class="citation-group" id="an-autocompletar-group">
+                  <legend>Autocompletar con IA (opcional)</legend>
+                  <label for="an-autocompletar-url">URL del artículo original</label>
+                  <input type="url" id="an-autocompletar-url" placeholder="https://ejemplo.com/articulo">
+                  <button type="button" id="an-autocompletar-ia" class="admin-btn-cancel">Autocompletar con IA</button>
+                  <p class="admin-hint" id="an-autocompletar-status" aria-live="polite"></p>
+                </fieldset>
+              </section>
+
+              <section class="news-panel" data-panel="fuente" hidden>
+                <h4 class="news-panel-title">Fuente</h4>
+                <label for="an-fuente-url">URL de la fuente</label>
+                <input type="url" id="an-fuente-url" required>
+                <label for="an-fuente-texto">Nombre de la fuente</label>
+                <input type="text" id="an-fuente-texto" required>
+              </section>
+
+              <footer class="news-publish-bar">
+                <div class="news-publish-field">
+                  <label for="an-fecha">📅 Fecha</label>
+                  <input type="date" id="an-fecha" required>
+                </div>
+                <label class="admin-checkbox news-publish-check" title="Desmárcalo para guardar como borrador, visible solo en el panel"><input type="checkbox" id="an-publicado" checked> Publicado</label>
+                <label class="admin-checkbox news-publish-check" title="Reemplaza al anterior destacado en la portada"><input type="checkbox" id="an-destacado"> ★ Destacada</label>
+                <div class="news-publish-actions">
+                  <button type="submit" class="news-btn-guardar">▶ AL AIRE</button>
+                  <button type="button" class="admin-btn-cancel" id="an-cancel">Cancelar</button>
+                </div>
+              </footer>
               <p id="an-status" class="form-status" aria-live="polite"></p>
             </form>
           </section>
@@ -1148,7 +1197,7 @@ const PAGES = [
           <div class="image-picker-grid" id="youtube-picker-grid"></div>
         </div>
       </div>`,
-    extraScript: `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&display=swap">
+    extraScript: `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=Karla:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap">
   <script src="editorial.js"></script>
   <script src="citas.js"></script>
   <script src="admin.js"></script>`,

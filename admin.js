@@ -153,6 +153,25 @@
     document.getElementById('admin-noticias-form').addEventListener('submit', submitNoticia);
     bindImagePicker('an-imagen', 'an-imagen-preview', 'an-elegir-imagen');
     document.getElementById('an-autocompletar-ia').addEventListener('click', autocompletarNoticiaConIA);
+    bindNewsPanels();
+  }
+
+  // ── FORMULARIO DE NOTICIAS: NIVELES NEWSROOM ─────────────
+  // Mismo patron que activarSynthPanel/bindSynthPanels en Contenidos --
+  // acordeon puramente visual, no cambia validacion ni envio del formulario.
+  function activarNewsPanel(nombre) {
+    document.querySelectorAll('#news-levels .news-level-card').forEach((card) => {
+      card.classList.toggle('active', card.dataset.panel === nombre);
+    });
+    document.querySelectorAll('.news-panel').forEach((panel) => {
+      panel.hidden = panel.dataset.panel !== nombre;
+    });
+  }
+
+  function bindNewsPanels() {
+    document.querySelectorAll('#news-levels .news-level-card').forEach((card) => {
+      card.addEventListener('click', () => activarNewsPanel(card.dataset.panel));
+    });
   }
 
   // Pide al backend que descargue el articulo de la URL y lo redacte con
@@ -194,12 +213,18 @@
     const q = (document.getElementById('admin-noticias-search').value || '').toLowerCase();
     const items = noticiasCache.filter((n) => n.titulo.toLowerCase().includes(q));
     el.innerHTML = items.length ? items.map((n) => `
-      <div class="admin-item">
-        <div class="admin-item-info">
-          <strong>${escapeHtml(n.titulo)}${n.destacado ? ' <span class="foro-badge">★ Destacada</span>' : ''}${n.publicado === false ? ' <span class="foro-badge foro-badge-borrador">Borrador</span>' : ''}</strong>
-          <span class="foro-meta">${escapeHtml(n.fecha_display)}</span>
+      <div class="news-item">
+        <div class="news-item-thumb" style="background-image:url('${escapeHtml(n.imagen || '')}')"></div>
+        <div class="news-item-info">
+          <strong>${escapeHtml(n.titulo)}</strong>
+          <div class="news-item-badges">
+            ${n.destacado ? '<span class="news-badge news-badge-destacada">★ Destacada</span>' : ''}
+            ${n.publicado === false ? '<span class="news-badge news-badge-borrador">Borrador</span>' : ''}
+            <span class="news-badge news-badge-cat">${escapeHtml(n.categoria)}</span>
+          </div>
+          <span class="news-item-meta">${escapeHtml(n.fecha_display)}</span>
         </div>
-        <div class="admin-item-actions">
+        <div class="news-item-actions">
           <button type="button" class="admin-btn-edit" data-id="${n.id}">Editar</button>
           <button type="button" class="admin-btn-delete foro-danger" data-id="${n.id}">Eliminar</button>
         </div>
@@ -230,6 +255,7 @@
     document.getElementById('an-autocompletar-url').value = '';
     updateImagePreview('an-imagen', 'an-imagen-preview');
     setStatus(document.getElementById('an-status'), '', '');
+    activarNewsPanel('clasificacion');
     document.getElementById('admin-noticias-form-box').style.display = 'block';
     document.getElementById('admin-noticias-form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -285,12 +311,37 @@
   // ── CONTENIDOS (video/ensayo/noticia/lectura_corta) ──────
   const SECCION_LABEL = { noticias: 'Noticias', 'revolucion-humana': 'Revolución Humana', educacion: 'Educación' };
   const TIPO_LABEL = { video: 'Video', audio: 'Audio', foto: 'Foto', ensayo: 'Ensayo', noticia: 'Noticia', lectura_corta: 'Lectura corta' };
+  const SUBSECCION_LABEL = { 'nuevos-humanos': 'Nuevos Humanos', 'revolucion-mundial': 'Revolución Mundial', 'logica-humana': 'Lógica Humana', 'corrupcion-humana': 'Corrupción Humana' };
+
+  // ── "UN FORMULARIO, VARIAS PIELES" ────────────────────────
+  // Nuevos Humanos y Corrupcion Humana ya tienen tema propio (Constelacion /
+  // paleta Newsroom); Educacion tiene el suyo (Biblioteca). Revolucion
+  // Mundial y Logica Humana se quedan en Synthwave (la paleta original) --
+  // Logica Humana a proposito, hasta disenar algo inspirado en la identidad
+  // de Aliado Imperfekto. Mismo mapa lo usa el formulario (data-tema en
+  // #admin-contenidos-form-box) y cada tarjeta de la lista (.synth-item).
+  const TEMA_POR_SUBSECCION = { 'nuevos-humanos': 'constelacion', 'corrupcion-humana': 'corrupcion' };
+  function temaParaClasificacion(seccion, subseccion) {
+    if (seccion === 'educacion') return 'biblioteca';
+    if (seccion === 'revolucion-humana' && subseccion && TEMA_POR_SUBSECCION[subseccion]) return TEMA_POR_SUBSECCION[subseccion];
+    return 'synthwave';
+  }
+  function actualizarTemaContenidos() {
+    const seccion = document.getElementById('ac-seccion').value;
+    const subseccion = document.getElementById('ac-subseccion').value;
+    const tema = temaParaClasificacion(seccion, subseccion);
+    const box = document.getElementById('admin-contenidos-form-box');
+    if (tema === 'synthwave') box.removeAttribute('data-tema');
+    else box.dataset.tema = tema;
+  }
 
   function bindContenidos() {
     document.getElementById('admin-contenidos-new').addEventListener('click', () => openContenidoForm());
     document.getElementById('ac-cancel').addEventListener('click', closeContenidoForm);
     document.getElementById('admin-contenidos-search').addEventListener('input', renderContenidosList);
     document.getElementById('admin-contenidos-form').addEventListener('submit', submitContenido);
+    document.getElementById('ac-seccion').addEventListener('change', actualizarTemaContenidos);
+    document.getElementById('ac-subseccion').addEventListener('change', actualizarTemaContenidos);
     document.getElementById('ac-usar-imagen-categoria').addEventListener('click', () => {
       const categoria = document.getElementById('ac-categoria').value;
       const img = window.SQPR && window.SQPR.CATEGORIA_IMAGEN && window.SQPR.CATEGORIA_IMAGEN[categoria];
@@ -687,12 +738,19 @@
     const q = (document.getElementById('admin-contenidos-search').value || '').toLowerCase();
     const items = contenidosCache.filter((c) => c.titulo.toLowerCase().includes(q));
     el.innerHTML = items.length ? items.map((c) => `
-      <div class="admin-item">
-        <div class="admin-item-info">
-          <strong>${escapeHtml(c.titulo)}${c.destacado ? ' <span class="foro-badge">★ Destacado</span>' : ''}</strong>
-          <span class="foro-meta">${SECCION_LABEL[c.seccion] || c.seccion} · ${TIPO_LABEL[c.tipo_formato] || c.tipo_formato} · ${escapeHtml(String(c.fecha_publicacion).slice(0, 10))}</span>
+      <div class="synth-item" data-tema="${temaParaClasificacion(c.seccion, c.subseccion)}">
+        <div class="synth-item-thumb" style="background-image:url('${escapeHtml(c.url_portada || '')}')"></div>
+        <div class="synth-item-info">
+          <strong>${escapeHtml(c.titulo)}</strong>
+          <div class="synth-item-badges">
+            ${c.destacado ? '<span class="synth-badge synth-badge-destacado">★ Destacado</span>' : ''}
+            ${c.es_premium ? '<span class="synth-badge synth-badge-premium">💎 Premium</span>' : ''}
+            <span class="synth-badge synth-badge-seccion">${SECCION_LABEL[c.seccion] || c.seccion}${c.subseccion ? ' · ' + (SUBSECCION_LABEL[c.subseccion] || c.subseccion) : ''}</span>
+            <span class="synth-badge synth-badge-seccion">${TIPO_LABEL[c.tipo_formato] || c.tipo_formato}</span>
+          </div>
+          <span class="synth-item-meta">${escapeHtml(String(c.fecha_publicacion).slice(0, 10))}</span>
         </div>
-        <div class="admin-item-actions">
+        <div class="synth-item-actions">
           <button type="button" class="admin-btn-edit" data-id="${c.id}">Editar</button>
           <button type="button" class="admin-btn-delete foro-danger" data-id="${c.id}">Eliminar</button>
         </div>
@@ -740,6 +798,7 @@
     updateCitationPreview();
     updateImagePreview('ac-url-portada', 'ac-url-portada-preview');
     setStatus(document.getElementById('ac-status'), '', '');
+    actualizarTemaContenidos();
     activarSynthPanel('clasificacion');
     document.getElementById('admin-contenidos-form-box').style.display = 'block';
     document.getElementById('admin-contenidos-form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });

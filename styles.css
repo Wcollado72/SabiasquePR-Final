@@ -1457,53 +1457,105 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   .ag-grid-2{ grid-template-columns:1fr; }
 }
 
-/* Formulario de Contenidos: isla "Synthwave Arcade" contenida a
-   #admin-contenidos-form-box -- el resto de admin.html sigue con el tema
-   normal del sitio. Los ids de cada campo no cambian, solo su agrupacion
-   visual en "niveles" tipo acordeon (ver bindSynthPanels en admin.js). */
+/* Formulario de Contenidos: "un formulario, varias pieles". Los mismos 5
+   paneles/acordeon (Synthwave Arcade de origen) sirven para las 5 categorias
+   de Contenidos (Nuevos Humanos, Corrupcion Humana, Revolucion Mundial,
+   Logica Humana, Educacion) -- lo unico que cambia por categoria son estos
+   tokens de color/tipografia via [data-tema] en #admin-contenidos-form-box
+   (ver actualizarTemaContenidos en admin.js), nunca la estructura ni los ids
+   de los campos. La misma paleta se reusa en las tarjetas de la lista
+   (.synth-item, ver mas abajo) para que "lo publicado" combine con el
+   formulario de cada categoria. Sin [data-tema] = Synthwave (la paleta
+   original): cubre Revolucion Mundial y, temporalmente, Logica Humana
+   (pendiente su propio diseno inspirado en Aliado Imperfekto). */
+.synth-theme,
+.synth-item{
+  --tema-bg:linear-gradient(180deg,#1a0b2e 0%,#2b0f4a 55%,#3d1160 100%);
+  --tema-border:#4a2a7a;
+  --tema-ink:#f5e9ff;
+  --tema-label:#b39ddb;
+  --tema-accent:#00e5ff;
+  --tema-accent2:#ff2fb0;
+  --tema-panel-bg:#241442;
+  --tema-input-bg:#1a0b2e;
+  --tema-font-head:'Orbitron',sans-serif;
+  --tema-font-body:'Rajdhani',sans-serif;
+  --tema-btn-bg:linear-gradient(90deg,#ff2fb0,#ff6fd8);
+  --tema-btn-ink:#1a0b2e;
+  --tema-ia-bg:rgba(255,47,176,.08);
+  --tema-glow-accent:0 0 18px rgba(0,229,255,.3);
+  --tema-glow-accent2:0 0 18px rgba(255,47,176,.35);
+  --tema-shadow-text:0 0 10px #ff2fb0;
+}
+/* Nuevos Humanos -- "Constelacion Comunitaria" */
+[data-tema="constelacion"]{
+  --tema-bg:#0e1a30; --tema-border:#2d3f5e; --tema-ink:#f3ead9; --tema-label:#e8b84b;
+  --tema-accent:#e8b84b; --tema-accent2:#e8b84b; --tema-panel-bg:#152540; --tema-input-bg:#0e1a30;
+  --tema-font-head:'Spectral',serif; --tema-font-body:'Karla',sans-serif;
+  --tema-btn-bg:#e8b84b; --tema-btn-ink:#12203a; --tema-ia-bg:rgba(232,184,75,.08);
+  --tema-glow-accent:0 0 14px rgba(232,184,75,.35); --tema-glow-accent2:0 0 14px rgba(232,184,75,.35);
+  --tema-shadow-text:none;
+}
+/* Educacion -- "Biblioteca / Atlas Ilustrado" */
+[data-tema="biblioteca"]{
+  --tema-bg:#16332b; --tema-border:#2a4a3e; --tema-ink:#ecdfc0; --tema-label:#b8934a;
+  --tema-accent:#b8934a; --tema-accent2:#b8934a; --tema-panel-bg:#1c4235; --tema-input-bg:#16332b;
+  --tema-font-head:'Spectral',serif; --tema-font-body:'Source Sans 3',sans-serif;
+  --tema-btn-bg:#b8934a; --tema-btn-ink:#16332b; --tema-ia-bg:rgba(184,147,74,.08);
+  --tema-glow-accent:none; --tema-glow-accent2:none; --tema-shadow-text:none;
+}
+/* Corrupcion Humana -- paleta "Newsroom" adaptada a Contenidos */
+[data-tema="corrupcion"]{
+  --tema-bg:#0b0b0d; --tema-border:#3a3a3e; --tema-ink:#f2f2f2; --tema-label:#9a9a9a;
+  --tema-accent:#e2231a; --tema-accent2:#e2231a; --tema-panel-bg:#1c1c1f; --tema-input-bg:#141416;
+  --tema-font-head:'Bebas Neue',sans-serif; --tema-font-body:'Barlow Condensed',sans-serif;
+  --tema-btn-bg:#e2231a; --tema-btn-ink:#fff; --tema-ia-bg:rgba(226,35,26,.08);
+  --tema-glow-accent:none; --tema-glow-accent2:none; --tema-shadow-text:none;
+}
+
 .synth-theme{
   max-width:1280px;
-  background:linear-gradient(180deg,#1a0b2e 0%,#2b0f4a 55%,#3d1160 100%);
-  border:1px solid #4a2a7a;
+  background:var(--tema-bg);
+  border:1px solid var(--tema-border);
   border-radius:var(--radius);
   padding:26px 30px;
-  color:#f5e9ff;
-  font-family:'Rajdhani',sans-serif;
+  color:var(--tema-ink);
+  font-family:var(--tema-font-body);
 }
 .synth-theme form{ max-width:none; }
 .synth-theme h3{
-  font-family:'Orbitron',sans-serif;
+  font-family:var(--tema-font-head);
   font-size:1.1rem;
   letter-spacing:.06em;
-  color:#fff;
-  text-shadow:0 0 10px #ff2fb0;
+  color:var(--tema-ink);
+  text-shadow:var(--tema-shadow-text);
   margin:0 0 18px;
 }
-.synth-theme label{ color:#b39ddb; font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; font-weight:600; }
+.synth-theme label{ color:var(--tema-label); font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; font-weight:600; }
 .synth-theme input,
 .synth-theme select,
 .synth-theme textarea{
-  background:#1a0b2e;
-  border:2px solid #4a2a7a;
-  color:#f5e9ff;
-  font-family:'Rajdhani',sans-serif;
+  background:var(--tema-input-bg);
+  border:2px solid var(--tema-border);
+  color:var(--tema-ink);
+  font-family:var(--tema-font-body);
   font-weight:600;
 }
 .synth-theme input:focus,
 .synth-theme select:focus,
-.synth-theme textarea:focus{ border-color:#00e5ff; outline:none; box-shadow:0 0 0 3px rgba(0,229,255,.25); }
-.synth-theme .admin-hint{ color:#9d8bc4; }
+.synth-theme textarea:focus{ border-color:var(--tema-accent); outline:none; box-shadow:var(--tema-glow-accent); }
+.synth-theme .admin-hint{ color:var(--tema-label); }
 .synth-theme .admin-btn-cancel,
 .synth-theme .foro-filter-btn{
   background:transparent;
-  border:2px solid #4a2a7a;
-  color:#f5e9ff;
-  font-family:'Rajdhani',sans-serif;
+  border:2px solid var(--tema-border);
+  color:var(--tema-ink);
+  font-family:var(--tema-font-body);
   font-weight:700;
 }
-.synth-theme .foro-filter-btn.active{ background:#00e5ff; border-color:#00e5ff; color:#1a0b2e; }
-.synth-theme .citation-group{ border-color:#4a2a7a; }
-.synth-theme .citation-preview{ color:#9d8bc4; }
+.synth-theme .foro-filter-btn.active{ background:var(--tema-accent); border-color:var(--tema-accent); color:var(--tema-btn-ink); }
+.synth-theme .citation-group{ border-color:var(--tema-border); }
+.synth-theme .citation-preview{ color:var(--tema-label); }
 
 .synth-levels{ display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:10px; margin-bottom:18px; }
 .synth-level-card{
@@ -1512,23 +1564,23 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   align-items:flex-start;
   gap:4px;
   padding:12px;
-  background:#241442;
-  border:2px solid #4a2a7a;
+  background:var(--tema-panel-bg);
+  border:2px solid var(--tema-border);
   border-radius:8px;
   cursor:pointer;
   text-align:left;
 }
-.synth-level-card.active{ border-color:#00e5ff; box-shadow:0 0 18px rgba(0,229,255,.3); }
+.synth-level-card.active{ border-color:var(--tema-accent); box-shadow:var(--tema-glow-accent); }
 .synth-level-card.synth-level-ia{ border-style:dashed; }
-.synth-level-card.synth-level-ia.active{ border-color:#ff2fb0; box-shadow:0 0 18px rgba(255,47,176,.35); }
+.synth-level-card.synth-level-ia.active{ border-color:var(--tema-accent2); box-shadow:var(--tema-glow-accent2); }
 .synth-level-icon{ font-size:20px; }
-.synth-level-title{ font-family:'Orbitron',sans-serif; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:#f5e9ff; }
-.synth-level-status{ font-size:.66rem; color:#7a6a9a; }
-.synth-level-card.active .synth-level-status{ color:#6ef7ff; }
+.synth-level-title{ font-family:var(--tema-font-head); font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:var(--tema-ink); }
+.synth-level-status{ font-size:.66rem; color:var(--tema-label); }
+.synth-level-card.active .synth-level-status{ color:var(--tema-accent); }
 
 .synth-panel{
-  background:#241442;
-  border:2px solid #00e5ff;
+  background:var(--tema-panel-bg);
+  border:2px solid var(--tema-accent);
   border-radius:8px;
   padding:20px 24px;
   margin-bottom:16px;
@@ -1536,11 +1588,11 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   flex-direction:column;
   gap:8px;
 }
-.synth-panel-title{ font-family:'Orbitron',sans-serif; font-size:.85rem; color:#00e5ff; letter-spacing:.04em; margin:0 0 6px; }
+.synth-panel-title{ font-family:var(--tema-font-head); font-size:.85rem; color:var(--tema-accent); letter-spacing:.04em; margin:0 0 6px; }
 
 .synth-theme .ia-asistente-box{
-  background:rgba(255,47,176,.08);
-  border-color:#ff2fb0;
+  background:var(--tema-ia-bg);
+  border-color:var(--tema-accent2);
 }
 
 .synth-publish-bar{
@@ -1550,8 +1602,8 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   gap:18px;
   padding:16px 20px;
   margin-top:6px;
-  background:#150a26;
-  border:2px solid #ff2fb0;
+  background:var(--tema-panel-bg);
+  border:2px solid var(--tema-accent2);
   border-radius:8px;
 }
 .synth-publish-field{ display:flex; flex-direction:column; gap:4px; }
@@ -1561,21 +1613,241 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .synth-publish-actions{ margin-left:auto; display:flex; gap:10px; }
 #admin-contenidos-form-box .synth-btn-guardar{
   padding:12px 30px;
-  background:linear-gradient(90deg,#ff2fb0,#ff6fd8);
+  background:var(--tema-btn-bg);
   border:none;
   border-radius:999px;
-  color:#1a0b2e;
-  font-family:'Orbitron',sans-serif;
+  color:var(--tema-btn-ink);
+  font-family:var(--tema-font-head);
   font-weight:800;
   font-size:.8rem;
   letter-spacing:.06em;
-  box-shadow:0 0 20px rgba(255,47,176,.6);
+  box-shadow:var(--tema-glow-accent2);
   cursor:pointer;
 }
-#admin-contenidos-form-box .synth-btn-guardar:hover{ background:linear-gradient(90deg,#ff6fd8,#ff2fb0); color:#1a0b2e; }
+#admin-contenidos-form-box .synth-btn-guardar:hover{ filter:brightness(1.12); }
 @media (max-width:820px){
   .synth-levels{ grid-template-columns:repeat(2, minmax(0,1fr)); }
   .synth-publish-actions{ margin-left:0; width:100%; }
+}
+
+/* Formulario de Noticias: isla "Newsroom" contenida a
+   #admin-noticias-form-box -- mismo patron que Synthwave Arcade (ver arriba):
+   los ids de cada campo no cambian, solo su agrupacion visual en "niveles"
+   tipo acordeon (ver bindNewsPanels en admin.js). */
+.news-theme{
+  max-width:1280px;
+  background:#0b0b0d;
+  border:1px solid #2a2a2e;
+  border-radius:var(--radius);
+  padding:0 0 26px;
+  color:#f2f2f2;
+  font-family:'Barlow Condensed',sans-serif;
+  overflow:hidden;
+}
+.news-theme form{ max-width:none; padding:0 30px; }
+.news-ticker{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:#e2231a;
+  color:#fff;
+  padding:7px 20px;
+  font-size:.72rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  margin-bottom:20px;
+}
+.news-ticker-dot{ width:8px; height:8px; border-radius:50%; background:#fff; }
+.news-theme h3{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.6rem;
+  letter-spacing:.03em;
+  color:#fff;
+  margin:0 30px 18px;
+}
+.news-theme label{ color:#9a9a9a; font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; font-weight:600; }
+.news-theme input,
+.news-theme select,
+.news-theme textarea{
+  background:#141416;
+  border:2px solid #3a3a3e;
+  color:#f2f2f2;
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:500;
+}
+.news-theme input:focus,
+.news-theme select:focus,
+.news-theme textarea:focus{ border-color:#e2231a; outline:none; box-shadow:0 0 0 3px rgba(226,35,26,.25); }
+.news-theme .admin-hint{ color:#8a8a8e; }
+.news-theme .admin-btn-cancel{
+  background:transparent;
+  border:2px solid #3a3a3e;
+  color:#f2f2f2;
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;
+}
+.news-theme .citation-group{ border-color:#3a3a3e; }
+
+.news-levels{ display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:8px; margin-bottom:18px; }
+.news-level-card{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:4px;
+  padding:10px 12px;
+  background:#1c1c1f;
+  border:none;
+  border-bottom:3px solid #3a3a3e;
+  cursor:pointer;
+  text-align:left;
+  clip-path:polygon(0 0,100% 0,94% 100%,0% 100%);
+}
+.news-level-card.active{ background:#e2231a; border-bottom-color:#fff; }
+.news-level-card.news-level-ia{ background:#1c1c1f; }
+.news-level-card.news-level-ia.active{ background:#8a1710; }
+.news-level-title{ font-family:'Bebas Neue',sans-serif; font-size:.9rem; letter-spacing:.03em; color:#f2f2f2; }
+.news-level-status{ font-size:.62rem; color:#7a7a7e; text-transform:uppercase; letter-spacing:.05em; }
+.news-level-card.active .news-level-status{ color:#ffd8d5; }
+
+.news-panel{
+  background:#141416;
+  border:1px solid #2a2a2e;
+  border-radius:4px;
+  padding:20px 24px;
+  margin-bottom:16px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.news-panel-title{ font-family:'Bebas Neue',sans-serif; font-size:1.1rem; color:#e2231a; letter-spacing:.04em; margin:0 0 6px; }
+
+.news-publish-bar{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:18px;
+  padding:16px 20px;
+  margin-top:6px;
+  background:#151517;
+  border-top:2px solid #e2231a;
+}
+.news-publish-field{ display:flex; flex-direction:column; gap:4px; }
+.news-publish-field label{ margin:0; }
+.news-publish-field input{ width:130px; }
+.news-publish-check{ display:flex; align-items:center; gap:6px; font-size:.78rem; margin:0; }
+.news-publish-actions{ margin-left:auto; display:flex; gap:10px; }
+#admin-noticias-form-box .news-btn-guardar{
+  padding:12px 30px;
+  background:#e2231a;
+  border:none;
+  border-radius:2px;
+  color:#fff;
+  font-family:'Bebas Neue',sans-serif;
+  font-weight:700;
+  font-size:1rem;
+  letter-spacing:.06em;
+  cursor:pointer;
+}
+#admin-noticias-form-box .news-btn-guardar:hover{ background:#ff2f22; }
+@media (max-width:820px){
+  .news-levels{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .news-publish-actions{ margin-left:0; width:100%; }
+}
+
+/* Lista de "lo publicado" en Contenidos y Noticias: misma isla oscura que
+   sus formularios (Synthwave / Newsroom), con miniatura + badges. El
+   buscador y el boton "+ Nuevo..." de arriba se quedan con el tema normal
+   del panel -- solo la lista en si combina con el formulario. */
+#admin-contenidos-list{
+  background:#15151a;
+  border:1px solid #2a2a30;
+  border-radius:var(--radius);
+  padding:16px;
+  gap:10px;
+}
+#admin-contenidos-list .foro-empty{ color:#9a9aa8; margin:0; }
+.synth-item{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  background:var(--tema-panel-bg);
+  border:2px solid var(--tema-border);
+  border-radius:8px;
+  padding:10px 16px;
+  transition:border-color .15s, box-shadow .15s;
+}
+.synth-item:hover{ border-color:var(--tema-accent); box-shadow:var(--tema-glow-accent); }
+.synth-item-thumb{
+  width:64px; height:64px; flex-shrink:0; border-radius:6px;
+  background-size:cover; background-position:center;
+  background-color:var(--tema-input-bg);
+  border:1px solid var(--tema-border);
+}
+.synth-item-info{ flex-grow:1; display:flex; flex-direction:column; gap:5px; min-width:0; }
+.synth-item-info strong{ color:var(--tema-ink); font-family:var(--tema-font-body); font-size:1rem; font-weight:700; }
+.synth-item-badges{ display:flex; flex-wrap:wrap; gap:6px; }
+.synth-badge{ font-size:.64rem; font-weight:700; letter-spacing:.03em; text-transform:uppercase; padding:2px 9px; border-radius:999px; white-space:nowrap; }
+.synth-badge-destacado{ background:var(--tema-ia-bg); color:var(--tema-accent2); border:1px solid var(--tema-accent2); }
+.synth-badge-premium{ background:var(--tema-ia-bg); color:var(--tema-accent); border:1px solid var(--tema-accent); }
+.synth-badge-seccion{ background:var(--tema-panel-bg); color:var(--tema-label); border:1px solid var(--tema-border); }
+.synth-item-meta{ color:var(--tema-label); font-size:.72rem; }
+.synth-item-actions{ display:flex; gap:8px; flex-shrink:0; }
+.synth-item-actions .admin-btn-edit,
+.synth-item-actions .admin-btn-delete{
+  background:transparent; border:2px solid var(--tema-border); color:var(--tema-ink);
+  font-family:var(--tema-font-body); font-weight:700; padding:6px 14px; border-radius:6px; cursor:pointer;
+}
+.synth-item-actions .admin-btn-edit:hover{ border-color:var(--tema-accent); color:var(--tema-accent); }
+.synth-item-actions .admin-btn-delete{ border-color:var(--tema-accent2); color:var(--tema-accent2); }
+.synth-item-actions .admin-btn-delete:hover{ background:var(--tema-accent2); color:var(--tema-btn-ink); }
+
+#admin-noticias-list{
+  background:#0b0b0d;
+  border:1px solid #2a2a2e;
+  border-radius:var(--radius);
+  padding:16px;
+  gap:10px;
+}
+#admin-noticias-list .foro-empty{ color:#9a9a9a; margin:0; }
+.news-item{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  background:#1c1c1f;
+  border:1px solid #2a2a2e;
+  border-bottom:3px solid #3a3a3e;
+  border-radius:2px;
+  padding:10px 16px;
+  transition:border-bottom-color .15s;
+}
+.news-item:hover{ border-bottom-color:#e2231a; }
+.news-item-thumb{
+  width:64px; height:64px; flex-shrink:0;
+  background-size:cover; background-position:center;
+  background-color:#141416;
+  border:1px solid #3a3a3e;
+}
+.news-item-info{ flex-grow:1; display:flex; flex-direction:column; gap:5px; min-width:0; }
+.news-item-info strong{ font-family:'Barlow Condensed',sans-serif; font-weight:700; color:#f2f2f2; font-size:1.05rem; }
+.news-item-badges{ display:flex; flex-wrap:wrap; gap:6px; }
+.news-badge{ font-size:.62rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:2px 9px; white-space:nowrap; }
+.news-badge-destacada{ background:#e2231a; color:#fff; }
+.news-badge-borrador{ background:#3a3a3e; color:#c9c9c9; }
+.news-badge-cat{ background:transparent; border:1px solid #3a3a3e; color:#9a9a9a; }
+.news-item-meta{ color:#7a7a7e; font-size:.7rem; text-transform:uppercase; letter-spacing:.04em; }
+.news-item-actions{ display:flex; gap:8px; flex-shrink:0; }
+.news-item-actions .admin-btn-edit,
+.news-item-actions .admin-btn-delete{
+  background:transparent; border:2px solid #3a3a3e; color:#f2f2f2;
+  font-family:'Barlow Condensed',sans-serif; font-weight:700; padding:6px 14px; cursor:pointer;
+}
+.news-item-actions .admin-btn-edit:hover{ border-color:#e2231a; color:#ff6b60; }
+.news-item-actions .admin-btn-delete{ border-color:#e2231a; color:#ff6b60; }
+.news-item-actions .admin-btn-delete:hover{ background:#e2231a; color:#fff; }
+@media (max-width:680px){
+  .synth-item, .news-item{ flex-wrap:wrap; }
+  .synth-item-actions, .news-item-actions{ width:100%; justify-content:flex-end; }
 }
 
 /* ===== 12. CARRITO Y MODAL DE LOGIN ===== */
