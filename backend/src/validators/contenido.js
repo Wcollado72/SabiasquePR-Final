@@ -13,7 +13,7 @@ const DIVULGACION_IA_VALIDAS = ['no', 'parcial', 'generado'];
 const CITA_ESTILOS_VALIDOS = [
   'apa', 'mla', 'chicago', 'turabian', 'ama', 'vancouver', 'abnt', 'icontec', 'ieee', 'bluebook',
 ];
-const SUBSECCIONES_VALIDAS = ['nuevos-humanos', 'revolucion-mundial', 'logica-humana', 'corrupcion-humana'];
+const SUBSECCIONES_VALIDAS = ['nuevos-humanos', 'revolucion-mundial', 'logica-humana', 'corrupcion-humana', 'ilogica-humana'];
 // `enfoque` es un segundo eje reutilizable: institucional/individual dentro
 // de Corrupcion Humana, o la region dentro de Nueva Humanidad.
 const ENFOQUES_VALIDOS = [

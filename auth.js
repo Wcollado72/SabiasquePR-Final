@@ -157,9 +157,12 @@ async function signIn(email, password) {
   setTimeout(() => window.closeLoginModal?.(), 900);
 }
 
-async function signUp(email, password) {
+async function signUp(email, password, fechaNacimiento) {
   setAuthStatus('Registrando...', 'info');
-  const { error } = await supabase.auth.signUp({ email, password });
+  const { error } = await supabase.auth.signUp({
+    email, password,
+    options: { data: { fecha_nacimiento: fechaNacimiento } },
+  });
   if (error) { setAuthStatus('' + error.message, 'error'); return; }
   setAuthStatus('Revisa tu correo para confirmar tu cuenta.', 'ok');
 }
@@ -202,6 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let registerMode = false;
   const btnLogin = document.getElementById('btn-login');
   const linkRegister = document.getElementById('link-register');
+  const nacimientoWrap = document.getElementById('login-nacimiento-wrap');
 
   // Un solo handler que decide segun el modo actual, para no ir
   // agregando/quitando listeners distintos (eso dejaba el de login
@@ -231,6 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
     registerMode = !registerMode;
     if (btnLogin)     btnLogin.textContent     = registerMode ? 'Crear cuenta' : 'Entrar';
     if (linkRegister) linkRegister.textContent = registerMode ? '← Tengo cuenta' : 'Registrar';
+    if (nacimientoWrap) nacimientoWrap.hidden = !registerMode;
   });
 
   // Recuperar contraseña
@@ -266,9 +271,20 @@ function handleLogin() {
 function handleRegister() {
   const email = document.getElementById('login-email')?.value.trim();
   const pass  = document.getElementById('login-pass')?.value;
-  if (!email || !pass) { setAuthStatus('Completa todos los campos.', 'error'); return; }
+  const fechaNacimiento = document.getElementById('login-nacimiento')?.value;
+  if (!email || !pass || !fechaNacimiento) { setAuthStatus('Completa todos los campos.', 'error'); return; }
   if (pass.length < 8)  { setAuthStatus('La contraseña debe tener al menos 8 caracteres.', 'error'); return; }
-  signUp(email, pass);
+  // No se rechaza a nadie por su fecha de nacimiento (un sitio de audiencia
+  // mixta no puede bloquear a menores de 13 del sitio en general, ver
+  // AUDITORIA-LEGAL-MENORES.md) -- solo se valida que la fecha sea real y no
+  // este en el futuro. La edad real, una vez guardada, refuerza (nunca
+  // reemplaza) el gate de las secciones 18+ del lado del servidor.
+  const fecha = new Date(fechaNacimiento);
+  if (Number.isNaN(fecha.getTime()) || fecha > new Date()) {
+    setAuthStatus('La fecha de nacimiento no es válida.', 'error');
+    return;
+  }
+  signUp(email, pass, fechaNacimiento);
 }
 
 // ── ARRANQUE ────────────────────────────────────────────────

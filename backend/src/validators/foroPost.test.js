@@ -55,33 +55,33 @@ describe('validatePost', () => {
     expect(errors.length).toBeGreaterThanOrEqual(2);
   });
 
-  test('acepta hasta 500 palabras para un usuario regular', () => {
-    const cuerpo = Array(500).fill('palabra').join(' ');
+  test('acepta hasta 200 palabras para un usuario regular', () => {
+    const cuerpo = Array(200).fill('palabra').join(' ');
     expect(validatePost({ ...BASE, cuerpo }, 'usuario')).toEqual([]);
   });
 
-  test('rechaza mas de 500 palabras para un usuario regular', () => {
-    const cuerpo = Array(501).fill('palabra').join(' ');
+  test('rechaza mas de 200 palabras para un usuario regular', () => {
+    const cuerpo = Array(201).fill('palabra').join(' ');
     const errors = validatePost({ ...BASE, cuerpo }, 'usuario');
-    expect(errors).toContain('El mensaje no puede superar 500 palabras.');
+    expect(errors).toContain('El mensaje no puede superar 200 palabras.');
   });
 
-  test('permite hasta 1500 palabras para premium y admin', () => {
-    const cuerpo = Array(1500).fill('palabra').join(' ');
+  test('permite hasta 1000 palabras para premium y admin', () => {
+    const cuerpo = Array(1000).fill('palabra').join(' ');
     expect(validatePost({ ...BASE, cuerpo }, 'premium')).toEqual([]);
     expect(validatePost({ ...BASE, cuerpo }, 'admin')).toEqual([]);
   });
 
-  test('rechaza mas de 1500 palabras para premium', () => {
-    const cuerpo = Array(1501).fill('palabra').join(' ');
+  test('rechaza mas de 1000 palabras para premium', () => {
+    const cuerpo = Array(1001).fill('palabra').join(' ');
     const errors = validatePost({ ...BASE, cuerpo }, 'premium');
-    expect(errors).toContain('El mensaje no puede superar 1500 palabras.');
+    expect(errors).toContain('El mensaje no puede superar 1000 palabras.');
   });
 
   test('usa el limite de usuario regular si no se especifica rol', () => {
-    const cuerpo = Array(501).fill('palabra').join(' ');
+    const cuerpo = Array(201).fill('palabra').join(' ');
     const errors = validatePost({ ...BASE, cuerpo });
-    expect(errors).toContain('El mensaje no puede superar 500 palabras.');
+    expect(errors).toContain('El mensaje no puede superar 200 palabras.');
   });
 
   test('rechaza enlace multimedia de un usuario regular', () => {

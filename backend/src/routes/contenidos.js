@@ -57,7 +57,11 @@ function truncarCuerpo(cuerpo) {
 // de la API a mano.
 function aplicarMuroDePago(contenido, user) {
   const tieneAcceso = user && (user.rol === 'premium' || user.rol === 'admin');
-  const requierePremium = contenido.es_premium || contenido.subseccion === 'logica-humana';
+  // 2026-09-27: se elimino el premium ligado a la seccion completa de
+  // Logica Humana -- ver todo el sitio es gratis para cualquiera, con o
+  // sin cuenta. El muro de pago ahora es exclusivamente por pieza
+  // individual marcada es_premium, sin importar la seccion.
+  const requierePremium = contenido.es_premium;
   if (!requierePremium || tieneAcceso) {
     return { ...contenido, bloqueado: false };
   }

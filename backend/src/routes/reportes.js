@@ -37,8 +37,8 @@ router.get('/', requireAuth, requireModerador, async (req, res) => {
     let where = '';
     if (estado) { params.push(estado); where = `WHERE r.estado = $${params.length}`; }
     const { rows } = await pool.query(
-      `SELECT r.id, r.tipo, r.item_id, r.motivo, r.estado, r.creado_en, pf.email AS reportado_por_email
-       FROM reportes r JOIN perfiles pf ON pf.id = r.reportado_por
+      `SELECT r.id, r.tipo, r.item_id, r.motivo, r.estado, r.automatico, r.creado_en, pf.email AS reportado_por_email
+       FROM reportes r LEFT JOIN perfiles pf ON pf.id = r.reportado_por
        ${where}
        ORDER BY (r.estado = 'pendiente') DESC, r.creado_en DESC`,
       params

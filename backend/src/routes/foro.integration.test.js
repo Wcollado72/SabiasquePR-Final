@@ -13,6 +13,16 @@ const ADMIN = JSON.stringify({ id: 'admin-1', rol: 'admin', edad_confirmada: tru
 const SIN_EDAD_CONFIRMADA = JSON.stringify({ id: 'user-menor', rol: 'usuario', edad_confirmada: false });
 const CUENTA_NUEVA = JSON.stringify({ id: 'user-nuevo', rol: 'usuario', edad_confirmada: true, creado_en: new Date().toISOString() });
 const MODERADOR = JSON.stringify({ id: 'mod-1', rol: 'moderador', edad_confirmada: true });
+// Fecha de nacimiento REAL conocida -- ver AUDITORIA-LEGAL-MENORES.md: el
+// dato conocido siempre gana sobre el checkbox de autoafirmacion.
+const MENOR_CON_FECHA_CONOCIDA = JSON.stringify({
+  id: 'user-menor-real', rol: 'usuario', edad_confirmada: true,
+  fecha_nacimiento: new Date(Date.now() - 16 * 365.25 * 24 * 3600 * 1000).toISOString().slice(0, 10),
+});
+const ADULTO_SIN_CONFIRMAR = JSON.stringify({
+  id: 'user-adulto-sin-check', rol: 'usuario', edad_confirmada: false,
+  fecha_nacimiento: new Date(Date.now() - 25 * 365.25 * 24 * 3600 * 1000).toISOString().slice(0, 10),
+});
 
 const POST_VALIDO = { titulo: 'Un titulo valido', cuerpo: 'Un mensaje suficientemente largo.', subseccion: 'corrupcion-humana' };
 
@@ -52,18 +62,18 @@ describe('POST /api/foro/posts', () => {
     expect(res.body.post.id).toBe('p1');
   });
 
-  test('400 si un usuario regular supera las 500 palabras', async () => {
-    const cuerpo = Array(501).fill('palabra').join(' ');
+  test('400 si un usuario regular supera las 200 palabras', async () => {
+    const cuerpo = Array(201).fill('palabra').join(' ');
     const res = await request(app)
       .post('/api/foro/posts')
       .set('x-test-user', AUTOR)
       .send({ titulo: 'Titulo valido', cuerpo, subseccion: 'corrupcion-humana' });
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('500 palabras');
+    expect(res.body.error).toContain('200 palabras');
   });
 
-  test('201 si un usuario regular publica hasta 500 palabras', async () => {
-    const cuerpo = Array(300).fill('palabra').join(' ');
+  test('201 si un usuario regular publica hasta 200 palabras', async () => {
+    const cuerpo = Array(150).fill('palabra').join(' ');
     pool.query.mockResolvedValueOnce({ rows: [{ id: 'p1', autor_id: 'user-autor', titulo: 'Titulo valido', cuerpo }] });
     const res = await request(app)
       .post('/api/foro/posts')
@@ -72,8 +82,8 @@ describe('POST /api/foro/posts', () => {
     expect(res.status).toBe(201);
   });
 
-  test('201 si un premium publica hasta 1500 palabras con enlace multimedia', async () => {
-    const cuerpo = Array(1200).fill('palabra').join(' ');
+  test('201 si un premium publica hasta 1000 palabras con enlace multimedia', async () => {
+    const cuerpo = Array(800).fill('palabra').join(' ');
     pool.query.mockResolvedValueOnce({ rows: [{ id: 'p1', autor_id: 'user-premium', titulo: 'Titulo valido', cuerpo }] });
     const res = await request(app)
       .post('/api/foro/posts')
@@ -117,6 +127,47 @@ describe('POST /api/foro/posts', () => {
       .set('x-test-user', SIN_EDAD_CONFIRMADA)
       .send({ titulo: 'Titulo valido', cuerpo: 'Un mensaje suficientemente largo.', subseccion: 'nuevos-humanos' });
     expect(res.status).toBe(201);
+  });
+
+  test('403 en corrupcion-humana si la fecha de nacimiento real dice que es menor, aunque haya marcado el checkbox', async () => {
+    const res = await request(app)
+      .post('/api/foro/posts')
+      .set('x-test-user', MENOR_CON_FECHA_CONOCIDA)
+      .send(POST_VALIDO);
+    expect(res.status).toBe(403);
+  });
+
+  test('403 en corrupcion-humana si es adulto por fecha de nacimiento pero no marco el checkbox (la fecha no reemplaza el consentimiento)', async () => {
+    const res = await request(app)
+      .post('/api/foro/posts')
+      .set('x-test-user', ADULTO_SIN_CONFIRMAR)
+      .send(POST_VALIDO);
+    expect(res.status).toBe(403);
+  });
+
+  test('201 y crea un reporte automatico si el texto coincide con un patron de riesgo', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'p1', autor_id: 'user-autor', titulo: 'Hola' }] }) // INSERT del post
+      .mockResolvedValueOnce({ rows: [] }); // INSERT del reporte automatico
+    const res = await request(app)
+      .post('/api/foro/posts')
+      .set('x-test-user', AUTOR)
+      .send({ titulo: 'Hola', cuerpo: 'agregame a whatsapp para seguir hablando', subseccion: 'corrupcion-humana' });
+    expect(res.status).toBe(201);
+    expect(pool.query).toHaveBeenCalledTimes(2);
+    const [sql, params] = pool.query.mock.calls[1];
+    expect(sql).toContain('INSERT INTO reportes');
+    expect(params).toEqual(['debate_post', 'p1', 'Detección automática: Solicitud de contacto fuera de la plataforma']);
+  });
+
+  test('201 sin reporte automatico si el texto no coincide con ningun patron de riesgo', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'p1', autor_id: 'user-autor', titulo: 'Hola' }] });
+    const res = await request(app)
+      .post('/api/foro/posts')
+      .set('x-test-user', AUTOR)
+      .send(POST_VALIDO);
+    expect(res.status).toBe(201);
+    expect(pool.query).toHaveBeenCalledTimes(1);
   });
 
   test('201 en educacion sin confirmar edad (foro 12+ sin gate)', async () => {
@@ -311,6 +362,22 @@ describe('POST /api/foro/posts/:postId/comentarios', () => {
       .set('x-test-user', SIN_EDAD_CONFIRMADA)
       .send({ cuerpo: 'Un comentario' });
     expect(res.status).toBe(403);
+  });
+
+  test('201 y crea un reporte automatico si el comentario coincide con un patron de riesgo', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'p2', subseccion: 'nuevos-humanos' }] }) // SELECT del post
+      .mockResolvedValueOnce({ rows: [{ id: 'c1', post_id: 'p2', cuerpo: 'mandame una foto tuya' }] }) // INSERT del comentario
+      .mockResolvedValueOnce({ rows: [] }); // INSERT del reporte automatico
+    const res = await request(app)
+      .post('/api/foro/posts/p2/comentarios')
+      .set('x-test-user', AUTOR)
+      .send({ cuerpo: 'mandame una foto tuya' });
+    expect(res.status).toBe(201);
+    expect(pool.query).toHaveBeenCalledTimes(3);
+    const [sql, params] = pool.query.mock.calls[2];
+    expect(sql).toContain('INSERT INTO reportes');
+    expect(params).toEqual(['debate_comentario', 'c1', 'Detección automática: Solicitud de fotos/contenido personal']);
   });
 
   test('201 al comentar en nuevos-humanos sin confirmar edad (no la exige)', async () => {

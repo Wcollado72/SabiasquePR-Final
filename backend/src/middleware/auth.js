@@ -27,14 +27,19 @@ async function requireAuth(req, res, next) {
     const { payload } = await jwtVerify(token, getJWKS());
     if (!payload.sub) return res.status(401).json({ ok: false, error: 'Token invalido.' });
 
+    // fecha_nacimiento viaja en el user_metadata del JWT (se paso como
+    // options.data al hacer signUp) -- solo se guarda en el INSERT inicial,
+    // nunca se sobreescribe despues, para que una cuenta ya creada no pueda
+    // "editar" su fecha de nacimiento via un token nuevo.
+    const fechaNacimiento = payload.user_metadata?.fecha_nacimiento || null;
     const { rows } = await pool.query(
-      `INSERT INTO perfiles (id, email)
-       VALUES ($1, $2)
+      `INSERT INTO perfiles (id, email, fecha_nacimiento)
+       VALUES ($1, $2, $3)
        ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email
-       RETURNING id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok, creado_en`,
-      [payload.sub, payload.email || null]
+       RETURNING id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok, fecha_nacimiento, creado_en`,
+      [payload.sub, payload.email || null, fechaNacimiento]
     );
-    req.user = rows[0]; // { id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok, creado_en }
+    req.user = rows[0]; // { id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok, fecha_nacimiento, creado_en }
     next();
   } catch (err) {
     res.status(401).json({ ok: false, error: 'Token invalido o expirado.' });
@@ -71,7 +76,7 @@ async function tryAuth(req, _res, next) {
   try {
     const { payload } = await jwtVerify(token, getJWKS());
     if (!payload.sub) { req.user = null; return next(); }
-    const { rows } = await pool.query('SELECT id, email, rol, edad_confirmada, logica_humana_terminos_ok, creado_en FROM perfiles WHERE id = $1', [payload.sub]);
+    const { rows } = await pool.query('SELECT id, email, rol, edad_confirmada, logica_humana_terminos_ok, fecha_nacimiento, creado_en FROM perfiles WHERE id = $1', [payload.sub]);
     req.user = rows[0] || null;
   } catch {
     req.user = null;

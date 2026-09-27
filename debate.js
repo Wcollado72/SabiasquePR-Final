@@ -1,5 +1,5 @@
 // ============================================================
-// debate.js — Sabías que PR · Debate semanal 18+ (Corrupción Humana)
+// debate.js — Sabías que PR · Debate semanal 18+ (Corrupción Humana / Ilógica Humana)
 // ============================================================
 // Motor de discusión embebido dentro de una sub-sección de Revolución
 // Humana (no es su propia página, a diferencia del extinto Foro general).
@@ -20,7 +20,9 @@
   let currentUserRol = 'usuario';
   let currentUserEdadConfirmada = false;
 
-  const WORD_LIMITS = { usuario: 500, premium: 1500, admin: 1500 };
+  // Politica confirmada 2026-09-27: 200 palabras para cuentas regulares,
+  // 1000 para premium/admin -- aplica igual en todas las sub-secciones.
+  const WORD_LIMITS = { usuario: 200, premium: 1000, admin: 1000 };
   function countWords(text) {
     return (text || '').trim().split(/\s+/).filter(Boolean).length;
   }
@@ -30,23 +32,29 @@
     'puerto-rico': 'Puerto Rico', 'estados-unidos': 'Estados Unidos',
     hispanoamerica: 'Hispanoamérica', internacionales: 'Internacionales',
   };
-  // Solo las sub-secciones de tono fuerte/moderacion minima piden el
-  // interstitial 18+ -- Nuevos Humanos (contenido positivo) no lo necesita.
-  const SUBSECCIONES_18_MAS = ['corrupcion-humana'];
+  // Politica de edad por seccion fijada 2026-09-27: solo Corrupcion Humana
+  // e Ilogica Humana son 18+ (piden el interstitial). Nuevos Humanos y
+  // Logica Humana son 12+ y no lo necesitan.
+  const SUBSECCIONES_18_MAS = ['corrupcion-humana', 'ilogica-humana'];
   // Opciones del select "Enfoque" del formulario de nueva publicacion,
-  // segun la sub-seccion activa.
+  // segun la sub-seccion activa -- las 4 secciones usan el mismo eje de
+  // region (institucional/individual se descarto 2026-09-27, ver
+  // IDEAS-PENDIENTES.md -- se guarda el concepto por si hace falta mas
+  // adelante, pero ya no es un filtro publico).
+  const REGIONES = [
+    ['puerto-rico', 'Puerto Rico'], ['estados-unidos', 'Estados Unidos'],
+    ['hispanoamerica', 'Hispanoamérica'], ['internacionales', 'Internacionales'],
+  ];
   const ENFOQUE_OPCIONES = {
-    'corrupcion-humana': [['institucional', 'Institucional'], ['individual', 'Individual (Humanos Inhumanos)']],
-    'nuevos-humanos': [
-      ['puerto-rico', 'Puerto Rico'], ['estados-unidos', 'Estados Unidos'],
-      ['hispanoamerica', 'Hispanoamérica'], ['internacionales', 'Internacionales'],
-    ],
+    'corrupcion-humana': REGIONES,
+    'ilogica-humana': REGIONES,
+    'nuevos-humanos': REGIONES,
   };
 
   const DISCLAIMER_HTML = `
     <div class="debate-disclaimer box box-blog">
       <h3>⚠️ Sección para mayores de 18 años</h3>
-      <p>Esta sección trata temas de corrupción, fallos institucionales y conducta individual con un enfoque de moderación mínima. La base de esta sección es la libertad de expresión: no se censura una opinión por ser incómoda o impopular.</p>
+      <p>Esta sección trata temas fuertes de la conducta y el pensamiento humano — corrupción, decisiones ilógicas, fallos institucionales y personales — con un enfoque de moderación mínima. La base de esta sección es la libertad de expresión: no se censura una opinión por ser incómoda o impopular.</p>
       <p>Legalmente, lo que protege a este sitio de responsabilidad por lo que publican los usuarios es la <strong>Sección 230 de la Communications Decency Act</strong> de EE. UU. — no significa que "todo vale": casos extremos (amenazas de daño corporal u otro contenido ilegal similar) se reportan y se revisan.</p>
       <p>Al continuar, confirmas bajo tu propia responsabilidad que eres mayor de 18 años. No se realiza ninguna verificación de identidad — esta responsabilidad es tuya.</p>
       <label class="admin-checkbox"><input type="checkbox" id="debate-confirmar-edad-check"> Confirmo que soy mayor de 18 años y acepto los términos de esta sección.</label>
@@ -121,8 +129,14 @@
     return d.innerHTML;
   }
 
-  function sessionEdadKey(subseccion) {
-    return `sqpr_edad_confirmada_${subseccion}`;
+  // Una sola clave compartida entre TODAS las secciones 18+ (no una por
+  // sub-seccion) -- confirmar la edad es un hecho sobre la persona, no
+  // sobre el contenido que esta viendo (mismo criterio que edad_confirmada
+  // en el perfil de un usuario con sesion). Pedido explicito 2026-09-27:
+  // entrar a Corrupcion Humana ya desbloquea Ilogica Humana (y cualquier
+  // otra seccion 18+ futura) sin volver a preguntar -- menos clics.
+  function sessionEdadKey() {
+    return 'sqpr_edad_confirmada_18mas';
   }
 
   // API pública: se llama desde revolucion-humana.html cuando la pestaña de
@@ -155,7 +169,7 @@
     const requiereEdad = SUBSECCIONES_18_MAS.includes(subseccion);
     const edadConfirmada = !requiereEdad || (currentUser
       ? currentUserEdadConfirmada
-      : sessionStorage.getItem(sessionEdadKey(subseccion)) === '1');
+      : sessionStorage.getItem(sessionEdadKey()) === '1');
 
     if (!edadConfirmada) {
       renderDisclaimer(root, subseccion, containerId);
@@ -177,7 +191,7 @@
           currentUserEdadConfirmada = true;
         } catch (err) { alert('' + err.message); return; }
       } else {
-        sessionStorage.setItem(sessionEdadKey(subseccion), '1');
+        sessionStorage.setItem(sessionEdadKey(), '1');
       }
       renderDebate(root, subseccion);
     });
@@ -425,11 +439,12 @@
 
   // Auto-wiring para revolucion-humana.html: el bloque de debate solo se
   // muestra/inicializa cuando una pestaña con debate habilitado del sub-nav
-  // de Revolución Humana está activa; el filtro de "enfoque" (region) solo
-  // aplica visualmente a Nuevos Humanos -- las demas sub-secciones no
-  // tienen un eje de enfoque publico todavia.
-  const DEBATE_SUBSECCIONES = ['corrupcion-humana', 'nuevos-humanos'];
-  const ENFOQUE_FILTRO_SUBSECCIONES = ['nuevos-humanos'];
+  // de Revolución Humana está activa. Logica Humana no tiene foro publico
+  // (es el area personal de Aliado Imperfekto, ver logica-humana.js) --
+  // las otras 3 secciones si. El filtro de "enfoque" (region) aplica por
+  // igual a las 4 secciones desde 2026-09-27 (modelo unico Sección→Región).
+  const DEBATE_SUBSECCIONES = ['corrupcion-humana', 'ilogica-humana', 'nuevos-humanos'];
+  const ENFOQUE_FILTRO_SUBSECCIONES = ['nuevos-humanos', 'logica-humana', 'corrupcion-humana', 'ilogica-humana'];
   document.addEventListener('DOMContentLoaded', () => {
     const subnav = document.getElementById('rh-subnav');
     const container = document.getElementById('rh-debate');

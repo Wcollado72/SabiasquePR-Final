@@ -123,16 +123,20 @@ const CITA_ESTILOS = {
   apa: 'APA', mla: 'MLA', chicago: 'Chicago', turabian: 'Turabian', ama: 'AMA',
   vancouver: 'Vancouver', abnt: 'ABNT', icontec: 'ICONTEC', ieee: 'IEEE', bluebook: 'Bluebook',
 };
-// Sub-secciones de Revolución Humana. "Lógica Humana", "Nuevos Humanos" y
-// "Corrupción Humana" tienen pestaña pública; "Revolución Mundial" ya se
-// admite en el modelo/admin para no migrar de nuevo cuando se active.
-// "Nuevos Humanos" se llamó "Nueva Humanidad" hasta el 2026-09-25 -- el
-// nombre se liberó al renombrar la página nuevos-humanos.html a
-// revolucion-humana.html (habla más directo/personal, mejor conexión
-// emocional que el nombre genérico).
+// Sub-secciones de Revolución Humana. "Lógica Humana", "Nuevos Humanos",
+// "Corrupción Humana" e "Ilógica Humana" tienen pestaña pública; "Revolución
+// Mundial" ya se admite en el modelo/admin para no migrar de nuevo cuando
+// se active. "Nuevos Humanos" se llamó "Nueva Humanidad" hasta el
+// 2026-09-25 -- el nombre se liberó al renombrar la página
+// nuevos-humanos.html a revolucion-humana.html (habla más directo/personal,
+// mejor conexión emocional que el nombre genérico). "Ilógica Humana" se
+// agregó 2026-09-27: foro público de debate, mismo patrón que Corrupción
+// Humana (18+), emparejadas como "lo peor" de la humanidad, frente a
+// Nuevos Humanos + Lógica Humana como "lo mejor".
 const SUBSECCIONES = {
   'nuevos-humanos': 'Nuevos Humanos', 'revolucion-mundial': 'Revolución Mundial',
   'logica-humana': 'Lógica Humana', 'corrupcion-humana': 'Corrupción Humana',
+  'ilogica-humana': 'Ilógica Humana',
 };
 
 // Segundo eje, reutilizable, con significado distinto segun la sub-seccion:
@@ -180,6 +184,10 @@ const LOGIN_BOX = `
           <div class="pass-field">
             <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
             ${PASS_TOGGLE_BTN('login-pass')}
+          </div>
+          <div id="login-nacimiento-wrap" hidden>
+            <label for="login-nacimiento">Fecha de nacimiento</label>
+            <input type="date" id="login-nacimiento" autocomplete="bday">
           </div>
           <div class="login-actions">
             <button type="button" id="btn-login">Entrar</button>
@@ -573,12 +581,18 @@ const PAGES = [
   {
     file: 'revolucion-humana.html',
     title: 'Sabías que PR — Revolución Humana',
-    description: 'Videos, ensayos y noticias sobre lo que la humanidad está logrando, descubriendo y sanando.',
+    description: 'Videos, ensayos y noticias sobre lo mejor de la humanidad, lo que le falla, y la esperanza de que podemos ser mejores.',
     heroH2: 'Revolución Humana',
-    heroP: 'Lo que la humanidad está logrando, descubriendo y sanando.',
+    heroP: 'Lo mejor de la humanidad, lo que le falla — y la esperanza de que podemos ser mejores.',
     heroClass: 'hero-positivo',
     mainClass: 'main-block',
     mainContent: `
+      <nav class="foro-filters" id="rh-subnav" data-filter-param="subseccion">
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-subseccion="corrupcion-humana">Corrupción Humana</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-subseccion="ilogica-humana">Ilógica Humana</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-subseccion="logica-humana">Lógica Humana</button>
+        <button type="button" class="foro-filter-btn active" aria-pressed="true" data-subseccion="nuevos-humanos">Nuevos Humanos</button>
+      </nav>
       <section class="lh-author-intro" id="rh-lh-intro">
         <div class="lh-author-photo-wrap">
           <img src="images/aliado-imperfekto-retrato-v2-sin-texto.webp" alt="Aliado Imperfekto: una figura encapuchada con el rostro oculto en sombra y una grieta dorada en el hombro, sostiene un farol encendido de espaldas al espectador, junto a una multitud diversa que camina hacia el horizonte al atardecer, con un mapa del mundo de fondo" class="lh-author-photo">
@@ -593,11 +607,6 @@ const PAGES = [
           <div id="rh-imagen-significado" hidden></div>
         </div>
       </section>
-      <nav class="foro-filters" id="rh-subnav" data-filter-param="subseccion">
-        <button type="button" class="foro-filter-btn active" aria-pressed="true" data-subseccion="nuevos-humanos">Nuevos Humanos</button>
-        <button type="button" class="foro-filter-btn" aria-pressed="false" data-subseccion="logica-humana">Lógica Humana</button>
-        <button type="button" class="foro-filter-btn" aria-pressed="false" data-subseccion="corrupcion-humana">Corrupción Humana</button>
-      </nav>
       <nav class="foro-filters foro-filters-sub" id="rh-enfoque-filter" data-filter-param="enfoque" hidden>
         <button type="button" class="foro-filter-btn active" aria-pressed="true" data-enfoque="puerto-rico">Puerto Rico</button>
         <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="estados-unidos">Estados Unidos</button>
@@ -1300,7 +1309,7 @@ const PAGES = [
           <p><strong>Enfoques principales:</strong></p>
           <ul>
             <li>Noticias variadas en distintos formatos y categorías, con el compromiso de un 95%+ de confiabilidad en cada dato.</li>
-            <li>Revolución Humana: lo mejor de la humanidad (Nuevos Humanos), lo que le falla (Corrupción Humana), y las ideas personales de Aliado Imperfekto (Lógica Humana).</li>
+            <li>Revolución Humana: lo mejor de la humanidad (Nuevos Humanos), las ideas personales de Aliado Imperfekto (Lógica Humana), lo que le falla (Corrupción Humana), y sus decisiones más ilógicas (Ilógica Humana).</li>
             <li>Educación con datos reales — desde rankings educativos mundiales hasta leyes, estudiantes y programas que están cambiando la enseñanza.</li>
             <li>Foros de discusión moderados en cada sección, para pensar en comunidad, no solo leer en solitario.</li>
           </ul>

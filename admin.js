@@ -1001,9 +1001,10 @@
     el.innerHTML = reportesCache.length ? reportesCache.map((r) => `
       <div class="synth-item">
         <div class="synth-item-info">
-          <strong>${REPORTE_TIPO_LABEL[r.tipo] || r.tipo} reportada por ${escapeHtml(r.reportado_por_email)}</strong>
+          <strong>${REPORTE_TIPO_LABEL[r.tipo] || r.tipo} ${r.automatico ? '— detección automática' : `reportada por ${escapeHtml(r.reportado_por_email)}`}</strong>
           <div class="synth-item-badges">
             <span class="synth-badge ${r.estado === 'pendiente' ? 'synth-badge-destacado' : 'synth-badge-seccion'}">${REPORTE_ESTADO_LABEL[r.estado] || r.estado}</span>
+            ${r.automatico ? '<span class="synth-badge synth-badge-destacado">🤖 automático</span>' : ''}
           </div>
           <span class="synth-item-meta">${escapeHtml(r.motivo)}</span>
         </div>

@@ -3,12 +3,16 @@ const { pool } = require('../db');
 const { enviarError500 } = require('../util/errores');
 const { requireAuth } = require('../middleware/auth');
 const { validatePost } = require('../validators/foroPost');
+const { esMenorConocido } = require('../util/edad');
+const { detectarRiesgo } = require('../util/deteccionRiesgo');
 
 const router = express.Router();
 
 // El gate de edad 18+ solo aplica a sub-secciones de tono fuerte/moderacion
-// minima -- Nueva Humanidad (contenido positivo) no lo necesita.
-const SUBSECCIONES_18_MAS = ['corrupcion-humana'];
+// minima -- Nuevos Humanos y Logica Humana (12+) no lo necesitan. Politica
+// de edad por seccion fijada 2026-09-27: solo Corrupcion Humana e Ilogica
+// Humana son 18+.
+const SUBSECCIONES_18_MAS = ['corrupcion-humana', 'ilogica-humana'];
 
 // Admin y moderador pueden editar/borrar cualquier post o comentario del
 // debate (moderacion real) -- el moderador NO tiene acceso al CRUD de
@@ -16,6 +20,32 @@ const SUBSECCIONES_18_MAS = ['corrupcion-humana'];
 // solo admin via requireAdmin en esas rutas.
 function esModeracion(rol) {
   return rol === 'admin' || rol === 'moderador';
+}
+
+// Bloquea si la subseccion es 18+ y, o bien el usuario nunca lo autoafirmo
+// (edad_confirmada), o bien -- mas fuerte -- su fecha de nacimiento REAL
+// (cuando se conoce, ver AUDITORIA-LEGAL-MENORES.md) dice que es menor de 18.
+// El dato conocido siempre gana sobre el checkbox: nadie puede "mentir" por
+// encima de una fecha de nacimiento ya registrada.
+function bloqueadoPorEdad(user, subseccion) {
+  if (!SUBSECCIONES_18_MAS.includes(subseccion)) return false;
+  if (esMenorConocido(user.fecha_nacimiento, 18)) return true;
+  return !user.edad_confirmada;
+}
+
+// Si `texto` coincide con un patron de riesgo, crea un reporte automatico
+// (pendiente, sin reportado_por -- ver AUDITORIA-LEGAL-MENORES.md) para que
+// un moderador lo revise con prioridad. Nunca bloquea ni borra el contenido
+// por si sola; un error aqui tampoco debe tumbar la publicacion del post/
+// comentario, por eso se llama envuelta en su propio try/catch desde fuera.
+async function marcarSiHayRiesgo(tipo, itemId, texto) {
+  const categoria = detectarRiesgo(texto);
+  if (!categoria) return;
+  await pool.query(
+    `INSERT INTO reportes (tipo, item_id, reportado_por, motivo, automatico)
+     VALUES ($1, $2, NULL, $3, true)`,
+    [tipo, itemId, `Detección automática: ${categoria}`]
+  );
 }
 
 // Anti-bots gratis para el debate publico (sin CAPTCHA): honeypot + cooldown
@@ -125,7 +155,7 @@ router.post('/posts', requireAuth, async (req, res) => {
   if (cuentaEnCooldown(req.user)) {
     return res.status(403).json({ ok: false, error: `Tu cuenta debe tener al menos ${COOLDOWN_HORAS_CUENTA_NUEVA} hora(s) de creada para publicar aquí.` });
   }
-  if (SUBSECCIONES_18_MAS.includes(req.body.subseccion) && !req.user.edad_confirmada) {
+  if (bloqueadoPorEdad(req.user, req.body.subseccion)) {
     return res.status(403).json({ ok: false, error: 'Debes confirmar que eres mayor de 18 años para participar en esta sección.' });
   }
   if (!(await verificarTurnstile(req.body.turnstileToken))) {
@@ -142,6 +172,7 @@ router.post('/posts', requireAuth, async (req, res) => {
        RETURNING id, titulo, cuerpo, subseccion, enfoque, enlace_media, enlace_media_tipo, destacado, tema_contenido_id, autor_id, creado_en, editado_en`,
       [req.user.id, titulo.trim(), cuerpo.trim(), subseccion, enfoque || null, enlaceMedia || null, enlaceMediaTipo || null, destacado, temaContenidoId]
     );
+    try { await marcarSiHayRiesgo('debate_post', rows[0].id, `${titulo} ${cuerpo}`); } catch { /* nunca tumbar la publicacion por esto */ }
     res.status(201).json({ ok: true, post: rows[0] });
   } catch (err) { enviarError500(res, err); }
 });
@@ -196,7 +227,7 @@ router.post('/posts/:postId/comentarios', requireAuth, async (req, res) => {
     if (cuerpo.length < 2) return res.status(400).json({ ok: false, error: 'El comentario es muy corto.' });
     const { rows: postExists } = await pool.query('SELECT id, subseccion FROM foro_posts WHERE id = $1', [req.params.postId]);
     if (postExists.length === 0) return res.status(404).json({ ok: false, error: 'Publicacion no encontrada.' });
-    if (SUBSECCIONES_18_MAS.includes(postExists[0].subseccion) && !req.user.edad_confirmada) {
+    if (bloqueadoPorEdad(req.user, postExists[0].subseccion)) {
       return res.status(403).json({ ok: false, error: 'Debes confirmar que eres mayor de 18 años para participar en esta sección.' });
     }
 
@@ -205,6 +236,7 @@ router.post('/posts/:postId/comentarios', requireAuth, async (req, res) => {
        RETURNING id, post_id, cuerpo, autor_id, creado_en`,
       [req.params.postId, req.user.id, cuerpo]
     );
+    try { await marcarSiHayRiesgo('debate_comentario', rows[0].id, cuerpo); } catch { /* nunca tumbar el comentario por esto */ }
     res.status(201).json({ ok: true, comentario: rows[0] });
   } catch (err) { enviarError500(res, err); }
 });

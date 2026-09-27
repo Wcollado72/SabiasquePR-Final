@@ -1,139 +1,18 @@
 // ============================================================
 // logica-humana.js — Sabías que PR · Área personal de Aliado Imperfekto
 // ============================================================
-// Sub-sección "Lógica Humana" dentro de Revolución Humana: solo premium,
-// con su propio disclaimer (separado del de Corrupción Humana) y una
-// sección de "Herramientas" con ensayos/recursos propios. El muro de pago
-// real vive en el servidor (backend/src/routes/contenidos.js,
-// aplicarMuroDePago trata subseccion==='logica-humana' como premium
-// completo) -- este script solo controla la experiencia del gate.
-// Mismo patrón getToken/apiFetch duplicado que ya es el estándar del sitio.
+// Sub-sección "Lógica Humana" dentro de Revolución Humana: espacio de
+// ensayos/recursos propios de Aliado Imperfekto. Es una sección normal,
+// abierta a cualquiera -- 2026-09-27 se eliminaron los tres gates que
+// tenía (edad 18+, premium, y el aviso de términos/Sección 230): el
+// usuario decidió que ver el sitio completo debe ser gratis para
+// cualquiera, con o sin cuenta, y que el aviso legal no era obligatorio
+// por ley (Sección 230 protege a la plataforma sin necesidad de
+// mostrárselo al usuario, y ya está cubierto de forma general en
+// terminos.html). Solo queda el acordeón de "Herramientas".
 // ============================================================
 
 (function () {
-  const cfg = window.SITE_CONFIG || {};
-  const API_URL = cfg.apiUrl || 'http://localhost:3000';
-  const isSupabaseConfigured = cfg.supabaseUrl && !cfg.supabaseUrl.includes('YOUR_SUPABASE');
-  let supabase = null;
-  let currentUser = null;
-  let currentUserRol = 'usuario';
-  let currentUserEdadConfirmada = false;
-  let currentUserTerminosOk = false;
-
-  const TERMINOS_HTML = `
-    <div class="debate-disclaimer box box-blog">
-      <h3>⚠️ Antes de entrar a Lógica Humana</h3>
-      <p>Esta es la sección personal de <strong>Aliado Imperfekto</strong> dentro de Sabías que PR: tema libre, tono reflexivo, escrita sin pretender tener siempre la razón. Es una sección para mayores de 18 años.</p>
-      <p>Igual que en el resto del sitio, lo que protege legalmente a esta plataforma por lo que aquí se publica es la <strong>Sección 230 de la Communications Decency Act</strong> de EE. UU. — la moderación es mínima, pero casos extremos (amenazas u otro contenido ilegal) se reportan y se revisan.</p>
-      <p>Al continuar, aceptas estos términos bajo tu propia responsabilidad.</p>
-      <label class="admin-checkbox"><input type="checkbox" id="lh-terminos-check"> Entiendo y acepto los términos de esta sección.</label>
-      <button type="button" id="lh-terminos-btn" class="btn btn-alt" disabled>Entrar</button>
-    </div>`;
-
-  async function waitForSharedSupabase(timeoutMs = 1500, intervalMs = 50) {
-    return new Promise((resolve) => {
-      const start = Date.now();
-      (function check() {
-        if (window.supabase) return resolve(window.supabase);
-        if (Date.now() - start >= timeoutMs) return resolve(null);
-        setTimeout(check, intervalMs);
-      })();
-    });
-  }
-
-  async function getToken() {
-    if (!supabase) return null;
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.access_token || null;
-  }
-
-  async function apiFetch(path, options = {}) {
-    const token = await getToken();
-    const headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
-    if (token) headers.Authorization = `Bearer ${token}`;
-    const res = await fetch(API_URL + path, Object.assign({}, options, { headers }));
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
-    return data;
-  }
-
-  function escapeHtml(str) {
-    const d = document.createElement('div');
-    d.textContent = str ?? '';
-    return d.innerHTML;
-  }
-
-  async function activarLogicaHumana(root) {
-    if (isSupabaseConfigured && !supabase) {
-      try {
-        const shared = await waitForSharedSupabase();
-        supabase = shared || (await (async () => {
-          const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
-          return createClient(cfg.supabaseUrl, cfg.supabaseKey);
-        })());
-        const { data: { session } } = await supabase.auth.getSession();
-        currentUser = session?.user ?? null;
-        if (currentUser) {
-          const me = await apiFetch('/api/me');
-          currentUserRol = me.user?.rol || 'usuario';
-          currentUserEdadConfirmada = Boolean(me.user?.edad_confirmada);
-          currentUserTerminosOk = Boolean(me.user?.logica_humana_terminos_ok);
-        }
-      } catch (err) {
-        console.warn('[Lógica Humana] Supabase no disponible:', err.message);
-      }
-    }
-
-    if (!currentUser || (currentUserRol !== 'premium' && currentUserRol !== 'admin')) {
-      root.innerHTML = '<p class="foro-loading">Esta sección es solo para cuentas premium — redirigiendo…</p>';
-      location.href = 'premium.html';
-      return;
-    }
-    if (!currentUserEdadConfirmada) {
-      renderEdadGate(root);
-      return;
-    }
-    if (!currentUserTerminosOk) {
-      renderTerminosGate(root);
-      return;
-    }
-    renderHerramientas(root);
-  }
-
-  function renderEdadGate(root) {
-    root.innerHTML = `
-      <div class="debate-disclaimer box box-blog">
-        <h3>⚠️ Lógica Humana es una sección para mayores de 18 años</h3>
-        <p>Antes de continuar, confirma bajo tu propia responsabilidad que eres mayor de edad. No se realiza ninguna verificación de identidad.</p>
-        <label class="admin-checkbox"><input type="checkbox" id="lh-edad-check"> Confirmo que soy mayor de 18 años.</label>
-        <button type="button" id="lh-edad-btn" class="btn btn-alt" disabled>Continuar</button>
-      </div>`;
-    const check = document.getElementById('lh-edad-check');
-    const btn = document.getElementById('lh-edad-btn');
-    check.addEventListener('change', () => { btn.disabled = !check.checked; });
-    btn.addEventListener('click', async () => {
-      try {
-        await apiFetch('/api/perfil/confirmar-edad', { method: 'POST' });
-        currentUserEdadConfirmada = true;
-        activarLogicaHumana(root);
-      } catch (err) { alert('' + err.message); }
-    });
-  }
-
-  function renderTerminosGate(root) {
-    root.innerHTML = TERMINOS_HTML;
-    const check = document.getElementById('lh-terminos-check');
-    const btn = document.getElementById('lh-terminos-btn');
-    check.addEventListener('change', () => { btn.disabled = !check.checked; });
-    btn.addEventListener('click', async () => {
-      try {
-        await apiFetch('/api/perfil/confirmar-terminos-logica-humana', { method: 'POST' });
-        currentUserTerminosOk = true;
-        activarLogicaHumana(root);
-      } catch (err) { alert('' + err.message); }
-    });
-  }
-
   function renderHerramientas(root) {
     root.innerHTML = `
       <section class="box box-blog lh-herramientas">
@@ -187,7 +66,7 @@
     function activar(subseccion) {
       if (subseccion === 'logica-humana') {
         container.hidden = false;
-        activarLogicaHumana(container);
+        renderHerramientas(container);
       } else {
         container.hidden = true;
         container.innerHTML = '';

@@ -138,19 +138,31 @@ describe('GET /api/contenidos/:id', () => {
 
   const LOGICA_ROW = { id: 'lh1', titulo: 'Idea', cuerpo: 'x'.repeat(500), url_media: null, es_premium: false, subseccion: 'logica-humana' };
 
-  test('un contenido de logica-humana se trunca aunque es_premium sea false', async () => {
+  // 2026-09-27: se elimino el premium ligado a la seccion completa de
+  // Logica Humana -- ver el sitio es gratis para cualquiera. El muro de
+  // pago ahora depende solo de es_premium, sin importar la subseccion.
+  test('un contenido de logica-humana con es_premium=false se ve completo para cualquiera', async () => {
     pool.query.mockResolvedValueOnce({ rows: [LOGICA_ROW] });
     const res = await request(app).get('/api/contenidos/lh1');
+    expect(res.body.contenido.bloqueado).toBe(false);
+    expect(res.body.contenido.cuerpo).toBe(LOGICA_ROW.cuerpo);
+  });
+
+  test('un contenido de logica-humana con es_premium=true SI se trunca para un usuario regular', async () => {
+    const row = { ...LOGICA_ROW, id: 'lh2', es_premium: true };
+    pool.query.mockResolvedValueOnce({ rows: [row] });
+    const res = await request(app).get('/api/contenidos/lh2');
     expect(res.body.contenido.bloqueado).toBe(true);
     expect(res.body.contenido.cuerpo.length).toBeLessThan(310);
   });
 
-  test('un contenido de logica-humana se ve completo para un usuario premium', async () => {
-    pool.query.mockResolvedValueOnce({ rows: [LOGICA_ROW] });
+  test('un contenido con es_premium=true se ve completo para un usuario premium', async () => {
+    const row = { ...LOGICA_ROW, id: 'lh2', es_premium: true };
+    pool.query.mockResolvedValueOnce({ rows: [row] });
     const PREMIUM_USER = JSON.stringify({ id: 'user-2', rol: 'premium' });
-    const res = await request(app).get('/api/contenidos/lh1').set('x-test-user', PREMIUM_USER);
+    const res = await request(app).get('/api/contenidos/lh2').set('x-test-user', PREMIUM_USER);
     expect(res.body.contenido.bloqueado).toBe(false);
-    expect(res.body.contenido.cuerpo).toBe(LOGICA_ROW.cuerpo);
+    expect(res.body.contenido.cuerpo).toBe(row.cuerpo);
   });
 });
 

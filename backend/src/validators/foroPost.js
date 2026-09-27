@@ -1,13 +1,16 @@
 // El "foro" evoluciono de un foro general (retirado, ver git history) al
 // motor del debate semanal 18+ de Revolucion Humana -- sigue siendo el
 // mismo CRUD+JWT, ahora acotado por sub-seccion y con reglas por rol.
-const SUBSECCIONES_VALIDAS = ['corrupcion-humana', 'nuevos-humanos', 'educacion'];
+const SUBSECCIONES_VALIDAS = ['corrupcion-humana', 'ilogica-humana', 'nuevos-humanos', 'educacion'];
 const ENFOQUES_VALIDOS = [
   'institucional', 'individual',
   'puerto-rico', 'estados-unidos', 'hispanoamerica', 'internacionales',
 ];
 const ENLACE_MEDIA_TIPOS_VALIDOS = ['imagen', 'audio', 'video'];
-const WORD_LIMITS = { usuario: 500, premium: 1500, admin: 1500 };
+// Politica confirmada 2026-09-27: 200 palabras para cuentas regulares en
+// cualquier foro/debate del sitio (no solo secciones 18+); mas de eso
+// requiere premium. Aplica por igual a todas las sub-secciones.
+const WORD_LIMITS = { usuario: 200, premium: 1000, admin: 1000 };
 
 function countWords(text) {
   return (text || '').trim().split(/\s+/).filter(Boolean).length;

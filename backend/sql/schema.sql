@@ -355,7 +355,7 @@ ALTER TABLE comentarios ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_subseccion_check;
 ALTER TABLE contenidos ADD CONSTRAINT contenidos_subseccion_check
   CHECK (subseccion IS NULL OR subseccion IN (
-    'nuevos-humanos', 'revolucion-mundial', 'logica-humana', 'corrupcion-humana'
+    'nuevos-humanos', 'revolucion-mundial', 'logica-humana', 'corrupcion-humana', 'ilogica-humana'
   ));
 
 -- `enfoque` es un segundo eje generico y reutilizable, con significado
@@ -376,7 +376,7 @@ ALTER TABLE contenidos ADD CONSTRAINT contenidos_enfoque_check
 ALTER TABLE foro_posts ADD COLUMN IF NOT EXISTS subseccion text NULL;
 ALTER TABLE foro_posts DROP CONSTRAINT IF EXISTS foro_posts_subseccion_check;
 ALTER TABLE foro_posts ADD CONSTRAINT foro_posts_subseccion_check
-  CHECK (subseccion IS NULL OR subseccion IN ('corrupcion-humana', 'nuevos-humanos', 'educacion'));
+  CHECK (subseccion IS NULL OR subseccion IN ('corrupcion-humana', 'ilogica-humana', 'nuevos-humanos', 'educacion'));
 
 ALTER TABLE foro_posts ADD COLUMN IF NOT EXISTS enfoque text NULL;
 ALTER TABLE foro_posts DROP CONSTRAINT IF EXISTS foro_posts_enfoque_check;
@@ -396,9 +396,19 @@ ALTER TABLE foro_posts ADD CONSTRAINT foro_posts_enlace_media_tipo_check
   CHECK (enlace_media_tipo IS NULL OR enlace_media_tipo IN ('imagen', 'audio', 'video'));
 
 -- Autoafirmacion de edad (checkbox del usuario, no verificacion real con
--- ID) para secciones 18+ (Corrupcion Humana, Logica Humana). Compartida
--- entre ambas -- es un hecho sobre la persona, no sobre el contenido.
+-- ID) para secciones 18+. Politica de edad por seccion fijada 2026-09-27:
+-- solo Corrupcion Humana e Ilogica Humana son 18+ (Nuevos Humanos y Logica
+-- Humana son 12+, sin este gate). Compartida entre las dos 18+ -- es un
+-- hecho sobre la persona, no sobre el contenido.
 ALTER TABLE perfiles ADD COLUMN IF NOT EXISTS edad_confirmada boolean NOT NULL DEFAULT false;
+
+-- Fecha de nacimiento real, capturada en el registro (2026-09-27, ver
+-- AUDITORIA-LEGAL-MENORES.md). NULL para cuentas creadas antes de este campo
+-- -- esas siguen dependiendo de la autoafirmacion edad_confirmada. Cuando SI
+-- se conoce, el backend calcula la edad real y la usa para bloquear acceso a
+-- secciones 18+ sin depender solo del honor del checkbox -- un dato conocido
+-- nunca se puede "mentir" por encima via el checkbox.
+ALTER TABLE perfiles ADD COLUMN IF NOT EXISTS fecha_nacimiento date NULL;
 
 -- Logica Humana (area personal de Aliado Imperfekto, solo premium) pide
 -- ademas su propio disclaimer, separado del de edad -- se recuerda aparte
@@ -416,6 +426,17 @@ CREATE TABLE IF NOT EXISTS reportes (
   estado        text NOT NULL DEFAULT 'pendiente' CHECK (estado IN ('pendiente', 'revisado', 'descartado')),
   creado_en     timestamptz NOT NULL DEFAULT now()
 );
+
+-- Deteccion automatica de lenguaje de riesgo (2026-09-27, ver
+-- AUDITORIA-LEGAL-MENORES.md): un post/comentario que coincide con un patron
+-- de riesgo (solicitar contacto fuera de la plataforma, lenguaje de
+-- grooming, etc.) genera un reporte automatico para revision prioritaria de
+-- un moderador -- nunca borra ni bloquea el contenido por si solo, un humano
+-- decide. `reportado_por` se vuelve NULL-able solo para este caso (un
+-- reporte automatico no tiene un usuario reportando); `automatico` distingue
+-- ambos tipos en el panel de admin.
+ALTER TABLE reportes ALTER COLUMN reportado_por DROP NOT NULL;
+ALTER TABLE reportes ADD COLUMN IF NOT EXISTS automatico boolean NOT NULL DEFAULT false;
 CREATE INDEX IF NOT EXISTS idx_reportes_estado ON reportes(estado, creado_en DESC);
 ALTER TABLE reportes ENABLE ROW LEVEL SECURITY;
 
