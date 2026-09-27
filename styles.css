@@ -1159,6 +1159,53 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 
 /* ===== 11. ADMIN ===== */
 .admin-gate{ text-align:center; }
+
+/* Consola Unica "Comando Nocturno": envuelve #admin-panel entero en el mismo
+   tema oscuro que ya usaba solo la pestana Agentes, con una barra lateral
+   vertical en vez de las pestanas horizontales de antes. activarTab()/
+   bindTabs() en admin.js no cambian -- siguen alternando el mismo
+   style.display por id, esto es solo fondo + layout. */
+#admin-panel.consola-nocturna{
+  background:#05080a;
+  color:#d8e0e0;
+  font-family:ui-monospace, 'SF Mono', 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+  border-radius:var(--radius);
+  padding:22px;
+  margin:0 -4px;
+}
+.consola-body{ display:flex; align-items:flex-start; gap:22px; }
+.consola-content{ flex:1; min-width:0; }
+.consola-nocturna .admin-tabs{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  width:170px;
+  flex-shrink:0;
+  margin-bottom:0;
+}
+.consola-nocturna .admin-tabs .foro-filter-btn{
+  width:100%;
+  text-align:left;
+  background:transparent;
+  border:1px solid #1a2226;
+  color:#8b95a0;
+  font-family:inherit;
+}
+.consola-nocturna .admin-tabs .foro-filter-btn:hover{ border-color:#4fd671; color:#d8e0e0; }
+.consola-nocturna .admin-tabs .foro-filter-btn.active{ background:#0d1214; border-color:#4fd671; color:#4fd671; }
+.consola-nocturna .admin-hint{ color:#5f6e6e; }
+.consola-nocturna .admin-toolbar input[type="search"]{
+  background:#0d1214; border:1px solid #1a2226; color:#d8e0e0; border-radius:4px;
+}
+.consola-nocturna .admin-btn-new{
+  background:#4fd671; border-color:#4fd671; color:#05080a; border-radius:4px;
+}
+.consola-nocturna .admin-btn-new:hover{ background:#ffb238; border-color:#ffb238; }
+@media (max-width:820px){
+  .consola-body{ flex-direction:column; }
+  .consola-nocturna .admin-tabs{ flex-direction:row; flex-wrap:wrap; width:auto; }
+}
+
 .admin-tabs{ margin-bottom:14px; }
 .admin-tab-panel{ display:flex; flex-direction:column; gap:14px; }
 .admin-toolbar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
@@ -1780,6 +1827,33 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 #admin-contenidos-list .foro-empty,
 #admin-productos-list .foro-empty,
 #admin-reportes-list .foro-empty{ color:#9a9aa8; margin:0; }
+.synth-group{ margin-bottom:12px; }
+.synth-group:last-child{ margin-bottom:0; }
+.synth-group-title{
+  cursor:pointer;
+  list-style:none;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 4px;
+  font-size:.72rem;
+  font-weight:700;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:#8b95a0;
+}
+.synth-group-title::-webkit-details-marker{ display:none; }
+.synth-group-title::before{ content:'▸'; font-size:.7rem; }
+.synth-group[open] > .synth-group-title::before{ content:'▾'; }
+.synth-group-count{
+  font-size:.64rem;
+  font-weight:700;
+  background:#1a2226;
+  color:#d8e0e0;
+  border-radius:999px;
+  padding:1px 8px;
+}
+.synth-group-items{ display:flex; flex-direction:column; gap:10px; margin-top:6px; }
 .synth-item{
   display:flex;
   align-items:center;

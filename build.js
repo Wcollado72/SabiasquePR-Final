@@ -111,6 +111,23 @@ const CATEGORIAS = {
 const TIPOS_FORMATO = {
   video: 'Video', audio: 'Audio', foto: 'Foto', ensayo: 'Ensayo', noticia: 'Noticia', lectura_corta: 'Lectura corta',
 };
+// Estilo de redaccion para el agente Redactor -- independiente del "Tipo de
+// formato" de arriba (que describe el MEDIO: video/audio/foto/texto). Esto
+// describe la ESTRUCTURA del texto que redacta la IA a partir de las mismas
+// notas del Investigador (ver ESTILOS_REDACCION en redactor.js) -- el admin
+// puede redactar las mismas notas como ensayo, luego cambiar a investigacion
+// y volver a redactar, sin repetir el paso de investigar.
+const ESTILOS_REDACCION = {
+  ensayo: 'Ensayo', noticia: 'Noticia corta', investigacion: 'Investigación', opinion: 'Opinión',
+};
+// Tono de redaccion -- mismo tratamiento que el estilo de arriba: eje
+// independiente, elegido a mano, en vez de derivarse en automatico de la
+// Seccion/Sub-seccion (ver TONOS en redactor.js). "Editorial" es el valor
+// por defecto si no se elige ninguno.
+const TONOS_REDACCION = {
+  esperanzador: 'Esperanzador', critico: 'Crítico / directo', analitico: 'Analítico',
+  informativo: 'Informativo', neutral: 'Neutral', editorial: 'Editorial (por defecto)',
+};
 const SUBFORMATOS = {
   podcast: 'Podcast', entrevista: 'Entrevista', galeria: 'Galería', opinion: 'Opinión',
   reportaje: 'Reportaje', cronica: 'Crónica', guia: 'Guía', infografia: 'Infografía',
@@ -593,6 +610,12 @@ const PAGES = [
         <button type="button" class="foro-filter-btn" aria-pressed="false" data-subseccion="logica-humana">Lógica Humana</button>
         <button type="button" class="foro-filter-btn active" aria-pressed="true" data-subseccion="nuevos-humanos">Nuevos Humanos</button>
       </nav>
+      <nav class="foro-filters foro-filters-sub" id="rh-enfoque-filter" data-filter-param="enfoque" hidden>
+        <button type="button" class="foro-filter-btn active" aria-pressed="true" data-enfoque="puerto-rico">Puerto Rico</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="estados-unidos">Estados Unidos</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="hispanoamerica">Hispanoamérica</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="internacionales">Internacionales</button>
+      </nav>
       <section class="lh-author-intro" id="rh-lh-intro">
         <div class="lh-author-photo-wrap">
           <img src="images/aliado-imperfekto-retrato-v2-sin-texto.webp" alt="Aliado Imperfekto: una figura encapuchada con el rostro oculto en sombra y una grieta dorada en el hombro, sostiene un farol encendido de espaldas al espectador, junto a una multitud diversa que camina hacia el horizonte al atardecer, con un mapa del mundo de fondo" class="lh-author-photo">
@@ -607,11 +630,6 @@ const PAGES = [
           <div id="rh-imagen-significado" hidden></div>
         </div>
       </section>
-      <nav class="foro-filters foro-filters-sub" id="rh-enfoque-filter" data-filter-param="enfoque" hidden>
-        <button type="button" class="foro-filter-btn active" aria-pressed="true" data-enfoque="puerto-rico">Puerto Rico</button>
-        <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="estados-unidos">Estados Unidos</button>
-        <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="hispanoamerica">Hispanoamérica</button>
-        <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="internacionales">Internacionales</button>
       </nav>
       <section class="debate-seccion" id="rh-logica-gate" hidden></section>
       <p class="home-hint" id="rh-hint" aria-live="polite"></p>
@@ -770,7 +788,7 @@ const PAGES = [
         <p class="foro-loading">Verificando acceso...</p>
       </section>
 
-      <div id="admin-panel" style="display:none;">
+      <div id="admin-panel" class="consola-nocturna" style="display:none;">
         <button type="button" id="ayuda-btn" class="ayuda-btn" aria-label="Abrir manual de ayuda" title="Manual de ayuda">?</button>
         <div class="ayuda-modal" id="ayuda-modal" hidden>
           <div class="ayuda-modal-box">
@@ -782,6 +800,7 @@ const PAGES = [
           </div>
         </div>
         <div class="ayuda-tooltip" id="ayuda-tooltip" role="tooltip" hidden></div>
+        <div class="consola-body">
         <nav class="foro-filters admin-tabs">
           <button type="button" class="foro-filter-btn active" data-tab="noticias">Noticias</button>
           <button type="button" class="foro-filter-btn" data-tab="contenidos">Contenidos</button>
@@ -789,6 +808,7 @@ const PAGES = [
           <button type="button" class="foro-filter-btn" data-tab="reportes">Reportes</button>
           <button type="button" class="foro-filter-btn" data-tab="agentes">Agentes</button>
         </nav>
+        <div class="consola-content">
 
         <section class="admin-tab-panel" id="admin-panel-noticias">
           <div class="admin-toolbar">
@@ -1032,6 +1052,15 @@ const PAGES = [
                   <div id="ia-notas-box" style="display:none;">
                     <label for="ia-notas">Notas de investigación (edítalas si hace falta antes de redactar)</label>
                     <textarea id="ia-notas" rows="8"></textarea>
+                    <label for="ia-tono">Tono</label>
+                    <select id="ia-tono">
+                      ${optionsHtml(TONOS_REDACCION)}
+                    </select>
+                    <label for="ia-estilo">Estilo de redacción</label>
+                    <select id="ia-estilo">
+                      ${optionsHtml(ESTILOS_REDACCION)}
+                    </select>
+                    <p class="admin-hint">Puedes redactar las mismas notas varias veces con tono/estilo distintos — no hace falta volver a investigar.</p>
                     <button type="button" class="admin-btn-cancel" id="ia-redactar-btn">Redactar con IA</button>
                     <p class="admin-hint" id="ia-redactar-status" aria-live="polite"></p>
                   </div>
@@ -1180,6 +1209,8 @@ const PAGES = [
             <button type="button" class="ag-btn-piloto" id="ag-ir-reportes">Ir a la cola de reportes →</button>
           </div>
         </section>
+        </div>
+        </div>
       </div>
 
       <div class="image-picker-modal" id="image-picker-modal" hidden>

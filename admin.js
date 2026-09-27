@@ -311,7 +311,11 @@
   // ── CONTENIDOS (video/ensayo/noticia/lectura_corta) ──────
   const SECCION_LABEL = { noticias: 'Noticias', 'revolucion-humana': 'Revolución Humana', educacion: 'Educación' };
   const TIPO_LABEL = { video: 'Video', audio: 'Audio', foto: 'Foto', ensayo: 'Ensayo', noticia: 'Noticia', lectura_corta: 'Lectura corta' };
-  const SUBSECCION_LABEL = { 'nuevos-humanos': 'Nuevos Humanos', 'revolucion-mundial': 'Revolución Mundial', 'logica-humana': 'Lógica Humana', 'corrupcion-humana': 'Corrupción Humana' };
+  const SUBSECCION_LABEL = { 'nuevos-humanos': 'Nuevos Humanos', 'revolucion-mundial': 'Revolución Mundial', 'logica-humana': 'Lógica Humana', 'corrupcion-humana': 'Corrupción Humana', 'ilogica-humana': 'Ilógica Humana' };
+  // Orden alfabetico de las 4 secciones de Revolucion Humana (mismo criterio
+  // usado en rh-subnav), mas Revolucion Mundial al final -- agrupa el acordeon
+  // de la lista de Contenidos (ver renderContenidosList).
+  const SUBSECCION_ORDEN = ['corrupcion-humana', 'ilogica-humana', 'logica-humana', 'nuevos-humanos', 'revolucion-mundial'];
 
   // ── "UN FORMULARIO, VARIAS PIELES" ────────────────────────
   // Nuevos Humanos, Corrupcion Humana y Logica Humana ya tienen tema propio
@@ -471,6 +475,8 @@
           subseccion: document.getElementById('ac-subseccion').value || null,
           categoria: document.getElementById('ac-categoria').value,
           tipoFormato: document.getElementById('ac-tipo-formato').value,
+          estilo: document.getElementById('ia-estilo').value,
+          tono: document.getElementById('ia-tono').value,
           fuenteTexto: document.getElementById('ac-fuente-texto').value,
           fuenteUrl: document.getElementById('ac-fuente-url').value,
         }),
@@ -739,7 +745,20 @@
     const el = document.getElementById('admin-contenidos-list');
     const q = (document.getElementById('admin-contenidos-search').value || '').toLowerCase();
     const items = contenidosCache.filter((c) => c.titulo.toLowerCase().includes(q));
-    el.innerHTML = items.length ? items.map((c) => `
+    if (!items.length) { el.innerHTML = '<p class="foro-empty">Sin resultados.</p>'; return; }
+
+    // Acordeon por subseccion (orden alfabetico de las 4 secciones de
+    // Revolucion Humana) -- agrupa visualmente sin tocar loadContenidos()
+    // ni el formulario de crear/editar, que siguen igual.
+    const grupos = new Map();
+    SUBSECCION_ORDEN.forEach((s) => grupos.set(s, []));
+    grupos.set('__otros', []);
+    items.forEach((c) => {
+      const clave = c.subseccion && grupos.has(c.subseccion) ? c.subseccion : '__otros';
+      grupos.get(clave).push(c);
+    });
+
+    const itemHtml = (c) => `
       <div class="synth-item" data-tema="${temaParaClasificacion(c.seccion, c.subseccion)}">
         <div class="synth-item-thumb" style="background-image:url('${escapeHtml(c.url_portada || '')}')"></div>
         <div class="synth-item-info">
@@ -756,7 +775,15 @@
           <button type="button" class="admin-btn-edit" data-id="${c.id}">Editar</button>
           <button type="button" class="admin-btn-delete foro-danger" data-id="${c.id}">Eliminar</button>
         </div>
-      </div>`).join('') : '<p class="foro-empty">Sin resultados.</p>';
+      </div>`;
+
+    el.innerHTML = Array.from(grupos.entries())
+      .filter(([, lista]) => lista.length)
+      .map(([clave, lista]) => `
+        <details class="synth-group" open>
+          <summary class="synth-group-title">${clave === '__otros' ? 'Sin subsección / Educación' : (SUBSECCION_LABEL[clave] || clave)} <span class="synth-group-count">${lista.length}</span></summary>
+          <div class="synth-group-items">${lista.map(itemHtml).join('')}</div>
+        </details>`).join('');
 
     el.querySelectorAll('.admin-btn-edit').forEach((btn) => btn.addEventListener('click', () => {
       const item = contenidosCache.find((c) => c.id === btn.dataset.id);

@@ -32,7 +32,7 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon-96.png" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=f430f8fe">
+  <link rel="stylesheet" href="styles.css?v=da318977">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Panel de administración","description":"Panel de administración de Sabías que PR: gestión de noticias y productos.","url":"https://sabiasquepr.com/admin.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -98,7 +98,7 @@
         <p class="foro-loading">Verificando acceso...</p>
       </section>
 
-      <div id="admin-panel" style="display:none;">
+      <div id="admin-panel" class="consola-nocturna" style="display:none;">
         <button type="button" id="ayuda-btn" class="ayuda-btn" aria-label="Abrir manual de ayuda" title="Manual de ayuda">?</button>
         <div class="ayuda-modal" id="ayuda-modal" hidden>
           <div class="ayuda-modal-box">
@@ -110,6 +110,7 @@
           </div>
         </div>
         <div class="ayuda-tooltip" id="ayuda-tooltip" role="tooltip" hidden></div>
+        <div class="consola-body">
         <nav class="foro-filters admin-tabs">
           <button type="button" class="foro-filter-btn active" data-tab="noticias">Noticias</button>
           <button type="button" class="foro-filter-btn" data-tab="contenidos">Contenidos</button>
@@ -117,6 +118,7 @@
           <button type="button" class="foro-filter-btn" data-tab="reportes">Reportes</button>
           <button type="button" class="foro-filter-btn" data-tab="agentes">Agentes</button>
         </nav>
+        <div class="consola-content">
 
         <section class="admin-tab-panel" id="admin-panel-noticias">
           <div class="admin-toolbar">
@@ -421,6 +423,23 @@
                   <div id="ia-notas-box" style="display:none;">
                     <label for="ia-notas">Notas de investigación (edítalas si hace falta antes de redactar)</label>
                     <textarea id="ia-notas" rows="8"></textarea>
+                    <label for="ia-tono">Tono</label>
+                    <select id="ia-tono">
+                      <option value="analitico">Analítico</option>
+<option value="critico">Crítico / directo</option>
+<option value="editorial">Editorial (por defecto)</option>
+<option value="esperanzador">Esperanzador</option>
+<option value="informativo">Informativo</option>
+<option value="neutral">Neutral</option>
+                    </select>
+                    <label for="ia-estilo">Estilo de redacción</label>
+                    <select id="ia-estilo">
+                      <option value="ensayo">Ensayo</option>
+<option value="investigacion">Investigación</option>
+<option value="noticia">Noticia corta</option>
+<option value="opinion">Opinión</option>
+                    </select>
+                    <p class="admin-hint">Puedes redactar las mismas notas varias veces con tono/estilo distintos — no hace falta volver a investigar.</p>
                     <button type="button" class="admin-btn-cancel" id="ia-redactar-btn">Redactar con IA</button>
                     <p class="admin-hint" id="ia-redactar-status" aria-live="polite"></p>
                   </div>
@@ -579,6 +598,8 @@
             <button type="button" class="ag-btn-piloto" id="ag-ir-reportes">Ir a la cola de reportes →</button>
           </div>
         </section>
+        </div>
+        </div>
       </div>
 
       <div class="image-picker-modal" id="image-picker-modal" hidden>

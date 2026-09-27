@@ -2,32 +2,50 @@
 // Contenidos. Toma las notas del Investigador (ya revisadas/editadas por el
 // admin) y redacta el borrador final -- el admin ya eligio seccion,
 // sub-seccion, enfoque y categoria en el formulario, asi que el Redactor
-// NUNCA tiene que adivinar la clasificacion, solo el tono de redaccion
-// segun esa clasificacion. Mismo patron de fetch crudo que anthropic.js.
+// NUNCA tiene que adivinar la clasificacion. El tono y el estilo de
+// redaccion son ejes independientes de la clasificacion, elegidos a mano en
+// el formulario (ver TONOS/ESTILOS_REDACCION abajo) -- no se derivan de la
+// seccion, para poder redactar las mismas notas con voces/estructuras
+// distintas sin tener que investigar de nuevo. Mismo patron de fetch crudo
+// que anthropic.js.
 const MODEL = 'claude-sonnet-5';
 const API_URL = 'https://api.anthropic.com/v1/messages';
 const PRECIO_ENTRADA_POR_MTOK = 2;  // Sonnet 5
 const PRECIO_SALIDA_POR_MTOK = 10;  // Sonnet 5
 
-// Tono por tipo de contenido -- decision ya aprobada por el usuario (no un
-// solo tono generico). "logica-humana" queda FUERA a proposito: es la voz
-// personal de Aliado Imperfekto, no algo que un agente generico deba imitar.
+// Tono de redaccion -- eje independiente de la seccion/subseccion (ver
+// ESTILOS_REDACCION abajo para la estructura). El admin lo elige en el
+// selector "Tono" del formulario; "editorial" es el valor por defecto si no
+// elige ninguno. "logica-humana" no tiene entrada aqui a proposito: es la
+// voz personal de Aliado Imperfekto, no algo que un agente generico redacte.
 const TONOS = {
-  noticias: 'Formato de NOTICIA CORTA: resumen de 2-3 oraciones y máximo 3-4 párrafos breves (2-4 oraciones cada uno). Tono neutral y directo, prioriza lo más relevante y noticioso.',
-  'revolucion-humana:nuevos-humanos': 'Tono esperanzador y humano, sin caer en lo ingenuo -- celebra lo que la humanidad está logrando bien, con hechos concretos, no frases vacías de optimismo.',
-  'revolucion-humana:corrupcion-humana': 'Tono directo y crítico, sin eufemismos -- nombra el fallo institucional o individual con claridad, respaldado en hechos, sin sensacionalismo barato.',
-  'revolucion-humana:revolucion-mundial': 'Tono analítico, con perspectiva global -- conecta el tema con su contexto internacional más amplio.',
-  educacion: 'Tono informativo y claro, como si le explicaras el tema a alguien inteligente pero sin conocimiento previo del asunto -- prioriza la precisión sobre el estilo.',
-  default: 'Tono editorial claro y directo, con redacción propia y original.',
+  esperanzador: 'Tono esperanzador y humano, sin caer en lo ingenuo -- celebra lo que la humanidad está logrando bien, con hechos concretos, no frases vacías de optimismo.',
+  critico: 'Tono directo y crítico, sin eufemismos -- nombra el fallo institucional o individual con claridad, respaldado en hechos, sin sensacionalismo barato.',
+  analitico: 'Tono analítico, con perspectiva global -- conecta el tema con su contexto internacional más amplio.',
+  informativo: 'Tono informativo y claro, como si le explicaras el tema a alguien inteligente pero sin conocimiento previo del asunto -- prioriza la precisión sobre el estilo.',
+  neutral: 'Tono neutral y directo -- prioriza los hechos más relevantes, sin adornos ni opinión personal.',
+  editorial: 'Tono editorial claro y directo, con redacción propia y original.',
 };
 
-function elegirTono({ seccion, subseccion }) {
-  if (subseccion) {
-    const clave = `${seccion}:${subseccion}`;
-    if (TONOS[clave]) return TONOS[clave];
-  }
-  if (TONOS[seccion]) return TONOS[seccion];
-  return TONOS.default;
+function elegirTono(tono) {
+  return TONOS[tono] || TONOS.editorial;
+}
+
+// Estilo de redaccion -- eje independiente del tono de seccion de arriba.
+// El tono dice CON QUE VOZ/POSTURA se escribe (segun la seccion); esto dice
+// QUE ESTRUCTURA tiene el resultado (segun lo que el admin pida en el
+// selector "Estilo de redaccion" del formulario), para que las mismas notas
+// del Investigador se puedan redactar como ensayo, noticia corta,
+// investigacion u opinion sin tener que investigar de nuevo.
+const ESTILOS_REDACCION = {
+  ensayo: 'Formato ENSAYO: desarrollo reflexivo y argumentado, varios párrafos que conectan el hecho con su contexto o significado más amplio -- no es un resumen de los hechos, es una reflexión a partir de ellos.',
+  noticia: 'Formato NOTICIA CORTA: resumen de 2-3 oraciones y máximo 3-4 párrafos breves (2-4 oraciones cada uno) -- solo los hechos verificables de las notas, en orden de importancia, sin interpretación personal.',
+  investigacion: 'Formato INVESTIGACIÓN: estructura de reportaje extendido -- expón el hecho central, después el contexto/antecedentes, y cierra con las implicaciones o lo que queda sin resolver. Más párrafos que una noticia corta, con más detalle de las notas.',
+  opinion: 'Formato OPINIÓN: primera persona editorial, argumenta una postura clara sobre el tema a partir de los hechos de las notas -- dile al lector qué pensar y por qué, sin fingir neutralidad.',
+};
+
+function elegirEstructura(estilo) {
+  return ESTILOS_REDACCION[estilo] || ESTILOS_REDACCION.ensayo;
 }
 
 const HERRAMIENTA = {
@@ -55,21 +73,23 @@ function calcularCosto(usage) {
   return entrada + salida;
 }
 
-async function redactarDesdeNotas({ notas, seccion, subseccion, categoria, tipoFormato, fuenteTexto, fuenteUrl }) {
+async function redactarDesdeNotas({ notas, seccion, subseccion, categoria, tipoFormato, estilo, tono: tonoElegido, fuenteTexto, fuenteUrl }) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY no esta configurada en el servidor.');
   if (!notas || notas.trim().length < 20) {
     throw new Error('Las notas de investigación son muy cortas para redactar. Revisa el paso del Investigador primero.');
   }
 
-  const tono = elegirTono({ seccion, subseccion });
+  const tono = elegirTono(tonoElegido);
+  const estructura = elegirEstructura(estilo);
   const prompt = `Eres redactor editorial de "Sabías que PR", un sitio de noticias y análisis en español para audiencia de Puerto Rico y Latinoamérica.
 
 Te doy notas de investigación ya organizadas sobre un tema. Tu trabajo:
 1. Escribe TODO en español, con redacción propia y original -- nunca copies ni traduzcas literalmente las notas.
 2. Sé preciso con los hechos de las notas, pero cuéntalos con tu propia voz editorial.
 3. ${tono}
-4. El resumen y los párrafos deben poder publicarse tal cual, sin necesitar edición adicional de fondo (el admin solo revisa, no reescribe).
+4. ${estructura}
+5. El resumen y los párrafos deben poder publicarse tal cual, sin necesitar edición adicional de fondo (el admin solo revisa, no reescribe).
 
 Sección: ${seccion || 'no especificada'}${subseccion ? ` / ${subseccion}` : ''}
 Formato: ${tipoFormato || 'no especificado'}${categoria ? ` · Categoría: ${categoria}` : ''}
@@ -121,4 +141,4 @@ Usa la herramienta "redactar_contenido" para entregar el resultado.`;
   };
 }
 
-module.exports = { redactarDesdeNotas, elegirTono, calcularCosto };
+module.exports = { redactarDesdeNotas, elegirTono, elegirEstructura, calcularCosto };

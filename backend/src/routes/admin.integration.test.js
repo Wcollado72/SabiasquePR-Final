@@ -224,10 +224,10 @@ describe('POST /api/admin/redactar', () => {
     pool.query.mockResolvedValueOnce({});
     const res = await request(app).post('/api/admin/redactar')
       .set('x-test-user', ADMIN)
-      .send({ notas: 'Notas de prueba suficientemente largas', seccion: 'revolucion-humana', subseccion: 'nuevos-humanos' });
+      .send({ notas: 'Notas de prueba suficientemente largas', seccion: 'revolucion-humana', subseccion: 'nuevos-humanos', estilo: 'investigacion', tono: 'critico' });
     expect(res.status).toBe(200);
     expect(res.body.titulo).toBe('Titulo redactado');
-    expect(redactarDesdeNotas).toHaveBeenCalledWith(expect.objectContaining({ seccion: 'revolucion-humana', subseccion: 'nuevos-humanos' }));
+    expect(redactarDesdeNotas).toHaveBeenCalledWith(expect.objectContaining({ seccion: 'revolucion-humana', subseccion: 'nuevos-humanos', estilo: 'investigacion', tono: 'critico' }));
   });
 });
 

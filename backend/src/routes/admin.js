@@ -120,12 +120,12 @@ router.post('/investigar', requireAuth, requireAdmin, async (req, res) => {
 // por el admin) mas la clasificacion que el admin ya eligio en el
 // formulario -- el Redactor nunca adivina seccion/subseccion/categoria.
 router.post('/redactar', requireAuth, requireAdmin, async (req, res) => {
-  const { notas, seccion, subseccion, categoria, tipoFormato, fuenteTexto, fuenteUrl } = req.body || {};
+  const { notas, seccion, subseccion, categoria, tipoFormato, estilo, tono, fuenteTexto, fuenteUrl } = req.body || {};
   if (!notas || typeof notas !== 'string') {
     return res.status(400).json({ ok: false, error: 'Faltan las notas de investigación.' });
   }
   try {
-    const redactado = await redactarDesdeNotas({ notas, seccion, subseccion, categoria, tipoFormato, fuenteTexto, fuenteUrl });
+    const redactado = await redactarDesdeNotas({ notas, seccion, subseccion, categoria, tipoFormato, estilo, tono, fuenteTexto, fuenteUrl });
 
     await registrarUsoIa({
       agente: 'redactor',
