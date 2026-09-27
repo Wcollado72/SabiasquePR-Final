@@ -1,0 +1,48 @@
+name: Respaldo de la base de datos (Supabase)
+
+# El plan gratis de Supabase NO incluye backups automaticos (confirmado
+# 2026-09-27, Settings -> Database -> Backups: "Free Plan does not include
+# project backups"). Este workflow es el reemplazo gratis: un pg_dump
+# diario de la base real, guardado como artefacto de GitHub Actions.
+#
+# Como restaurar un respaldo si hace falta: GitHub -> pestaña "Actions" de
+# este repo -> abrir la ejecucion del dia que quieras -> seccion
+# "Artifacts" al final -> descargar el .dump -> restaurar con
+# `pg_restore --clean --if-exists -d "<DATABASE_URL>" archivo.dump`.
+#
+# Requiere un secreto en GitHub: Settings -> Secrets and variables ->
+# Actions -> New repository secret -> nombre DATABASE_URL, mismo valor que
+# el de Render (el de Session Pooler, no el de conexion directa).
+#
+# Limitacion honesta: 14 dias de retencion (el limite gratis de
+# almacenamiento de Actions es compartido entre todos los artefactos del
+# repo) -- no es tan robusto como un plan pagado con point-in-time
+# recovery, pero es proteccion real sin costo.
+
+on:
+  schedule:
+    - cron: '0 7 * * *' # 7:00 UTC diario (~3:00 AM hora de Puerto Rico)
+  workflow_dispatch: {} # permite ejecutarlo manualmente desde GitHub
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Instalar cliente de Postgres (pg_dump)
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Respaldar la base de datos
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          mkdir -p backups
+          pg_dump "$DATABASE_URL" \
+            --no-owner --no-privileges --format=custom \
+            --file="backups/sabiasquepr-$(date +%Y-%m-%d).dump"
+
+      - name: Subir el respaldo como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: backups/*.dump
+          retention-days: 14
