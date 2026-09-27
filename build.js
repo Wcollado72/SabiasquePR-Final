@@ -293,7 +293,7 @@ function buildPage(p) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${p.title}</title>
-  <meta name="description" content="${p.description}">
+  <meta name="description" content="${p.description}">${p.file === 'admin.html' ? '\n  <meta name="robots" content="noindex, nofollow">' : ''}
   <meta name="author" content="Aliado Imperfekto">
   <link rel="canonical" href="${SITE.url}/${p.file}">
   <meta property="og:type" content="website">
@@ -1573,6 +1573,7 @@ const ROBOTS = `User-agent: *
 Allow: /
 Disallow: /_content/
 Disallow: /node_modules/
+Disallow: /admin.html
 
 Sitemap: ${SITE.url}/sitemap.xml
 `;

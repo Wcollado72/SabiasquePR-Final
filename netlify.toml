@@ -76,10 +76,10 @@
 #   dentro de un .js no aparece grepeando el HTML generado, hay que buscar
 #   tambien import(...) y .src = dentro de todos los .js de pagina.
 #
-# OJO al activar Mailchimp (hoy sigue con el placeholder YOUR_MC_USER en
-# build.js): el newsletter usa JSONP a "<mcServer>.list-manage.com" -- hay
-# que agregar ese dominio a script-src cuando se configure de verdad, o el
-# formulario de newsletter se rompe en silencio.
+# beehiiv (reemplazo de Mailchimp, 2026-09-27) no necesita dominio nuevo aqui:
+# la suscripcion pasa por nuestro propio backend (POST /api/newsletter/subscribe,
+# newsletter.js), que llama a la API de beehiiv desde el servidor -- el
+# navegador nunca llama directamente a beehiiv.com.
 [[headers]]
   for = "/*"
   [headers.values]
@@ -88,3 +88,10 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    # HSTS: fuerza HTTPS en cada visita futura (el navegador ya no intenta
+    # HTTP primero) durante 2 anos, incluyendo subdominios. "preload" es un
+    # opt-in a la lista precargada de Chrome/Firefox/Safari -- una vez que el
+    # dominio esta ahi, ni la PRIMERA visita usa HTTP nunca, en ningun
+    # navegador que la respete. No tiene costo ni downside real aqui porque
+    # el sitio ya sirve todo por HTTPS (Netlify lo fuerza por defecto).
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"

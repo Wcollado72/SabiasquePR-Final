@@ -1,0 +1,7 @@
+# Si encontraste una vulnerabilidad de seguridad en sabiasquepr.com,
+# por favor repórtala de forma privada antes de hacerla pública.
+# Agradecemos el reporte responsable.
+
+Contact: mailto:willcollado@gmail.com
+Preferred-Languages: es, en
+Expires: 2027-09-26T00:00:00.000Z
