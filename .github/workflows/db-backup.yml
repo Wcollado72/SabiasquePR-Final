@@ -28,8 +28,17 @@ jobs:
   backup:
     runs-on: ubuntu-latest
     steps:
-      - name: Instalar cliente de Postgres (pg_dump)
-        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends postgresql-client
+      # El repositorio de Ubuntu trae pg_dump 16, pero Supabase corre
+      # Postgres 17 -- pg_dump se niega a respaldar un servidor mas nuevo
+      # que el mismo (probado 2026-09-27: "aborting because of server
+      # version mismatch"). Se instala la version correcta desde el
+      # repositorio oficial de PostgreSQL (PGDG) en vez del que trae Ubuntu.
+      # Si Supabase sube de version mayor mas adelante, subir el 17 de abajo.
+      - name: Instalar cliente de Postgres 17 (pg_dump, desde PGDG)
+        run: |
+          sudo apt-get install -y --no-install-recommends postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y --no-install-recommends postgresql-client-17
 
       - name: Respaldar la base de datos
         env:
