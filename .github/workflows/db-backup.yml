@@ -45,7 +45,10 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           mkdir -p backups
-          pg_dump "$DATABASE_URL" \
+          # Ruta directa al binario 17 -- el runner ya trae una version mas
+          # vieja de pg_dump preinstalada en /usr/bin que gana por PATH
+          # aunque se instale la 17 encima (probado 2026-09-27).
+          /usr/lib/postgresql/17/bin/pg_dump "$DATABASE_URL" \
             --no-owner --no-privileges --format=custom \
             --file="backups/sabiasquepr-$(date +%Y-%m-%d).dump"
 
