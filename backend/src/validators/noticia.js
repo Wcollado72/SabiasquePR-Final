@@ -3,6 +3,7 @@ const CATEGORIAS_VALIDAS = [
   'finanzas', 'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura', 'ciencia',
 ];
 const DIVULGACION_IA_VALIDAS = ['no', 'parcial', 'generado'];
+const IDIOMAS_ORIGINAL_VALIDOS = ['es', 'en'];
 
 function validateNoticia(body, { partial = false } = {}) {
   const errors = [];
@@ -22,6 +23,9 @@ function validateNoticia(body, { partial = false } = {}) {
   if (body.divulgacionIa !== undefined && !DIVULGACION_IA_VALIDAS.includes(body.divulgacionIa)) {
     errors.push('Divulgacion de IA no valida.');
   }
+  if (body.idiomaOriginal !== undefined && !IDIOMAS_ORIGINAL_VALIDOS.includes(body.idiomaOriginal)) {
+    errors.push('Idioma original no valido.');
+  }
   if (body.destacado !== undefined && typeof body.destacado !== 'boolean') {
     errors.push('El campo "destacado" debe ser verdadero o falso.');
   }
@@ -36,4 +40,4 @@ function validateNoticia(body, { partial = false } = {}) {
   return errors;
 }
 
-module.exports = { validateNoticia, CATEGORIAS_VALIDAS, DIVULGACION_IA_VALIDAS };
+module.exports = { validateNoticia, CATEGORIAS_VALIDAS, DIVULGACION_IA_VALIDAS, IDIOMAS_ORIGINAL_VALIDOS };

@@ -4,6 +4,7 @@ const { enviarError500 } = require('../util/errores');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 const { slugify } = require('../util/slugify');
 const { validateProducto } = require('../validators/producto');
+const { aplicarTraducciones, normalizarLang } = require('../util/traducciones');
 
 const router = express.Router();
 
@@ -25,10 +26,10 @@ function toRow(id, body, existing = {}) {
 }
 
 // GET /api/productos -- lista, publico
-router.get('/', async (_req, res) => {
+router.get('/', async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM productos ORDER BY creado_en DESC');
-    res.json({ ok: true, productos: rows });
+    res.json({ ok: true, productos: await aplicarTraducciones('producto', rows, normalizarLang(req.query.lang)) });
   } catch (err) { enviarError500(res, err); }
 });
 
@@ -37,7 +38,8 @@ router.get('/:id', async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM productos WHERE id = $1', [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ ok: false, error: 'Producto no encontrado.' });
-    res.json({ ok: true, producto: rows[0] });
+    const [traducido] = await aplicarTraducciones('producto', [rows[0]], normalizarLang(req.query.lang));
+    res.json({ ok: true, producto: traducido });
   } catch (err) { enviarError500(res, err); }
 });
 

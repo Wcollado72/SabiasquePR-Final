@@ -1234,6 +1234,18 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   .consola-nocturna .admin-tabs{ flex-direction:row; flex-wrap:wrap; width:auto; }
 }
 
+/* Caja "Traducción" bajo cada formulario del admin (Fase C2, ver admin.js). */
+.tr-box{ margin-top:22px; padding-top:18px; border-top:1px dashed var(--line); display:flex; flex-direction:column; gap:6px; }
+.tr-box[hidden]{ display:none; }
+.tr-title{ margin:0; font-size:.95rem; }
+.tr-box textarea{ width:100%; }
+.tr-box label{ margin-top:10px; }
+.tr-acciones{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 2px; }
+.tr-acciones[hidden], #tr-noticia-campos[hidden], #tr-contenido-campos[hidden], #tr-producto-campos[hidden]{ display:none; }
+.consola-nocturna .tr-box{ color:#d8e0e0; border-top-color:#2a3a40; }
+.synth-theme .tr-box{ border-top-color:var(--tema-border); }
+.synth-theme .tr-title{ font-family:var(--tema-font-head); color:var(--tema-accent); letter-spacing:.04em; }
+
 .admin-tabs{ margin-bottom:14px; }
 .admin-tab-panel{ display:flex; flex-direction:column; gap:14px; }
 .admin-toolbar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }

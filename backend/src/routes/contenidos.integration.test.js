@@ -229,9 +229,10 @@ describe('POST /api/contenidos', () => {
     const [sql, values] = pool.query.mock.calls[1];
     expect(sql).toMatch(/subformato, divulgacion_ia, cita_estilo, cita_autor,\s*cita_anio, cita_titulo_original, cita_fecha_acceso, cita_sin_fuente_externa/);
     // Posiciones 17-27 del array toRow(): subformato..citaSinFuenteExterna, subseccion, esPremium, enfoque
-    expect(values.slice(16)).toEqual([
+    expect(values.slice(16, 27)).toEqual([
       'entrevista', 'parcial', 'apa', 'Jane Doe', '2026', 'Titulo original', '2026-09-23', false, null, false, null,
     ]);
+    expect(values[27]).toBe('es'); // idioma_original por defecto
   });
 
   test('201 con tipoFormato "audio" y urlMedia', async () => {
@@ -298,9 +299,10 @@ describe('PUT /api/contenidos/:id', () => {
     expect(res.status).toBe(200);
     const [, values] = pool.query.mock.calls[1];
     // subformato..citaSinFuenteExterna, subseccion, esPremium, enfoque son las ultimas 11 posiciones de toRow()
-    expect(values.slice(-11)).toEqual([
+    expect(values.slice(-12, -1)).toEqual([
       'reportaje', 'parcial', 'apa', 'Jane Doe', '2026', 'Original', '2026-09-20', false, null, false, null,
     ]);
+    expect(values[values.length - 1]).toBe('es');
   });
 });
 
@@ -315,5 +317,44 @@ describe('DELETE /api/contenidos/:id', () => {
     const res = await request(app).delete('/api/contenidos/a').set('x-test-user', ADMIN);
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
+  });
+});
+
+describe('GET /api/contenidos?lang= (Fase C2)', () => {
+  test('con ?lang=en superpone la traduccion y marca lo que no tiene', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'a', titulo: 'Hola', cuerpo: 'Cuerpo' }, { id: 'b', titulo: 'Adios', cuerpo: 'Otro' }] })
+      .mockResolvedValueOnce({ rows: [{ item_id: 'a', campos: { titulo: 'Hello', cuerpo: 'Body' } }] });
+    const res = await request(app).get('/api/contenidos?lang=en');
+    expect(res.body.contenidos[0]).toMatchObject({ titulo: 'Hello', cuerpo: 'Body', sin_traduccion: false });
+    expect(res.body.contenidos[1]).toMatchObject({ titulo: 'Adios', sin_traduccion: true });
+  });
+
+  test('el muro premium recorta el texto YA traducido, no el original', async () => {
+    const largoEn = 'word '.repeat(200);
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'p', titulo: 'Premium', es_premium: true, cuerpo: 'palabra '.repeat(200), url_media: 'https://v.com/x' }] })
+      .mockResolvedValueOnce({ rows: [{ item_id: 'p', campos: { cuerpo: largoEn } }] });
+    const res = await request(app).get('/api/contenidos?lang=en');
+    const c = res.body.contenidos[0];
+    expect(c.bloqueado).toBe(true);
+    expect(c.url_media).toBeNull();
+    expect(c.cuerpo.startsWith('word')).toBe(true);
+    expect(c.cuerpo.length).toBeLessThanOrEqual(301);
+  });
+
+  test('una pieza escrita en ingles se muestra tal cual con ?lang=en', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'e', titulo: 'Original', idioma_original: 'en' }] });
+    const res = await request(app).get('/api/contenidos?lang=en');
+    expect(pool.query).toHaveBeenCalledTimes(1);
+    expect(res.body.contenidos[0]).toMatchObject({ titulo: 'Original', sin_traduccion: false, idioma_mostrado: 'en' });
+  });
+
+  test('el detalle acepta ?lang=en', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'a', titulo: 'Hola', es_premium: false }] })
+      .mockResolvedValueOnce({ rows: [{ item_id: 'a', campos: { titulo: 'Hello' } }] });
+    const res = await request(app).get('/api/contenidos/a?lang=en');
+    expect(res.body.contenido.titulo).toBe('Hello');
   });
 });

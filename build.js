@@ -861,6 +861,11 @@ const PAGES = [
 
               <section class="news-panel" data-panel="clasificacion">
                 <h4 class="news-panel-title">Clasificación</h4>
+                <label for="an-idioma-original">Idioma en que escribiste esta noticia</label>
+                <select id="an-idioma-original">
+                  <option value="es">Español</option>
+                  <option value="en">English</option>
+                </select>
                 <label for="an-categoria">Categoría</label>
                 <select id="an-categoria">
                   ${optionsHtml(CATEGORIAS)}
@@ -927,6 +932,7 @@ const PAGES = [
               </footer>
               <p id="an-status" class="form-status" aria-live="polite"></p>
             </form>
+            <section class="tr-box" id="tr-noticia" data-tipo="noticia" hidden></section>
           </section>
         </section>
 
@@ -972,6 +978,11 @@ const PAGES = [
 
               <section class="synth-panel" data-panel="clasificacion">
                 <h4 class="synth-panel-title">🕹️ NIVEL 1 — CLASIFICACIÓN</h4>
+                <label for="ac-idioma-original">Idioma en que escribiste este contenido</label>
+                <select id="ac-idioma-original">
+                  <option value="es">Español</option>
+                  <option value="en">English</option>
+                </select>
                 <label for="ac-seccion">Sección</label>
                 <select id="ac-seccion">
                   <option value="noticias">Noticias</option>
@@ -1145,6 +1156,7 @@ const PAGES = [
               </footer>
               <p id="ac-status" class="form-status" aria-live="polite"></p>
             </form>
+            <section class="tr-box" id="tr-contenido" data-tipo="contenido" hidden></section>
           </section>
         </section>
 
@@ -1181,6 +1193,7 @@ const PAGES = [
               </div>
               <p id="ap-status" class="form-status" aria-live="polite"></p>
             </form>
+            <section class="tr-box" id="tr-producto" data-tipo="producto" hidden></section>
           </section>
         </section>
 

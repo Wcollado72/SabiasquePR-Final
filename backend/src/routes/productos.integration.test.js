@@ -110,3 +110,20 @@ describe('DELETE /api/productos/:id', () => {
     expect(res.status).toBe(200);
   });
 });
+
+describe('GET /api/productos?lang= (Fase C2)', () => {
+  test('traduce nombre y descripcion pero deja precio y enlaces intactos', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 't', nombre: 'Taza', descripcion: 'Bonita', precio: '12.00', stripe_link: 'https://buy.stripe.com/x', stripe_price_id: 'price_1' }] })
+      .mockResolvedValueOnce({ rows: [{ item_id: 't', campos: { nombre: 'Mug', descripcion: 'Nice', precio: '0', stripe_link: 'https://evil.com' } }] });
+    const res = await request(app).get('/api/productos?lang=en');
+    expect(res.body.productos[0]).toMatchObject({ nombre: 'Mug', descripcion: 'Nice', precio: '12.00', stripe_link: 'https://buy.stripe.com/x', stripe_price_id: 'price_1' });
+  });
+
+  test('sin ?lang= no cambia el comportamiento anterior', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 't', nombre: 'Taza' }] });
+    const res = await request(app).get('/api/productos');
+    expect(pool.query).toHaveBeenCalledTimes(1);
+    expect(res.body.productos[0]).toEqual({ id: 't', nombre: 'Taza' });
+  });
+});

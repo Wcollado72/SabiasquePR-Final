@@ -4,6 +4,7 @@ const { enviarError500 } = require('../util/errores');
 const { requireAuth, requireAdmin, tryAuth } = require('../middleware/auth');
 const { slugify } = require('../util/slugify');
 const { validateContenido } = require('../validators/contenido');
+const { aplicarTraducciones, normalizarLang } = require('../util/traducciones');
 
 const router = express.Router();
 
@@ -36,6 +37,7 @@ function toRow(id, body, existing = {}) {
     body.subseccion !== undefined ? body.subseccion : (existing.subseccion ?? null),
     body.esPremium ?? existing.es_premium ?? false,
     body.enfoque !== undefined ? body.enfoque : (existing.enfoque ?? null),
+    body.idiomaOriginal ?? existing.idioma_original ?? 'es',
   ];
 }
 
@@ -110,7 +112,10 @@ router.get('/', tryAuth, async (req, res) => {
     if (enfoque) { params.push(enfoque); where.push(`enfoque = $${params.length}`); }
     const sql = `SELECT * FROM contenidos ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY fecha_publicacion DESC, creado_en DESC`;
     const { rows } = await pool.query(sql, params);
-    res.json({ ok: true, contenidos: rows.map((r) => aplicarMuroDePago(r, req.user)) });
+    // La traduccion se superpone ANTES del muro de pago: asi el recorte de
+    // contenido premium se aplica al texto que el visitante realmente ve.
+    const traducidos = await aplicarTraducciones('contenido', rows, normalizarLang(req.query.lang));
+    res.json({ ok: true, contenidos: traducidos.map((r) => aplicarMuroDePago(r, req.user)) });
   } catch (err) { enviarError500(res, err); }
 });
 
@@ -120,7 +125,8 @@ router.get('/:id', tryAuth, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM contenidos WHERE id = $1', [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ ok: false, error: 'Contenido no encontrado.' });
-    res.json({ ok: true, contenido: aplicarMuroDePago(rows[0], req.user) });
+    const [traducido] = await aplicarTraducciones('contenido', [rows[0]], normalizarLang(req.query.lang));
+    res.json({ ok: true, contenido: aplicarMuroDePago(traducido, req.user) });
   } catch (err) { enviarError500(res, err); }
 });
 
@@ -145,8 +151,8 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
          url_media, fuente_url, fuente_texto, duracion_min, url_portada, portada_alt,
          fecha_publicacion, destacado, subformato, divulgacion_ia, cita_estilo, cita_autor,
          cita_anio, cita_titulo_original, cita_fecha_acceso, cita_sin_fuente_externa,
-         subseccion, es_premium, enfoque
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27)
+         subseccion, es_premium, enfoque, idioma_original
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28)
        RETURNING *`
     );
     res.status(201).json({ ok: true, contenido: rows[0] });
@@ -174,7 +180,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
          cuerpo=$7, autor=$8, url_media=$9, fuente_url=$10, fuente_texto=$11, duracion_min=$12,
          url_portada=$13, portada_alt=$14, fecha_publicacion=$15, destacado=$16, subformato=$17,
          divulgacion_ia=$18, cita_estilo=$19, cita_autor=$20, cita_anio=$21, cita_titulo_original=$22,
-         cita_fecha_acceso=$23, cita_sin_fuente_externa=$24, subseccion=$25, es_premium=$26, enfoque=$27
+         cita_fecha_acceso=$23, cita_sin_fuente_externa=$24, subseccion=$25, es_premium=$26, enfoque=$27, idioma_original=$28
        WHERE id=$1 RETURNING *`
     );
     res.json({ ok: true, contenido: rows[0] });

@@ -33,7 +33,7 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon-96.png" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=73906782">
+  <link rel="stylesheet" href="styles.css?v=65f11c85">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Panel de administración","description":"Panel de administración de Sabías que PR: gestión de noticias y productos.","url":"https://sabiasquepr.com/admin.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -162,6 +162,11 @@
 
               <section class="news-panel" data-panel="clasificacion">
                 <h4 class="news-panel-title">Clasificación</h4>
+                <label for="an-idioma-original">Idioma en que escribiste esta noticia</label>
+                <select id="an-idioma-original">
+                  <option value="es">Español</option>
+                  <option value="en">English</option>
+                </select>
                 <label for="an-categoria">Categoría</label>
                 <select id="an-categoria">
                   <option value="ciencia">Ciencia</option>
@@ -245,6 +250,7 @@
               </footer>
               <p id="an-status" class="form-status" aria-live="polite"></p>
             </form>
+            <section class="tr-box" id="tr-noticia" data-tipo="noticia" hidden></section>
           </section>
         </section>
 
@@ -290,6 +296,11 @@
 
               <section class="synth-panel" data-panel="clasificacion">
                 <h4 class="synth-panel-title">🕹️ NIVEL 1 — CLASIFICACIÓN</h4>
+                <label for="ac-idioma-original">Idioma en que escribiste este contenido</label>
+                <select id="ac-idioma-original">
+                  <option value="es">Español</option>
+                  <option value="en">English</option>
+                </select>
                 <label for="ac-seccion">Sección</label>
                 <select id="ac-seccion">
                   <option value="noticias">Noticias</option>
@@ -524,6 +535,7 @@
               </footer>
               <p id="ac-status" class="form-status" aria-live="polite"></p>
             </form>
+            <section class="tr-box" id="tr-contenido" data-tipo="contenido" hidden></section>
           </section>
         </section>
 
@@ -560,6 +572,7 @@
               </div>
               <p id="ap-status" class="form-status" aria-live="polite"></p>
             </form>
+            <section class="tr-box" id="tr-producto" data-tipo="producto" hidden></section>
           </section>
         </section>
 

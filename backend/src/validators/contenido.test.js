@@ -188,3 +188,12 @@ describe('validateContenido', () => {
       .toContain('El campo "esPremium" debe ser verdadero o falso.');
   });
 });
+
+describe('validateContenido idiomaOriginal (Fase C2)', () => {
+  const { validateContenido: validar } = require('./contenido');
+  test('acepta es y en, y rechaza cualquier otro valor', () => {
+    expect(validar({ idiomaOriginal: 'es' }, { partial: true })).toEqual([]);
+    expect(validar({ idiomaOriginal: 'en' }, { partial: true })).toEqual([]);
+    expect(validar({ idiomaOriginal: 'fr' }, { partial: true })).toContain('Idioma original no valido.');
+  });
+});

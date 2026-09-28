@@ -4,6 +4,7 @@ const { enviarError500 } = require('../util/errores');
 const { requireAuth, requireAdmin, tryAuth } = require('../middleware/auth');
 const { slugify } = require('../util/slugify');
 const { validateNoticia } = require('../validators/noticia');
+const { aplicarTraducciones, normalizarLang } = require('../util/traducciones');
 
 const router = express.Router();
 
@@ -27,6 +28,7 @@ function toRow(id, body, existing = {}) {
     body.destacado ?? existing.destacado ?? false,
     body.divulgacionIa ?? existing.divulgacion_ia ?? 'no',
     body.publicado ?? existing.publicado ?? true,
+    body.idiomaOriginal ?? existing.idioma_original ?? 'es',
   ];
 }
 
@@ -65,7 +67,7 @@ router.get('/', tryAuth, async (req, res) => {
     if (!esAdmin) where.push('publicado = true');
     const sql = `SELECT * FROM noticias ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY fecha DESC, creado_en DESC`;
     const { rows } = await pool.query(sql, params);
-    res.json({ ok: true, noticias: rows });
+    res.json({ ok: true, noticias: await aplicarTraducciones('noticia', rows, normalizarLang(req.query.lang)) });
   } catch (err) { enviarError500(res, err); }
 });
 
@@ -79,7 +81,8 @@ router.get('/:id', tryAuth, async (req, res) => {
     if (!noticia || (!noticia.publicado && !esAdmin)) {
       return res.status(404).json({ ok: false, error: 'Noticia no encontrada.' });
     }
-    res.json({ ok: true, noticia });
+    const [traducida] = await aplicarTraducciones('noticia', [noticia], normalizarLang(req.query.lang));
+    res.json({ ok: true, noticia: traducida });
   } catch (err) { enviarError500(res, err); }
 });
 
@@ -98,8 +101,8 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
       id,
       destacado,
       values,
-      `INSERT INTO noticias (id, titulo, fecha, fecha_display, imagen, imagen_alt, imagen_caption, clase, fuente_url, fuente_texto, parrafos, categoria, destacado, divulgacion_ia, publicado)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12,$13,$14,$15) RETURNING *`
+      `INSERT INTO noticias (id, titulo, fecha, fecha_display, imagen, imagen_alt, imagen_caption, clase, fuente_url, fuente_texto, parrafos, categoria, destacado, divulgacion_ia, publicado, idioma_original)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12,$13,$14,$15,$16) RETURNING *`
     );
     res.status(201).json({ ok: true, noticia: rows[0] });
   } catch (err) { enviarError500(res, err); }
@@ -121,7 +124,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
       values,
       `UPDATE noticias SET titulo=$2, fecha=$3, fecha_display=$4, imagen=$5, imagen_alt=$6,
          imagen_caption=$7, clase=$8, fuente_url=$9, fuente_texto=$10, parrafos=$11::jsonb, categoria=$12,
-         destacado=$13, divulgacion_ia=$14, publicado=$15
+         destacado=$13, divulgacion_ia=$14, publicado=$15, idioma_original=$16
        WHERE id=$1 RETURNING *`
     );
     res.json({ ok: true, noticia: rows[0] });

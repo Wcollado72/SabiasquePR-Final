@@ -89,6 +89,7 @@
       bindNoticias();
       bindContenidos();
       bindProductos();
+      bindTraducciones();
       bindUrlNormalizer();
       loadNoticias();
       loadContenidos();
@@ -189,6 +190,182 @@
     });
   }
 
+  // ── TRADUCCIONES (Fase C2) ───────────────────────────────
+  // Cada formulario (noticia, contenido, producto) tiene debajo una caja para
+  // la version en el otro idioma: "Traducir con IA" genera un BORRADOR (nunca
+  // guarda solo), el admin lo revisa/edita y lo guarda con "Guardar
+  // traducción". Los campos son solo los de texto; precios, enlaces y
+  // clasificaciones no se traducen (son los mismos en ambos idiomas).
+  const TRADUCCION_CFG = {
+    noticia: {
+      idInput: 'an-id', origenSelect: 'an-idioma-original',
+      campos: [
+        { nombre: 'titulo', etiqueta: 'Título', control: 'input', origen: 'an-titulo' },
+        { nombre: 'parrafos', etiqueta: 'Párrafos (uno por línea)', control: 'lista', origen: 'an-parrafos' },
+        { nombre: 'imagen_alt', etiqueta: 'Texto alternativo de la imagen', control: 'input', origen: 'an-imagen-alt' },
+        { nombre: 'imagen_caption', etiqueta: 'Pie de imagen', control: 'input', origen: 'an-imagen-caption' },
+      ],
+    },
+    contenido: {
+      idInput: 'ac-id', origenSelect: 'ac-idioma-original',
+      campos: [
+        { nombre: 'titulo', etiqueta: 'Título', control: 'input', origen: 'ac-titulo' },
+        { nombre: 'subtitulo_resumen', etiqueta: 'Resumen / subtítulo', control: 'textarea', origen: 'ac-subtitulo' },
+        { nombre: 'cuerpo', etiqueta: 'Cuerpo', control: 'textarea-grande', origen: 'ac-cuerpo' },
+        { nombre: 'portada_alt', etiqueta: 'Texto alternativo de la portada', control: 'input', origen: 'ac-portada-alt' },
+      ],
+    },
+    producto: {
+      idInput: 'ap-id', origenSelect: null, // los productos se escriben siempre en español
+      campos: [
+        { nombre: 'nombre', etiqueta: 'Nombre', control: 'input', origen: 'ap-nombre' },
+        { nombre: 'descripcion', etiqueta: 'Descripción', control: 'textarea', origen: 'ap-descripcion' },
+        { nombre: 'imagen_alt', etiqueta: 'Texto alternativo de la imagen', control: 'input', origen: 'ap-imagen-alt' },
+      ],
+    },
+  };
+  const IDIOMA_NOMBRE = { es: 'español', en: 'inglés' };
+
+  function idiomaOrigenDe(tipo) {
+    const sel = TRADUCCION_CFG[tipo].origenSelect;
+    return (sel && document.getElementById(sel).value) === 'en' ? 'en' : 'es';
+  }
+  function idiomaDestinoDe(tipo) { return idiomaOrigenDe(tipo) === 'es' ? 'en' : 'es'; }
+  function idPiezaDe(tipo) { return document.getElementById(TRADUCCION_CFG[tipo].idInput).value; }
+
+  function separarLineas(valor) {
+    return valor.split('\n').map((p) => p.trim()).filter(Boolean);
+  }
+  function leerCampoOrigen(campo) {
+    const valor = document.getElementById(campo.origen).value;
+    return campo.control === 'lista' ? separarLineas(valor) : valor.trim();
+  }
+  function leerCampoTraduccion(tipo, campo) {
+    const valor = document.getElementById(`tr-${tipo}-${campo.nombre}`).value;
+    return campo.control === 'lista' ? separarLineas(valor) : valor.trim();
+  }
+  function escribirCampoTraduccion(tipo, campo, valor) {
+    const el = document.getElementById(`tr-${tipo}-${campo.nombre}`);
+    el.value = Array.isArray(valor) ? valor.join('\n') : (valor || '');
+  }
+
+  function renderPanelTraduccion(tipo) {
+    const cfg = TRADUCCION_CFG[tipo];
+    const box = document.getElementById(`tr-${tipo}`);
+    const campos = cfg.campos.map((c) => {
+      const id = `tr-${tipo}-${c.nombre}`;
+      const filas = c.control === 'textarea-grande' ? 10 : (c.control === 'input' ? 0 : 4);
+      const control = filas
+        ? `<textarea id="${id}" rows="${filas}" spellcheck="true"></textarea>`
+        : `<input type="text" id="${id}" spellcheck="true">`;
+      return `<label for="${id}">${c.etiqueta}</label>${control}`;
+    }).join('');
+    box.innerHTML = `
+      <h4 class="tr-title">🌐 Traducción al <span id="tr-${tipo}-destino"></span></h4>
+      <p class="admin-hint" id="tr-${tipo}-estado"></p>
+      <div id="tr-${tipo}-campos">${campos}</div>
+      <div class="tr-acciones" id="tr-${tipo}-acciones">
+        <button type="button" class="admin-btn-cancel" id="tr-${tipo}-ia">Traducir con IA</button>
+        <button type="button" class="admin-btn-new" id="tr-${tipo}-guardar">Guardar traducción</button>
+        <button type="button" class="admin-btn-cancel" id="tr-${tipo}-borrar">Eliminar traducción</button>
+      </div>
+      <p class="form-status" id="tr-${tipo}-status" aria-live="polite"></p>`;
+    box.hidden = false;
+    document.getElementById(`tr-${tipo}-ia`).addEventListener('click', () => traducirConIa(tipo));
+    document.getElementById(`tr-${tipo}-guardar`).addEventListener('click', () => guardarTraduccion(tipo));
+    document.getElementById(`tr-${tipo}-borrar`).addEventListener('click', () => borrarTraduccion(tipo));
+    if (cfg.origenSelect) {
+      document.getElementById(cfg.origenSelect).addEventListener('change', () => refrescarPanelTraduccion(tipo));
+    }
+  }
+
+  function bindTraducciones() {
+    Object.keys(TRADUCCION_CFG).forEach(renderPanelTraduccion);
+  }
+
+  // Se llama al abrir cada formulario: muestra la traduccion guardada (si hay)
+  // o el aviso de que primero hay que guardar la pieza.
+  async function refrescarPanelTraduccion(tipo) {
+    if (!document.getElementById(`tr-${tipo}-campos`)) return; // moderador: no se montan
+    const cfg = TRADUCCION_CFG[tipo];
+    const id = idPiezaDe(tipo);
+    const destino = idiomaDestinoDe(tipo);
+    const origenNombre = IDIOMA_NOMBRE[idiomaOrigenDe(tipo)];
+    const estado = document.getElementById(`tr-${tipo}-estado`);
+    document.getElementById(`tr-${tipo}-destino`).textContent = IDIOMA_NOMBRE[destino];
+    setStatus(document.getElementById(`tr-${tipo}-status`), '', '');
+    cfg.campos.forEach((c) => escribirCampoTraduccion(tipo, c, ''));
+    const usable = Boolean(id);
+    document.getElementById(`tr-${tipo}-campos`).hidden = !usable;
+    document.getElementById(`tr-${tipo}-acciones`).hidden = !usable;
+    if (!usable) { estado.textContent = 'Guarda primero la pieza; después podrás traducirla aquí.'; return; }
+    estado.textContent = 'Buscando traducción guardada...';
+    try {
+      const data = await apiFetch(`/api/admin/traducciones/${tipo}/${encodeURIComponent(id)}`);
+      if (id !== idPiezaDe(tipo)) return; // se abrió otra pieza mientras cargaba
+      const guardada = data.traducciones && data.traducciones[destino];
+      if (guardada) {
+        cfg.campos.forEach((c) => escribirCampoTraduccion(tipo, c, guardada.campos[c.nombre]));
+        estado.textContent = `Traducción al ${IDIOMA_NOMBRE[destino]} guardada (${String(guardada.actualizadoEn).slice(0, 10)}). Los visitantes que elijan ese idioma la verán.`;
+      } else {
+        estado.textContent = `Sin traducción al ${IDIOMA_NOMBRE[destino]} todavía: los visitantes que elijan ese idioma verán la pieza en ${origenNombre} con la etiqueta "solo en ${origenNombre}".`;
+      }
+    } catch (err) {
+      estado.textContent = 'No se pudo consultar la traducción: ' + err.message;
+    }
+  }
+
+  async function traducirConIa(tipo) {
+    const cfg = TRADUCCION_CFG[tipo];
+    const statusEl = document.getElementById(`tr-${tipo}-status`);
+    const campos = {};
+    cfg.campos.forEach((c) => { campos[c.nombre] = leerCampoOrigen(c); });
+    setStatus(statusEl, 'info', 'Traduciendo con IA... (puede tardar unos segundos)');
+    try {
+      const data = await apiFetch('/api/admin/traducir', {
+        method: 'POST',
+        body: JSON.stringify({ tipo, idiomaOrigen: idiomaOrigenDe(tipo), idiomaDestino: idiomaDestinoDe(tipo), campos }),
+      });
+      cfg.campos.forEach((c) => escribirCampoTraduccion(tipo, c, data.campos[c.nombre]));
+      setStatus(statusEl, 'ok', 'Borrador listo — revísalo, ajústalo si hace falta y pulsa "Guardar traducción". Todavía no está guardado.');
+    } catch (err) {
+      setStatus(statusEl, 'error', '' + err.message);
+    }
+  }
+
+  async function guardarTraduccion(tipo) {
+    const cfg = TRADUCCION_CFG[tipo];
+    const statusEl = document.getElementById(`tr-${tipo}-status`);
+    const id = idPiezaDe(tipo);
+    const destino = idiomaDestinoDe(tipo);
+    const campos = {};
+    cfg.campos.forEach((c) => {
+      const v = leerCampoTraduccion(tipo, c);
+      if (Array.isArray(v) ? v.length : v) campos[c.nombre] = v;
+    });
+    setStatus(statusEl, 'info', 'Guardando traducción...');
+    try {
+      await apiFetch(`/api/admin/traducciones/${tipo}/${encodeURIComponent(id)}/${destino}`, { method: 'PUT', body: JSON.stringify({ campos }) });
+      await refrescarPanelTraduccion(tipo);
+      setStatus(statusEl, 'ok', 'Traducción guardada.');
+    } catch (err) {
+      setStatus(statusEl, 'error', '' + err.message);
+    }
+  }
+
+  async function borrarTraduccion(tipo) {
+    const statusEl = document.getElementById(`tr-${tipo}-status`);
+    const destino = idiomaDestinoDe(tipo);
+    if (!confirm(`¿Eliminar la traducción al ${IDIOMA_NOMBRE[destino]}? La pieza volverá a mostrarse solo en su idioma original.`)) return;
+    try {
+      await apiFetch(`/api/admin/traducciones/${tipo}/${encodeURIComponent(idPiezaDe(tipo))}/${destino}`, { method: 'DELETE' });
+      await refrescarPanelTraduccion(tipo);
+      setStatus(statusEl, 'ok', 'Traducción eliminada.');
+    } catch (err) {
+      setStatus(statusEl, 'error', '' + err.message);
+    }
+  }
+
   // ── NOTICIAS ─────────────────────────────────────────────
   function bindNoticias() {
     document.getElementById('admin-noticias-new').addEventListener('click', () => openNoticiaForm());
@@ -285,6 +462,7 @@
     document.getElementById('admin-noticias-form-title').textContent = item ? 'Editar noticia' : 'Nueva noticia';
     document.getElementById('an-id').value = item?.id || '';
     document.getElementById('an-titulo').value = item?.titulo || '';
+    document.getElementById('an-idioma-original').value = item?.idioma_original || 'es';
     document.getElementById('an-categoria').value = item?.categoria || 'general';
     document.getElementById('an-fecha').value = item?.fecha ? String(item.fecha).slice(0, 10) : '';
     document.getElementById('an-imagen').value = item?.imagen || '';
@@ -300,6 +478,7 @@
     updateImagePreview('an-imagen', 'an-imagen-preview');
     setStatus(document.getElementById('an-status'), '', '');
     activarNewsPanel('clasificacion');
+    refrescarPanelTraduccion('noticia');
     document.getElementById('admin-noticias-form-box').style.display = 'block';
     document.getElementById('admin-noticias-form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -316,6 +495,7 @@
     const id = document.getElementById('an-id').value;
     const body = {
       titulo: document.getElementById('an-titulo').value.trim(),
+      idiomaOriginal: document.getElementById('an-idioma-original').value,
       categoria: document.getElementById('an-categoria').value,
       fecha: document.getElementById('an-fecha').value,
       imagen: document.getElementById('an-imagen').value.trim(),
@@ -935,6 +1115,7 @@
   function openContenidoForm(item) {
     document.getElementById('admin-contenidos-form-title').textContent = item ? 'Editar contenido' : 'Nuevo contenido';
     document.getElementById('ac-id').value = item?.id || '';
+    document.getElementById('ac-idioma-original').value = item?.idioma_original || 'es';
     document.getElementById('ac-seccion').value = item?.seccion || 'noticias';
     document.getElementById('ac-tipo-formato').value = item?.tipo_formato || 'noticia';
     document.getElementById('ac-categoria').value = item?.categoria || 'general';
@@ -969,6 +1150,7 @@
     setStatus(document.getElementById('ac-status'), '', '');
     actualizarTemaContenidos();
     activarSynthPanel('clasificacion');
+    refrescarPanelTraduccion('contenido');
     document.getElementById('admin-contenidos-form-box').style.display = 'block';
     document.getElementById('admin-contenidos-form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -1004,6 +1186,7 @@
       destacado: document.getElementById('ac-destacado').checked,
       subseccion: document.getElementById('ac-subseccion').value || null,
       enfoque: document.getElementById('ac-enfoque').value || null,
+      idiomaOriginal: document.getElementById('ac-idioma-original').value,
       esPremium: document.getElementById('ac-premium').checked,
       citaSinFuenteExterna: sinFuente,
       citaEstilo: sinFuente ? null : (document.getElementById('ac-cita-estilo').value || null),
@@ -1095,6 +1278,7 @@
     document.getElementById('ap-stripe-link').value = item?.stripe_link || '';
     document.getElementById('ap-disponible').checked = item ? !!item.disponible : true;
     setStatus(document.getElementById('ap-status'), '', '');
+    refrescarPanelTraduccion('producto');
     document.getElementById('admin-productos-form-box').style.display = 'block';
     document.getElementById('admin-productos-form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }

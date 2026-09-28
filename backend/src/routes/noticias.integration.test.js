@@ -151,7 +151,8 @@ describe('POST /api/noticias', () => {
     expect(res.status).toBe(201);
     const [sql, values] = pool.query.mock.calls[1];
     expect(sql).toMatch(/divulgacion_ia/);
-    expect(values[values.length - 2]).toBe('parcial');
+    expect(values[13]).toBe('parcial'); // divulgacion_ia
+    expect(values[15]).toBe('es'); // idioma_original por defecto
   });
 
   test('201 con publicado=false lo persiste como borrador (por defecto es true)', async () => {
@@ -165,7 +166,7 @@ describe('POST /api/noticias', () => {
     expect(res.status).toBe(201);
     const [sql, values] = pool.query.mock.calls[1];
     expect(sql).toMatch(/publicado/);
-    expect(values[values.length - 1]).toBe(false);
+    expect(values[14]).toBe(false); // publicado
   });
 });
 
@@ -264,5 +265,50 @@ describe('DELETE /api/noticias/:id', () => {
     const res = await request(app).delete('/api/noticias/a').set('x-test-user', ADMIN);
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
+  });
+});
+
+describe('GET /api/noticias?lang= (Fase C2)', () => {
+  test('con ?lang=en superpone la traduccion y marca sin_traduccion en lo que no tiene', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'a', titulo: 'Hola', parrafos: ['Uno'] }, { id: 'b', titulo: 'Adios', parrafos: ['Dos'] }] })
+      .mockResolvedValueOnce({ rows: [{ item_id: 'a', campos: { titulo: 'Hello', parrafos: ['One'] } }] });
+    const res = await request(app).get('/api/noticias?lang=en');
+    expect(res.status).toBe(200);
+    expect(res.body.noticias[0]).toMatchObject({ titulo: 'Hello', parrafos: ['One'], idioma_mostrado: 'en', sin_traduccion: false });
+    expect(res.body.noticias[1]).toMatchObject({ titulo: 'Adios', idioma_mostrado: 'es', sin_traduccion: true });
+    expect(pool.query.mock.calls[1][1]).toEqual(['noticia', 'en', ['a', 'b']]);
+  });
+
+  test('sin ?lang= no consulta traducciones ni agrega banderas', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'a', titulo: 'Hola' }] });
+    const res = await request(app).get('/api/noticias');
+    expect(pool.query).toHaveBeenCalledTimes(1);
+    expect(res.body.noticias[0]).toEqual({ id: 'a', titulo: 'Hola' });
+  });
+
+  test('?lang=en en el detalle traduce, y un idioma invalido se ignora', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'a', titulo: 'Hola', publicado: true }] })
+      .mockResolvedValueOnce({ rows: [{ item_id: 'a', campos: { titulo: 'Hello' } }] });
+    const en = await request(app).get('/api/noticias/a?lang=en');
+    expect(en.body.noticia.titulo).toBe('Hello');
+
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'a', titulo: 'Hola', publicado: true }] });
+    const raro = await request(app).get('/api/noticias/a?lang=fr');
+    expect(raro.body.noticia.titulo).toBe('Hola');
+  });
+
+  test('POST persiste idiomaOriginal cuando se envia', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [{ id: 'x' }] });
+    const res = await request(app).post('/api/noticias').set('x-test-user', ADMIN).send({ ...NOTICIA_VALIDA, idiomaOriginal: 'en' });
+    expect(res.status).toBe(201);
+    expect(pool.query.mock.calls[1][1][15]).toBe('en');
+  });
+
+  test('POST rechaza un idiomaOriginal invalido', async () => {
+    const res = await request(app).post('/api/noticias').set('x-test-user', ADMIN).send({ ...NOTICIA_VALIDA, idiomaOriginal: 'fr' });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/Idioma original/);
   });
 });

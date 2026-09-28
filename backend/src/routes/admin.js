@@ -6,6 +6,8 @@ const { extraerArticulo } = require('../services/articleExtractor');
 const { redactarDesdeArticulo } = require('../services/anthropic');
 const { investigarDesdeUrl, investigarDesdeTexto } = require('../services/investigador');
 const { redactarDesdeNotas } = require('../services/redactor');
+const { traducirCampos } = require('../services/traductor');
+const { validateTraduccion, TIPOS_VALIDOS, IDIOMAS_VALIDOS, CAMPOS_POR_TIPO } = require('../validators/traduccion');
 
 const router = express.Router();
 
@@ -171,6 +173,130 @@ router.get('/uso-ia', requireAuth, requireModerador, async (req, res) => {
       ultimas: ultimas.rows,
     });
   } catch (err) { enviarError500(res, err); }
+});
+
+// ── TRADUCCIONES (Fase C2) ──────────────────────────────────
+// El nombre de la tabla sale de este mapa (nunca del request) para que el
+// tipo que manda el cliente no pueda inyectar SQL.
+const TABLA_POR_TIPO = { noticia: 'noticias', contenido: 'contenidos', producto: 'productos' };
+
+async function cargarPieza(tipo, id) {
+  const { rows } = await pool.query(`SELECT * FROM ${TABLA_POR_TIPO[tipo]} WHERE id = $1`, [id]);
+  return rows[0] || null;
+}
+
+function idiomaOriginalDe(pieza) {
+  return pieza.idioma_original === 'en' ? 'en' : 'es';
+}
+
+// Extrae de la fila guardada solo los campos traducibles del tipo.
+function camposDePieza(tipo, pieza) {
+  const campos = {};
+  for (const nombre of Object.keys(CAMPOS_POR_TIPO[tipo])) {
+    if (pieza[nombre] !== undefined && pieza[nombre] !== null) campos[nombre] = pieza[nombre];
+  }
+  return campos;
+}
+
+function tipoValido(res, tipo) {
+  if (TIPOS_VALIDOS.includes(tipo)) return true;
+  res.status(400).json({ ok: false, error: 'Tipo de contenido no valido.' });
+  return false;
+}
+
+// GET /api/admin/traducciones/:tipo/:id -- traducciones guardadas de una pieza
+router.get('/traducciones/:tipo/:id', requireAuth, requireAdmin, async (req, res) => {
+  const { tipo, id } = req.params;
+  if (!tipoValido(res, tipo)) return;
+  try {
+    const pieza = await cargarPieza(tipo, id);
+    if (!pieza) return res.status(404).json({ ok: false, error: 'Contenido no encontrado.' });
+    const { rows } = await pool.query(
+      'SELECT idioma, campos, actualizado_en FROM traducciones WHERE tipo = $1 AND item_id = $2',
+      [tipo, id]
+    );
+    res.json({
+      ok: true,
+      idiomaOriginal: idiomaOriginalDe(pieza),
+      traducciones: Object.fromEntries(rows.map((r) => [r.idioma, { campos: r.campos, actualizadoEn: r.actualizado_en }])),
+    });
+  } catch (err) { enviarError500(res, err); }
+});
+
+// PUT /api/admin/traducciones/:tipo/:id/:idioma -- guardar (crear o reemplazar)
+router.put('/traducciones/:tipo/:id/:idioma', requireAuth, requireAdmin, async (req, res) => {
+  const { tipo, id, idioma } = req.params;
+  const { errors, campos } = validateTraduccion(tipo, idioma, req.body && req.body.campos);
+  if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
+  try {
+    const pieza = await cargarPieza(tipo, id);
+    if (!pieza) return res.status(404).json({ ok: false, error: 'Contenido no encontrado.' });
+    if (idiomaOriginalDe(pieza) === idioma) {
+      return res.status(400).json({ ok: false, error: 'Ese ya es el idioma original de la pieza; edita la pieza directamente.' });
+    }
+    await pool.query(
+      `INSERT INTO traducciones (tipo, item_id, idioma, campos, actualizado_por)
+       VALUES ($1,$2,$3,$4::jsonb,$5)
+       ON CONFLICT (tipo, item_id, idioma)
+       DO UPDATE SET campos = EXCLUDED.campos, actualizado_en = now(), actualizado_por = EXCLUDED.actualizado_por`,
+      [tipo, id, idioma, JSON.stringify(campos), req.user.id]
+    );
+    res.json({ ok: true, campos });
+  } catch (err) { enviarError500(res, err); }
+});
+
+// DELETE /api/admin/traducciones/:tipo/:id/:idioma
+router.delete('/traducciones/:tipo/:id/:idioma', requireAuth, requireAdmin, async (req, res) => {
+  const { tipo, id, idioma } = req.params;
+  if (!tipoValido(res, tipo)) return;
+  if (!IDIOMAS_VALIDOS.includes(idioma)) return res.status(400).json({ ok: false, error: 'Idioma no valido.' });
+  try {
+    const { rowCount } = await pool.query(
+      'DELETE FROM traducciones WHERE tipo = $1 AND item_id = $2 AND idioma = $3',
+      [tipo, id, idioma]
+    );
+    if (rowCount === 0) return res.status(404).json({ ok: false, error: 'No hay traduccion guardada en ese idioma.' });
+    res.json({ ok: true });
+  } catch (err) { enviarError500(res, err); }
+});
+
+// POST /api/admin/traducir -- solo admin. Genera un BORRADOR de traduccion con
+// el agente Traductor; nunca guarda nada -- el admin revisa y luego usa el PUT.
+// Recibe { tipo, idiomaDestino, campos } (lo que hay en el formulario) o
+// { tipo, id, idiomaDestino } para traducir lo ya guardado. Si viene `id`, el
+// idioma de origen es el idioma original de la pieza; si no, `idiomaOrigen`.
+router.post('/traducir', requireAuth, requireAdmin, async (req, res) => {
+  const { tipo, id, idiomaDestino } = req.body || {};
+  if (!tipoValido(res, tipo)) return;
+  if (!IDIOMAS_VALIDOS.includes(idiomaDestino)) {
+    return res.status(400).json({ ok: false, error: 'Idioma de destino no valido (es / en).' });
+  }
+  try {
+    let idiomaOrigen = req.body.idiomaOrigen;
+    let camposEntrada = req.body.campos;
+    if (id) {
+      const pieza = await cargarPieza(tipo, id);
+      if (!pieza) return res.status(404).json({ ok: false, error: 'Contenido no encontrado.' });
+      idiomaOrigen = idiomaOriginalDe(pieza);
+      if (!camposEntrada) camposEntrada = camposDePieza(tipo, pieza);
+    }
+    if (!IDIOMAS_VALIDOS.includes(idiomaOrigen)) {
+      return res.status(400).json({ ok: false, error: 'Falta el idioma de origen (es / en).' });
+    }
+    if (idiomaOrigen === idiomaDestino) {
+      return res.status(400).json({ ok: false, error: 'El idioma de origen y el de destino son el mismo.' });
+    }
+    const { errors, campos } = validateTraduccion(tipo, idiomaOrigen, camposEntrada);
+    if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
+
+    const traducido = await traducirCampos({ tipo, campos, idiomaOrigen, idiomaDestino });
+    await registrarUsoIa({
+      agente: 'traductor', fuenteTipo: 'texto', usarBusquedaWeb: false, usage: traducido.usage, creadoPor: req.user.id,
+    });
+    res.json({ ok: true, campos: traducido.campos, idiomaOrigen, idiomaDestino });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: err.message });
+  }
 });
 
 module.exports = router;

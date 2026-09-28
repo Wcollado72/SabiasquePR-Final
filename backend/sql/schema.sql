@@ -456,3 +456,34 @@ CREATE TABLE IF NOT EXISTS ia_generaciones (
   creado_en             timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_ia_generaciones_creado_en ON ia_generaciones(creado_en DESC);
+
+-- ============================================================
+-- Fase C2 (2026-09-28): sitio bilingue espanol/ingles.
+-- `idioma_original` dice en que idioma se escribio la pieza; la otra
+-- version vive en `traducciones` (una fila por pieza+idioma), asi que hay
+-- UN solo hilo de comentarios, UN solo destacado y el mismo producto de
+-- Stripe. Productos siempre se consideran escritos en espanol.
+-- ============================================================
+ALTER TABLE noticias ADD COLUMN IF NOT EXISTS idioma_original text NOT NULL DEFAULT 'es';
+ALTER TABLE noticias DROP CONSTRAINT IF EXISTS noticias_idioma_original_check;
+ALTER TABLE noticias ADD CONSTRAINT noticias_idioma_original_check CHECK (idioma_original IN ('es', 'en'));
+
+ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS idioma_original text NOT NULL DEFAULT 'es';
+ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_idioma_original_check;
+ALTER TABLE contenidos ADD CONSTRAINT contenidos_idioma_original_check CHECK (idioma_original IN ('es', 'en'));
+
+CREATE TABLE IF NOT EXISTS traducciones (
+  tipo           text NOT NULL CHECK (tipo IN ('noticia', 'contenido', 'producto')),
+  item_id        text NOT NULL,
+  idioma         text NOT NULL CHECK (idioma IN ('es', 'en')),
+  campos         jsonb NOT NULL,
+  actualizado_en timestamptz NOT NULL DEFAULT now(),
+  actualizado_por uuid NULL REFERENCES perfiles(id) ON DELETE SET NULL,
+  PRIMARY KEY (tipo, item_id, idioma)
+);
+ALTER TABLE traducciones ENABLE ROW LEVEL SECURITY;
+
+-- El agente Traductor tambien se registra en la bitacora de costo real.
+ALTER TABLE ia_generaciones DROP CONSTRAINT IF EXISTS ia_generaciones_agente_check;
+ALTER TABLE ia_generaciones ADD CONSTRAINT ia_generaciones_agente_check
+  CHECK (agente IN ('investigador', 'redactor', 'traductor'));

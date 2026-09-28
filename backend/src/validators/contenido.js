@@ -10,6 +10,7 @@ const SUBFORMATOS_VALIDOS = [
   'cronica', 'guia', 'infografia', 'tutorial', 'documental', 'columna',
 ];
 const DIVULGACION_IA_VALIDAS = ['no', 'parcial', 'generado'];
+const IDIOMAS_ORIGINAL_VALIDOS = ['es', 'en'];
 const CITA_ESTILOS_VALIDOS = [
   'apa', 'mla', 'chicago', 'turabian', 'ama', 'vancouver', 'abnt', 'icontec', 'ieee', 'bluebook',
 ];
@@ -42,6 +43,9 @@ function validateContenido(body, { partial = false } = {}) {
   }
   if (body.divulgacionIa !== undefined && !DIVULGACION_IA_VALIDAS.includes(body.divulgacionIa)) {
     errors.push('Divulgacion de IA no valida.');
+  }
+  if (body.idiomaOriginal !== undefined && !IDIOMAS_ORIGINAL_VALIDOS.includes(body.idiomaOriginal)) {
+    errors.push('Idioma original no valido.');
   }
   if (body.citaEstilo !== undefined && body.citaEstilo !== null && !CITA_ESTILOS_VALIDOS.includes(body.citaEstilo)) {
     errors.push('Estilo de cita no valido.');
@@ -100,6 +104,7 @@ module.exports = {
   CATEGORIAS_VALIDAS,
   SUBFORMATOS_VALIDOS,
   DIVULGACION_IA_VALIDAS,
+  IDIOMAS_ORIGINAL_VALIDOS,
   CITA_ESTILOS_VALIDOS,
   SUBSECCIONES_VALIDAS,
   ENFOQUES_VALIDOS,
