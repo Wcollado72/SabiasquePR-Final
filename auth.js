@@ -37,7 +37,11 @@ async function initAuth() {
       // moderador, lo lleva directo al panel en vez de dejarlo donde estaba
       // -- solo en el evento de login real (no en cada carga de pagina con
       // sesion ya activa, ni en logout/refresh de token).
-      if (event === 'SIGNED_IN') redirigirAlPanelSiCorresponde(session);
+      // supabase-js vuelve a emitir SIGNED_IN cada vez que la pestana recupera
+      // el foco -- por eso solo se actua si el usuario acaba de iniciar sesion
+      // a proposito (marca puesta en signIn/signInWithGoogle). Sin esto, al
+      // volver a la pestana se recargaba el panel y se perdian los campos.
+      if (event === 'SIGNED_IN' && consumirMarcaLoginManual()) redirigirAlPanelSiCorresponde(session);
     });
   } catch (err) {
     console.warn('[Auth] Error al inicializar Supabase:', err.message);
@@ -122,6 +126,20 @@ async function updateLoginUI(session) {
   }
 }
 
+const MARCA_LOGIN_MANUAL = 'sqpr_login_manual';
+function marcarLoginManual() {
+  try { sessionStorage.setItem(MARCA_LOGIN_MANUAL, String(Date.now())); } catch { /* sin storage: no se redirige */ }
+}
+// Devuelve true una sola vez, y solo si la marca es reciente (evita que una
+// marca vieja de un login abandonado dispare una redireccion mas tarde).
+function consumirMarcaLoginManual() {
+  try {
+    const t = Number(sessionStorage.getItem(MARCA_LOGIN_MANUAL));
+    sessionStorage.removeItem(MARCA_LOGIN_MANUAL);
+    return Number.isFinite(t) && t > 0 && Date.now() - t < 2 * 60 * 1000;
+  } catch { return false; }
+}
+
 // Redirige al panel de administracion justo despues de iniciar sesion, si
 // el rol lo permite -- evita el paso extra de ir a buscar el enlace del
 // panel a mano cada vez. Si ya esta en admin.html (ej. volvio a iniciar
@@ -177,8 +195,9 @@ function setAuthStatus(msg, type = 'info') {
 // ── ACCIONES DE AUTH ────────────────────────────────────────
 async function signIn(email, password) {
   setAuthStatus('Entrando...', 'info');
+  marcarLoginManual();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) { setAuthStatus('' + error.message, 'error'); return; }
+  if (error) { consumirMarcaLoginManual(); setAuthStatus('' + error.message, 'error'); return; }
   setAuthStatus('¡Bienvenido!', 'ok');
   setTimeout(() => window.closeLoginModal?.(), 900);
 }
@@ -199,6 +218,7 @@ async function signOut() {
 }
 
 async function signInWithGoogle() {
+  marcarLoginManual();
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: window.location.href },
