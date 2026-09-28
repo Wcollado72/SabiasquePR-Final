@@ -1,4 +1,4 @@
-const { elegirTono, elegirEstructura } = require('./redactor');
+const { elegirTono, elegirEstructura, elegirIdioma } = require('./redactor');
 
 describe('elegirTono', () => {
   test('devuelve una instruccion distinta por cada tono valido', () => {
@@ -39,5 +39,14 @@ describe('elegirEstructura', () => {
   test('cae a ensayo si el estilo no existe o falta', () => {
     expect(elegirEstructura('inventado')).toBe(elegirEstructura('ensayo'));
     expect(elegirEstructura(undefined)).toBe(elegirEstructura('ensayo'));
+  });
+});
+
+describe('elegirIdioma', () => {
+  test('solo espanol e ingles, con espanol por defecto', () => {
+    expect(elegirIdioma('es')).toMatch(/español/);
+    expect(elegirIdioma('en')).toMatch(/inglés/);
+    expect(elegirIdioma('fr')).toBe(elegirIdioma('es'));
+    expect(elegirIdioma(undefined)).toBe(elegirIdioma('es'));
   });
 });

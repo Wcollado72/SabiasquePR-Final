@@ -84,14 +84,15 @@ async function registrarUsoIa({ agente, fuenteTipo, usarBusquedaWeb, usage, crea
 // tituloSugerido }, mas usarBusquedaWeb. Nunca guarda contenido, solo notas
 // para que el admin revise antes de redactar.
 router.post('/investigar', requireAuth, requireAdmin, async (req, res) => {
-  const { url, texto, tituloSugerido, usarBusquedaWeb } = req.body || {};
+  const { url, texto, tituloSugerido, usarBusquedaWeb, instrucciones, tono, respuestas } = req.body || {};
   if (!url && !texto) {
     return res.status(400).json({ ok: false, error: 'Falta la URL o el texto de la fuente.' });
   }
   try {
+    const opciones = { usarBusquedaWeb: Boolean(usarBusquedaWeb), instrucciones, tono, respuestas };
     const resultado = url
-      ? await investigarDesdeUrl(url, { usarBusquedaWeb: Boolean(usarBusquedaWeb) })
-      : await investigarDesdeTexto(texto, { tituloSugerido, usarBusquedaWeb: Boolean(usarBusquedaWeb) });
+      ? await investigarDesdeUrl(url, opciones)
+      : await investigarDesdeTexto(texto, { tituloSugerido, ...opciones });
 
     await registrarUsoIa({
       agente: 'investigador',
@@ -110,6 +111,10 @@ router.post('/investigar', requireAuth, requireAdmin, async (req, res) => {
       citaAutor: resultado.citaAutor,
       citaAnio: resultado.citaAnio,
       citaEstiloSugerido: resultado.citaEstiloSugerido,
+      idiomaDetectado: resultado.idiomaDetectado || '',
+      textoCorregido: resultado.textoCorregido || '',
+      correcciones: resultado.correcciones || [],
+      preguntas: resultado.preguntas || [],
     });
   } catch (err) {
     res.status(400).json({ ok: false, error: err.message });
@@ -120,12 +125,12 @@ router.post('/investigar', requireAuth, requireAdmin, async (req, res) => {
 // por el admin) mas la clasificacion que el admin ya eligio en el
 // formulario -- el Redactor nunca adivina seccion/subseccion/categoria.
 router.post('/redactar', requireAuth, requireAdmin, async (req, res) => {
-  const { notas, seccion, subseccion, categoria, tipoFormato, estilo, tono, fuenteTexto, fuenteUrl } = req.body || {};
+  const { notas, seccion, subseccion, categoria, tipoFormato, estilo, tono, idioma, fuenteTexto, fuenteUrl } = req.body || {};
   if (!notas || typeof notas !== 'string') {
     return res.status(400).json({ ok: false, error: 'Faltan las notas de investigación.' });
   }
   try {
-    const redactado = await redactarDesdeNotas({ notas, seccion, subseccion, categoria, tipoFormato, estilo, tono, fuenteTexto, fuenteUrl });
+    const redactado = await redactarDesdeNotas({ notas, seccion, subseccion, categoria, tipoFormato, estilo, tono, idioma, fuenteTexto, fuenteUrl });
 
     await registrarUsoIa({
       agente: 'redactor',

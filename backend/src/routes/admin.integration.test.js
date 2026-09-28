@@ -160,7 +160,7 @@ describe('POST /api/admin/investigar', () => {
       .set('x-test-user', ADMIN).send({ url: 'https://ejemplo.com/a', usarBusquedaWeb: false });
     expect(res.status).toBe(200);
     expect(res.body.notas).toBe('Notas de prueba');
-    expect(investigarDesdeUrl).toHaveBeenCalledWith('https://ejemplo.com/a', { usarBusquedaWeb: false });
+    expect(investigarDesdeUrl).toHaveBeenCalledWith('https://ejemplo.com/a', expect.objectContaining({ usarBusquedaWeb: false }));
     expect(pool.query).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO ia_generaciones'),
       expect.arrayContaining(['investigador', 'url', false])
@@ -177,6 +177,24 @@ describe('POST /api/admin/investigar', () => {
       .set('x-test-user', ADMIN).send({ texto: 'Una transcripcion larga de prueba...', tituloSugerido: 'Video X' });
     expect(res.status).toBe(200);
     expect(investigarDesdeTexto).toHaveBeenCalled();
+  });
+
+  test('devuelve correcciones/preguntas/idioma y pasa instrucciones y tono al agente', async () => {
+    investigarDesdeTexto.mockResolvedValueOnce({
+      notas: 'N', tituloOriginal: 'T', fuenteTexto: '', fuenteUrl: '', fuenteTipo: 'texto', usage: USAGE_MOCK,
+      idiomaDetectado: 'suajili', textoCorregido: 'texto limpio',
+      correcciones: [{ antes: 'tecsto', despues: 'texto', motivo: 'ortografia' }],
+      preguntas: [{ pregunta: '¿Tono?', opciones: ['Neutral', 'Crítico'] }],
+    });
+    pool.query.mockResolvedValueOnce({});
+    const res = await request(app).post('/api/admin/investigar').set('x-test-user', ADMIN)
+      .send({ texto: 'Un tecsto largo de prueba con suficientes caracteres para investigar.', instrucciones: 'Busca fuentes africanas', tono: 'neutral', respuestas: 'Neutral' });
+    expect(res.status).toBe(200);
+    expect(res.body.idiomaDetectado).toBe('suajili');
+    expect(res.body.textoCorregido).toBe('texto limpio');
+    expect(res.body.correcciones).toHaveLength(1);
+    expect(res.body.preguntas[0].opciones).toEqual(['Neutral', 'Crítico']);
+    expect(investigarDesdeTexto).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ instrucciones: 'Busca fuentes africanas', tono: 'neutral', respuestas: 'Neutral' }));
   });
 
   test('400 si el servicio lanza un error', async () => {
@@ -224,10 +242,10 @@ describe('POST /api/admin/redactar', () => {
     pool.query.mockResolvedValueOnce({});
     const res = await request(app).post('/api/admin/redactar')
       .set('x-test-user', ADMIN)
-      .send({ notas: 'Notas de prueba suficientemente largas', seccion: 'revolucion-humana', subseccion: 'nuevos-humanos', estilo: 'investigacion', tono: 'critico' });
+      .send({ notas: 'Notas de prueba suficientemente largas', seccion: 'revolucion-humana', subseccion: 'nuevos-humanos', estilo: 'investigacion', tono: 'critico', idioma: 'en' });
     expect(res.status).toBe(200);
     expect(res.body.titulo).toBe('Titulo redactado');
-    expect(redactarDesdeNotas).toHaveBeenCalledWith(expect.objectContaining({ seccion: 'revolucion-humana', subseccion: 'nuevos-humanos', estilo: 'investigacion', tono: 'critico' }));
+    expect(redactarDesdeNotas).toHaveBeenCalledWith(expect.objectContaining({ seccion: 'revolucion-humana', subseccion: 'nuevos-humanos', estilo: 'investigacion', tono: 'critico', idioma: 'en' }));
   });
 });
 

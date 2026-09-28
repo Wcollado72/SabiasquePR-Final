@@ -44,6 +44,17 @@ const ESTILOS_REDACCION = {
   opinion: 'Formato OPINIÓN: primera persona editorial, argumenta una postura clara sobre el tema a partir de los hechos de las notas -- dile al lector qué pensar y por qué, sin fingir neutralidad.',
 };
 
+// Idioma en que se redacta el resultado. El sitio publica en espanol e
+// ingles; las notas del Investigador siempre vienen en espanol.
+const IDIOMAS_REDACCION = {
+  es: 'español (natural para Puerto Rico y Latinoamérica)',
+  en: 'inglés (American English, natural y claro)',
+};
+
+function elegirIdioma(idioma) {
+  return IDIOMAS_REDACCION[idioma] || IDIOMAS_REDACCION.es;
+}
+
 function elegirEstructura(estilo) {
   return ESTILOS_REDACCION[estilo] || ESTILOS_REDACCION.ensayo;
 }
@@ -54,12 +65,12 @@ const HERRAMIENTA = {
   input_schema: {
     type: 'object',
     properties: {
-      titulo: { type: 'string', description: 'Titular en español, claro y preciso.' },
-      subtituloResumen: { type: 'string', description: 'Resumen editorial de 2-3 oraciones, en español, redacción 100% original.' },
+      titulo: { type: 'string', description: 'Titular en el idioma de redacción indicado, claro y preciso.' },
+      subtituloResumen: { type: 'string', description: 'Resumen editorial de 2-3 oraciones, en el idioma de redacción indicado, redacción 100% original.' },
       parrafos: {
         type: 'array',
         items: { type: 'string' },
-        description: 'Cuerpo del contenido en español, redacción 100% original -- nunca traducción ni copia de las notas fuente.',
+        description: 'Cuerpo del contenido en el idioma de redacción indicado, redacción 100% original -- nunca traducción literal ni copia de las notas fuente.',
       },
       duracionMinEstimado: { type: 'integer', description: 'Minutos estimados de lectura del resultado (entero, mínimo 1).' },
     },
@@ -73,7 +84,7 @@ function calcularCosto(usage) {
   return entrada + salida;
 }
 
-async function redactarDesdeNotas({ notas, seccion, subseccion, categoria, tipoFormato, estilo, tono: tonoElegido, fuenteTexto, fuenteUrl }) {
+async function redactarDesdeNotas({ notas, seccion, subseccion, categoria, tipoFormato, estilo, tono: tonoElegido, idioma, fuenteTexto, fuenteUrl }) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY no esta configurada en el servidor.');
   if (!notas || notas.trim().length < 20) {
@@ -82,10 +93,11 @@ async function redactarDesdeNotas({ notas, seccion, subseccion, categoria, tipoF
 
   const tono = elegirTono(tonoElegido);
   const estructura = elegirEstructura(estilo);
+  const idiomaNombre = elegirIdioma(idioma);
   const prompt = `Eres redactor editorial de "Sabías que PR", un sitio de noticias y análisis en español para audiencia de Puerto Rico y Latinoamérica.
 
 Te doy notas de investigación ya organizadas sobre un tema. Tu trabajo:
-1. Escribe TODO en español, con redacción propia y original -- nunca copies ni traduzcas literalmente las notas.
+1. Escribe TODO en ${idiomaNombre}, con redacción propia y original -- nunca copies ni traduzcas literalmente las notas. Mantén en su idioma original los nombres propios y las citas textuales importantes (con traducción entre paréntesis si hace falta). Si corriges algo, no pierdas el sentido ni el tono pedido.
 2. Sé preciso con los hechos de las notas, pero cuéntalos con tu propia voz editorial.
 3. ${tono}
 4. ${estructura}
@@ -142,4 +154,4 @@ Usa la herramienta "redactar_contenido" para entregar el resultado.`;
   };
 }
 
-module.exports = { redactarDesdeNotas, elegirTono, elegirEstructura, calcularCosto };
+module.exports = { redactarDesdeNotas, elegirTono, elegirEstructura, elegirIdioma, calcularCosto };

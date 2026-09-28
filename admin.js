@@ -106,11 +106,28 @@
   // el navegador deje enviar el formulario. En vez de que el admin tenga que
   // recordar escribirlo siempre, al salir del campo se le agrega solo si
   // falta — así "sabiasquepr.com" se completa a "https://sabiasquepr.com".
+  // Quita parametros de rastreo (utm_*, fbclid, gclid) y el fragmento
+  // "#:~:text=" que Chrome/Gemini agregan al copiar un enlace resaltado --
+  // no cambian el articulo, solo ensucian la cita y filtran de donde vino.
+  function limpiarUrlDeRastreo(valor) {
+    if (!valor) return valor;
+    try {
+      const u = new URL(valor);
+      [...u.searchParams.keys()]
+        .filter((k) => /^utm_/i.test(k) || ['fbclid', 'gclid', 'mc_cid', 'mc_eid'].includes(k.toLowerCase()))
+        .forEach((k) => u.searchParams.delete(k));
+      if (u.hash.startsWith('#:~:')) u.hash = '';
+      return u.toString();
+    } catch { return valor; }
+  }
+
   function bindUrlNormalizer() {
     document.querySelectorAll('#admin-panel input[type="url"]').forEach((input) => {
       input.addEventListener('blur', () => {
-        const v = input.value.trim();
-        if (v && !/^[a-z][a-z0-9+.-]*:\/\//i.test(v)) input.value = 'https://' + v;
+        let v = input.value.trim();
+        if (v && !/^[a-z][a-z0-9+.-]*:\/\//i.test(v)) v = 'https://' + v;
+        input.value = limpiarUrlDeRastreo(v);
+        if (input.id === 'ac-fuente-url') updateCitationPreview();
       });
     });
   }
@@ -444,15 +461,31 @@
       });
     });
 
-    document.getElementById('ia-investigar-btn').addEventListener('click', investigarFuente);
+    document.getElementById('ia-investigar-btn').addEventListener('click', () => investigarFuente());
+    document.getElementById('ia-reinvestigar-btn').addEventListener('click', reinvestigarConRespuestas);
+    document.getElementById('ia-restaurar-texto').addEventListener('click', restaurarTextoPegado);
+    // Si el admin edita el texto a mano, ese pasa a ser su "original".
+    document.getElementById('ia-texto').addEventListener('input', () => {
+      textoPegadoOriginal = null;
+      document.getElementById('ia-correcciones-box').style.display = 'none';
+    });
     document.getElementById('ia-redactar-btn').addEventListener('click', redactarConIA);
   }
 
-  async function investigarFuente() {
+  // Texto pegado tal como lo escribio el admin, para poder restaurarlo si no
+  // le gustan las correcciones automaticas del Investigador.
+  let textoPegadoOriginal = null;
+
+  async function investigarFuente(respuestasTexto = '') {
     const statusEl = document.getElementById('ia-investigar-status');
     const esUrl = document.querySelector('#ia-fuente-toggle .foro-filter-btn.active').dataset.fuente === 'url';
     const usarBusquedaWeb = document.getElementById('ia-usar-busqueda').checked;
-    const body = { usarBusquedaWeb };
+    const body = {
+      usarBusquedaWeb,
+      instrucciones: document.getElementById('ia-instrucciones').value.trim(),
+      tono: document.getElementById('ia-tono').value,
+      respuestas: respuestasTexto,
+    };
     if (esUrl) {
       const url = document.getElementById('ia-url').value.trim();
       if (!url) { statusEl.textContent = 'Pega primero la URL de la fuente.'; return; }
@@ -460,6 +493,7 @@
     } else {
       const texto = document.getElementById('ia-texto').value.trim();
       if (!texto) { statusEl.textContent = 'Pega primero el texto o la transcripción.'; return; }
+      if (textoPegadoOriginal === null) textoPegadoOriginal = document.getElementById('ia-texto').value;
       body.texto = texto;
       body.tituloSugerido = document.getElementById('ia-titulo-sugerido').value.trim();
     }
@@ -482,10 +516,68 @@
         toggleCitationFields();
         updateCitationPreview();
       }
-      statusEl.textContent = 'Listo — revisa/edita las notas y la citación, luego dale a "Redactar con IA".';
+      mostrarCorreccionesIa(data);
+      mostrarPreguntasIa(data.preguntas || []);
+      const idioma = data.idiomaDetectado ? ` Idioma detectado: ${data.idiomaDetectado}.` : '';
+      statusEl.textContent = (data.preguntas && data.preguntas.length
+        ? 'Notas provisionales listas — responde las preguntas de abajo para afinarlas, o continúa con "Redactar con IA".'
+        : 'Listo — revisa/edita las notas y la citación, luego dale a "Redactar con IA".') + idioma;
     } catch (err) {
       statusEl.textContent = 'No se pudo investigar: ' + err.message;
     }
+  }
+
+  // Muestra cada correccion automatica (antes -> despues) y deja el texto
+  // corregido en el cuadro; "Restaurar" devuelve exactamente lo que se pego.
+  function mostrarCorreccionesIa(data) {
+    const box = document.getElementById('ia-correcciones-box');
+    const lista = document.getElementById('ia-correcciones-lista');
+    const resumen = document.getElementById('ia-correcciones-resumen');
+    const cambios = data.correcciones || [];
+    // Sin cambios nuevos (p. ej. al reinvestigar un texto ya corregido) se
+    // deja el cuadro como esta, para poder seguir restaurando el original.
+    if (!cambios.length || !data.textoCorregido) return;
+    document.getElementById('ia-texto').value = data.textoCorregido;
+    resumen.textContent = `El agente corrigió ${cambios.length} cosa${cambios.length === 1 ? '' : 's'} en el texto pegado (sin cambiar el sentido ni las citas):`;
+    lista.innerHTML = cambios.map((c) => `<li class="suggestion-item">"<mark>${escapeHtml(c.antes)}</mark>" → ${c.despues ? `"${escapeHtml(c.despues)}"` : '<em>(eliminado)</em>'}${c.motivo ? ` — ${escapeHtml(c.motivo)}` : ''}</li>`).join('');
+    box.style.display = '';
+  }
+
+  function mostrarPreguntasIa(preguntas) {
+    const box = document.getElementById('ia-preguntas-box');
+    const lista = document.getElementById('ia-preguntas-lista');
+    if (!preguntas.length) { box.style.display = 'none'; lista.innerHTML = ''; return; }
+    lista.innerHTML = preguntas.map((p, i) => `
+      <div class="ia-pregunta" data-pregunta="${escapeHtml(p.pregunta)}">
+        <p class="admin-hint">${i + 1}. ${escapeHtml(p.pregunta)}</p>
+        <div class="foro-filters">${p.opciones.map((o) => `<button type="button" class="foro-filter-btn" data-opcion="${escapeHtml(o)}">${escapeHtml(o)}</button>`).join('')}</div>
+      </div>`).join('');
+    lista.querySelectorAll('.ia-pregunta').forEach((bloque) => {
+      bloque.querySelectorAll('.foro-filter-btn').forEach((btn) => btn.addEventListener('click', () => {
+        bloque.querySelectorAll('.foro-filter-btn').forEach((b) => b.classList.toggle('active', b === btn));
+      }));
+    });
+    box.style.display = '';
+  }
+
+  function reinvestigarConRespuestas() {
+    const respondidas = [...document.querySelectorAll('#ia-preguntas-lista .ia-pregunta')]
+      .map((b) => {
+        const activa = b.querySelector('.foro-filter-btn.active');
+        return activa ? `${b.dataset.pregunta} → ${activa.dataset.opcion}` : '';
+      })
+      .filter(Boolean);
+    if (!respondidas.length) {
+      document.getElementById('ia-investigar-status').textContent = 'Elige al menos una respuesta para investigar de nuevo.';
+      return;
+    }
+    investigarFuente(respondidas.join('; '));
+  }
+
+  function restaurarTextoPegado() {
+    if (textoPegadoOriginal === null) return;
+    document.getElementById('ia-texto').value = textoPegadoOriginal;
+    document.getElementById('ia-correcciones-box').style.display = 'none';
   }
 
   async function redactarConIA() {
@@ -504,6 +596,7 @@
           tipoFormato: document.getElementById('ac-tipo-formato').value,
           estilo: document.getElementById('ia-estilo').value,
           tono: document.getElementById('ia-tono').value,
+          idioma: document.getElementById('ia-idioma').value,
           fuenteTexto: document.getElementById('ac-fuente-texto').value,
           fuenteUrl: document.getElementById('ac-fuente-url').value,
         }),

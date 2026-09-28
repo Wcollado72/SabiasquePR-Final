@@ -32,7 +32,7 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon-96.png" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=da318977">
+  <link rel="stylesheet" href="styles.css?v=d3d24e5e">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Panel de administración","description":"Panel de administración de Sabías que PR: gestión de noticias y productos.","url":"https://sabiasquepr.com/admin.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -415,20 +415,39 @@
                     <label for="ia-titulo-sugerido">Título sugerido de la fuente (opcional)</label>
                     <input type="text" id="ia-titulo-sugerido">
                   </div>
-                  <label class="admin-checkbox"><input type="checkbox" id="ia-usar-busqueda"> Usar búsqueda web (~$0.01-0.03 extra por uso, máximo 3 búsquedas)</label>
-                  <button type="button" class="admin-btn-cancel" id="ia-investigar-btn">Investigar</button>
-                  <p class="admin-hint" id="ia-investigar-status" aria-live="polite"></p>
-                  <div id="ia-notas-box" style="display:none;">
-                    <label for="ia-notas">Notas de investigación (edítalas si hace falta antes de redactar)</label>
-                    <textarea id="ia-notas" rows="8"></textarea>
-                    <label for="ia-tono">Tono</label>
-                    <select id="ia-tono">
-                      <option value="analitico">Analítico</option>
+                  <label for="ia-instrucciones">Instrucciones para el Investigador (opcional)</label>
+                  <textarea id="ia-instrucciones" rows="3" maxlength="1000" placeholder="Ej.: busca noticias, ensayos y videos de África sobre este tema; usa fuentes confiables locales, en los idiomas de cada país"></textarea>
+                  <label for="ia-tono">Tono</label>
+                  <select id="ia-tono">
+                    <option value="">Que el agente me pregunte</option>
+<option value="analitico">Analítico</option>
 <option value="critico">Crítico / directo</option>
 <option value="editorial">Editorial (por defecto)</option>
 <option value="esperanzador">Esperanzador</option>
 <option value="informativo">Informativo</option>
 <option value="neutral">Neutral</option>
+                  </select>
+                  <p class="admin-hint">Los agentes leen e investigan en cualquier idioma, lengua o dialecto del mundo. Al investigar, el agente corrige lo que pegaste (te muestra cada cambio) y te pregunta solo si tiene dudas de tono.</p>
+                  <label class="admin-checkbox"><input type="checkbox" id="ia-usar-busqueda"> Usar búsqueda web (~$0.01-0.03 extra por uso, máximo 3 búsquedas)</label>
+                  <button type="button" class="admin-btn-cancel" id="ia-investigar-btn">Investigar</button>
+                  <p class="admin-hint" id="ia-investigar-status" aria-live="polite"></p>
+                  <div id="ia-correcciones-box" style="display:none;">
+                    <p class="admin-hint" id="ia-correcciones-resumen"></p>
+                    <ul id="ia-correcciones-lista" class="suggestion-list"></ul>
+                    <button type="button" class="admin-btn-cancel" id="ia-restaurar-texto">Restaurar texto original</button>
+                  </div>
+                  <div id="ia-preguntas-box" style="display:none;">
+                    <p class="admin-hint"><strong>El agente tiene dudas antes de seguir:</strong></p>
+                    <div id="ia-preguntas-lista"></div>
+                    <button type="button" class="admin-btn-cancel" id="ia-reinvestigar-btn">Investigar de nuevo con mis respuestas</button>
+                  </div>
+                  <div id="ia-notas-box" style="display:none;">
+                    <label for="ia-notas">Notas de investigación (edítalas si hace falta antes de redactar)</label>
+                    <textarea id="ia-notas" rows="8"></textarea>
+                    <label for="ia-idioma">Idioma de redacción</label>
+                    <select id="ia-idioma">
+                      <option value="es">Español</option>
+                      <option value="en">English</option>
                     </select>
                     <label for="ia-estilo">Estilo de redacción</label>
                     <select id="ia-estilo">
@@ -437,7 +456,7 @@
 <option value="noticia">Noticia corta</option>
 <option value="opinion">Opinión</option>
                     </select>
-                    <p class="admin-hint">Puedes redactar las mismas notas varias veces con tono/estilo distintos — no hace falta volver a investigar.</p>
+                    <p class="admin-hint">Puedes redactar las mismas notas varias veces con tono, estilo o idioma distintos — no hace falta volver a investigar. El sitio publica solo en español e inglés.</p>
                     <button type="button" class="admin-btn-cancel" id="ia-redactar-btn">Redactar con IA</button>
                     <p class="admin-hint" id="ia-redactar-status" aria-live="polite"></p>
                   </div>

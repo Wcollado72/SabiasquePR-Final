@@ -1412,6 +1412,12 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   border-radius:var(--radius);
 }
 .citation-group legend{ padding:0 4px; font-weight:600; font-size:.9rem; }
+/* Un <fieldset> tiene min-width:min-content por defecto: una URL larga sin
+   espacios en la vista previa de la cita ensanchaba todo el formulario y el
+   desplegable "Estilo de citacion" se salia de la pantalla. */
+.citation-group{ min-width:0; }
+.citation-preview{ overflow-wrap:anywhere; word-break:break-word; }
+.synth-panel, .news-panel{ min-width:0; }
 .citation-preview{
   margin:0;
   padding:10px 12px;

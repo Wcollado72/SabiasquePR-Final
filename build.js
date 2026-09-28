@@ -1047,21 +1047,39 @@ const PAGES = [
                     <label for="ia-titulo-sugerido">Título sugerido de la fuente (opcional)</label>
                     <input type="text" id="ia-titulo-sugerido">
                   </div>
+                  <label for="ia-instrucciones">Instrucciones para el Investigador (opcional)</label>
+                  <textarea id="ia-instrucciones" rows="3" maxlength="1000" placeholder="Ej.: busca noticias, ensayos y videos de África sobre este tema; usa fuentes confiables locales, en los idiomas de cada país"></textarea>
+                  <label for="ia-tono">Tono</label>
+                  <select id="ia-tono">
+                    ${optionsHtml(TONOS_REDACCION, { includeEmpty: 'Que el agente me pregunte' })}
+                  </select>
+                  <p class="admin-hint">Los agentes leen e investigan en cualquier idioma, lengua o dialecto del mundo. Al investigar, el agente corrige lo que pegaste (te muestra cada cambio) y te pregunta solo si tiene dudas de tono.</p>
                   <label class="admin-checkbox"><input type="checkbox" id="ia-usar-busqueda"> Usar búsqueda web (~$0.01-0.03 extra por uso, máximo 3 búsquedas)</label>
                   <button type="button" class="admin-btn-cancel" id="ia-investigar-btn">Investigar</button>
                   <p class="admin-hint" id="ia-investigar-status" aria-live="polite"></p>
+                  <div id="ia-correcciones-box" style="display:none;">
+                    <p class="admin-hint" id="ia-correcciones-resumen"></p>
+                    <ul id="ia-correcciones-lista" class="suggestion-list"></ul>
+                    <button type="button" class="admin-btn-cancel" id="ia-restaurar-texto">Restaurar texto original</button>
+                  </div>
+                  <div id="ia-preguntas-box" style="display:none;">
+                    <p class="admin-hint"><strong>El agente tiene dudas antes de seguir:</strong></p>
+                    <div id="ia-preguntas-lista"></div>
+                    <button type="button" class="admin-btn-cancel" id="ia-reinvestigar-btn">Investigar de nuevo con mis respuestas</button>
+                  </div>
                   <div id="ia-notas-box" style="display:none;">
                     <label for="ia-notas">Notas de investigación (edítalas si hace falta antes de redactar)</label>
                     <textarea id="ia-notas" rows="8"></textarea>
-                    <label for="ia-tono">Tono</label>
-                    <select id="ia-tono">
-                      ${optionsHtml(TONOS_REDACCION)}
+                    <label for="ia-idioma">Idioma de redacción</label>
+                    <select id="ia-idioma">
+                      <option value="es">Español</option>
+                      <option value="en">English</option>
                     </select>
                     <label for="ia-estilo">Estilo de redacción</label>
                     <select id="ia-estilo">
                       ${optionsHtml(ESTILOS_REDACCION)}
                     </select>
-                    <p class="admin-hint">Puedes redactar las mismas notas varias veces con tono/estilo distintos — no hace falta volver a investigar.</p>
+                    <p class="admin-hint">Puedes redactar las mismas notas varias veces con tono, estilo o idioma distintos — no hace falta volver a investigar. El sitio publica solo en español e inglés.</p>
                     <button type="button" class="admin-btn-cancel" id="ia-redactar-btn">Redactar con IA</button>
                     <p class="admin-hint" id="ia-redactar-status" aria-live="polite"></p>
                   </div>
