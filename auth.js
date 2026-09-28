@@ -31,8 +31,13 @@ async function initAuth() {
     window.supabase = supabase; // permite que otros scripts (p.ej. foro.js) reutilicen la sesión
     await checkSession();
 
-    supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.onAuthStateChange((event, session) => {
       updateLoginUI(session);
+      // Idea del usuario (2026-09-27): si quien inicia sesion es admin o
+      // moderador, lo lleva directo al panel en vez de dejarlo donde estaba
+      // -- solo en el evento de login real (no en cada carga de pagina con
+      // sesion ya activa, ni en logout/refresh de token).
+      if (event === 'SIGNED_IN') redirigirAlPanelSiCorresponde(session);
     });
   } catch (err) {
     console.warn('[Auth] Error al inicializar Supabase:', err.message);
@@ -114,6 +119,27 @@ async function updateLoginUI(session) {
     if (adminLink && data.user.rol === 'admin') adminLink.style.display = '';
   } catch (err) {
     console.warn('[Auth] No se pudo obtener el rol del usuario:', err.message);
+  }
+}
+
+// Redirige al panel de administracion justo despues de iniciar sesion, si
+// el rol lo permite -- evita el paso extra de ir a buscar el enlace del
+// panel a mano cada vez. Si ya esta en admin.html (ej. volvio a iniciar
+// sesion ahi tras un logout), recarga para que admin.js vuelva a correr su
+// verificacion con la sesion nueva, en vez de dejar el panel tapado.
+async function redirigirAlPanelSiCorresponde(session) {
+  const token = session?.access_token;
+  if (!token) return;
+  try {
+    const res = await fetch(API_URL + '/api/me', { headers: { Authorization: `Bearer ${token}` } });
+    const data = await res.json();
+    if (!data.ok || !['admin', 'moderador'].includes(data.user?.rol)) return;
+    const yaEnAdmin = /(^|\/)admin(\.html)?$/.test(location.pathname);
+    if (yaEnAdmin) location.reload();
+    else location.href = 'admin.html';
+  } catch {
+    // Si falla la verificacion de rol, el usuario se queda donde estaba --
+    // el login en si ya tuvo exito, esto nunca debe interrumpirlo.
   }
 }
 

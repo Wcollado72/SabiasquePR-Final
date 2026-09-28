@@ -32,10 +32,11 @@ describe('validatePost', () => {
     expect(validatePost({ ...BASE, subseccion: 'inventada' })).toContain('Sub-seccion no valida.');
   });
 
-  test('acepta enfoque institucional/individual y rechaza invalido', () => {
-    expect(validatePost({ ...BASE, enfoque: 'institucional' })).toEqual([]);
-    expect(validatePost({ ...BASE, enfoque: 'individual' })).toEqual([]);
+  test('acepta enfoque de region y rechaza invalido (incluye institucional/individual, eliminados 2026-09-27)', () => {
+    expect(validatePost({ ...BASE, enfoque: 'puerto-rico' })).toEqual([]);
     expect(validatePost({ ...BASE, enfoque: 'inventado' })).toContain('Enfoque no valido.');
+    expect(validatePost({ ...BASE, enfoque: 'institucional' })).toContain('Enfoque no valido.');
+    expect(validatePost({ ...BASE, enfoque: 'individual' })).toContain('Enfoque no valido.');
   });
 
   test('acepta la subseccion nuevos-humanos y sus regiones de enfoque', () => {

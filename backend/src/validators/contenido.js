@@ -14,10 +14,11 @@ const CITA_ESTILOS_VALIDOS = [
   'apa', 'mla', 'chicago', 'turabian', 'ama', 'vancouver', 'abnt', 'icontec', 'ieee', 'bluebook',
 ];
 const SUBSECCIONES_VALIDAS = ['nuevos-humanos', 'revolucion-mundial', 'logica-humana', 'corrupcion-humana', 'ilogica-humana'];
-// `enfoque` es un segundo eje reutilizable: institucional/individual dentro
-// de Corrupcion Humana, o la region dentro de Nueva Humanidad.
+// `enfoque` es la region dentro de cualquier sub-seccion de Revolucion
+// Humana -- el eje "institucional/individual" (Corrupcion Humana) se
+// elimino 2026-09-27: las 4 sub-secciones usan el mismo modelo de 2 niveles,
+// Seccion -> Region (ver AUDITORIA-LEGAL-MENORES.md / plan de "pocos clics").
 const ENFOQUES_VALIDOS = [
-  'institucional', 'individual',
   'puerto-rico', 'estados-unidos', 'hispanoamerica', 'internacionales',
 ];
 

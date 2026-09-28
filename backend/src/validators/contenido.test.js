@@ -171,12 +171,14 @@ describe('validateContenido', () => {
     expect(validateContenido({ ...BASE, subseccion: 'inventada' })).toContain('Subseccion no valida.');
   });
 
-  test('acepta enfoque institucional/individual/regiones, ausente, y rechaza invalido', () => {
-    for (const enfoque of ['institucional', 'individual', 'puerto-rico', 'estados-unidos', 'hispanoamerica', 'internacionales']) {
+  test('acepta enfoque de region, ausente, y rechaza invalido (incluye institucional/individual, eliminados 2026-09-27)', () => {
+    for (const enfoque of ['puerto-rico', 'estados-unidos', 'hispanoamerica', 'internacionales']) {
       expect(validateContenido({ ...BASE, enfoque })).toEqual([]);
     }
     expect(validateContenido(BASE)).toEqual([]);
     expect(validateContenido({ ...BASE, enfoque: 'inventado' })).toContain('Enfoque no valido.');
+    expect(validateContenido({ ...BASE, enfoque: 'institucional' })).toContain('Enfoque no valido.');
+    expect(validateContenido({ ...BASE, enfoque: 'individual' })).toContain('Enfoque no valido.');
   });
 
   test('acepta esPremium booleano y rechaza otros tipos', () => {

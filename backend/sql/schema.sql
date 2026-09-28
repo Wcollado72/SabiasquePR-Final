@@ -358,15 +358,15 @@ ALTER TABLE contenidos ADD CONSTRAINT contenidos_subseccion_check
     'nuevos-humanos', 'revolucion-mundial', 'logica-humana', 'corrupcion-humana', 'ilogica-humana'
   ));
 
--- `enfoque` es un segundo eje generico y reutilizable, con significado
--- distinto segun la sub-seccion: institucional/individual dentro de
--- Corrupcion Humana, o la region dentro de Nueva Humanidad. Un solo campo
--- flexible en vez de una columna nueva por cada sub-seccion.
+-- `enfoque` es la region dentro de cualquier sub-seccion de Revolucion
+-- Humana. El eje "institucional/individual" (pensado solo para Corrupcion
+-- Humana) se elimino 2026-09-27 -- las 4 sub-secciones usan el mismo modelo
+-- de 2 niveles, Seccion -> Region (confirmado sin filas existentes con esos
+-- valores antes de quitarlos del CHECK).
 ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS enfoque text NULL;
 ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_enfoque_check;
 ALTER TABLE contenidos ADD CONSTRAINT contenidos_enfoque_check
   CHECK (enfoque IS NULL OR enfoque IN (
-    'institucional', 'individual',
     'puerto-rico', 'estados-unidos', 'hispanoamerica', 'internacionales'
   ));
 
@@ -382,7 +382,6 @@ ALTER TABLE foro_posts ADD COLUMN IF NOT EXISTS enfoque text NULL;
 ALTER TABLE foro_posts DROP CONSTRAINT IF EXISTS foro_posts_enfoque_check;
 ALTER TABLE foro_posts ADD CONSTRAINT foro_posts_enfoque_check
   CHECK (enfoque IS NULL OR enfoque IN (
-    'institucional', 'individual',
     'puerto-rico', 'estados-unidos', 'hispanoamerica', 'internacionales'
   ));
 

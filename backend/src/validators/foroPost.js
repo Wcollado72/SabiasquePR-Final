@@ -2,8 +2,9 @@
 // motor del debate semanal 18+ de Revolucion Humana -- sigue siendo el
 // mismo CRUD+JWT, ahora acotado por sub-seccion y con reglas por rol.
 const SUBSECCIONES_VALIDAS = ['corrupcion-humana', 'ilogica-humana', 'nuevos-humanos', 'educacion'];
+// El eje "institucional/individual" (Corrupcion Humana) se elimino
+// 2026-09-27 -- todas las sub-secciones usan el mismo modelo de region.
 const ENFOQUES_VALIDOS = [
-  'institucional', 'individual',
   'puerto-rico', 'estados-unidos', 'hispanoamerica', 'internacionales',
 ];
 const ENLACE_MEDIA_TIPOS_VALIDOS = ['imagen', 'audio', 'video'];

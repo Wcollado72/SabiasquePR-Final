@@ -156,16 +156,17 @@ const SUBSECCIONES = {
   'ilogica-humana': 'Ilógica Humana',
 };
 
-// Segundo eje, reutilizable, con significado distinto segun la sub-seccion:
-// institucional/individual dentro de Corrupcion Humana, o la region dentro
-// de Nuevos Humanos. Un solo campo/select en vez de uno por sub-seccion.
+// Region dentro de cualquier sub-seccion de Revolucion Humana (Corrupcion
+// Humana, Ilogica Humana, Logica Humana, Nuevos Humanos) -- mismo campo que
+// filtra el collage publico (ver rh-enfoque-filter). El eje "institucional/
+// individual" que este campo tuvo solo para Corrupcion Humana se elimino
+// 2026-09-27: las 4 secciones usan el mismo modelo de 2 niveles, Seccion ->
+// Region (confirmado sin contenido existente con esos valores).
 const ENFOQUES = {
-  institucional: 'Institucional (Corrupción Humana)',
-  individual: 'Individual (Corrupción Humana)',
-  'puerto-rico': 'Puerto Rico (Nuevos Humanos)',
-  'estados-unidos': 'Estados Unidos (Nuevos Humanos)',
-  hispanoamerica: 'Hispanoamérica (Nuevos Humanos)',
-  internacionales: 'Internacionales (Nuevos Humanos)',
+  'puerto-rico': 'Puerto Rico',
+  'estados-unidos': 'Estados Unidos',
+  hispanoamerica: 'Hispanoamérica',
+  internacionales: 'Internacionales',
 };
 
 // Botones de filtro por categoría de Noticias. "Todas" siempre primero,
@@ -969,9 +970,9 @@ const PAGES = [
                 <select id="ac-subseccion">
                   ${optionsHtml(SUBSECCIONES, { includeEmpty: 'Ninguna' })}
                 </select>
-                <label for="ac-enfoque">Enfoque (solo aplica dentro de Corrupción Humana)</label>
+                <label for="ac-enfoque">Región (filtra el collage público dentro de cualquier sub-sección de Revolución Humana)</label>
                 <select id="ac-enfoque">
-                  ${optionsHtml(ENFOQUES, { includeEmpty: 'Ninguno' })}
+                  ${optionsHtml(ENFOQUES, { includeEmpty: 'Ninguna' })}
                 </select>
                 <label for="ac-tipo-formato">Tipo de formato</label>
                 <select id="ac-tipo-formato">

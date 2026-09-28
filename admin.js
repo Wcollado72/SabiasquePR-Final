@@ -46,6 +46,13 @@
       })());
       const { data: { session } } = await supabase.auth.getSession();
       currentUser = session?.user ?? null;
+      // Si se cierra sesion (aqui o en otra pestana) mientras el panel esta
+      // abierto, hay que volver a tapar el contenido -- init() solo corre
+      // una vez al cargar la pagina, sin esto el admin-panel se queda
+      // visible en el DOM (con datos ya cargados) despues del logout.
+      supabase.auth.onAuthStateChange((_event, sesionActual) => {
+        if (!sesionActual) cerrarPanelPorLogout();
+      });
     } catch (err) {
       showGate('⚠️ No se pudo verificar tu sesión: ' + err.message);
       return;
@@ -111,6 +118,26 @@
   function showGate(msg) {
     const el = document.getElementById('admin-gate');
     if (el) el.innerHTML = `<p>${msg}</p>`;
+  }
+
+  // Vuelve a tapar el panel cuando la sesion desaparece (logout, token
+  // expirado, o sesion cerrada en otra pestana). Limpia las listas ya
+  // cargadas -- no basta con ocultar el div, los datos de admin no deben
+  // quedarse en el DOM despues de cerrar sesion.
+  function cerrarPanelPorLogout() {
+    currentUser = null;
+    document.getElementById('admin-panel').style.display = 'none';
+    const gate = document.getElementById('admin-gate');
+    if (gate) gate.style.display = '';
+    showGate('<a href="#" class="login-modal-trigger">Inicia sesión</a> para acceder al panel de administración.');
+    ['admin-noticias-list', 'admin-contenidos-list', 'admin-productos-list', 'admin-reportes-list'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '';
+    });
+    noticiasCache = [];
+    productosCache = [];
+    contenidosCache = [];
+    reportesCache = [];
   }
 
   async function getToken() {
@@ -749,14 +776,29 @@
 
     // Acordeon por subseccion (orden alfabetico de las 4 secciones de
     // Revolucion Humana) -- agrupa visualmente sin tocar loadContenidos()
-    // ni el formulario de crear/editar, que siguen igual.
-    const grupos = new Map();
-    SUBSECCION_ORDEN.forEach((s) => grupos.set(s, []));
-    grupos.set('__otros', []);
+    // ni el formulario de crear/editar, que siguen igual. Lo que no tiene
+    // subseccion se agrupa aparte por SECCION (Educacion, Noticias...) en
+    // vez de mezclarse todo en un solo "otros" -- Educacion no usa
+    // subseccion (ese campo es propio de Revolucion Humana), no es que le
+    // falte clasificar.
+    const gruposSubseccion = new Map();
+    SUBSECCION_ORDEN.forEach((s) => gruposSubseccion.set(s, []));
+    const gruposSeccion = new Map();
     items.forEach((c) => {
-      const clave = c.subseccion && grupos.has(c.subseccion) ? c.subseccion : '__otros';
-      grupos.get(clave).push(c);
+      if (c.subseccion && gruposSubseccion.has(c.subseccion)) {
+        gruposSubseccion.get(c.subseccion).push(c);
+        return;
+      }
+      const clave = c.seccion || '__sin_seccion';
+      if (!gruposSeccion.has(clave)) gruposSeccion.set(clave, []);
+      gruposSeccion.get(clave).push(c);
     });
+    const seccionEntries = Array.from(gruposSeccion.entries())
+      .sort((a, b) => (SECCION_LABEL[a[0]] || a[0]).localeCompare(SECCION_LABEL[b[0]] || b[0], 'es'));
+    const grupos = new Map([
+      ...gruposSubseccion,
+      ...seccionEntries.map(([clave, lista]) => [`seccion:${clave}`, lista]),
+    ]);
 
     const itemHtml = (c) => `
       <div class="synth-item" data-tema="${temaParaClasificacion(c.seccion, c.subseccion)}">
@@ -779,11 +821,16 @@
 
     el.innerHTML = Array.from(grupos.entries())
       .filter(([, lista]) => lista.length)
-      .map(([clave, lista]) => `
+      .map(([clave, lista]) => {
+        const titulo = clave.startsWith('seccion:')
+          ? (SECCION_LABEL[clave.slice(8)] || clave.slice(8))
+          : (SUBSECCION_LABEL[clave] || clave);
+        return `
         <details class="synth-group" open>
-          <summary class="synth-group-title">${clave === '__otros' ? 'Sin subsección / Educación' : (SUBSECCION_LABEL[clave] || clave)} <span class="synth-group-count">${lista.length}</span></summary>
+          <summary class="synth-group-title">${escapeHtml(titulo)} <span class="synth-group-count">${lista.length}</span></summary>
           <div class="synth-group-items">${lista.map(itemHtml).join('')}</div>
-        </details>`).join('');
+        </details>`;
+      }).join('');
 
     el.querySelectorAll('.admin-btn-edit').forEach((btn) => btn.addEventListener('click', () => {
       const item = contenidosCache.find((c) => c.id === btn.dataset.id);
