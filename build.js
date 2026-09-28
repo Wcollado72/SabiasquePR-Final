@@ -134,6 +134,12 @@ const TONOS_REDACCION = {
   esperanzador: 'Esperanzador', critico: 'Crítico / directo', analitico: 'Analítico',
   informativo: 'Informativo', neutral: 'Neutral', editorial: 'Editorial (por defecto)',
 };
+// Origen geografico conocido de la fuente para el Investigador (2026-09-28)
+// -- mismas claves que CONTINENTES_VALIDOS en backend/src/services/investigador.js.
+const CONTINENTES = {
+  africa: 'África', 'america-norte': 'América del Norte', 'america-sur': 'América del Sur',
+  asia: 'Asia', europa: 'Europa', oceania: 'Oceanía', antartida: 'Antártida',
+};
 const SUBFORMATOS = {
   podcast: 'Podcast', entrevista: 'Entrevista', galeria: 'Galería', opinion: 'Opinión',
   reportaje: 'Reportaje', cronica: 'Crónica', guia: 'Guía', infografia: 'Infografía',
@@ -1070,6 +1076,13 @@ const PAGES = [
                     <label for="ia-titulo-sugerido">Título sugerido de la fuente (opcional)</label>
                     <input type="text" id="ia-titulo-sugerido">
                   </div>
+                  <label for="ia-continente">Origen conocido de la fuente (opcional) — continente</label>
+                  <select id="ia-continente">
+                    ${optionsHtml(CONTINENTES, { includeEmpty: 'No sé / no aplica' })}
+                  </select>
+                  <label for="ia-region">Región, ciudad o país (opcional)</label>
+                  <input type="text" id="ia-region" placeholder="Ej.: Nairobi, Kenia — déjalo vacío si no sabes">
+                  <p class="admin-hint">Si pegas una URL, intentamos adivinarlo del dominio — revisa y corrige si hace falta. Saber el origen ahorra búsquedas (el agente busca directo ahí, no en todo el continente) y da más precisión.</p>
                   <label for="ia-instrucciones">Instrucciones para el Investigador (opcional)</label>
                   <textarea id="ia-instrucciones" rows="3" maxlength="1000" placeholder="Ej.: busca noticias, ensayos y videos de África sobre este tema; usa fuentes confiables locales, en los idiomas de cada país"></textarea>
                   <label for="ia-tono">Tono</label>

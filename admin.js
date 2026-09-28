@@ -644,6 +644,10 @@
     document.getElementById('ia-investigar-btn').addEventListener('click', () => investigarFuente());
     document.getElementById('ia-reinvestigar-btn').addEventListener('click', reinvestigarConRespuestas);
     document.getElementById('ia-restaurar-texto').addEventListener('click', restaurarTextoPegado);
+    document.getElementById('ia-url').addEventListener('blur', sugerirOrigenPorUrl);
+    // Si el admin toca el origen a mano, ya no lo pisamos con una sugerencia futura.
+    document.getElementById('ia-continente').addEventListener('change', () => { origenTocadoPorAdmin = true; });
+    document.getElementById('ia-region').addEventListener('input', () => { origenTocadoPorAdmin = true; });
     // Si el admin edita el texto a mano, ese pasa a ser su "original".
     document.getElementById('ia-texto').addEventListener('input', () => {
       textoPegadoOriginal = null;
@@ -656,6 +660,75 @@
   // le gustan las correcciones automaticas del Investigador.
   let textoPegadoOriginal = null;
 
+  // ── ORIGEN GEOGRAFICO DE LA FUENTE (2026-09-28) ──────────
+  // Sugerencia rapida por dominio -- nunca llama a la IA (costaria dinero y
+  // tiempo antes de que el admin decida investigar). Solo ccTLD conocidos +
+  // un puñado de pistas por palabra clave; si no reconoce nada, deja los
+  // campos como estaban para que el admin los llene a mano ("No se" = dejar
+  // vacio). Mismo patron del sitio: texto libre para region/ciudad, no una
+  // lista de 200+ paises que mantener.
+  const CCTLD_A_CONTINENTE = {
+    dz: 'africa', ao: 'africa', bj: 'africa', bw: 'africa', bf: 'africa', bi: 'africa', cv: 'africa',
+    cm: 'africa', cf: 'africa', td: 'africa', km: 'africa', cg: 'africa', cd: 'africa', ci: 'africa',
+    dj: 'africa', eg: 'africa', gq: 'africa', er: 'africa', sz: 'africa', et: 'africa', ga: 'africa',
+    gm: 'africa', gh: 'africa', gn: 'africa', gw: 'africa', ke: 'africa', ls: 'africa', lr: 'africa',
+    ly: 'africa', mg: 'africa', mw: 'africa', ml: 'africa', mr: 'africa', mu: 'africa', ma: 'africa',
+    mz: 'africa', na: 'africa', ne: 'africa', ng: 'africa', rw: 'africa', st: 'africa', sn: 'africa',
+    sc: 'africa', sl: 'africa', so: 'africa', za: 'africa', ss: 'africa', sd: 'africa', tz: 'africa',
+    tg: 'africa', tn: 'africa', ug: 'africa', zm: 'africa', zw: 'africa',
+    us: 'america-norte', ca: 'america-norte', mx: 'america-norte', gt: 'america-norte', bz: 'america-norte',
+    sv: 'america-norte', hn: 'america-norte', ni: 'america-norte', cr: 'america-norte', pa: 'america-norte',
+    cu: 'america-norte', do: 'america-norte', ht: 'america-norte', jm: 'america-norte', tt: 'america-norte',
+    bs: 'america-norte', bb: 'america-norte', pr: 'america-norte',
+    ar: 'america-sur', bo: 'america-sur', br: 'america-sur', cl: 'america-sur', co: 'america-sur',
+    ec: 'america-sur', gy: 'america-sur', py: 'america-sur', pe: 'america-sur', sr: 'america-sur',
+    uy: 'america-sur', ve: 'america-sur',
+    af: 'asia', am: 'asia', az: 'asia', bh: 'asia', bd: 'asia', bt: 'asia', bn: 'asia', kh: 'asia',
+    cn: 'asia', ge: 'asia', in: 'asia', id: 'asia', ir: 'asia', iq: 'asia', il: 'asia', jp: 'asia',
+    jo: 'asia', kz: 'asia', kw: 'asia', kg: 'asia', la: 'asia', lb: 'asia', my: 'asia', mv: 'asia',
+    mn: 'asia', mm: 'asia', kp: 'asia', kr: 'asia', om: 'asia', pk: 'asia', ps: 'asia', ph: 'asia',
+    qa: 'asia', sa: 'asia', sg: 'asia', lk: 'asia', sy: 'asia', tw: 'asia', tj: 'asia', th: 'asia',
+    tl: 'asia', tr: 'asia', tm: 'asia', ae: 'asia', uz: 'asia', vn: 'asia', ye: 'asia',
+    al: 'europa', ad: 'europa', at: 'europa', by: 'europa', be: 'europa', ba: 'europa', bg: 'europa',
+    hr: 'europa', cy: 'europa', cz: 'europa', dk: 'europa', ee: 'europa', fi: 'europa', fr: 'europa',
+    de: 'europa', gr: 'europa', hu: 'europa', is: 'europa', ie: 'europa', it: 'europa', xk: 'europa',
+    lv: 'europa', li: 'europa', lt: 'europa', lu: 'europa', mt: 'europa', md: 'europa', mc: 'europa',
+    me: 'europa', nl: 'europa', mk: 'europa', no: 'europa', pl: 'europa', pt: 'europa', ro: 'europa',
+    ru: 'europa', sm: 'europa', rs: 'europa', sk: 'europa', si: 'europa', es: 'europa', se: 'europa',
+    ch: 'europa', ua: 'europa', uk: 'europa', gb: 'europa', va: 'europa',
+    au: 'oceania', fj: 'oceania', ki: 'oceania', mh: 'oceania', fm: 'oceania', nr: 'oceania',
+    nz: 'oceania', pw: 'oceania', pg: 'oceania', ws: 'oceania', sb: 'oceania', to: 'oceania',
+    tv: 'oceania', vu: 'oceania',
+    aq: 'antartida',
+  };
+  // Pistas por palabra clave en el dominio, para sitios que no usan un ccTLD
+  // real (ej. "nation.africa") -- solo sugiere el continente, nunca la region.
+  const PALABRA_A_CONTINENTE = [
+    [/africa/, 'africa'], [/asia/, 'asia'], [/europe/, 'europa'],
+    [/latam|latino/, 'america-sur'], [/oceania|pacific/, 'oceania'],
+  ];
+  let origenTocadoPorAdmin = false;
+
+  function detectarOrigenPorUrl(url) {
+    let host;
+    try { host = new URL(url).hostname.toLowerCase(); } catch { return null; }
+    const partes = host.replace(/^www\./, '').split('.');
+    const tld = partes[partes.length - 1];
+    if (CCTLD_A_CONTINENTE[tld]) return CCTLD_A_CONTINENTE[tld];
+    for (const [patron, continente] of PALABRA_A_CONTINENTE) {
+      if (patron.test(host)) return continente;
+    }
+    return null;
+  }
+
+  function sugerirOrigenPorUrl() {
+    if (origenTocadoPorAdmin) return; // el admin ya lo edito, no lo pisamos
+    const url = document.getElementById('ia-url').value.trim();
+    if (!url) return;
+    const continente = detectarOrigenPorUrl(url);
+    if (continente) document.getElementById('ia-continente').value = continente;
+  }
+
   async function investigarFuente(respuestasTexto = '') {
     const statusEl = document.getElementById('ia-investigar-status');
     const esUrl = document.querySelector('#ia-fuente-toggle .foro-filter-btn.active').dataset.fuente === 'url';
@@ -665,6 +738,8 @@
       instrucciones: document.getElementById('ia-instrucciones').value.trim(),
       tono: document.getElementById('ia-tono').value,
       respuestas: respuestasTexto,
+      continente: document.getElementById('ia-continente').value,
+      region: document.getElementById('ia-region').value.trim(),
     };
     if (esUrl) {
       const url = document.getElementById('ia-url').value.trim();
@@ -1115,6 +1190,9 @@
   function openContenidoForm(item) {
     document.getElementById('admin-contenidos-form-title').textContent = item ? 'Editar contenido' : 'Nuevo contenido';
     document.getElementById('ac-id').value = item?.id || '';
+    document.getElementById('ia-continente').value = '';
+    document.getElementById('ia-region').value = '';
+    origenTocadoPorAdmin = false;
     document.getElementById('ac-idioma-original').value = item?.idioma_original || 'es';
     document.getElementById('ac-seccion').value = item?.seccion || 'noticias';
     document.getElementById('ac-tipo-formato').value = item?.tipo_formato || 'noticia';

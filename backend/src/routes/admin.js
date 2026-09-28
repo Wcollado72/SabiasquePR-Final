@@ -86,12 +86,12 @@ async function registrarUsoIa({ agente, fuenteTipo, usarBusquedaWeb, usage, crea
 // tituloSugerido }, mas usarBusquedaWeb. Nunca guarda contenido, solo notas
 // para que el admin revise antes de redactar.
 router.post('/investigar', requireAuth, requireAdmin, async (req, res) => {
-  const { url, texto, tituloSugerido, usarBusquedaWeb, instrucciones, tono, respuestas } = req.body || {};
+  const { url, texto, tituloSugerido, usarBusquedaWeb, instrucciones, tono, respuestas, continente, region } = req.body || {};
   if (!url && !texto) {
     return res.status(400).json({ ok: false, error: 'Falta la URL o el texto de la fuente.' });
   }
   try {
-    const opciones = { usarBusquedaWeb: Boolean(usarBusquedaWeb), instrucciones, tono, respuestas };
+    const opciones = { usarBusquedaWeb: Boolean(usarBusquedaWeb), instrucciones, tono, respuestas, continente, region };
     const resultado = url
       ? await investigarDesdeUrl(url, opciones)
       : await investigarDesdeTexto(texto, { tituloSugerido, ...opciones });

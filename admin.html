@@ -430,6 +430,20 @@
                     <label for="ia-titulo-sugerido">Título sugerido de la fuente (opcional)</label>
                     <input type="text" id="ia-titulo-sugerido">
                   </div>
+                  <label for="ia-continente">Origen conocido de la fuente (opcional) — continente</label>
+                  <select id="ia-continente">
+                    <option value="">No sé / no aplica</option>
+<option value="africa">África</option>
+<option value="america-norte">América del Norte</option>
+<option value="america-sur">América del Sur</option>
+<option value="antartida">Antártida</option>
+<option value="asia">Asia</option>
+<option value="europa">Europa</option>
+<option value="oceania">Oceanía</option>
+                  </select>
+                  <label for="ia-region">Región, ciudad o país (opcional)</label>
+                  <input type="text" id="ia-region" placeholder="Ej.: Nairobi, Kenia — déjalo vacío si no sabes">
+                  <p class="admin-hint">Si pegas una URL, intentamos adivinarlo del dominio — revisa y corrige si hace falta. Saber el origen ahorra búsquedas (el agente busca directo ahí, no en todo el continente) y da más precisión.</p>
                   <label for="ia-instrucciones">Instrucciones para el Investigador (opcional)</label>
                   <textarea id="ia-instrucciones" rows="3" maxlength="1000" placeholder="Ej.: busca noticias, ensayos y videos de África sobre este tema; usa fuentes confiables locales, en los idiomas de cada país"></textarea>
                   <label for="ia-tono">Tono</label>

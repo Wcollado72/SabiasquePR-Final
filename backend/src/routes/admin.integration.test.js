@@ -197,6 +197,17 @@ describe('POST /api/admin/investigar', () => {
     expect(investigarDesdeTexto).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ instrucciones: 'Busca fuentes africanas', tono: 'neutral', respuestas: 'Neutral' }));
   });
 
+  test('pasa continente y region al agente (origen conocido de la fuente)', async () => {
+    investigarDesdeUrl.mockResolvedValueOnce({
+      notas: 'N', tituloOriginal: 'T', fuenteTexto: 'Nation Africa', fuenteUrl: 'https://nation.africa/a', fuenteTipo: 'url', usage: USAGE_MOCK,
+    });
+    pool.query.mockResolvedValueOnce({});
+    const res = await request(app).post('/api/admin/investigar').set('x-test-user', ADMIN)
+      .send({ url: 'https://nation.africa/a', continente: 'africa', region: 'Nairobi, Kenia' });
+    expect(res.status).toBe(200);
+    expect(investigarDesdeUrl).toHaveBeenCalledWith('https://nation.africa/a', expect.objectContaining({ continente: 'africa', region: 'Nairobi, Kenia' }));
+  });
+
   test('400 si el servicio lanza un error', async () => {
     investigarDesdeUrl.mockRejectedValueOnce(new Error('El texto pegado es muy corto.'));
     const res = await request(app).post('/api/admin/investigar')
