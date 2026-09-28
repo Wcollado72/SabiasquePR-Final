@@ -33,6 +33,10 @@
     return /(^|\/)admin(\.html)?$/.test(pathname || '');
   }
 
+  function esPaginaLegal(pathname) {
+    return /(^|\/)(terminos|privacidad)(\.html)?$/.test(pathname || '');
+  }
+
   function localeFecha(lang) {
     return lang === 'en' ? 'en-US' : 'es-PR';
   }
@@ -87,7 +91,7 @@
   }
 
   const puras = {
-    normalizar, idiomaGuardado, esPaginaAdmin, localeFecha, formatear,
+    normalizar, idiomaGuardado, esPaginaAdmin, esPaginaLegal, localeFecha, formatear,
     compilarPatrones, traducirTexto, traducir,
   };
 
@@ -157,6 +161,21 @@
     if (loc) loc.setAttribute('content', 'en_US');
   }
 
+  // Aviso de cortesia en Terminos/Privacidad: la traduccion no reemplaza el
+  // valor legal del espanol. Se agrega directo en ingles (no hay version en
+  // espanol de este aviso, asi que no pasa por el diccionario).
+  function agregarAvisoLegal() {
+    if (!esPaginaLegal(location.pathname)) return;
+    const caja = document.querySelector('.contact-box');
+    if (!caja || document.getElementById('aviso-traduccion-cortesia')) return;
+    const p = document.createElement('p');
+    p.id = 'aviso-traduccion-cortesia';
+    p.className = 'idioma-aviso';
+    p.setAttribute('data-no-i18n', '');
+    p.textContent = 'Courtesy translation — the Spanish version of this page prevails in case of any discrepancy.';
+    caja.insertBefore(p, caja.firstChild);
+  }
+
   let observador = null;
   function vigilar() {
     observador = new MutationObserver((muts) => {
@@ -201,6 +220,7 @@
     patrones = compilarPatrones(dic);
     traducirArbol(document.body);
     traducirMeta();
+    agregarAvisoLegal();
     vigilar();
     clearTimeout(seguro);
     liberarPantalla();
