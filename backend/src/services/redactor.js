@@ -90,6 +90,7 @@ Te doy notas de investigación ya organizadas sobre un tema. Tu trabajo:
 3. ${tono}
 4. ${estructura}
 5. El resumen y los párrafos deben poder publicarse tal cual, sin necesitar edición adicional de fondo (el admin solo revisa, no reescribe).
+6. Estándar editorial y legal: nunca reproduzcas descripciones gráficas de violencia o de abuso (sexual o de otro tipo), ni detalles que identifiquen a víctimas menores de edad; limítate a hechos verificables de las notas (quién, qué, cargos, decisión judicial, fecha). Atribuye cada afirmación seria a su fuente y no presentes acusaciones como hechos probados si las notas solo dicen que hay un arresto o cargos.
 
 Sección: ${seccion || 'no especificada'}${subseccion ? ` / ${subseccion}` : ''}
 Formato: ${tipoFormato || 'no especificado'}${categoria ? ` · Categoría: ${categoria}` : ''}
