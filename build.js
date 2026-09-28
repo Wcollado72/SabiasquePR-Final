@@ -826,6 +826,7 @@ const PAGES = [
           <button type="button" class="foro-filter-btn" data-tab="productos">Productos</button>
           <button type="button" class="foro-filter-btn" data-tab="reportes">Reportes</button>
           <button type="button" class="foro-filter-btn" data-tab="agentes">Agentes</button>
+          <button type="button" class="foro-filter-btn" data-tab="gastos">Gastos</button>
         </nav>
         <div class="consola-content">
 
@@ -1265,6 +1266,67 @@ const PAGES = [
             </div>
             <button type="button" class="ag-btn-piloto" id="ag-ir-reportes">Ir a la cola de reportes →</button>
           </div>
+        </section>
+
+        <section class="admin-tab-panel admin-agentes" id="admin-panel-gastos" style="display:none;" data-help="gastos">
+          <div class="ag-header">
+            <div>
+              <h2>Gastos</h2>
+              <p class="ag-sub">Suscripciones fijas del proyecto + el gasto real de los agentes de IA.</p>
+            </div>
+            <div class="ag-tile ag-tile-dashed" style="border-style:solid;">
+              <div>
+                <p class="ag-tile-label">Total mensual estimado</p>
+                <p class="ag-tile-valor" id="gastos-total-mes">—</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="ag-section">
+            <div class="ag-section-head">
+              <h3>Agentes de IA (automático, este mes)</h3>
+              <span class="ag-status-ok" id="gastos-ia-resumen">Cargando...</span>
+            </div>
+            <div class="ag-grid" id="gastos-ia-grid">
+              <p class="admin-hint">Cargando gasto de agentes...</p>
+            </div>
+          </div>
+
+          <div class="ag-section">
+            <div class="ag-section-head">
+              <h3>Servicios y suscripciones</h3>
+              <button type="button" class="ag-btn-piloto" id="gastos-nuevo">+ Nuevo servicio</button>
+            </div>
+            <div id="gastos-lista" class="admin-list"></div>
+          </div>
+
+          <section class="box box-blog contact-box admin-form" id="gastos-form-box" style="display:none;">
+            <h3 id="gastos-form-title">Nuevo servicio</h3>
+            <form id="gastos-form">
+              <input type="hidden" id="gs-id">
+              <label for="gs-nombre">Nombre</label>
+              <input type="text" id="gs-nombre" required minlength="2" maxlength="120" placeholder="Ej.: Claude Pro, Netlify, Supabase...">
+              <label for="gs-estado">Estado</label>
+              <select id="gs-estado">
+                <option value="gratis">🟢 Gratis (nunca cobra)</option>
+                <option value="gratis_por_ahora">🟡 Gratis por ahora (puede empezar a cobrar)</option>
+                <option value="por_uso" selected>🔵 Por uso / de pago</option>
+              </select>
+              <label for="gs-costo">Costo mensual estimado (USD, opcional)</label>
+              <input type="number" id="gs-costo" min="0" step="0.01" placeholder="0.00">
+              <label for="gs-fecha-renovacion">Fecha de renovación (opcional)</label>
+              <input type="date" id="gs-fecha-renovacion">
+              <label for="gs-enlace">Enlace de facturación (opcional)</label>
+              <input type="url" id="gs-enlace" placeholder="https://...">
+              <label for="gs-notas">Notas (opcional)</label>
+              <textarea id="gs-notas" rows="2" maxlength="500"></textarea>
+              <div class="admin-form-actions">
+                <button type="submit">Guardar</button>
+                <button type="button" class="admin-btn-cancel" id="gs-cancel">Cancelar</button>
+              </div>
+              <p id="gs-status" class="form-status" aria-live="polite"></p>
+            </form>
+          </section>
         </section>
         </div>
         </div>

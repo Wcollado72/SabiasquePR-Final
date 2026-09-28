@@ -8,6 +8,8 @@ const { investigarDesdeUrl, investigarDesdeTexto } = require('../services/invest
 const { redactarDesdeNotas } = require('../services/redactor');
 const { traducirCampos } = require('../services/traductor');
 const { validateTraduccion, TIPOS_VALIDOS, IDIOMAS_VALIDOS, CAMPOS_POR_TIPO } = require('../validators/traduccion');
+const { validateGastoServicio } = require('../validators/gastoServicio');
+const { slugify } = require('../util/slugify');
 
 const router = express.Router();
 
@@ -297,6 +299,77 @@ router.post('/traducir', requireAuth, requireAdmin, async (req, res) => {
   } catch (err) {
     res.status(400).json({ ok: false, error: err.message });
   }
+});
+
+// ── GASTOS (2026-09-28) ──────────────────────────────────────
+// Servicios/suscripciones fijas del proyecto (Claude Pro, Netlify,
+// Supabase, etc.). Solo admin -- es informacion financiera, mas estricto
+// que Reportes/Agentes (que si dejan pasar a moderador). El gasto
+// automatico de los agentes IA sigue viviendo en GET /uso-ia (arriba);
+// el frontend combina ambas listas en la pestaña "Gastos".
+function toRowGasto(id, body, existing = {}) {
+  return [
+    id,
+    body.nombre ?? existing.nombre,
+    body.estado ?? existing.estado,
+    body.costoMensualUsd !== undefined ? (body.costoMensualUsd === '' || body.costoMensualUsd === null ? null : Number(body.costoMensualUsd)) : (existing.costo_mensual_usd ?? null),
+    body.fechaRenovacion !== undefined ? (body.fechaRenovacion || null) : (existing.fecha_renovacion ?? null),
+    body.enlaceFacturacion !== undefined ? (body.enlaceFacturacion || null) : (existing.enlace_facturacion ?? null),
+    body.notas !== undefined ? (body.notas || null) : (existing.notas ?? null),
+  ];
+}
+
+// GET /api/admin/gastos -- lista los servicios fijos, ordenados por nombre
+router.get('/gastos', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM gastos_servicios ORDER BY nombre ASC');
+    res.json({ ok: true, servicios: rows });
+  } catch (err) { enviarError500(res, err); }
+});
+
+// POST /api/admin/gastos -- crear
+router.post('/gastos', requireAuth, requireAdmin, async (req, res) => {
+  const errors = validateGastoServicio(req.body);
+  if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
+  try {
+    let id = slugify(req.body.nombre);
+    const { rows: dupe } = await pool.query('SELECT id FROM gastos_servicios WHERE id = $1', [id]);
+    if (dupe.length) id = `${id}-${Date.now().toString(36)}`;
+
+    const { rows } = await pool.query(
+      `INSERT INTO gastos_servicios (id, nombre, estado, costo_mensual_usd, fecha_renovacion, enlace_facturacion, notas)
+       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+      toRowGasto(id, req.body)
+    );
+    res.status(201).json({ ok: true, servicio: rows[0] });
+  } catch (err) { enviarError500(res, err); }
+});
+
+// PUT /api/admin/gastos/:id -- editar
+router.put('/gastos/:id', requireAuth, requireAdmin, async (req, res) => {
+  const errors = validateGastoServicio(req.body, { partial: true });
+  if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
+  try {
+    const { rows: existingRows } = await pool.query('SELECT * FROM gastos_servicios WHERE id = $1', [req.params.id]);
+    if (existingRows.length === 0) return res.status(404).json({ ok: false, error: 'Servicio no encontrado.' });
+
+    const { rows } = await pool.query(
+      `UPDATE gastos_servicios SET nombre=$2, estado=$3, costo_mensual_usd=$4, fecha_renovacion=$5,
+         enlace_facturacion=$6, notas=$7, actualizado_en=now()
+       WHERE id=$1 RETURNING *`,
+      toRowGasto(req.params.id, req.body, existingRows[0])
+    );
+    res.json({ ok: true, servicio: rows[0] });
+  } catch (err) { enviarError500(res, err); }
+});
+
+// DELETE /api/admin/gastos/:id
+router.delete('/gastos/:id', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { rowCount } = await pool.query('DELETE FROM gastos_servicios WHERE id = $1', [req.params.id]);
+    if (rowCount === 0) return res.status(404).json({ ok: false, error: 'Servicio no encontrado.' });
+    res.json({ ok: true });
+  } catch (err) { enviarError500(res, err); }
 });
 
 module.exports = router;

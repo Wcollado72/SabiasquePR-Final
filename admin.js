@@ -91,13 +91,17 @@
       bindProductos();
       bindTraducciones();
       bindUrlNormalizer();
+      bindGastos();
       loadNoticias();
       loadContenidos();
       loadProductos();
+      loadGastos();
+      loadGastosIa();
     } else {
-      // Moderador: sin acceso a gestion de contenido editorial (el backend
-      // ya lo rechaza igual, esto solo evita mostrar tabs que no puede usar).
-      document.querySelectorAll('.admin-tabs [data-tab="noticias"], .admin-tabs [data-tab="contenidos"], .admin-tabs [data-tab="productos"]')
+      // Moderador: sin acceso a gestion de contenido editorial NI a Gastos
+      // (informacion financiera) -- el backend ya lo rechaza igual, esto
+      // solo evita mostrar tabs que no puede usar.
+      document.querySelectorAll('.admin-tabs [data-tab="noticias"], .admin-tabs [data-tab="contenidos"], .admin-tabs [data-tab="productos"], .admin-tabs [data-tab="gastos"]')
         .forEach((btn) => { btn.style.display = 'none'; });
       activarTab('reportes');
     }
@@ -182,6 +186,7 @@
     document.getElementById('admin-panel-productos').style.display = tab === 'productos' ? '' : 'none';
     document.getElementById('admin-panel-reportes').style.display = tab === 'reportes' ? '' : 'none';
     document.getElementById('admin-panel-agentes').style.display = tab === 'agentes' ? '' : 'none';
+    document.getElementById('admin-panel-gastos').style.display = tab === 'gastos' ? '' : 'none';
   }
 
   function bindTabs() {
@@ -364,6 +369,150 @@
     } catch (err) {
       setStatus(statusEl, 'error', '' + err.message);
     }
+  }
+
+  // ── GASTOS (2026-09-28) ──────────────────────────────────
+  // Servicios/suscripciones fijas del proyecto (Claude Pro, Netlify,
+  // Supabase, etc.) + el gasto real de los agentes de IA (mismo endpoint
+  // /api/admin/uso-ia que ya usa la pestana Agentes, GET /uso-ia). Solo
+  // admin -- es informacion financiera, el backend ya lo exige aparte.
+  let gastosCache = [];
+  let gastosCostoMesIa = 0;
+
+  const ESTADO_LABEL_GASTO = { gratis: '🟢 Gratis', gratis_por_ahora: '🟡 Gratis por ahora', por_uso: '🔵 Por uso' };
+
+  function bindGastos() {
+    document.getElementById('gastos-nuevo').addEventListener('click', () => openGastoForm());
+    document.getElementById('gs-cancel').addEventListener('click', closeGastoForm);
+    document.getElementById('gastos-form').addEventListener('submit', submitGasto);
+  }
+
+  async function loadGastos() {
+    const el = document.getElementById('gastos-lista');
+    el.innerHTML = '<p class="foro-loading">Cargando...</p>';
+    try {
+      const data = await apiFetch('/api/admin/gastos');
+      gastosCache = data.servicios;
+      renderGastosList();
+      actualizarTotalGastos();
+    } catch (err) {
+      el.innerHTML = `<p class="foro-error">${escapeHtml(err.message)}</p>`;
+    }
+  }
+
+  function renderGastosList() {
+    const el = document.getElementById('gastos-lista');
+    el.innerHTML = gastosCache.length ? gastosCache.map((s) => `
+      <div class="synth-item">
+        <div class="synth-item-info">
+          <strong>${escapeHtml(s.nombre)}</strong>
+          <div class="synth-item-badges">
+            <span class="gasto-badge gasto-badge-${s.estado}">${ESTADO_LABEL_GASTO[s.estado] || s.estado}</span>
+            ${s.costo_mensual_usd != null ? `<span class="synth-badge synth-badge-seccion">$${Number(s.costo_mensual_usd).toFixed(2)}/mes</span>` : ''}
+            ${s.fecha_renovacion ? `<span class="synth-badge synth-badge-seccion">Renueva ${escapeHtml(String(s.fecha_renovacion).slice(0, 10))}</span>` : ''}
+          </div>
+          ${s.notas ? `<span class="synth-item-meta">${escapeHtml(s.notas)}</span>` : ''}
+        </div>
+        <div class="gasto-item-actions">
+          ${s.enlace_facturacion ? `<a class="admin-btn-cancel" href="${escapeHtml(s.enlace_facturacion)}" target="_blank" rel="noopener noreferrer">Ver facturación →</a>` : ''}
+          <button type="button" class="admin-btn-edit" data-id="${s.id}">Editar</button>
+          <button type="button" class="admin-btn-delete foro-danger" data-id="${s.id}">Eliminar</button>
+        </div>
+      </div>`).join('') : '<p class="foro-empty">Sin servicios registrados todavía.</p>';
+
+    el.querySelectorAll('.admin-btn-edit').forEach((btn) => btn.addEventListener('click', () => {
+      const item = gastosCache.find((s) => s.id === btn.dataset.id);
+      if (item) openGastoForm(item);
+    }));
+    el.querySelectorAll('.admin-btn-delete').forEach((btn) => btn.addEventListener('click', () => deleteGasto(btn.dataset.id)));
+  }
+
+  function openGastoForm(item) {
+    document.getElementById('gastos-form-title').textContent = item ? 'Editar servicio' : 'Nuevo servicio';
+    document.getElementById('gs-id').value = item?.id || '';
+    document.getElementById('gs-nombre').value = item?.nombre || '';
+    document.getElementById('gs-estado').value = item?.estado || 'por_uso';
+    document.getElementById('gs-costo').value = item?.costo_mensual_usd ?? '';
+    document.getElementById('gs-fecha-renovacion').value = item?.fecha_renovacion ? String(item.fecha_renovacion).slice(0, 10) : '';
+    document.getElementById('gs-enlace').value = item?.enlace_facturacion || '';
+    document.getElementById('gs-notas').value = item?.notas || '';
+    setStatus(document.getElementById('gs-status'), '', '');
+    document.getElementById('gastos-form-box').style.display = 'block';
+    document.getElementById('gastos-form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function closeGastoForm() {
+    document.getElementById('gastos-form-box').style.display = 'none';
+    document.getElementById('gastos-form').reset();
+  }
+
+  async function submitGasto(e) {
+    e.preventDefault();
+    const statusEl = document.getElementById('gs-status');
+    const id = document.getElementById('gs-id').value;
+    const body = {
+      nombre: document.getElementById('gs-nombre').value.trim(),
+      estado: document.getElementById('gs-estado').value,
+      costoMensualUsd: document.getElementById('gs-costo').value === '' ? null : Number(document.getElementById('gs-costo').value),
+      fechaRenovacion: document.getElementById('gs-fecha-renovacion').value || null,
+      enlaceFacturacion: document.getElementById('gs-enlace').value.trim() || null,
+      notas: document.getElementById('gs-notas').value.trim() || null,
+    };
+    setStatus(statusEl, 'info', 'Guardando...');
+    try {
+      if (id) {
+        await apiFetch(`/api/admin/gastos/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body) });
+      } else {
+        await apiFetch('/api/admin/gastos', { method: 'POST', body: JSON.stringify(body) });
+      }
+      closeGastoForm();
+      loadGastos();
+    } catch (err) {
+      setStatus(statusEl, 'error', '' + err.message);
+    }
+  }
+
+  async function deleteGasto(id) {
+    if (!confirm('¿Eliminar este servicio de la lista de gastos?')) return;
+    try {
+      await apiFetch(`/api/admin/gastos/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      loadGastos();
+    } catch (err) {
+      alert('' + err.message);
+    }
+  }
+
+  // Mismo endpoint que loadUsoIa() (pestana Agentes), pintado en los
+  // elementos propios de Gastos -- aqui se muestran TODOS los agentes que
+  // devuelva el backend (investigador/redactor/traductor), no solo los 2
+  // fijos que pinta la pestana Agentes.
+  async function loadGastosIa() {
+    const grid = document.getElementById('gastos-ia-grid');
+    const resumen = document.getElementById('gastos-ia-resumen');
+    const AGENTE_LABEL = { investigador: 'Investigador', redactor: 'Redactor', traductor: 'Traductor' };
+    try {
+      const data = await apiFetch('/api/admin/uso-ia');
+      gastosCostoMesIa = data.costoMesActual || 0;
+      resumen.textContent = `$${gastosCostoMesIa.toFixed(3)} este mes`;
+      const filas = data.porAgente || [];
+      grid.innerHTML = filas.length
+        ? filas.map((r) => `
+          <div class="ag-tile">
+            <p class="ag-tile-label">${escapeHtml(AGENTE_LABEL[r.agente] || r.agente)}</p>
+            <p class="ag-tile-valor">$${Number(r.costo_total).toFixed(3)}</p>
+            <p class="ag-tile-desc">${r.llamadas} uso${r.llamadas === 1 ? '' : 's'} acumulados</p>
+          </div>`).join('')
+        : '<p class="admin-hint">Sin usos todavía.</p>';
+      actualizarTotalGastos();
+    } catch (err) {
+      resumen.textContent = 'Error al cargar';
+      grid.innerHTML = `<p class="admin-hint">No se pudo cargar: ${escapeHtml(err.message)}</p>`;
+    }
+  }
+
+  function actualizarTotalGastos() {
+    const fijo = gastosCache.reduce((suma, s) => suma + (s.costo_mensual_usd != null ? Number(s.costo_mensual_usd) : 0), 0);
+    document.getElementById('gastos-total-mes').textContent = `$${(fijo + gastosCostoMesIa).toFixed(2)}`;
   }
 
   // ── NOTICIAS ─────────────────────────────────────────────

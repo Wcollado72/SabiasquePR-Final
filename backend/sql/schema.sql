@@ -487,3 +487,21 @@ ALTER TABLE traducciones ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ia_generaciones DROP CONSTRAINT IF EXISTS ia_generaciones_agente_check;
 ALTER TABLE ia_generaciones ADD CONSTRAINT ia_generaciones_agente_check
   CHECK (agente IN ('investigador', 'redactor', 'traductor'));
+
+-- ============================================================
+-- Fase "Gastos" del admin (2026-09-28): servicios/suscripciones fijas del
+-- proyecto (Claude Pro, Netlify, Supabase, etc.), separado del gasto
+-- automatico de ia_generaciones (Investigador/Redactor/Traductor).
+-- ============================================================
+CREATE TABLE IF NOT EXISTS gastos_servicios (
+  id                  text PRIMARY KEY,
+  nombre              text NOT NULL,
+  estado              text NOT NULL CHECK (estado IN ('gratis', 'gratis_por_ahora', 'por_uso')),
+  costo_mensual_usd   numeric(10,2) NULL,
+  fecha_renovacion    date NULL,
+  enlace_facturacion  text NULL,
+  notas               text NULL,
+  creado_en           timestamptz NOT NULL DEFAULT now(),
+  actualizado_en      timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE gastos_servicios ENABLE ROW LEVEL SECURITY;

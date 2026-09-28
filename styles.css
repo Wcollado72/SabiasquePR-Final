@@ -1578,6 +1578,36 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   .ag-grid-2{ grid-template-columns:1fr; }
 }
 
+/* Pestaña "Gastos" (2026-09-28): reutiliza la isla oscura de Agentes
+   (.admin-agentes) -- solo el formulario de servicios necesita override,
+   porque .contact-box/.admin-form usan var(--bg)/var(--panel) del tema
+   claro/oscuro del SITIO, no los hex fijos de .admin-agentes. */
+.admin-agentes #gastos-form-box{
+  background:#0d1214;
+  border:1px solid #1a2226;
+  color:#d8e0e0;
+  border-radius:6px;
+  padding:18px 20px;
+  margin-top:6px;
+}
+.admin-agentes #gastos-form-box h3{ color:#ffb238; }
+.admin-agentes #gastos-form-box label{ color:#8b95a0; }
+.admin-agentes #gastos-form-box input,
+.admin-agentes #gastos-form-box select,
+.admin-agentes #gastos-form-box textarea{
+  background:#05080a; border:1px solid #1a2226; color:#d8e0e0;
+}
+.admin-agentes #gastos-form-box .admin-btn-cancel{ background:transparent; border-color:#1a2226; color:#d8e0e0; }
+.gasto-badge{
+  display:inline-block; padding:2px 9px; border-radius:999px;
+  font-size:.64rem; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+  white-space:nowrap;
+}
+.gasto-badge-gratis{ background:rgba(79,214,113,.15); color:#4fd671; }
+.gasto-badge-gratis_por_ahora{ background:rgba(255,178,56,.15); color:#ffb238; }
+.gasto-badge-por_uso{ background:rgba(94,180,255,.15); color:#5eb4ff; }
+.gasto-item-actions{ display:flex; flex-wrap:wrap; gap:6px; }
+
 /* Formulario de Contenidos: "un formulario, varias pieles". Los mismos 5
    paneles/acordeon (Synthwave Arcade de origen) sirven para las 5 categorias
    de Contenidos (Nuevos Humanos, Corrupcion Humana, Revolucion Mundial,
