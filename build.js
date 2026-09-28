@@ -68,6 +68,12 @@ const noticias  = JSON.parse(fs.readFileSync('_content/noticias.json',  'utf8'))
 // Versión de assets: hash del CSS, para evitar CSS viejo en caché
 const ASSET_VERSION = require('crypto').createHash('md5').update(fs.readFileSync('styles.css')).digest('hex').slice(0,8);
 
+// Versión del diccionario de inglés (i18n/en.json): cambia solo cuando cambia
+// el archivo, así el navegador/service worker no se quedan con uno viejo.
+const I18N_VERSION = fs.existsSync('i18n/en.json')
+  ? require('crypto').createHash('md5').update(fs.readFileSync('i18n/en.json')).digest('hex').slice(0, 8)
+  : '0';
+
 // ── HELPERS DE RENDERIZADO ──────────────────────────────────
 
 // noticias/tienda ahora se cargan en el navegador vía la API REST
@@ -340,6 +346,7 @@ function buildPage(p) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
   <script>try{document.documentElement.dataset.theme=localStorage.getItem('sqpr-theme')==='dark'?'dark':'light'}catch(e){}</script>
+  <script>try{if(localStorage.getItem('sqpr-lang')==='en'&&!/(^|\\/)admin(\\.html)?$/.test(location.pathname))document.documentElement.classList.add('i18n-pending')}catch(e){}</script>
   <link rel="alternate" type="application/rss+xml" title="${SITE.name} — Noticias" href="${SITE.url}/rss.xml">
   <link rel="icon" href="favicon.ico" sizes="32x32">
   <link rel="icon" href="favicon-16.png" type="image/png" sizes="16x16">
@@ -375,6 +382,9 @@ function buildPage(p) {
           </ul>
         </nav>
         <div class="header-controls">
+          <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Cambiar idioma" title="Español / English" aria-pressed="false">
+            <span data-l="es" class="active">ES</span><span class="lang-sep" aria-hidden="true">/</span><span data-l="en">EN</span>
+          </button>
           <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar a modo oscuro">
             <span class="theme-icon" aria-hidden="true">
               <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -436,9 +446,11 @@ function buildPage(p) {
       supabaseKey: '${SITE.supabaseKey}',
       apiUrl:      '${SITE.apiUrl}',
       youtubeApiKey: '${SITE.youtubeApiKey}',
-      turnstileSiteKey: '${SITE.turnstileSiteKey}'
+      turnstileSiteKey: '${SITE.turnstileSiteKey}',
+      i18nVersion: '${I18N_VERSION}'
     };
   </script>
+  <script src="i18n.js"></script>
   <script src="auth.js" type="module"></script>
   <script src="script.js"></script>
   ${p.extraScript || ''}

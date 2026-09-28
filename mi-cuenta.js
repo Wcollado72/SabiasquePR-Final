@@ -57,7 +57,7 @@
         return;
       }
       list.innerHTML = `<div class="admin-list">${data.ordenes.map((o) => {
-        const fecha = new Date(o.creado_en).toLocaleDateString('es-PR', { year: 'numeric', month: 'long', day: 'numeric' });
+        const fecha = new Date(o.creado_en).toLocaleDateString(window.SQPR_LOCALE || 'es-PR', { year: 'numeric', month: 'long', day: 'numeric' });
         const items = (o.items || []).map((i) => `${i.cantidad}× ${i.nombre}`).join(', ');
         const dir = o.envio_direccion;
         const envio = dir

@@ -218,6 +218,34 @@ hr{ border:0; border-top:1px solid var(--line); }
 .nav-toggle[aria-expanded="true"] .hamburger-bar:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
 
 .header-controls{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+/* Selector de idioma ES/EN (ver i18n.js). Mientras se carga el diccionario en
+   ingles se oculta el cuerpo para no parpadear en espanol. */
+html.i18n-pending body{ visibility:hidden; }
+.lang-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  height:30px;
+  padding:0 8px;
+  background:transparent;
+  border:1px solid var(--line);
+  border-radius:999px;
+  color:var(--ink-mute);
+  font:600 .68rem/1 var(--font-ui, inherit);
+  letter-spacing:.03em;
+  cursor:pointer;
+  transition:background-color .2s, border-color .2s;
+}
+.lang-toggle:hover{ border-color:var(--ink); background:var(--panel); }
+.lang-toggle .active{ color:var(--ink); }
+.lang-toggle .lang-sep{ opacity:.45; }
+/* El selector de idioma suma ancho al header: en pantallas medianas se
+   aprietan un poco los espacios para que "Hazte premium" no salte de linea. */
+@media (min-width:901px) and (max-width:1440px){
+  .site-header-inner{ gap:16px; }
+  .nav ul{ gap:10px 14px; }
+  .nav a{ letter-spacing:.05em; }
+}
 .theme-toggle,
 .cart-btn{
   position:relative;

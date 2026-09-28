@@ -30,3 +30,6 @@ coverage/
 .claude/skills/
 .junie/
 skills-lock.json
+
+# Generado por scripts/i18n-extraer.js (lista de trabajo, no se publica)
+i18n/faltantes.json

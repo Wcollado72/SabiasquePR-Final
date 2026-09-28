@@ -47,7 +47,7 @@
   }
 
   function formatDate(iso) {
-    try { return new Date(iso).toLocaleDateString('es-PR', { year: 'numeric', month: 'short', day: 'numeric' }); }
+    try { return new Date(iso).toLocaleDateString(window.SQPR_LOCALE || 'es-PR', { year: 'numeric', month: 'short', day: 'numeric' }); }
     catch { return ''; }
   }
 

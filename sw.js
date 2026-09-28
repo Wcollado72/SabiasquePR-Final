@@ -8,8 +8,8 @@
 
 // Sube estos números en cada rediseño o cambio de imágenes:
 // las imágenes usan cache-first y, sin cambiar la versión, se quedarían viejas.
-const CACHE_NAME  = 'sqpr-v9';
-const CACHE_PAGES = 'sqpr-pages-v9';
+const CACHE_NAME  = 'sqpr-v10';
+const CACHE_PAGES = 'sqpr-pages-v10';
 
 // Assets estáticos que se cachean al instalar (todos deben existir)
 const STATIC_ASSETS = [
@@ -29,6 +29,7 @@ const STATIC_ASSETS = [
   '/terminos.html',
   '/404.html',
   '/script.js',
+  '/i18n.js',
   '/auth.js',
   '/editorial.js',
   '/home.js',

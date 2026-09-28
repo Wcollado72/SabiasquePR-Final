@@ -283,7 +283,7 @@
       + '<div class="skeleton skeleton-line"></div></div>';
   }
 
-  window.SQPR = {
+  window.SQPR = Object.assign(window.SQPR || {}, {
     CATEGORIAS: CATEGORIAS,
     CATEGORIA_IMAGEN: CATEGORIA_IMAGEN,
     FORMATO_LABEL: FORMATO_LABEL,
@@ -304,5 +304,5 @@
     metaLine: metaLine,
     cardHtml: cardHtml,
     skeletonCard: skeletonCard,
-  };
+  });
 })();
