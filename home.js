@@ -24,7 +24,7 @@
     }, SLOW_MS);
 
     try {
-      const res = await fetch(API_URL + '/api/noticias');
+      const res = await fetch(window.SQPR.withLang(API_URL + '/api/noticias'));
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error ' + res.status);
       render(data.noticias || [], featuredEl, latestEl);

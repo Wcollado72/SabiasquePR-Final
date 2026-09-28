@@ -44,7 +44,7 @@
     }, SLOW_MS);
 
     try {
-      const res = await fetch(API_URL + '/api/contenidos/' + encodeURIComponent(id));
+      const res = await fetch(S.withLang(API_URL + '/api/contenidos/' + encodeURIComponent(id)));
       const data = await res.json().catch(() => ({}));
       if (res.status === 404) return showError(root, 'No encontramos este contenido.');
       if (!res.ok) throw new Error(data.error || 'Error ' + res.status);
@@ -71,6 +71,10 @@
     const iaLabel = item.divulgacion_ia && S.DIVULGACION_IA_LABEL && S.DIVULGACION_IA_LABEL[item.divulgacion_ia];
     const iaBadge = iaLabel
       ? '<span class="badge-ia ' + S.DIVULGACION_IA_CLASS[item.divulgacion_ia] + '">' + S.escapeHtml(iaLabel) + '</span>'
+      : '';
+
+    const avisoIdioma = item.sin_traduccion
+      ? '<p class="idioma-aviso">Este contenido todavía no está traducido al inglés — se muestra en español.</p>'
       : '';
 
     const media = item.tipo_formato === 'video' && item.url_media
@@ -133,6 +137,7 @@
       + autor
       + iaBadge
       + '</header>'
+      + avisoIdioma
       + media
       + audioEmbed
       + cuerpo

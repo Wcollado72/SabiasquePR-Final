@@ -42,6 +42,23 @@
     cultura: { src: 'images/categoria-cultura.webp', alt: 'Ilustración de un vejigante, un cuatro y una pandereta, símbolo de la categoría Cultura' },
   };
 
+  // Agrega ?lang=en a una URL de la API cuando el visitante eligio ingles
+  // (window.SQPR_LANG, de i18n.js) -- en español no hace falta el parametro,
+  // el backend ya devuelve el idioma original. Ver Fase C3.
+  function withLang(url) {
+    if (window.SQPR_LANG !== 'en') return url;
+    return url + (url.includes('?') ? '&' : '?') + 'lang=en';
+  }
+
+  // Pastilla "Solo en español" para tarjetas -- el texto es la clave del
+  // diccionario de i18n.js, se traduce solo si hiciera falta (no debería,
+  // ya que solo aparece cuando se pidio ingles y no hay traduccion).
+  function badgeIdioma(item) {
+    return item && item.sin_traduccion
+      ? '<span class="badge-idioma">Solo en español</span>'
+      : '';
+  }
+
   function escapeHtml(str) {
     const d = document.createElement('div');
     d.textContent = str == null ? '' : String(str);
@@ -176,6 +193,7 @@
       + '<p class="card-meta">' + contenidoMetaLine(item) + '</p>'
       + iaBadge
       + premiumBadge
+      + badgeIdioma(item)
       + '</div>';
 
     const reproducirLabel = REPRODUCIBLES[item.tipo_formato];
@@ -235,6 +253,7 @@
       duracion_min: readingMinutes(row),
       url_media: null,
       _hrefBase: 'articulo.html',
+      sin_traduccion: row.sin_traduccion,
     };
   }
 
@@ -271,6 +290,7 @@
       + '<' + tag + ' class="card-title">' + escapeHtml(art.titulo) + '</' + tag + '>'
       + '<p class="card-dek">' + escapeHtml(dek(art, o.featured ? 260 : 170)) + '</p>'
       + '<p class="card-meta">' + metaLine(art) + '</p>'
+      + badgeIdioma(art)
       + '</div>';
     return '<article class="card"><a class="card-link" href="' + articleUrl(art) + '">' + inner + '</a></article>';
   }
@@ -293,6 +313,8 @@
     contenidoCardHtml: contenidoCardHtml,
     bindCardPlayDelegation: bindCardPlayDelegation,
     noticiaComoContenido: noticiaComoContenido,
+    withLang: withLang,
+    badgeIdioma: badgeIdioma,
     escapeHtml: escapeHtml,
     stripHtml: stripHtml,
     safeUrl: safeUrl,

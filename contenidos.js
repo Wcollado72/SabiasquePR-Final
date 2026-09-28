@@ -93,7 +93,7 @@
     try {
       const params = new URLSearchParams({ seccion });
       Object.entries(filtros).forEach(([param, valor]) => { if (valor) params.set(param, valor); });
-      const res = await fetch(API_URL + '/api/contenidos?' + params.toString());
+      const res = await fetch(S.withLang(API_URL + '/api/contenidos?' + params.toString()));
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error ' + res.status);
       const items = data.contenidos || [];

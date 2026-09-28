@@ -616,6 +616,34 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   background:color-mix(in srgb, var(--premium) 22%, transparent);
   color:var(--premium-ink);
 }
+/* Fase C3: pieza sin traduccion al idioma elegido -- se muestra en su
+   idioma original con este aviso (backend: `sin_traduccion`, ver
+   util/traducciones.js). Pastilla chica en tarjetas, aviso mas visible en
+   la pagina de detalle. */
+.badge-idioma{
+  display:inline-block;
+  margin-top:6px;
+  margin-left:6px;
+  padding:3px 10px;
+  border-radius:999px;
+  font-family:var(--font-ui);
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  background:color-mix(in srgb, var(--ink) 12%, transparent);
+  color:var(--ink-mute);
+}
+.idioma-aviso{
+  margin:0 0 18px;
+  padding:10px 14px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:var(--panel);
+  color:var(--ink-soft);
+  font-family:var(--font-ui);
+  font-size:.85rem;
+}
 
 /* Muro de pago (vista previa parcial) en el detalle de un contenido premium */
 .paywall-teaser{

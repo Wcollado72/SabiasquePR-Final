@@ -29,7 +29,7 @@
     }, SLOW_MS);
 
     try {
-      const res = await fetch(API_URL + '/api/noticias/' + encodeURIComponent(id));
+      const res = await fetch(S.withLang(API_URL + '/api/noticias/' + encodeURIComponent(id)));
       const data = await res.json().catch(() => ({}));
       if (res.status === 404) return showError(root, 'No encontramos este artículo.');
       if (!res.ok) throw new Error(data.error || 'Error ' + res.status);
@@ -56,6 +56,9 @@
         + (sourceUrl ? '<a href="' + S.escapeHtml(sourceUrl) + '" target="_blank" rel="noopener noreferrer">' + S.escapeHtml(art.fuente_texto) + '</a>' : S.escapeHtml(art.fuente_texto))
         + '</p>'
       : '';
+    const avisoIdioma = art.sin_traduccion
+      ? '<p class="idioma-aviso">Este artículo todavía no está traducido al inglés — se muestra en español.</p>'
+      : '';
     const img = art.imagen
       ? '<img src="' + S.escapeHtml(art.imagen) + '" alt="' + S.escapeHtml(art.imagen_alt || '') + '" width="1200" height="675" fetchpriority="high">'
       : '';
@@ -71,6 +74,7 @@
       + '<h1 class="article-title">' + S.escapeHtml(art.titulo) + '</h1>'
       + '<p class="article-meta"><time datetime="' + S.escapeHtml(String(art.fecha).slice(0, 10)) + '">' + S.escapeHtml(art.fecha_display || '') + '</time> · ' + S.readingMinutes(art) + ' min de lectura</p>'
       + '</header>'
+      + avisoIdioma
       + figure
       + '<div class="article-body">' + paragraphs + '</div>'
       + source;
@@ -118,7 +122,7 @@
       headline: art.titulo,
       description: description,
       datePublished: String(art.fecha).slice(0, 10),
-      inLanguage: 'es',
+      inLanguage: art.idioma_mostrado || 'es',
       mainEntityOfPage: url,
       publisher: { '@type': 'Organization', name: SITE_NAME },
     };
@@ -156,7 +160,7 @@
     const grid = document.getElementById('article-more-grid');
     if (!section || !grid) return;
     try {
-      const res = await fetch(API_URL + '/api/noticias');
+      const res = await fetch(S.withLang(API_URL + '/api/noticias'));
       const data = await res.json();
       if (!res.ok) return;
       const others = (data.noticias || []).filter((n) => n.id !== current.id);

@@ -56,8 +56,8 @@
     try {
       const qs = activeCategoria ? `?categoria=${encodeURIComponent(activeCategoria)}` : '';
       const [noticiasRes, contenidosRes] = await Promise.all([
-        fetch(API_URL + '/api/noticias' + qs),
-        fetch(API_URL + '/api/contenidos?seccion=noticias' + (activeCategoria ? `&categoria=${encodeURIComponent(activeCategoria)}` : '')),
+        fetch(S.withLang(API_URL + '/api/noticias' + qs)),
+        fetch(S.withLang(API_URL + '/api/contenidos?seccion=noticias' + (activeCategoria ? `&categoria=${encodeURIComponent(activeCategoria)}` : ''))),
       ]);
       const noticiasData = await noticiasRes.json();
       const contenidosData = await contenidosRes.json();
