@@ -20,11 +20,27 @@ function limpiarHtml(html) {
   return h;
 }
 
+// El navegador decodifica las entidades HTML antes de crear el nodo de
+// texto (ej. "&amp;" -> "&"); si el diccionario guarda la entidad cruda,
+// nunca coincide en tiempo real. Se decodifican las mismas que build.js
+// puede producir (nombres, no numericas, y las mas comunes con codigo).
+const ENTIDADES = {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
+  ndash: '–', mdash: '—', hellip: '…',
+};
+function decodificarEntidades(s) {
+  return s.replace(/&(#(\d+)|([a-z]+));/gi, (m, _g, num, nombre) => {
+    if (num) return String.fromCodePoint(Number(num));
+    const l = (nombre || '').toLowerCase();
+    return l in ENTIDADES ? ENTIDADES[l] : m;
+  });
+}
+
 function extraer(html) {
   const textos = new Set();
   const h = limpiarHtml(html);
-  for (const m of h.matchAll(/>([^<>]+)</g)) textos.add(normalizar(m[1].replace(/&nbsp;/g, ' ')));
-  for (const m of h.matchAll(/\s(?:placeholder|aria-label|title|alt)="([^"]+)"/g)) textos.add(normalizar(m[1]));
+  for (const m of h.matchAll(/>([^<>]+)</g)) textos.add(normalizar(decodificarEntidades(m[1])));
+  for (const m of h.matchAll(/\s(?:placeholder|aria-label|title|alt)="([^"]+)"/g)) textos.add(normalizar(decodificarEntidades(m[1])));
   const titulo = /<title>([^<]+)<\/title>/i.exec(html);
   if (titulo && !soloChrome) textos.add(normalizar(titulo[1]));
   const desc = /<meta name="description" content="([^"]+)"/i.exec(html);
