@@ -50,8 +50,15 @@
       // abierto, hay que volver a tapar el contenido -- init() solo corre
       // una vez al cargar la pagina, sin esto el admin-panel se queda
       // visible en el DOM (con datos ya cargados) despues del logout.
-      supabase.auth.onAuthStateChange((_event, sesionActual) => {
+      // Al reves tambien: si se inicia sesion (o se cambia de cuenta) estando ya
+      // en esta pagina, la compuerta se evaluaba solo al cargar y se quedaba en
+      // "Inicia sesion" aunque el encabezado ya mostrara la cuenta. Solo se
+      // recarga cuando NO habia sesion al cargar (`currentUser` nulo): supabase-js
+      // vuelve a emitir SIGNED_IN cada vez que la pestana recupera el foco, y
+      // recargar con el panel abierto haria perder lo que se esta editando.
+      supabase.auth.onAuthStateChange((evento, sesionActual) => {
         if (!sesionActual) cerrarPanelPorLogout();
+        else if (!currentUser && (evento === 'SIGNED_IN' || evento === 'TOKEN_REFRESHED')) location.reload();
       });
     } catch (err) {
       showGate('⚠️ No se pudo verificar tu sesión: ' + err.message);
