@@ -18,6 +18,12 @@
   force = true
 
 [[redirects]]
+  from = "/tools/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
   from = "/.git/*"
   to = "/404.html"
   status = 404
@@ -67,14 +73,18 @@
 # - www.youtube.com: reproductor embebido de Contenidos + oEmbed del admin
 # - www.googleapis.com: YouTube Data API (selector de canal en el admin)
 # - formspree.io: el formulario de contacto envia ahi directamente (form-action)
-# - cdn.jsdelivr.net: import() dinamico del cliente de Supabase
-#   (@supabase/supabase-js) -- lo usan auth.js, debate.js, admin.js y
-#   logica-humana.js. CORREGIDO 2026-09-26: se me paso en el primer
-#   inventario (solo habia un <link rel="preconnect">, sin <script src>
-#   estatico visible en build.js) y esto rompio el login en produccion por
-#   unos minutos hasta esta correccion -- la leccion: un import() dinamico
-#   dentro de un .js no aparece grepeando el HTML generado, hay que buscar
-#   tambien import(...) y .src = dentro de todos los .js de pagina.
+# - cdn.jsdelivr.net: YA NO SE USA (2026-10-02, AUDITORIA-SEGURIDAD.md, debilidad #3).
+#   TRANSICION: sigue en script-src solo una semana. El Service Worker (sw.js) sirve
+#   el JS de la visita anterior desde cache la primera vez tras un despliegue, y ese
+#   auth.js viejo todavia hace import() a este CDN; sin este permiso, esa primera
+#   carga mostraria el login roto. QUITAR de script-src a partir de 2026-10-10
+#   (pendiente anotado en IDEAS-PENDIENTES.md).
+#   El cliente de Supabase se cargaba con import() desde ahi SIN version fija
+#   (supabase-js@2/+esm): si ese paquete se comprometia, el codigo corria en
+#   cada pagina con login. Ahora se empaqueta en un solo archivo propio
+#   (vendor/supabase-js.js, generado con tools/vendor -> `npm run build`) y se
+#   sirve desde 'self'. Para actualizar la version: editar tools/vendor/package.json,
+#   correr `npm install && npm run build` ahi y comitear el vendor/ resultante.
 #
 # beehiiv (reemplazo de Mailchimp, 2026-09-27) no necesita dominio nuevo aqui:
 # la suscripcion pasa por nuestro propio backend (POST /api/newsletter/subscribe,

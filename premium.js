@@ -33,7 +33,7 @@
           supabase = shared;
         } else {
           const { createClient } = await import(
-            'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+            './vendor/supabase-js.js'
           );
           supabase = createClient(cfg.supabaseUrl, cfg.supabaseKey);
         }

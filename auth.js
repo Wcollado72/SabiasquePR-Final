@@ -71,7 +71,7 @@ async function initAuth() {
 
   try {
     const { createClient } = await import(
-      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+      './vendor/supabase-js.js'
     );
     supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
     window.supabase = supabase; // permite que otros scripts (p.ej. foro.js) reutilicen la sesión

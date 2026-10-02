@@ -1,0 +1,15 @@
+{
+  "name": "sabiasquepr-vendor",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Empaqueta supabase-js en un solo archivo local (vendor/supabase-js.js) para no cargarlo de un CDN",
+  "scripts": {
+    "build": "esbuild entry.js --bundle --format=esm --platform=browser --target=es2020 --minify --legal-comments=none --outfile=../../vendor/supabase-js.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.117.2"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

@@ -1,0 +1,46 @@
+name: Auditoria de seguridad (dependencias y secretos)
+
+# AUDITORIA-SEGURIDAD.md, debilidad #5. Corre en cada push a main, en cada PR
+# y una vez por semana (por si aparece una vulnerabilidad nueva en una
+# dependencia que no cambio). Si algo falla, GitHub te manda un correo.
+#
+# - npm audit: falla si hay vulnerabilidades de nivel "high" o peor.
+# - gitleaks: busca llaves/contrasenas pegadas por error en el codigo o en el
+#   historial de git (el escaneo nativo de GitHub para repos privados es de pago).
+
+on:
+  push: { branches: [main] }
+  pull_request: {}
+  schedule:
+    - cron: '0 11 * * 1' # lunes 11:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  npm-audit:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        carpeta: [backend, tools/vendor]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: npm audit (${{ matrix.carpeta }})
+        working-directory: ${{ matrix.carpeta }}
+        run: |
+          npm ci
+          npm audit --audit-level=high
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 } # historial completo, no solo el ultimo commit
+      - name: Instalar gitleaks
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz | tar -xz gitleaks
+      - name: Buscar secretos (codigo + historial)
+        run: ./gitleaks detect --source . --redact --verbose --no-banner

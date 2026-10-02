@@ -1,0 +1,26 @@
+# Vigilancia automatica de dependencias (AUDITORIA-SEGURIDAD.md, debilidad #5).
+# Dependabot abre un PR cuando hay una version nueva o un parche de seguridad.
+# Los parches/menores van agrupados en un solo PR por carpeta para no llenar
+# la bandeja; los saltos de version MAYOR (ej. Express 4 -> 5) llegan sueltos
+# y se revisan a mano -- nunca se mezclan con los parches.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /backend
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+    groups:
+      parches-y-menores:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /tools/vendor
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 3
+    groups:
+      parches-y-menores:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: monthly }

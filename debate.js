@@ -149,7 +149,7 @@
       try {
         const shared = await waitForSharedSupabase();
         supabase = shared || (await (async () => {
-          const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+          const { createClient } = await import('./vendor/supabase-js.js');
           return createClient(cfg.supabaseUrl, cfg.supabaseKey);
         })());
         const { data: { session } } = await supabase.auth.getSession();
