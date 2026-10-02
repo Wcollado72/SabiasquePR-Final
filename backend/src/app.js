@@ -1,8 +1,10 @@
 const express = require('express');
+const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const { pool } = require('./db');
 const { requireAuth } = require('./middleware/auth');
+const { enviarError500 } = require('./util/errores');
 const foroRoutes = require('./routes/foro');
 const noticiasRoutes = require('./routes/noticias');
 const contenidosRoutes = require('./routes/contenidos');
@@ -32,6 +34,17 @@ function buildApp() {
   // codigo (como volver a medirlo: ver AUDITORIA-SEGURIDAD.md).
   const hops = Number.parseInt(process.env.TRUST_PROXY_HOPS, 10);
   app.set('trust proxy', Number.isInteger(hops) && hops >= 0 ? hops : (process.env.RENDER ? 3 : 0));
+
+  // Cabeceras de endurecimiento del API (AUDITORIA-SEGURIDAD.md, debilidad #7):
+  // quita `x-powered-by: Express` (anunciaba el framework) y agrega nosniff,
+  // HSTS, X-Frame-Options, etc. El API solo devuelve JSON, asi que el CSP es el
+  // mas cerrado posible. `Cross-Origin-Resource-Policy: cross-origin` es
+  // necesario porque el frontend (Netlify) vive en otro origen y llama a este
+  // API con fetch -- el default de helmet (same-origin) estorbaria.
+  app.use(helmet({
+    contentSecurityPolicy: { directives: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] } },
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }));
 
   const allowedOrigins = (process.env.FRONTEND_ORIGIN ||
     'http://localhost:5500,http://127.0.0.1:5500,http://localhost:8080')
@@ -89,7 +102,8 @@ function buildApp() {
       const result = await pool.query('SELECT NOW() AS hora_servidor');
       res.json({ ok: true, hora_servidor: result.rows[0].hora_servidor });
     } catch (err) {
-      res.status(500).json({ ok: false, error: err.message });
+      console.error(err);
+      res.status(500).json({ ok: false, error: 'Base de datos no disponible.' });
     }
   });
 
@@ -118,10 +132,20 @@ function buildApp() {
   app.use('/api/reportes', reportesRoutes);
   app.use('/api/newsletter', newsletterRoutes);
 
-  // Manejador de errores (CORS rechazado, JSON malformado, etc.)
+  // Manejador de errores. Nunca se devuelve err.message tal cual en un error
+  // inesperado (AUDITORIA-SEGURIDAD.md, debilidad #9): solo los casos conocidos
+  // tienen mensaje propio; el resto se registra en el log y sale generico.
   app.use((err, _req, res, _next) => {
-    const status = err.message && err.message.includes('CORS') ? 403 : 400;
-    res.status(status).json({ ok: false, error: err.message });
+    if (err.message && err.message.includes('CORS')) {
+      return res.status(403).json({ ok: false, error: 'Origen no permitido por CORS.' });
+    }
+    if (err.type === 'entity.parse.failed') {
+      return res.status(400).json({ ok: false, error: 'El cuerpo de la peticion no es un JSON valido.' });
+    }
+    if (err.type === 'entity.too.large') {
+      return res.status(413).json({ ok: false, error: 'El cuerpo de la peticion es demasiado grande.' });
+    }
+    enviarError500(res, err);
   });
 
   return app;

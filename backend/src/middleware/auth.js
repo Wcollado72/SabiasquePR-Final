@@ -47,6 +47,24 @@ function rechazarPorMfa(res) {
   });
 }
 
+// Verificacion del JWT con emisor y audiencia (AUDITORIA-SEGURIDAD.md,
+// debilidad #8). Segun la documentacion oficial de Supabase, los tokens de
+// usuario traen `iss` = <URL del proyecto>/auth/v1 y `aud` = "authenticated";
+// los de la llave anon/service_role traen iss "supabase" y quedan rechazados.
+function verificarJwt(token) {
+  return jwtVerify(token, getJWKS(), {
+    issuer: new URL('/auth/v1', process.env.SUPABASE_URL).href,
+    audience: 'authenticated',
+  });
+}
+
+// Cuenta suspendida (ban) desde el panel de Supabase: sin esto su token seguia
+// valiendo hasta una hora mas. `banned_until` viaja en la misma consulta.
+const BANNED_SQL = '(SELECT banned_until FROM auth.users WHERE id = perfiles.id) AS banned_until';
+function estaSuspendido(row) {
+  return Boolean(row?.banned_until) && new Date(row.banned_until) > new Date();
+}
+
 // Verifica el JWT de Supabase, hace upsert defensivo en `perfiles`
 // (por si no existe un trigger de auth.users -> perfiles) y expone req.user.
 async function requireAuth(req, res, next) {
@@ -55,7 +73,7 @@ async function requireAuth(req, res, next) {
   if (!token) return res.status(401).json({ ok: false, error: 'Falta token de autenticacion.' });
 
   try {
-    const { payload } = await jwtVerify(token, getJWKS());
+    const { payload } = await verificarJwt(token);
     if (!payload.sub) return res.status(401).json({ ok: false, error: 'Token invalido.' });
 
     // fecha_nacimiento viaja en el user_metadata del JWT (se paso como
@@ -67,9 +85,13 @@ async function requireAuth(req, res, next) {
       `INSERT INTO perfiles (id, email, fecha_nacimiento)
        VALUES ($1, $2, $3)
        ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email
-       RETURNING id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok, fecha_nacimiento, creado_en`,
+       RETURNING id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok, fecha_nacimiento, creado_en, ${BANNED_SQL}`,
       [payload.sub, payload.email || null, fechaNacimiento]
     );
+    if (estaSuspendido(rows[0])) {
+      return res.status(401).json({ ok: false, error: 'Cuenta suspendida.' });
+    }
+    delete rows[0].banned_until;
     req.user = aplicarMfa(rows[0], payload); // { id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok, fecha_nacimiento, creado_en }
     req.auth = { aal: payload.aal || 'aal1' };
     next();
@@ -108,10 +130,15 @@ async function tryAuth(req, _res, next) {
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
   if (!token) { req.user = null; return next(); }
   try {
-    const { payload } = await jwtVerify(token, getJWKS());
+    const { payload } = await verificarJwt(token);
     if (!payload.sub) { req.user = null; return next(); }
-    const { rows } = await pool.query('SELECT id, email, rol, edad_confirmada, logica_humana_terminos_ok, fecha_nacimiento, creado_en FROM perfiles WHERE id = $1', [payload.sub]);
-    req.user = rows[0] ? aplicarMfa(rows[0], payload) : null;
+    const { rows } = await pool.query(`SELECT id, email, rol, edad_confirmada, logica_humana_terminos_ok, fecha_nacimiento, creado_en, ${BANNED_SQL} FROM perfiles WHERE id = $1`, [payload.sub]);
+    if (rows[0] && !estaSuspendido(rows[0])) {
+      delete rows[0].banned_until;
+      req.user = aplicarMfa(rows[0], payload);
+    } else {
+      req.user = null;
+    }
   } catch {
     req.user = null;
   }
