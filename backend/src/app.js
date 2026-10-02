@@ -36,6 +36,18 @@ function buildApp() {
 
   app.use(express.json());
 
+  // TEMPORAL (seguridad, fase 3): solo devuelve los encabezados de IP de quien
+  // pregunta, para medir cuantos saltos de proxy hay delante de Express en
+  // Render. Se borra en el commit siguiente, cuando se fije `trust proxy`.
+  app.get('/api/_diag/proxy', (req, res) => res.json({
+    ip: req.ip, ips: req.ips,
+    xff: req.headers['x-forwarded-for'] || null,
+    cf: req.headers['cf-connecting-ip'] || null,
+    realIp: req.headers['x-real-ip'] || null,
+    forwarded: req.headers.forwarded || null,
+    socket: req.socket.remoteAddress,
+  }));
+
   // Prevencion de bots/abuso, gratis: limite general generoso para toda la
   // API (lectura), y uno mas estricto solo para escribir (crear/editar/
   // borrar) -- ahi es donde importa frenar spam, no en las consultas.
