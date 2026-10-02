@@ -476,5 +476,19 @@
   "Tu cuenta tiene verificación en dos pasos. Escribe el código de 6 dígitos que muestra tu app de autenticación para continuar.": "Your account has two-step verification. Enter the 6-digit code shown by your authenticator app to continue.",
   "Escribe los 6 dígitos que muestra tu app.": "Enter the 6 digits shown by your app.",
   "No encontramos un autenticador activo en tu cuenta.": "We could not find an active authenticator on your account.",
-  "¿Perdiste tu app de autenticación? Escríbenos a": "Lost your authenticator app? Write to us at"
+  "¿Perdiste tu app de autenticación? Escríbenos a": "Lost your authenticator app? Write to us at",
+  "Correo o contraseña incorrectos.": "Incorrect email or password.",
+  "Todavía no confirmas tu correo. Revisa tu bandeja de entrada (y la carpeta de spam).": "You haven't confirmed your email yet. Check your inbox (and your spam folder).",
+  "Ya existe una cuenta con ese correo. Prueba iniciando sesión.": "An account with that email already exists. Try signing in.",
+  "Esa contraseña es demasiado débil. Usa 8 o más caracteres con mayúsculas, minúsculas, números y símbolos.": "That password is too weak. Use 8 or more characters with uppercase, lowercase, numbers and symbols.",
+  "La contraseña nueva debe ser diferente a la anterior.": "The new password must be different from the old one.",
+  "Pediste demasiados correos seguidos. Espera unos minutos e inténtalo de nuevo.": "You requested too many emails in a row. Wait a few minutes and try again.",
+  "Demasiados intentos seguidos. Espera unos minutos e inténtalo de nuevo.": "Too many attempts in a row. Wait a few minutes and try again.",
+  "No se pudo completar la verificación de seguridad. Inténtalo de nuevo.": "The security check could not be completed. Please try again.",
+  "El enlace o el código expiró. Pide uno nuevo.": "The link or code has expired. Request a new one.",
+  "Los registros están desactivados por ahora.": "Sign-ups are turned off for now.",
+  "Falta la verificación en dos pasos.": "Two-step verification is required.",
+  "Ese código no es correcto. Revisa tu app de autenticación e inténtalo de nuevo.": "That code isn't correct. Check your authenticator app and try again.",
+  "El código expiró. Escribe el nuevo que muestra tu app.": "The code expired. Enter the new one shown by your app.",
+  "Ocurrió un error inesperado. Inténtalo de nuevo.": "An unexpected error occurred. Please try again."
 }

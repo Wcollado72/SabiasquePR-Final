@@ -204,7 +204,7 @@
         estado.className = 'form-status ok';
         location.reload();
       } catch (err) {
-        estado.textContent = 'No se pudo verificar: ' + err.message;
+        estado.textContent = 'No se pudo verificar: ' + (window.sqprErrorAuth ? window.sqprErrorAuth(err) : err.message);
         estado.className = 'form-status error';
         input.value = '';
         input.focus();

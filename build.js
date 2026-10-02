@@ -462,6 +462,7 @@ function buildPage(p) {
     };
   </script>
   <script src="i18n.js"></script>
+  <script src="auth-errores.js"></script>
   <script src="auth.js" type="module"></script>
   <script src="script.js"></script>
   ${p.extraScript || ''}

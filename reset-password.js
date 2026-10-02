@@ -81,7 +81,7 @@
         setStatus(statusEl, 'ok', '');
         mostrarFormularioDeContrasena();
       } catch (err) {
-        setStatus(statusEl, 'error', 'No se pudo verificar: ' + err.message);
+        setStatus(statusEl, 'error', 'No se pudo verificar: ' + (window.sqprErrorAuth ? window.sqprErrorAuth(err) : err.message));
         document.getElementById('reset-mfa-codigo').value = '';
       }
     });
@@ -123,7 +123,7 @@
       }
       setStatus(statusEl, 'info', 'Guardando...');
       const { error } = await supabase.auth.updateUser({ password: pass1 });
-      if (error) { setStatus(statusEl, 'error', error.message); return; }
+      if (error) { setStatus(statusEl, 'error', window.sqprErrorAuth ? window.sqprErrorAuth(error) : error.message); return; }
       setStatus(statusEl, 'ok', '¡Listo! Tu contraseña se actualizó. Ya puedes iniciar sesión.');
       form.style.display = 'none';
     });

@@ -265,6 +265,9 @@ function mostrarPerfilPendiente() {
   input.focus();
 }
 
+// Mensaje en espanol para un error de Supabase Auth (ver auth-errores.js).
+const errorAuth = (error) => (window.sqprErrorAuth ? window.sqprErrorAuth(error) : error.message);
+
 const MARCA_LOGIN_MANUAL = 'sqpr_login_manual';
 function marcarLoginManual() {
   try { sessionStorage.setItem(MARCA_LOGIN_MANUAL, String(Date.now())); } catch { /* sin storage: no se redirige */ }
@@ -377,7 +380,7 @@ async function signIn(email, password) {
     options: { captchaToken: authTurnstileToken() },
   });
   resetAuthTurnstile();
-  if (error) { consumirMarcaLoginManual(); setAuthStatus('' + error.message, 'error'); return; }
+  if (error) { consumirMarcaLoginManual(); setAuthStatus(errorAuth(error), 'error'); return; }
   setAuthStatus('¡Bienvenido!', 'ok');
   setTimeout(() => window.closeLoginModal?.(), 900);
 }
@@ -390,7 +393,7 @@ async function signUp(email, password, fechaNacimiento) {
     options: { data: { fecha_nacimiento: fechaNacimiento }, captchaToken: authTurnstileToken() },
   });
   resetAuthTurnstile();
-  if (error) { setAuthStatus('' + error.message, 'error'); return; }
+  if (error) { setAuthStatus(errorAuth(error), 'error'); return; }
   setAuthStatus('Revisa tu correo para confirmar tu cuenta.', 'ok');
 }
 
@@ -405,7 +408,7 @@ async function signInWithGoogle() {
     provider: 'google',
     options: { redirectTo: window.location.href },
   });
-  if (error) setAuthStatus('' + error.message, 'error');
+  if (error) setAuthStatus(errorAuth(error), 'error');
 }
 
 async function resetPassword(email) {
@@ -416,7 +419,7 @@ async function resetPassword(email) {
     captchaToken: authTurnstileToken(),
   });
   resetAuthTurnstile();
-  if (error) { setAuthStatus('' + error.message, 'error'); return; }
+  if (error) { setAuthStatus(errorAuth(error), 'error'); return; }
   setAuthStatus('Revisa tu correo para restablecer la contraseña.', 'ok');
 }
 
