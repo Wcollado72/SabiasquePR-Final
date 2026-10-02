@@ -5,10 +5,19 @@ name: Respaldo de la base de datos (Supabase)
 # project backups"). Este workflow es el reemplazo gratis: un pg_dump
 # diario de la base real, guardado como artefacto de GitHub Actions.
 #
+# CIFRADO (AUDITORIA-SEGURIDAD.md, debilidad #4, 2026-10-02): el dump trae
+# correos y fechas de nacimiento (datos personales, posiblemente de menores),
+# asi que se cifra con `age` ANTES de subirlo. Aqui solo vive la llave PUBLICA
+# (publica por diseno: sirve para cifrar, no para abrir). La llave PRIVADA esta
+# solo en la PC del dueno (una carpeta privada del dueno) y
+# DEBE tener una copia en un gestor de contrasenas / USB: sin ella los
+# respaldos son irrecuperables, y quien tenga acceso al repo no puede abrirlos.
+#
 # Como restaurar un respaldo si hace falta: GitHub -> pestaña "Actions" de
 # este repo -> abrir la ejecucion del dia que quieras -> seccion
-# "Artifacts" al final -> descargar el .dump -> restaurar con
-# `pg_restore --clean --if-exists -d "<DATABASE_URL>" archivo.dump`.
+# "Artifacts" al final -> descargar el .dump.age -> descifrar y restaurar:
+#   age -d -i sabiasquepr-llave-respaldos.txt -o respaldo.dump archivo.dump.age
+#   pg_restore --clean --if-exists -d "<DATABASE_URL>" respaldo.dump
 #
 # Requiere un secreto en GitHub: Settings -> Secrets and variables ->
 # Actions -> New repository secret -> nombre DATABASE_URL, mismo valor que
@@ -38,7 +47,7 @@ jobs:
         run: |
           sudo apt-get install -y --no-install-recommends postgresql-common
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
-          sudo apt-get install -y --no-install-recommends postgresql-client-17
+          sudo apt-get install -y --no-install-recommends postgresql-client-17 age
 
       - name: Respaldar la base de datos
         env:
@@ -52,9 +61,19 @@ jobs:
             --no-owner --no-privileges --format=custom \
             --file="backups/sabiasquepr-$(date +%Y-%m-%d).dump"
 
+      - name: Cifrar el respaldo (age, llave publica) y borrar el texto plano
+        run: |
+          for f in backups/*.dump; do
+            age -r age1pcha6zxx436d9494n2qdl0k5v0rzsq7la2ga8xr50eu9cw94agrqn3lhjg -o "$f.age" "$f"
+            rm -f "$f"
+          done
+          # Falla el trabajo si por cualquier motivo quedo algo sin cifrar
+          test -z "$(ls backups/*.dump 2>/dev/null)"
+          ls -la backups/*.age
+
       - name: Subir el respaldo como artefacto
         uses: actions/upload-artifact@v4
         with:
           name: db-backup-${{ github.run_id }}
-          path: backups/*.dump
+          path: backups/*.dump.age
           retention-days: 14
