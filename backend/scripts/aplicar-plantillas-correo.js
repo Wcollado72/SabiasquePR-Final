@@ -45,7 +45,15 @@ async function llamar(metodo, cuerpo) {
     body: cuerpo ? JSON.stringify(cuerpo) : undefined,
   });
   if (!res.ok) {
-    throw new Error(`La API de Supabase respondio ${res.status}${res.status === 401 ? ' (revisa que el token sea valido y no haya caducado)' : ''}.`);
+    // El cuerpo del error de Supabase explica el motivo (por ejemplo, que permiso
+    // le falta al token). No incluye el token, asi que es seguro mostrarlo.
+    const detalle = (await res.text().catch(() => '')).slice(0, 400);
+    throw new Error(
+      `La API de Supabase respondio ${res.status} al hacer ${metodo}`
+      + `${res.status === 401 ? ' (revisa que el token sea valido y no haya caducado)' : ''}`
+      + `${res.status === 403 ? ' (el token no tiene permiso para esta accion)' : ''}.`
+      + `${detalle ? `\nMensaje de Supabase: ${detalle}` : ''}`
+    );
   }
   return res.json();
 }
