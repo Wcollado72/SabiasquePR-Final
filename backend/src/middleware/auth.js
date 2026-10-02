@@ -16,6 +16,37 @@ function getJWKS() {
   return jwks;
 }
 
+// ── MFA del admin (AUDITORIA-SEGURIDAD.md, debilidad #2) ─────────────────
+// Los roles con poder (admin y moderador) solo pueden usar ese poder si la
+// sesion paso la verificacion en dos pasos: el JWT de Supabase trae `aal`
+// ("aal1" = solo contrasena, "aal2" = contrasena + codigo TOTP). Mientras
+// sea aal1, el rol EFECTIVO se degrada a "usuario" en toda la API -- asi
+// tambien quedan cubiertas las comprobaciones de rol que algunas rutas hacen
+// por dentro (foro, comentarios, borradores de noticias) sin tocar cada una.
+// El rol real se conserva en `rolReal` solo para que /api/me le diga al panel
+// que paso falta (y poder mostrarle el paso de verificacion).
+// Interruptor de emergencia: ADMIN_MFA_REQUIRED=false en Render (por ejemplo
+// si se pierde el telefono con el autenticador y no hay otra via).
+const ROLES_CON_PODER = ['admin', 'moderador'];
+function mfaExigido() {
+  return process.env.ADMIN_MFA_REQUIRED !== 'false';
+}
+function aplicarMfa(user, payload) {
+  if (user && mfaExigido() && ROLES_CON_PODER.includes(user.rol) && payload?.aal !== 'aal2') {
+    user.rolReal = user.rol;
+    user.rol = 'usuario';
+    user.mfaPendiente = true;
+  }
+  return user;
+}
+function rechazarPorMfa(res) {
+  return res.status(403).json({
+    ok: false,
+    code: 'mfa_required',
+    error: 'Se requiere verificacion en dos pasos (MFA) para usar este panel.',
+  });
+}
+
 // Verifica el JWT de Supabase, hace upsert defensivo en `perfiles`
 // (por si no existe un trigger de auth.users -> perfiles) y expone req.user.
 async function requireAuth(req, res, next) {
@@ -39,7 +70,8 @@ async function requireAuth(req, res, next) {
        RETURNING id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok, fecha_nacimiento, creado_en`,
       [payload.sub, payload.email || null, fechaNacimiento]
     );
-    req.user = rows[0]; // { id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok, fecha_nacimiento, creado_en }
+    req.user = aplicarMfa(rows[0], payload); // { id, email, rol, nombre, edad_confirmada, logica_humana_terminos_ok, fecha_nacimiento, creado_en }
+    req.auth = { aal: payload.aal || 'aal1' };
     next();
   } catch (err) {
     res.status(401).json({ ok: false, error: 'Token invalido o expirado.' });
@@ -48,6 +80,7 @@ async function requireAuth(req, res, next) {
 
 // Debe usarse despues de requireAuth (necesita req.user ya poblado).
 function requireAdmin(req, res, next) {
+  if (req.user?.mfaPendiente) return rechazarPorMfa(res);
   if (req.user?.rol !== 'admin') {
     return res.status(403).json({ ok: false, error: 'Requiere rol de administrador.' });
   }
@@ -58,6 +91,7 @@ function requireAdmin(req, res, next) {
 // moderador pasan. Gestion de contenido editorial sigue usando requireAdmin
 // a secas -- el moderador no tiene acceso ahi.
 function requireModerador(req, res, next) {
+  if (req.user?.mfaPendiente) return rechazarPorMfa(res);
   if (req.user?.rol !== 'admin' && req.user?.rol !== 'moderador') {
     return res.status(403).json({ ok: false, error: 'Requiere rol de administrador o moderador.' });
   }
@@ -77,7 +111,7 @@ async function tryAuth(req, _res, next) {
     const { payload } = await jwtVerify(token, getJWKS());
     if (!payload.sub) { req.user = null; return next(); }
     const { rows } = await pool.query('SELECT id, email, rol, edad_confirmada, logica_humana_terminos_ok, fecha_nacimiento, creado_en FROM perfiles WHERE id = $1', [payload.sub]);
-    req.user = rows[0] || null;
+    req.user = rows[0] ? aplicarMfa(rows[0], payload) : null;
   } catch {
     req.user = null;
   }

@@ -2395,3 +2395,17 @@ html[data-theme="dark"] .social-links img{ filter:invert(1) hue-rotate(180deg); 
   .article-body{ font-size:12pt; }
   a{ color:inherit; text-decoration:none; }
 }
+
+
+/* ── Verificación en dos pasos (MFA) del panel admin ─────────────── */
+.mfa-paso{ max-width:420px; margin:0 auto; text-align:left; }
+.mfa-paso h2{ margin:0 0 10px; font-size:1.25rem; }
+.mfa-pasos{ padding-left:20px; margin:8px 0 14px; color:var(--ink-soft); }
+.mfa-qr{ display:block; margin:10px auto; background:#fff; padding:8px; border-radius:var(--radius); border:1px solid var(--line); }
+.mfa-secreto{ font-size:.85rem; color:var(--ink-soft); word-break:break-all; }
+.mfa-secreto code{ background:var(--panel); border:1px solid var(--line); padding:2px 6px; border-radius:4px; user-select:all; }
+.mfa-aviso{ font-size:.85rem; color:var(--info); }
+.mfa-form{ display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+.mfa-form input{ flex:1; min-width:0; font-size:1.3rem; letter-spacing:.35em; text-align:center; padding:8px; border:1px solid var(--input-border); background:var(--input-bg); color:var(--ink); border-radius:var(--radius); }
+.mfa-form .form-status{ flex-basis:100%; margin:0; }
+.mfa-salir{ background:none; border:none; color:var(--ink-mute); text-decoration:underline; cursor:pointer; padding:4px 0; }

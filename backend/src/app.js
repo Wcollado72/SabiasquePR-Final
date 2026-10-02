@@ -94,8 +94,16 @@ function buildApp() {
   });
 
   // Identidad del usuario autenticado (id, email, rol) -- usado por el panel de administración.
+  // `rol` es el rol REAL (para que el panel sepa que le falta el paso de MFA);
+  // el poder efectivo ya lo degrada requireAuth mientras la sesion sea aal1.
   app.get('/api/me', requireAuth, (req, res) => {
-    res.json({ ok: true, user: req.user });
+    const { rolReal, mfaPendiente, ...user } = req.user;
+    res.json({
+      ok: true,
+      user: { ...user, rol: rolReal || user.rol },
+      mfaPendiente: Boolean(mfaPendiente),
+      aal: req.auth?.aal ?? null,
+    });
   });
 
   app.use('/api/foro', foroRoutes);

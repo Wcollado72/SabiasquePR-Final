@@ -71,6 +71,13 @@
         showGate('⛔ Tu cuenta no tiene permisos de administrador ni de moderador.');
         return;
       }
+      // Verificacion en dos pasos (AUDITORIA-SEGURIDAD.md, debilidad #2): el
+      // servidor ya degrada el poder de esta sesion mientras no sea aal2, asi
+      // que aqui solo se le pide al admin inscribir o ingresar su codigo.
+      if (data.mfaPendiente) {
+        await pasoMfa();
+        return;
+      }
     } catch (err) {
       showGate('⚠️ ' + err.message);
       return;
@@ -137,6 +144,141 @@
     });
   }
 
+  // ── VERIFICACION EN DOS PASOS (TOTP) ─────────────────────
+  // Vive en la compuerta (no detras de /api/admin/*) a proposito: para poder
+  // inscribir el autenticador por primera vez la sesion todavia es aal1, y esa
+  // sesion no puede llamar rutas de admin. Todo el trabajo lo hace Supabase
+  // Auth (supabase.auth.mfa.*); el servidor solo lee el claim `aal` del JWT.
+  function elemento(tag, props = {}, hijos = []) {
+    const el = document.createElement(tag);
+    Object.entries(props).forEach(([k, v]) => {
+      if (k === 'texto') el.textContent = v;
+      else if (k === 'clase') el.className = v;
+      else el.setAttribute(k, v);
+    });
+    hijos.forEach((h) => el.appendChild(h));
+    return el;
+  }
+
+  function pintarMfa(titulo, hijos) {
+    const gate = document.getElementById('admin-gate');
+    if (!gate) return;
+    const panel = document.getElementById('admin-panel');
+    if (panel) panel.style.display = 'none';
+    gate.style.display = '';
+    gate.replaceChildren(elemento('div', { clase: 'mfa-paso' }, [
+      elemento('h2', { texto: titulo }),
+      ...hijos,
+    ]));
+  }
+
+  function formularioCodigo(alEnviar) {
+    const estado = elemento('p', { clase: 'form-status', role: 'status', 'aria-live': 'polite' });
+    const input = elemento('input', {
+      type: 'text', id: 'mfa-codigo', inputmode: 'numeric', autocomplete: 'one-time-code',
+      maxlength: '6', pattern: '[0-9]{6}', placeholder: '000000', 'aria-label': 'Código de 6 dígitos',
+    });
+    const boton = elemento('button', { type: 'submit', texto: 'Verificar' });
+    const form = elemento('form', { clase: 'mfa-form' }, [input, boton]);
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const codigo = input.value.replace(/\s+/g, '');
+      if (!/^\d{6}$/.test(codigo)) {
+        estado.textContent = 'Escribe los 6 dígitos que muestra tu app.';
+        estado.className = 'form-status error';
+        return;
+      }
+      boton.disabled = true;
+      estado.textContent = 'Verificando...';
+      estado.className = 'form-status info';
+      try {
+        await alEnviar(codigo);
+        estado.textContent = 'Verificado. Abriendo el panel...';
+        estado.className = 'form-status ok';
+        location.reload();
+      } catch (err) {
+        estado.textContent = 'No se pudo verificar: ' + err.message;
+        estado.className = 'form-status error';
+        input.value = '';
+        input.focus();
+        boton.disabled = false;
+      }
+    });
+    form.appendChild(estado);
+    return { form, estado, input };
+  }
+
+  async function verificarCodigo(factorId, codigo) {
+    const { data: reto, error: e1 } = await supabase.auth.mfa.challenge({ factorId });
+    if (e1) throw e1;
+    const { error: e2 } = await supabase.auth.mfa.verify({ factorId, challengeId: reto.id, code: codigo });
+    if (e2) throw e2;
+  }
+
+  function botonCerrarSesion() {
+    const b = elemento('button', { type: 'button', clase: 'mfa-salir', texto: 'Cerrar sesión' });
+    b.addEventListener('click', () => supabase.auth.signOut());
+    return b;
+  }
+
+  async function pasoMfa() {
+    const { data: lista, error } = await supabase.auth.mfa.listFactors();
+    if (error) {
+      showGate('⚠️ No se pudo consultar la verificación en dos pasos: ' + error.message);
+      return;
+    }
+    // `totp` solo trae los factores ya verificados.
+    const verificado = (lista?.totp || [])[0];
+    if (verificado) {
+      const { form, input } = formularioCodigo((codigo) => verificarCodigo(verificado.id, codigo));
+      pintarMfa('Verificación en dos pasos', [
+        elemento('p', { texto: 'Escribe el código de 6 dígitos que muestra tu app de autenticación.' }),
+        form,
+        botonCerrarSesion(),
+      ]);
+      input.focus();
+      return;
+    }
+    await inscribirMfa(lista);
+  }
+
+  async function inscribirMfa(lista) {
+    // Una inscripcion abandonada (QR creado pero nunca confirmado) bloquea
+    // crear otra con el mismo nombre -- se limpian antes de empezar de nuevo.
+    const pendientes = (lista?.all || []).filter((f) => f.factor_type === 'totp' && f.status !== 'verified');
+    for (const f of pendientes) await supabase.auth.mfa.unenroll({ factorId: f.id });
+
+    const { data, error } = await supabase.auth.mfa.enroll({
+      factorType: 'totp',
+      friendlyName: 'Sabías que PR · admin · ' + new Date().toISOString().slice(0, 10) + ' ' + Math.random().toString(36).slice(2, 6),
+    });
+    if (error) {
+      showGate('⚠️ No se pudo iniciar la verificación en dos pasos: ' + error.message);
+      return;
+    }
+    const factorId = data.id;
+    const qr = elemento('img', { alt: 'Código QR para tu app de autenticación', width: '200', height: '200', clase: 'mfa-qr' });
+    qr.src = data.totp.qr_code;
+    const { form, input } = formularioCodigo((codigo) => verificarCodigo(factorId, codigo));
+    pintarMfa('Activa la verificación en dos pasos', [
+      elemento('p', { texto: 'Tu cuenta tiene permisos de administración, así que necesita un segundo paso al entrar.' }),
+      elemento('ol', { clase: 'mfa-pasos' }, [
+        elemento('li', { texto: 'Abre una app de autenticación (Google Authenticator, Microsoft Authenticator, Authy, 1Password...).' }),
+        elemento('li', { texto: 'Escanea este código QR.' }),
+        elemento('li', { texto: 'Escribe aquí el código de 6 dígitos que te muestra.' }),
+      ]),
+      qr,
+      elemento('p', { clase: 'mfa-secreto' }, [
+        elemento('span', { texto: 'Si no puedes escanear, escribe esta clave a mano: ' }),
+        elemento('code', { texto: data.totp.secret }),
+      ]),
+      elemento('p', { clase: 'mfa-aviso', texto: 'Guarda esa clave en tu gestor de contraseñas: es la única forma de recuperar el acceso si pierdes el teléfono.' }),
+      form,
+      botonCerrarSesion(),
+    ]);
+    input.focus();
+  }
+
   function showGate(msg) {
     const el = document.getElementById('admin-gate');
     if (el) el.innerHTML = `<p>${msg}</p>`;
@@ -174,6 +316,7 @@
     if (token) headers.Authorization = `Bearer ${token}`;
     const res = await fetch(API_URL + path, Object.assign({}, options, { headers }));
     const data = await res.json().catch(() => ({}));
+    if (data.code === 'mfa_required') { pasoMfa(); throw new Error(data.error); }
     if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
     return data;
   }
