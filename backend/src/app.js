@@ -62,6 +62,15 @@ function buildApp() {
   app.use('/api/stripe', stripeWebhookRoutes);
 
   app.use(express.json());
+  // Express 5 deja `req.body` en `undefined` (en Express 4 era `{}`) cuando la
+  // peticion no trae cuerpo JSON. Muchas rutas leen `req.body.campo` tras el
+  // validador; sin esto una peticion vacia daba TypeError -> 500 en vez de un
+  // 400 de validacion (probado en app.express5.test.js). El webhook de Stripe
+  // se monta antes y necesita su cuerpo crudo, asi que no pasa por aqui.
+  app.use((req, _res, next) => {
+    if (req.body === undefined) req.body = {};
+    next();
+  });
 
   // Prevencion de bots/abuso, gratis: limite general generoso para toda la
   // API (lectura), y uno mas estricto solo para escribir (crear/editar/
