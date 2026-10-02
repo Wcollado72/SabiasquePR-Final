@@ -8,8 +8,8 @@
 
 // Sube estos números en cada rediseño o cambio de imágenes:
 // las imágenes usan cache-first y, sin cambiar la versión, se quedarían viejas.
-const CACHE_NAME  = 'sqpr-v14';
-const CACHE_PAGES = 'sqpr-pages-v14';
+const CACHE_NAME  = 'sqpr-v15';
+const CACHE_PAGES = 'sqpr-pages-v15';
 
 // Assets estáticos que se cachean al instalar (todos deben existir)
 const STATIC_ASSETS = [

@@ -39,12 +39,59 @@
       return;
     }
 
+    const mfaForm = document.getElementById('reset-mfa-form');
+
+    // Si la cuenta tiene verificacion en dos pasos (MFA), Supabase NO deja cambiar
+    // la contrasena con una sesion de recuperacion normal (aal1): exige antes el
+    // codigo del autenticador (aal2), si no el correo saltaria el MFA. Se pide el
+    // codigo ANTES de mostrar el formulario de contrasena nueva.
+    async function faltaCodigoMfa() {
+      try {
+        const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        return !error && data?.nextLevel === 'aal2' && data?.currentLevel !== 'aal2';
+      } catch { return false; }
+    }
+
+    function mostrarFormularioDeContrasena() {
+      intro.textContent = 'Escribe tu nueva contraseña.';
+      if (mfaForm) mfaForm.style.display = 'none';
+      form.style.display = 'flex';
+    }
+
+    function mostrarPasoMfa() {
+      intro.textContent = 'Tu cuenta tiene verificación en dos pasos. Escribe el código de 6 dígitos que muestra tu app de autenticación para continuar.';
+      mfaForm.style.display = 'flex';
+      document.getElementById('reset-mfa-codigo')?.focus();
+    }
+
+    mfaForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const codigo = document.getElementById('reset-mfa-codigo').value.replace(/\s+/g, '');
+      if (!/^\d{6}$/.test(codigo)) { setStatus(statusEl, 'error', 'Escribe los 6 dígitos que muestra tu app.'); return; }
+      setStatus(statusEl, 'info', 'Verificando...');
+      try {
+        const { data: lista, error: eLista } = await supabase.auth.mfa.listFactors();
+        if (eLista) throw eLista;
+        const factor = (lista?.totp || [])[0];
+        if (!factor) throw new Error('No encontramos un autenticador activo en tu cuenta.');
+        const { data: reto, error: eReto } = await supabase.auth.mfa.challenge({ factorId: factor.id });
+        if (eReto) throw eReto;
+        const { error: eVer } = await supabase.auth.mfa.verify({ factorId: factor.id, challengeId: reto.id, code: codigo });
+        if (eVer) throw eVer;
+        setStatus(statusEl, 'ok', '');
+        mostrarFormularioDeContrasena();
+      } catch (err) {
+        setStatus(statusEl, 'error', 'No se pudo verificar: ' + err.message);
+        document.getElementById('reset-mfa-codigo').value = '';
+      }
+    });
+
     let handled = false;
-    function showForm() {
+    async function showForm() {
       if (handled) return;
       handled = true;
-      intro.textContent = 'Escribe tu nueva contraseña.';
-      form.style.display = 'flex';
+      if (mfaForm && await faltaCodigoMfa()) mostrarPasoMfa();
+      else mostrarFormularioDeContrasena();
     }
 
     supabase.auth.onAuthStateChange((event, session) => {

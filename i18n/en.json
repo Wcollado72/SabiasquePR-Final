@@ -469,5 +469,12 @@
   "La pedimos una sola vez y no se muestra a nadie. No se puede cambiar después. Nos sirve para aplicar nuestras reglas de edad (algunas secciones son solo para mayores de 18); no se rechaza a nadie por su edad.": "We ask for it only once and it is never shown to anyone. It can't be changed later. We use it to apply our age rules (some sections are for adults 18+ only); nobody is turned away because of their age.",
   "Guardar": "Save",
   "Escribe tu fecha de nacimiento.": "Enter your date of birth.",
-  "No se pudo guardar. Intenta de nuevo.": "Could not save. Please try again."
+  "No se pudo guardar. Intenta de nuevo.": "Could not save. Please try again.",
+  "Código de verificación": "Verification code",
+  "Verificar": "Verify",
+  "Verificando...": "Verifying...",
+  "Tu cuenta tiene verificación en dos pasos. Escribe el código de 6 dígitos que muestra tu app de autenticación para continuar.": "Your account has two-step verification. Enter the 6-digit code shown by your authenticator app to continue.",
+  "Escribe los 6 dígitos que muestra tu app.": "Enter the 6 digits shown by your app.",
+  "No encontramos un autenticador activo en tu cuenta.": "We could not find an active authenticator on your account.",
+  "¿Perdiste tu app de autenticación? Escríbenos a": "Lost your authenticator app? Write to us at"
 }

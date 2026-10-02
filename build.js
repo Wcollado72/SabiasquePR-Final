@@ -1416,15 +1416,21 @@ const PAGES = [
       <section class="box box-blog contact-box" id="reset-box" style="max-width:420px;margin:0 auto;">
         <h3>Restablecer contraseña</h3>
         <p id="reset-intro">Verificando el enlace...</p>
+        <form id="reset-mfa-form" style="display:none; flex-direction:column; gap:8px;">
+          <label for="reset-mfa-codigo">Código de verificación</label>
+          <input type="text" id="reset-mfa-codigo" required inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="000000">
+          <button type="submit">Verificar</button>
+          <p class="reset-mfa-ayuda">¿Perdiste tu app de autenticación? Escríbenos a <a href="mailto:${SITE.email}">${SITE.email}</a> para ayudarte a recuperar el acceso.</p>
+        </form>
         <form id="reset-form" style="display:none; flex-direction:column; gap:8px;">
           <label for="reset-pass">Nueva contraseña</label>
           <div class="pass-field">
-            <input type="password" id="reset-pass" required minlength="6" autocomplete="new-password">
+            <input type="password" id="reset-pass" required minlength="8" autocomplete="new-password">
             ${PASS_TOGGLE_BTN('reset-pass')}
           </div>
           <label for="reset-pass2">Confirma la contraseña</label>
           <div class="pass-field">
-            <input type="password" id="reset-pass2" required minlength="6" autocomplete="new-password">
+            <input type="password" id="reset-pass2" required minlength="8" autocomplete="new-password">
             ${PASS_TOGGLE_BTN('reset-pass2')}
           </div>
           <button type="submit">Guardar nueva contraseña</button>
