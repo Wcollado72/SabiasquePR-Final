@@ -12,9 +12,55 @@ const cfg = window.SITE_CONFIG || {};
 const SUPABASE_URL = cfg.supabaseUrl || '';
 const SUPABASE_KEY = cfg.supabaseKey || '';
 const API_URL = cfg.apiUrl || 'http://localhost:3000';
+const TURNSTILE_SITE_KEY = cfg.turnstileSiteKey || '';
 const isConfigured = SUPABASE_URL && !SUPABASE_URL.includes('YOUR_SUPABASE');
 
 let supabase = null;
+
+// ── CLOUDFLARE TURNSTILE (CAPTCHA del modal de login/registro) ──────
+// Mismo sitio de Turnstile que usa el foro (ver debate.js), pero aqui
+// protege los propios endpoints de Supabase Auth (signup/login/recuperar
+// contrasena), que Supabase valida del lado del servidor via el campo
+// `captchaToken`. El script de la API solo se carga la primera vez que se
+// abre el modal -- no en cada pagina -- para no pedirle a Cloudflare algo
+// que la mayoria de las visitas nunca necesita.
+let turnstileWidgetId = null;
+let turnstileScriptPromise = null;
+function cargarTurnstileScript() {
+  if (turnstileScriptPromise) return turnstileScriptPromise;
+  turnstileScriptPromise = new Promise((resolve) => {
+    if (window.turnstile) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+    s.async = true;
+    s.defer = true;
+    s.onload = () => resolve();
+    document.head.appendChild(s);
+  });
+  return turnstileScriptPromise;
+}
+async function renderAuthTurnstile() {
+  if (!TURNSTILE_SITE_KEY || turnstileWidgetId !== null) return;
+  const el = document.getElementById('auth-turnstile');
+  if (!el) return;
+  await cargarTurnstileScript();
+  turnstileWidgetId = window.turnstile.render('#auth-turnstile', { sitekey: TURNSTILE_SITE_KEY });
+}
+function authTurnstileToken() {
+  if (!TURNSTILE_SITE_KEY || !window.turnstile || turnstileWidgetId === null) return undefined;
+  return window.turnstile.getResponse(turnstileWidgetId) || undefined;
+}
+function resetAuthTurnstile() {
+  if (window.turnstile && turnstileWidgetId !== null) window.turnstile.reset(turnstileWidgetId);
+}
+// Si Turnstile esta configurado pero el widget todavia no entrego un token
+// (script lento, usuario muy rapido), mejor avisar que intentar un envio
+// que el servidor va a rechazar de todas formas -- mismo patron que ya usa
+// debate.js para el foro.
+function turnstilePendiente() {
+  return Boolean(TURNSTILE_SITE_KEY) && !authTurnstileToken();
+}
+window.onLoginModalOpen = renderAuthTurnstile;
 
 // ── INICIALIZACIÓN ──────────────────────────────────────────
 async function initAuth() {
@@ -194,20 +240,27 @@ function setAuthStatus(msg, type = 'info') {
 
 // ── ACCIONES DE AUTH ────────────────────────────────────────
 async function signIn(email, password) {
+  if (turnstilePendiente()) { setAuthStatus('Espera un segundo a que cargue la verificación y vuelve a intentar.', 'error'); return; }
   setAuthStatus('Entrando...', 'info');
   marcarLoginManual();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({
+    email, password,
+    options: { captchaToken: authTurnstileToken() },
+  });
+  resetAuthTurnstile();
   if (error) { consumirMarcaLoginManual(); setAuthStatus('' + error.message, 'error'); return; }
   setAuthStatus('¡Bienvenido!', 'ok');
   setTimeout(() => window.closeLoginModal?.(), 900);
 }
 
 async function signUp(email, password, fechaNacimiento) {
+  if (turnstilePendiente()) { setAuthStatus('Espera un segundo a que cargue la verificación y vuelve a intentar.', 'error'); return; }
   setAuthStatus('Registrando...', 'info');
   const { error } = await supabase.auth.signUp({
     email, password,
-    options: { data: { fecha_nacimiento: fechaNacimiento } },
+    options: { data: { fecha_nacimiento: fechaNacimiento }, captchaToken: authTurnstileToken() },
   });
+  resetAuthTurnstile();
   if (error) { setAuthStatus('' + error.message, 'error'); return; }
   setAuthStatus('Revisa tu correo para confirmar tu cuenta.', 'ok');
 }
@@ -227,10 +280,13 @@ async function signInWithGoogle() {
 }
 
 async function resetPassword(email) {
+  if (turnstilePendiente()) { setAuthStatus('Espera un segundo a que cargue la verificación y vuelve a intentar.', 'error'); return; }
   setAuthStatus('Enviando correo...', 'info');
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/reset-password.html`,
+    captchaToken: authTurnstileToken(),
   });
+  resetAuthTurnstile();
   if (error) { setAuthStatus('' + error.message, 'error'); return; }
   setAuthStatus('Revisa tu correo para restablecer la contraseña.', 'ok');
 }

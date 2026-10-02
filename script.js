@@ -244,6 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!isLoginOpen()) lastFocus = document.activeElement;
     loginModalOverlay.classList.add('open');
     loginTriggerBtn?.setAttribute('aria-expanded', 'true');
+    window.onLoginModalOpen?.();
     const emailField = document.getElementById('login-email');
     (emailField?.offsetParent ? emailField : (focusables(loginModal || loginModalOverlay)[0] || loginModalClose))?.focus();
   }
