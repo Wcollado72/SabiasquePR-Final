@@ -19,6 +19,20 @@ const newsletterRoutes = require('./routes/newsletter');
 function buildApp() {
   const app = express();
 
+  // Saltos de proxy delante de Express (AUDITORIA-SEGURIDAD.md, debilidad #1).
+  // Sin esto, `req.ip` es siempre el proxy local de Render (::1) y TODOS los
+  // visitantes comparten un solo contador del rate limit: una persona podia
+  // agotar los 300 pedidos por 15 min de todos. Medido en produccion el
+  // 2026-10-02: la cadena que llega a Express es
+  //   socket ::1 <- balanceador interno <- borde de Cloudflare <- cliente real
+  // = 3 saltos de confianza, y el cliente real queda como `req.ip`. Un
+  // X-Forwarded-For falso que mande un atacante queda a la IZQUIERDA del
+  // cliente real y se ignora. En local/pruebas (sin proxies) el default es 0.
+  // Si Render cambia de infraestructura: TRUST_PROXY_HOPS lo ajusta sin tocar
+  // codigo (como volver a medirlo: ver AUDITORIA-SEGURIDAD.md).
+  const hops = Number.parseInt(process.env.TRUST_PROXY_HOPS, 10);
+  app.set('trust proxy', Number.isInteger(hops) && hops >= 0 ? hops : (process.env.RENDER ? 3 : 0));
+
   const allowedOrigins = (process.env.FRONTEND_ORIGIN ||
     'http://localhost:5500,http://127.0.0.1:5500,http://localhost:8080')
     .split(',').map((s) => s.trim()).filter(Boolean);
