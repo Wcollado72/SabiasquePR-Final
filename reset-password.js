@@ -81,7 +81,7 @@
         setStatus(statusEl, 'ok', '');
         mostrarFormularioDeContrasena();
       } catch (err) {
-        setStatus(statusEl, 'error', 'No se pudo verificar: ' + (window.sqprErrorAuth ? window.sqprErrorAuth(err) : err.message));
+        setStatus(statusEl, 'error', (window.SQPR && window.SQPR.t ? window.SQPR.t('No se pudo verificar') : 'No se pudo verificar') + ': ' + (window.sqprErrorAuth ? window.sqprErrorAuth(err) : err.message));
         document.getElementById('reset-mfa-codigo').value = '';
       }
     });

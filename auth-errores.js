@@ -28,6 +28,13 @@
     return POR_CODIGO[codigo] || error.message || 'Ocurrió un error inesperado. Inténtalo de nuevo.';
   }
 
-  if (typeof window !== 'undefined') window.sqprErrorAuth = errorAuthEnEspanol;
+  // En el navegador el mensaje pasa por el diccionario de i18n.js (SQPR.t), asi que
+  // sale en el idioma que eligio el visitante. Los textos nuevos viven en i18n/en.json.
+  if (typeof window !== 'undefined') {
+    window.sqprErrorAuth = function (error) {
+      const texto = errorAuthEnEspanol(error);
+      return window.SQPR && window.SQPR.t ? window.SQPR.t(texto) : texto;
+    };
+  }
   if (typeof module !== 'undefined' && module.exports) module.exports = { errorAuthEnEspanol, POR_CODIGO };
 })();

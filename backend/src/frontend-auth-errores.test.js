@@ -35,3 +35,22 @@ describe('errorAuthEnEspanol', () => {
     expect(errorAuthEnEspanol(lo_que_devuelve_supabase)).not.toMatch(/New password/);
   });
 });
+
+describe('idioma del visitante', () => {
+  const dic = require('../../i18n/en.json');
+  const { traducir } = require('../../i18n.js');
+
+  test('cada mensaje de error tiene traduccion al ingles en i18n/en.json', () => {
+    const sinTraducir = [...new Set(Object.values(POR_CODIGO))].filter((t) => typeof dic[t] !== 'string' || !dic[t].trim());
+    expect(sinTraducir).toEqual([]);
+  });
+
+  test('en ingles el mensaje de contrasena repetida sale en ingles', () => {
+    const es = errorAuthEnEspanol({ code: 'same_password' });
+    expect(traducir(dic, es, {}, [])).toBe('The new password must be different from the old one.');
+  });
+
+  test('la etiqueta "No se pudo verificar" tambien esta traducida', () => {
+    expect(dic['No se pudo verificar']).toBe('Could not verify');
+  });
+});
