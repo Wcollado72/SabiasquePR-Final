@@ -238,6 +238,42 @@ function setAuthStatus(msg, type = 'info') {
   el.className    = `auth-status ${type}`;
 }
 
+// ── CONTRASENAS FILTRADAS (HaveIBeenPwned, k-anonymity) ─────────────
+// AUDITORIA-SEGURIDAD.md, debilidad #12. La proteccion nativa de Supabase es
+// solo del plan Pro; esta usa la API publica y gratuita de rangos de
+// Pwned Passwords: se calcula el SHA-1 de la contrasena EN EL NAVEGADOR y solo
+// se envian sus primeros 5 caracteres (nunca la contrasena ni el hash completo);
+// la API devuelve todos los sufijos que comparten ese prefijo y la comparacion
+// se hace aqui. `Add-Padding` agrega entradas falsas (conteo 0) para que ni el
+// tamano de la respuesta delate nada. Si la API no responde, NO se bloquea el
+// registro (mejor una proteccion de menos que impedir crear cuentas).
+// Es una capa del lado del cliente: no sustituye a la politica de Supabase
+// (8+ caracteres con mayusculas, minusculas, digitos y simbolos).
+async function vecesFiltrada(contrasena) {
+  try {
+    const bytes = new TextEncoder().encode(contrasena);
+    const digest = await crypto.subtle.digest('SHA-1', bytes);
+    const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    const prefijo = hex.slice(0, 5);
+    const sufijo = hex.slice(5);
+    const res = await fetch('https://api.pwnedpasswords.com/range/' + prefijo, {
+      headers: { 'Add-Padding': 'true' },
+      cache: 'no-store',
+    });
+    if (!res.ok) return 0;
+    const texto = await res.text();
+    for (const linea of texto.split('\n')) {
+      const [h, n] = linea.trim().split(':');
+      if (h === sufijo) return Number(n) || 0;
+    }
+    return 0;
+  } catch {
+    return 0;
+  }
+}
+window.sqprVecesFiltrada = vecesFiltrada; // lo reutiliza reset-password.js
+const MSG_FILTRADA = 'Esa contraseña aparece en filtraciones de datos conocidas. Elige otra.';
+
 // ── ACCIONES DE AUTH ────────────────────────────────────────
 async function signIn(email, password) {
   if (turnstilePendiente()) { setAuthStatus('Espera un segundo a que cargue la verificación y vuelve a intentar.', 'error'); return; }
@@ -370,7 +406,7 @@ function handleLogin() {
   signIn(email, pass);
 }
 
-function handleRegister() {
+async function handleRegister() {
   const email = document.getElementById('login-email')?.value.trim();
   const pass  = document.getElementById('login-pass')?.value;
   const fechaNacimiento = document.getElementById('login-nacimiento')?.value;
@@ -386,6 +422,7 @@ function handleRegister() {
     setAuthStatus('La fecha de nacimiento no es válida.', 'error');
     return;
   }
+  if (await vecesFiltrada(pass) > 0) { setAuthStatus(MSG_FILTRADA, 'error'); return; }
   signUp(email, pass, fechaNacimiento);
 }
 

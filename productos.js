@@ -53,7 +53,7 @@
           data-product-name="${escapeAttr(p.nombre)}"
           data-product-price="${p.precio}"
           data-stripe-link="${isReal ? p.stripe_link : ''}"
-          onclick="addToCart(this)">
+          data-cart-action="add">
           Añadir al carrito
         </button>
       </section>`;

@@ -49,6 +49,11 @@ const SITE = {
   // NUNCA va aqui -- vive solo como variable de entorno TURNSTILE_SECRET_KEY
   // en Render (backend), y el backend la usa para verificar el token.
   turnstileSiteKey: '0x4AAAAAAFD1ChRrVsC9PVWd',
+  // "Entrar con Google": el proveedor esta DESACTIVADO en Supabase (Authentication
+  // -> Sign In / Providers -> Google), asi que el boton daba error al pulsarlo
+  // (AUDITORIA-SEGURIDAD.md, debilidad #10). Poner en true SOLO despues de
+  // activar Google en Supabase con credenciales reales de Google Cloud.
+  googleLogin: false,
 
   // ── YouTube Data API (panel admin — elegir video del canal) ──
   // Llave PÚBLICA restringida por dominio (HTTP referrer) en Google
@@ -222,7 +227,7 @@ const LOGIN_BOX = `
           <div id="auth-turnstile" class="cf-turnstile-box"></div>
           <div class="login-actions">
             <button type="button" id="btn-login">Entrar</button>
-            <button type="button" id="btn-google" class="btn-google" title="Entrar con Google">G</button>
+            ${SITE.googleLogin ? '<button type="button" id="btn-google" class="btn-google" title="Entrar con Google">G</button>' : ''}
           </div>
           <div class="login-links">
             <a href="#" id="link-register">Registrar</a>
@@ -1757,6 +1762,84 @@ console.log('  ✓ rss.xml');
 
 fs.writeFileSync('images-manifest.json', generateImagesManifest(), 'utf8');
 console.log('  ✓ images-manifest.json');
+
+// ── CABECERAS DE SEGURIDAD (_headers) ───────────────────────
+// AUDITORIA-SEGURIDAD.md, debilidades #3 y #13. Antes vivian en netlify.toml
+// con `script-src 'unsafe-inline'`. Ahora se GENERAN aqui en cada build, para
+// poder calcular el hash SHA-256 de cada script en linea tal como quedo en el
+// HTML y permitir SOLO esos: un script inyectado por un atacante (XSS) ya no
+// se ejecutaria aunque lograra meterse en la pagina. Si algun dia cambia el
+// texto de un script en linea (ej. I18N_VERSION en SITE_CONFIG), el hash se
+// recalcula solo -- no hay nada que actualizar a mano. Hoy hay 5 scripts en
+// linea distintos, iguales en las 16 paginas; si algun dia hubiera mas de 12
+// el build FALLA a proposito (casi seguro es contenido que varia por pagina y
+// llenaria el CSP de hashes; mejor un deploy fallido, que sigue sirviendo la
+// version anterior, que revisarlo despues).
+//
+// 'unsafe-inline' sigue SOLO en style-src-attr (atributos style="..."): hay ~58
+// en el HTML y el riesgo de un estilo en linea es muy inferior al de un script;
+// las etiquetas <style> y las hojas externas siguen restringidas a 'self' y
+// Google Fonts. Los manejadores onclick="..." ya no existen (el carrito usa
+// data-cart-action + un listener delegado en script.js), por eso
+// script-src-attr 'none' no rompe nada.
+//
+// Dominios permitidos (verificados leyendo el codigo real, no adivinados):
+// - challenges.cloudflare.com: Turnstile (script + iframe del reto)
+// - googletagmanager.com / google-analytics.com / analytics.google.com: GA4
+// - fonts.googleapis.com / fonts.gstatic.com: Google Fonts
+// - qmlhjacduuvptxglqxqn.supabase.co: Supabase (auth + datos)
+// - sabiasquepr-backend-uufz.onrender.com: la API propia
+// - www.youtube.com: reproductor embebido + oEmbed del admin
+// - www.googleapis.com: YouTube Data API (selector de canal del admin)
+// - formspree.io: el formulario de contacto envia ahi directamente (form-action)
+// - api.pwnedpasswords.com: chequeo de contrasenas filtradas (HIBP, k-anonymity;
+//   solo se manda un prefijo de 5 caracteres del hash, nunca la contrasena)
+// - cdn.jsdelivr.net: YA NO se usa (el cliente de Supabase se sirve desde
+//   vendor/supabase-js.js, ver tools/vendor). Se quito del CSP el 2026-10-02.
+// beehiiv no necesita dominio aqui: la suscripcion pasa por nuestro backend.
+function generarHeaders() {
+  const crypto = require('crypto');
+  const hashes = new Set();
+  for (const page of PAGES) {
+    const html = fs.readFileSync(page.file, 'utf8');
+    for (const m of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)) {
+      const [, attrs, cuerpo] = m;
+      if (/\bsrc\s*=/.test(attrs) || /application\/ld\+json/.test(attrs)) continue; // externos y JSON-LD no cuentan
+      hashes.add(`'sha256-${crypto.createHash('sha256').update(cuerpo, 'utf8').digest('base64')}'`);
+    }
+  }
+  if (hashes.size > 12) {
+    throw new Error(`CSP: ${hashes.size} scripts en linea distintos (esperados <= 12). Revisa si algun script en linea ahora varia por pagina.`);
+  }
+  const csp = [
+    "default-src 'self'",
+    `script-src 'self' ${[...hashes].sort().join(' ')} https://challenges.cloudflare.com https://www.googletagmanager.com`,
+    "script-src-attr 'none'",
+    "style-src 'self' https://fonts.googleapis.com",
+    "style-src-attr 'unsafe-inline'",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: https:",
+    "connect-src 'self' https://qmlhjacduuvptxglqxqn.supabase.co https://sabiasquepr-backend-uufz.onrender.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://www.youtube.com https://www.googleapis.com https://api.pwnedpasswords.com",
+    "frame-src 'self' https://www.youtube.com https://challenges.cloudflare.com",
+    "frame-ancestors 'none'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self' https://formspree.io",
+  ].join('; ');
+  const contenido = `/*
+  Content-Security-Policy: ${csp}
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+`;
+  return { contenido, hashes: hashes.size };
+}
+
+const headersGenerados = generarHeaders();
+fs.writeFileSync('_headers', headersGenerados.contenido, 'utf8');
+console.log(`  ✓ _headers (CSP con ${headersGenerados.hashes} scripts en línea permitidos por hash)`);
 
 console.log(`\n✅ Build completo — ${PAGES.length} páginas generadas.`);
 console.log('   Configurar en SITE: formspreeId · ga4Id · supabaseUrl · supabaseKey\n');

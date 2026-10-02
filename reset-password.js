@@ -68,8 +68,12 @@
       e.preventDefault();
       const pass1 = document.getElementById('reset-pass').value;
       const pass2 = document.getElementById('reset-pass2').value;
-      if (pass1.length < 6) { setStatus(statusEl, 'error', 'La contraseña debe tener al menos 6 caracteres.'); return; }
+      if (pass1.length < 8) { setStatus(statusEl, 'error', 'La contraseña debe tener al menos 8 caracteres.'); return; }
       if (pass1 !== pass2) { setStatus(statusEl, 'error', 'Las contraseñas no coinciden.'); return; }
+      if (window.sqprVecesFiltrada && await window.sqprVecesFiltrada(pass1) > 0) {
+        setStatus(statusEl, 'error', 'Esa contraseña aparece en filtraciones de datos conocidas. Elige otra.');
+        return;
+      }
       setStatus(statusEl, 'info', 'Guardando...');
       const { error } = await supabase.auth.updateUser({ password: pass1 });
       if (error) { setStatus(statusEl, 'error', error.message); return; }

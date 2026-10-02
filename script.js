@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
   cartClose?.addEventListener('click', closeCart);
   cartOverlay?.addEventListener('click', closeCart);
 
-  // Añadir al carrito (llamado desde HTML con onclick)
+  // Añadir al carrito (lo dispara el listener delegado de data-cart-action)
   window.addToCart = function(btn) {
     const id    = btn.dataset.productId;
     const name  = btn.dataset.productName;
@@ -157,16 +157,20 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // Sin onclick="..." en el HTML generado: un CSP sin 'unsafe-inline' no
+    // ejecuta manejadores en linea. Los botones llevan data-cart-action y un
+    // solo listener delegado (mas abajo) los atiende.
+    const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     cartItemsEl.innerHTML = cart.map(item => `
       <div class="cart-item">
-        <span class="cart-item-name">${item.name}</span>
+        <span class="cart-item-name">${esc(item.name)}</span>
         <div class="cart-item-controls">
-          <button class="qty-btn" onclick="changeQty('${item.id}', -1)">−</button>
+          <button type="button" class="qty-btn" data-cart-action="qty" data-id="${esc(item.id)}" data-delta="-1">−</button>
           <span class="cart-item-qty">${item.qty}</span>
-          <button class="qty-btn" onclick="changeQty('${item.id}', 1)">+</button>
+          <button type="button" class="qty-btn" data-cart-action="qty" data-id="${esc(item.id)}" data-delta="1">+</button>
         </div>
         <span class="cart-item-price">$${(item.price * item.qty).toFixed(2)}</span>
-        <button class="cart-remove" onclick="removeItem('${item.id}')" aria-label="Eliminar">✕</button>
+        <button type="button" class="cart-remove" data-cart-action="remove" data-id="${esc(item.id)}" aria-label="Eliminar">✕</button>
       </div>`).join('');
   }
 
@@ -182,6 +186,17 @@ document.addEventListener('DOMContentLoaded', () => {
     cart = cart.filter(i => i.id !== id);
     updateCartUI();
   };
+
+  // Un solo listener para los botones del carrito (los de la tienda y los del
+  // propio panel del carrito, que se vuelven a pintar con cada cambio).
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-cart-action]');
+    if (!el) return;
+    const accion = el.dataset.cartAction;
+    if (accion === 'add') window.addToCart(el);
+    else if (accion === 'qty') window.changeQty(el.dataset.id, Number(el.dataset.delta));
+    else if (accion === 'remove') window.removeItem(el.dataset.id);
+  });
 
   // Checkout unificado → una sola sesion de Stripe con todos los productos
   // del carrito como line_items, sin importar cuantos sean. Requiere sesion

@@ -53,55 +53,9 @@
   status = 301
   force = true
 
-# Cabeceras de seguridad (AUDITORIA-SEGURIDAD.md, Hallazgo 2). El backend
-# Express solo sirve /api/*, asi que estas cabeceras van aqui, no en helmet.
-#
-# script-src/style-src llevan 'unsafe-inline' porque el sitio usa scripts y
-# estilos en linea en muchas paginas (window.SITE_CONFIG, atributos style="")
-# -- quitarlo requeriria mover todo eso a archivos externos o hashes, tarea
-# aparte. No es ideal, pero el resto de la politica (frame-ancestors, los
-# allowlist por dominio, object-src) sigue siendo proteccion real, y el sitio
-# ya escapa correctamente el contenido de usuarios (ver Hallazgos "ya esta
-# bien construido" en la auditoria) -- este CSP es una capa extra, no la unica.
-#
-# Dominios permitidos, verificados leyendo el codigo real (no adivinados):
-# - challenges.cloudflare.com: widget de Turnstile (script + iframe del reto)
-# - googletagmanager.com / google-analytics.com / analytics.google.com: GA4
-# - fonts.googleapis.com / fonts.gstatic.com: Google Fonts
-# - qmlhjacduuvptxglqxqn.supabase.co: Supabase (auth + datos)
-# - sabiasquepr-backend-uufz.onrender.com: la API propia (la que usa Netlify)
-# - www.youtube.com: reproductor embebido de Contenidos + oEmbed del admin
-# - www.googleapis.com: YouTube Data API (selector de canal en el admin)
-# - formspree.io: el formulario de contacto envia ahi directamente (form-action)
-# - cdn.jsdelivr.net: YA NO SE USA (2026-10-02, AUDITORIA-SEGURIDAD.md, debilidad #3).
-#   TRANSICION: sigue en script-src solo una semana. El Service Worker (sw.js) sirve
-#   el JS de la visita anterior desde cache la primera vez tras un despliegue, y ese
-#   auth.js viejo todavia hace import() a este CDN; sin este permiso, esa primera
-#   carga mostraria el login roto. QUITAR de script-src a partir de 2026-10-10
-#   (pendiente anotado en IDEAS-PENDIENTES.md).
-#   El cliente de Supabase se cargaba con import() desde ahi SIN version fija
-#   (supabase-js@2/+esm): si ese paquete se comprometia, el codigo corria en
-#   cada pagina con login. Ahora se empaqueta en un solo archivo propio
-#   (vendor/supabase-js.js, generado con tools/vendor -> `npm run build`) y se
-#   sirve desde 'self'. Para actualizar la version: editar tools/vendor/package.json,
-#   correr `npm install && npm run build` ahi y comitear el vendor/ resultante.
-#
-# beehiiv (reemplazo de Mailchimp, 2026-09-27) no necesita dominio nuevo aqui:
-# la suscripcion pasa por nuestro propio backend (POST /api/newsletter/subscribe,
-# newsletter.js), que llama a la API de beehiiv desde el servidor -- el
-# navegador nunca llama directamente a beehiiv.com.
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://qmlhjacduuvptxglqxqn.supabase.co https://sabiasquepr-backend-uufz.onrender.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://www.youtube.com https://www.googleapis.com; frame-src 'self' https://www.youtube.com https://challenges.cloudflare.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self' https://formspree.io"
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
-    # HSTS: fuerza HTTPS en cada visita futura (el navegador ya no intenta
-    # HTTP primero) durante 2 anos, incluyendo subdominios. "preload" es un
-    # opt-in a la lista precargada de Chrome/Firefox/Safari -- una vez que el
-    # dominio esta ahi, ni la PRIMERA visita usa HTTP nunca, en ningun
-    # navegador que la respete. No tiene costo ni downside real aqui porque
-    # el sitio ya sirve todo por HTTPS (Netlify lo fuerza por defecto).
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+# Cabeceras de seguridad (CSP, HSTS, X-Frame-Options, etc.): YA NO viven aqui.
+# Se generan en cada build en el archivo `_headers` (ver generarHeaders() en
+# build.js, donde esta documentado cada dominio permitido) porque el CSP lleva
+# el hash SHA-256 de cada script en linea y ese hash cambia cuando cambia el
+# script. Netlify lee `_headers` de la carpeta publicada. AUDITORIA-SEGURIDAD.md,
+# debilidades #3 y #13.
