@@ -463,5 +463,11 @@
   "Wyoming": "Wyoming",
   "X (Twitter)": "X (Twitter)",
   "YouTube": "YouTube",
-  "Esa contraseña aparece en filtraciones de datos conocidas. Elige otra.": "That password appears in known data breaches. Please choose a different one."
+  "Esa contraseña aparece en filtraciones de datos conocidas. Elige otra.": "That password appears in known data breaches. Please choose a different one.",
+  "Completa tu perfil": "Complete your profile",
+  "Antes de seguir necesitamos tu fecha de nacimiento.": "Before you continue, we need your date of birth.",
+  "La pedimos una sola vez y no se muestra a nadie. No se puede cambiar después. Nos sirve para aplicar nuestras reglas de edad (algunas secciones son solo para mayores de 18); no se rechaza a nadie por su edad.": "We ask for it only once and it is never shown to anyone. It can't be changed later. We use it to apply our age rules (some sections are for adults 18+ only); nobody is turned away because of their age.",
+  "Guardar": "Save",
+  "Escribe tu fecha de nacimiento.": "Enter your date of birth.",
+  "No se pudo guardar. Intenta de nuevo.": "Could not save. Please try again."
 }

@@ -152,6 +152,7 @@ async function updateLoginUI(session) {
 
   if (statusEl) statusEl.textContent = '';
   if (adminLink) adminLink.style.display = 'none';
+  if (!user) quitarPerfilPendiente();
   if (!user || !session?.access_token) return;
 
   // El rol (premium/admin) vive en `perfiles`, no en el JWT de Supabase,
@@ -167,9 +168,101 @@ async function updateLoginUI(session) {
       statusEl.className = 'foro-badge ' + (ESTADO_CLASE[data.user.rol] || '');
     }
     if (adminLink && data.user.rol === 'admin') adminLink.style.display = '';
+    // Cuentas sin fecha de nacimiento (creadas con Google, o anteriores al campo).
+    if (!data.user.fecha_nacimiento) mostrarPerfilPendiente(); else quitarPerfilPendiente();
   } catch (err) {
     console.warn('[Auth] No se pudo obtener el rol del usuario:', err.message);
   }
+}
+
+// ── COMPLETA TU PERFIL (fecha de nacimiento) ───────────────
+// Quien entra con Google no pasa por el formulario de registro, y las cuentas
+// anteriores al campo tampoco la tienen: sin fecha, la regla de edad de las
+// secciones 18+ dependeria solo de una casilla (ver AUDITORIA-LEGAL-MENORES.md).
+// Se pide UNA vez, el servidor no deja cambiarla despues, y NO se rechaza a
+// nadie por su edad (politica del sitio). No bloquea la lectura: es una capa
+// encima de la pagina que solo se quita al guardar (o al cerrar sesion).
+const PERFIL_OVERLAY_ID = 'perfil-pendiente-overlay';
+function quitarPerfilPendiente() {
+  document.getElementById(PERFIL_OVERLAY_ID)?.remove();
+}
+function mostrarPerfilPendiente() {
+  if (document.getElementById(PERFIL_OVERLAY_ID)) return;
+  // En la pagina de restablecer contrasena ya hay un formulario propio abierto.
+  if (/(^|\/)reset-password(\.html)?$/.test(location.pathname)) return;
+
+  const el = (tag, props = {}, hijos = []) => {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (k === 'texto') n.textContent = v;
+      else if (k === 'clase') n.className = v;
+      else n.setAttribute(k, v);
+    }
+    hijos.forEach((h) => n.appendChild(h));
+    return n;
+  };
+
+  const estado = el('p', { clase: 'auth-status', role: 'status', 'aria-live': 'polite' });
+  const input = el('input', {
+    type: 'date', id: 'perfil-nacimiento', required: '', autocomplete: 'bday',
+    min: '1900-01-01', max: new Date().toISOString().slice(0, 10),
+  });
+  const guardar = el('button', { type: 'submit', texto: 'Guardar' });
+  const salir = el('button', { type: 'button', clase: 'perfil-pendiente-salir', texto: 'Cerrar sesión' });
+  const form = el('form', {}, [
+    el('label', { for: 'perfil-nacimiento', texto: 'Fecha de nacimiento' }),
+    input, guardar, estado,
+  ]);
+
+  const caja = el('div', { clase: 'login-modal perfil-pendiente', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'perfil-pendiente-titulo' }, [
+    el('div', { clase: 'login-box' }, [
+      el('h2', { id: 'perfil-pendiente-titulo', texto: 'Completa tu perfil' }),
+      el('p', { texto: 'Antes de seguir necesitamos tu fecha de nacimiento.' }),
+      el('p', { clase: 'perfil-pendiente-nota', texto: 'La pedimos una sola vez y no se muestra a nadie. No se puede cambiar después. Nos sirve para aplicar nuestras reglas de edad (algunas secciones son solo para mayores de 18); no se rechaza a nadie por su edad.' }),
+      form,
+      salir,
+    ]),
+  ]);
+  const overlay = el('div', { id: PERFIL_OVERLAY_ID, clase: 'login-modal-overlay open' }, [caja]);
+
+  const poner = (msg, tipo) => { estado.textContent = msg; estado.className = 'auth-status ' + tipo; };
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!input.value) { poner('Escribe tu fecha de nacimiento.', 'error'); return; }
+    guardar.disabled = true;
+    poner('Guardando...', 'info');
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(API_URL + '/api/perfil/fecha-nacimiento', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ fechaNacimiento: input.value }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 409) { quitarPerfilPendiente(); return; } // ya estaba registrada: nada mas que pedir
+      if (!res.ok || !data.ok) throw new Error(data.error || 'No se pudo guardar. Intenta de nuevo.');
+      quitarPerfilPendiente();
+    } catch (err) {
+      poner(err.message, 'error');
+      guardar.disabled = false;
+    }
+  });
+  salir.addEventListener('click', () => signOut());
+
+  // Atrapa el foco dentro del cuadro y no se cierra con Escape (es obligatorio).
+  overlay.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { e.stopPropagation(); return; }
+    if (e.key !== 'Tab') return;
+    const foco = [input, guardar, salir].filter((n) => !n.disabled);
+    const i = foco.indexOf(document.activeElement);
+    const sig = e.shiftKey ? (i <= 0 ? foco.length - 1 : i - 1) : (i === foco.length - 1 ? 0 : i + 1);
+    e.preventDefault();
+    foco[sig].focus();
+  });
+
+  document.body.appendChild(overlay);
+  input.focus();
 }
 
 const MARCA_LOGIN_MANUAL = 'sqpr_login_manual';
