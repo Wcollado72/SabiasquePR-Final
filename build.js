@@ -53,7 +53,7 @@ const SITE = {
   // -> Sign In / Providers -> Google), asi que el boton daba error al pulsarlo
   // (AUDITORIA-SEGURIDAD.md, debilidad #10). Poner en true SOLO despues de
   // activar Google en Supabase con credenciales reales de Google Cloud.
-  googleLogin: false,
+  googleLogin: true,
 
   // ── YouTube Data API (panel admin — elegir video del canal) ──
   // Llave PÚBLICA restringida por dominio (HTTP referrer) en Google
