@@ -25,7 +25,7 @@ jobs:
       matrix:
         carpeta: [backend, tools/vendor]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - name: npm audit (${{ matrix.carpeta }})
@@ -37,7 +37,7 @@ jobs:
   gitleaks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 } # historial completo, no solo el ultimo commit
       - name: Instalar gitleaks
         run: |
