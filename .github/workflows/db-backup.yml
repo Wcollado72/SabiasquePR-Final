@@ -72,7 +72,7 @@ jobs:
           ls -la backups/*.age
 
       - name: Subir el respaldo como artefacto
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: db-backup-${{ github.run_id }}
           path: backups/*.dump.age
