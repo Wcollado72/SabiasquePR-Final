@@ -1,7 +1,8 @@
 // Uso (desde la carpeta backend):
 //   node scripts/restaurar-respaldo.js --solo-lista            (solo muestra que se restauraria; no conecta)
 //   node scripts/restaurar-respaldo.js [ruta\respaldo.dump]    (restaura en el proyecto NUEVO de Supabase)
-//   Opcion extra: --forzar  (permite restaurar aunque el proyecto nuevo ya tenga tablas o usuarios)
+//   Opciones extra: --portapapeles (toma la contrasena del portapapeles en vez de escribirla/pegarla)
+//                   --forzar       (permite restaurar aunque el proyecto nuevo ya tenga tablas o usuarios)
 //
 // Restaura el respaldo (ya descifrado con `age`) en el proyecto nuevo de Supabase:
 //   - esquema `public` completo + datos, y los usuarios (auth.users / auth.identities); ver lib/filtrar-toc.js
@@ -25,16 +26,51 @@ const PG_BIN = process.env.PG_BIN || 'C:\\Program Files\\PostgreSQL\\17\\bin';
 const args = process.argv.slice(2);
 const soloLista = args.includes('--solo-lista');
 const forzar = args.includes('--forzar');
+const usarPortapapeles = args.includes('--portapapeles');
 const rutaDump = args.find((a) => !a.startsWith('--')) || path.join(os.tmpdir(), 'restore-test', 'respaldo.dump');
 
-function preguntar(pregunta, oculto) {
+function preguntar(pregunta) {
   return new Promise((resolve) => {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    if (oculto) {
-      rl._writeToOutput = function (str) { if (str.includes('\n')) rl.output.write('\n'); };
-    }
     rl.question(pregunta, (r) => { rl.close(); resolve(r.trim()); });
   });
+}
+
+// Lee la contrasena mostrando un * por cada caracter (asi se NOTA que la terminal esta recibiendo, tanto al
+// escribir como al pegar) sin revelar el texto. Enter termina, Retroceso borra, Ctrl+C cancela.
+function preguntarOculto(pregunta) {
+  return new Promise((resolve, reject) => {
+    if (!process.stdin.isTTY) return reject(new Error('Hace falta una terminal interactiva.'));
+    process.stdout.write(pregunta);
+    let valor = '';
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+    const fin = () => {
+      process.stdin.removeListener('data', alRecibir);
+      process.stdin.setRawMode(false);
+      process.stdin.pause();
+      process.stdout.write('\n');
+    };
+    function alRecibir(trozo) {
+      for (const ch of trozo) {
+        if (ch === '\r' || ch === '\n') { fin(); return resolve(valor); }
+        if (ch === '\u0003') { fin(); return reject(new Error('Cancelado (Ctrl+C).')); }
+        if (ch === '\u007f' || ch === '\b') {
+          if (valor.length) { valor = valor.slice(0, -1); process.stdout.write('\b \b'); }
+          continue;
+        }
+        if (ch >= ' ') { valor += ch; process.stdout.write('*'); }
+      }
+    }
+    process.stdin.on('data', alRecibir);
+  });
+}
+
+// Alternativa a pegar en la terminal: toma la contrasena directamente del portapapeles de Windows.
+function leerPortapapeles() {
+  const salida = execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', 'Get-Clipboard -Raw'], { encoding: 'utf8' });
+  return salida.replace(/[\r\n]+$/, '');
 }
 
 function herramienta(nombre) {
@@ -74,11 +110,19 @@ async function main() {
   }
 
   console.log(`\nDestino: proyecto NUEVO ${REF_NUEVO} (usuario ${USUARIO}, base ${BASE}, puerto ${PUERTO}).`);
-  const host = await preguntar('Host del Session pooler (ej. aws-0-us-east-1.pooler.supabase.com), sin "postgresql://" ni usuario: ', false);
+  const host = await preguntar('Host del Session pooler (ej. aws-0-us-east-1.pooler.supabase.com), sin "postgresql://" ni usuario: ');
   if (!/^[a-z0-9.-]+\.supabase\.com$/i.test(host)) throw new Error('Ese host no parece un host del pooler de Supabase (debe terminar en .supabase.com).');
-  console.log('Contrasena de la base del proyecto NUEVO (se copia desde Bitwarden; no se vera al pegarla):');
-  const password = await preguntar('Contrasena: ', true);
-  if (!password) throw new Error('La contrasena esta vacia.');
+  let password;
+  if (usarPortapapeles) {
+    password = leerPortapapeles();
+    console.log('Contrasena tomada del portapapeles.');
+  } else {
+    console.log('Contrasena de la base del proyecto NUEVO (veras un * por cada caracter que escribas o pegues):');
+    password = await preguntarOculto('Contrasena: ');
+  }
+  if (!password) throw new Error('La contrasena esta vacia (el portapapeles o lo escrito no tenia nada).');
+  const aspecto = /^[A-Za-z0-9]+$/.test(password) ? 'solo letras y numeros' : 'CONTIENE simbolos o espacios';
+  console.log(`  Recibi ${password.length} caracteres (${aspecto}). La contrasena de la base deberia tener 32 y solo letras y numeros.`);
 
   const db = new Client({ host, port: Number(PUERTO), user: USUARIO, password, database: BASE, ssl: { rejectUnauthorized: false } });
   await db.connect();
@@ -92,7 +136,7 @@ async function main() {
   }
   await db.end();
 
-  const confirmar = await preguntar('\nEscribe SI (en mayusculas) para restaurar en el proyecto NUEVO: ', false);
+  const confirmar = await preguntar('\nEscribe SI (en mayusculas) para restaurar en el proyecto NUEVO: ');
   if (confirmar !== 'SI') throw new Error('Cancelado: no se escribio SI.');
 
   console.log('\nRestaurando (una sola transaccion)...');
