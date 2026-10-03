@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const { buildApp } = require('./app');
 
 const app = buildApp();

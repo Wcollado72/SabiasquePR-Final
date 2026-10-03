@@ -3,7 +3,7 @@
 // absoluta de significado legal, nunca parafrasea ni suaviza, y conserva
 // la estructura de secciones numeradas. El resultado sigue necesitando
 // revision humana del usuario antes de publicarse (ver i18n/revisar-legal.md).
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const fs = require('fs');
 const path = require('path');
 

@@ -8,7 +8,7 @@
 //   cd backend && node scripts/traducir-ui.js [--solo N] [--dry]
 //   --solo N   traduce solo los primeros N textos (para probar antes de todo)
 //   --dry      no escribe i18n/en.json, solo imprime el resultado
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const fs = require('fs');
 const path = require('path');
 

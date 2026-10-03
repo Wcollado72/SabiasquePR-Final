@@ -3,7 +3,7 @@
 // de producto actualizados (Gemini/Nano Banana) + producto nuevo Bolso.
 // Uso: node scripts/update-productos-2026-09-22.js
 // ============================================================
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const { pool } = require('../src/db');
 
 const updates = [

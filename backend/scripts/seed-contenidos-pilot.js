@@ -9,7 +9,7 @@
 // Uso: node scripts/seed-contenidos-pilot.js
 // Es seguro repetir: usa ON CONFLICT (id) DO UPDATE.
 // ============================================================
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const { pool } = require('../src/db');
 const { validateContenido } = require('../src/validators/contenido');
 const { slugify } = require('../src/util/slugify');

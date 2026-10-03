@@ -1,6 +1,6 @@
 // Actualiza la foto y el texto del Polo (ahora "Flor de Maga", ya no "Noticias
 // Internacionales" — la foto nueva del usuario no tiene nada que ver con el globo).
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const { pool } = require('../src/db');
 
 async function main() {

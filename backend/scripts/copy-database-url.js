@@ -2,7 +2,7 @@
 // Copia el DATABASE_URL de tu .env local directo al portapapeles de Windows
 // (via clip.exe) -- para pegarlo en Render sin volver a transcribirlo a
 // mano. No se imprime en ningun lado, ni en esta terminal ni en ningun log.
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const { execSync } = require('child_process');
 
 const v = process.env.DATABASE_URL;

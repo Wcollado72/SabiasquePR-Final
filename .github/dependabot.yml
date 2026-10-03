@@ -12,6 +12,11 @@ updates:
     groups:
       parches-y-menores:
         update-types: [minor, patch]
+    # jose 6 es solo ESM y el backend usa require('jose') (CommonJS): rompe 5 suites de
+    # pruebas (probado 2026-10-03, PR #8). Ignorar la 6.x hasta migrar a import dinamico.
+    ignore:
+      - dependency-name: jose
+        versions: [">=6"]
 
   - package-ecosystem: npm
     directory: /tools/vendor
