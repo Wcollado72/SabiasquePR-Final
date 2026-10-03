@@ -1,6 +1,11 @@
 [build]
   command = "node build.js"
   publish = "."
+  # Cada deploy a produccion cuesta 15 creditos de Netlify. Si el commit solo toca
+  # cosas que NO forman parte del sitio (backend/, docs/, tools/, scripts/, .github/,
+  # *.md, render.yaml), Netlify se salta el build. Codigo 0 = saltar; cualquier otro
+  # (incluye error por referencia desconocida) = construir, asi que ante la duda se publica.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)backend' ':(exclude)docs' ':(exclude)tools' ':(exclude)scripts' ':(exclude).github' ':(exclude)*.md' ':(exclude)render.yaml' ':(exclude)skills-lock.json'"
 
 # El repo mezcla el frontend estatico con backend/ y docs/ en la raiz.
 # Estas rutas existen como archivos fisicos pero no deben poder

@@ -68,6 +68,10 @@ const SITE = {
 };
 
 // ── CONTENIDO DESDE CMS JSON ────────────────────────────────
+// Fecha que muestran Terminos y Privacidad. NO usar new Date(): cada deploy re-fecharia
+// textos legales que no cambiaron. Actualizar a mano SOLO cuando cambie el texto legal.
+const LEGAL_ACTUALIZADO = '2 de octubre de 2026';
+
 const noticias  = JSON.parse(fs.readFileSync('_content/noticias.json',  'utf8'));
 
 // Versión de assets: hash del CSS, para evitar CSS viejo en caché
@@ -1578,7 +1582,7 @@ const PAGES = [
     hideRefs: true,
     mainContent: `
       <section class="box box-blog contact-box">
-        <p><em>Última actualización: ${new Date().toLocaleDateString('es-PR', { year: 'numeric', month: 'long', day: 'numeric' })}</em></p>
+        <p><em>Última actualización: ${LEGAL_ACTUALIZADO}</em></p>
 
         <h3>1. Qué datos recopilamos</h3>
         <ul>
@@ -1622,7 +1626,7 @@ const PAGES = [
     hideRefs: true,
     mainContent: `
       <section class="box box-blog contact-box">
-        <p><em>Última actualización: ${new Date().toLocaleDateString('es-PR', { year: 'numeric', month: 'long', day: 'numeric' })}</em></p>
+        <p><em>Última actualización: ${LEGAL_ACTUALIZADO}</em></p>
 
         <h3>1. Aceptación de los términos</h3>
         <p>Al usar este sitio aceptas estos términos. Si no estás de acuerdo, te pedimos no utilizar el sitio.</p>
