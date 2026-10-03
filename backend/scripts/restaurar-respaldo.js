@@ -121,8 +121,16 @@ async function main() {
     password = await preguntarOculto('Contrasena: ');
   }
   if (!password) throw new Error('La contrasena esta vacia (el portapapeles o lo escrito no tenia nada).');
-  const aspecto = /^[A-Za-z0-9]+$/.test(password) ? 'solo letras y numeros' : 'CONTIENE simbolos o espacios';
-  console.log(`  Recibi ${password.length} caracteres (${aspecto}). La contrasena de la base deberia tener 32 y solo letras y numeros.`);
+  const letras = (password.match(/[A-Za-z]/g) || []).length;
+  const numeros = (password.match(/[0-9]/g) || []).length;
+  const blancos = (password.match(/\s/g) || []).length;
+  const otros = password.length - letras - numeros - blancos;
+  console.log(`  Recibi ${password.length} caracteres: ${letras} letras, ${numeros} numeros, ${otros} simbolos, ${blancos} espacios/saltos de linea.`);
+  if (!/^[A-Za-z0-9]{32}$/.test(password) && !args.includes('--aceptar-clave-rara')) {
+    throw new Error('Esto NO parece la contrasena de la base (se esperan 32 letras/numeros, sin simbolos ni espacios). '
+      + 'No intento conectar para no provocar un bloqueo por intentos fallidos. Vuelve a copiarla (o pegala en el prompt, '
+      + 'sin --portapapeles). Si de verdad es asi, usa --aceptar-clave-rara.');
+  }
 
   const db = new Client({ host, port: Number(PUERTO), user: USUARIO, password, database: BASE, ssl: { rejectUnauthorized: false } });
   await db.connect();
