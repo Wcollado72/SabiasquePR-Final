@@ -83,4 +83,10 @@ const enc = leerEncabezados();
 const csp = enc['Content-Security-Policy'] || '';
 console.log(`Copia lista en ${DESTINO}`);
 console.log(`CSP aplicado: ${csp ? 'si' : 'NO (no se encontro)'} | incluye el Supabase NUEVO: ${csp.includes('ldhlayiblphzyvakliaz')} | incluye el VIEJO: ${csp.includes('qmlhjacduuvptxglqxqn')}`);
+// El CSP de produccion solo permite el API de Render. SOLO en este servidor de ensayo se agrega el API local
+// (http://localhost:3000) a connect-src; el resto del CSP queda exactamente como lo genera build.js.
+if (csp) {
+  enc['Content-Security-Policy'] = csp.replace(/connect-src /, 'connect-src http://localhost:3000 ');
+  console.log('CSP del ensayo: se agrego http://localhost:3000 a connect-src (solo en este servidor).');
+}
 servir(enc).listen(PUERTO, () => console.log(`Sitio de ensayo en http://localhost:${PUERTO}  (Ctrl+C para detener)`));
