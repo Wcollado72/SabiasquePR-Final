@@ -112,3 +112,19 @@ describe('Traducciones del collage', () => {
     expect(typeof dic[k]).toBe('string');
   });
 });
+
+describe('netlify.toml: redirección de la dirección de Netlify al dominio propio', () => {
+  const toml = leer('netlify.toml');
+  const primera = toml.slice(toml.indexOf('[[redirects]]'), toml.indexOf('[[redirects]]', toml.indexOf('[[redirects]]') + 1));
+
+  test('la primera regla manda el nombre exacto de netlify.app a sabiasquepr.com conservando la ruta', () => {
+    expect(primera).toMatch(/from = "https:\/\/fabulous-tartufo-fcb839\.netlify\.app\/\*"/);
+    expect(primera).toMatch(/to = "https:\/\/sabiasquepr\.com\/:splat"/);
+    expect(primera).toMatch(/status = 301/);
+  });
+
+  test('no usa un comodín que alcance a los deploy previews ni branch deploys', () => {
+    expect(primera).not.toMatch(/\*\.netlify\.app/);
+    expect(primera).not.toMatch(/deploy-preview|main--/);
+  });
+});

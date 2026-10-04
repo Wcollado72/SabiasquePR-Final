@@ -7,6 +7,18 @@
   # (incluye error por referencia desconocida) = construir, asi que ante la duda se publica.
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)backend' ':(exclude)docs' ':(exclude)tools' ':(exclude)scripts' ':(exclude).github' ':(exclude)*.md' ':(exclude)render.yaml' ':(exclude)skills-lock.json'"
 
+# Quien entre por la direccion de Netlify (fabulous-tartufo-fcb839.netlify.app) pasa a
+# sabiasquepr.com. Motivo (2026-10-04): Stripe devolvia a los compradores a la direccion de
+# Netlify, donde no tenian sesion iniciada (cada dominio guarda su propia sesion) y parecia que
+# la sesion se habia caido; ademas evita contenido duplicado ante Google. Solo aplica a ESE
+# nombre exacto: los deploy previews y branch deploys (deploy-preview-N--..., main--...) son
+# otros nombres y no se tocan. Va primero porque Netlify usa la primera regla que coincide.
+[[redirects]]
+  from = "https://fabulous-tartufo-fcb839.netlify.app/*"
+  to = "https://sabiasquepr.com/:splat"
+  status = 301
+  force = true
+
 # El repo mezcla el frontend estatico con backend/ y docs/ en la raiz.
 # Estas rutas existen como archivos fisicos pero no deben poder
 # descargarse desde el sitio publicado.
