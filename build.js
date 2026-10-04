@@ -826,6 +826,12 @@ const PAGES = [
         </div>
         <p class="foro-login-hint" id="premium-login-hint" style="display:none;"><a href="#" class="login-modal-trigger">Inicia sesión</a> para activar el apoyo mensual y recibir tu insignia.</p>
       </section>
+      <section class="box box-blog foro-intro" id="agradecimientos">
+        <h3>Gracias a quienes apoyan</h3>
+        <p>Estas personas apoyan cada mes y autorizaron que su nombre aparezca aquí. ¡Gracias!</p>
+        <ul id="agradecimientos-lista" class="agradecimientos-lista" aria-live="polite"></ul>
+        <p id="agradecimientos-vacio" class="admin-hint">Todavía no hay nombres aquí. Si apoyas cada mes, podrás aparecer en este muro si lo autorizas desde Mi cuenta.</p>
+      </section>
       <section class="box box-blog foro-intro">
         <h3>Lo que debes saber</h3>
         <ul>
@@ -1449,6 +1455,19 @@ const PAGES = [
         <p style="margin-top:14px;"><a href="index.html">← Volver al inicio</a></p>
       </section>
 
+      <section class="box box-blog contact-box" id="cuenta-agradecimiento" style="max-width:460px;margin:24px auto 0;display:none;">
+        <h3>Muro de agradecimiento</h3>
+        <p class="admin-hint">Si quieres, tu nombre puede aparecer en la página Apoya el canal mientras tu apoyo mensual esté activo. Es opcional y puedes retirarlo cuando quieras.</p>
+        <form id="agradecimiento-form">
+          <label for="agradecimiento-nombre">Nombre que aparecerá</label>
+          <input type="text" id="agradecimiento-nombre" maxlength="40" minlength="2" placeholder="Tu nombre o un alias" autocomplete="off">
+          <label class="admin-checkbox"><input type="checkbox" id="agradecimiento-acepto"> Autorizo que este nombre se muestre públicamente en la página Apoya el canal.</label>
+          <button type="submit">Guardar</button>
+          <button type="button" id="agradecimiento-retirar" class="admin-btn-cancel" style="display:none;">Retirar mi nombre</button>
+        </form>
+        <p id="agradecimiento-status" class="form-status" aria-live="polite"></p>
+      </section>
+
       <section class="box box-blog contact-box" id="cuenta-pedidos" style="max-width:460px;margin:24px auto 0;display:none;">
         <h3>Mis pedidos</h3>
         <div id="cuenta-pedidos-list"><p class="foro-loading">Cargando...</p></div>
@@ -1639,6 +1658,7 @@ const PAGES = [
           <li><strong>Cuenta de usuario (login):</strong> correo y contraseña (cifrada), gestionados por <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">Supabase</a>.</li>
           <li><strong>Analítica de navegación:</strong> páginas visitadas, dispositivo y ubicación aproximada, mediante <a href="https://analytics.google.com" target="_blank" rel="noopener noreferrer">Google Analytics 4</a>.</li>
           <li><strong>Compras y apoyo voluntario:</strong> los pagos (tienda, apoyo mensual y apoyo único) los procesa directamente <a href="https://stripe.com" target="_blank" rel="noopener noreferrer">Stripe</a>; nosotros no almacenamos datos de tarjetas. Guardamos solo lo necesario para atenderte: tu correo, el identificador de cliente de Stripe y el estado de tu apoyo mensual (activo o cancelado).</li>
+          <li><strong>Reconocimiento de colaboradores (opcional):</strong> si autorizas que aparezca tu nombre en el muro de agradecimiento, lo mostramos mientras tu apoyo mensual esté activo; puedes retirar tu autorización en Mi cuenta o escribiéndonos y lo quitamos.</li>
         </ul>
 
         <h3>2. Para qué usamos tus datos</h3>

@@ -505,3 +505,13 @@ CREATE TABLE IF NOT EXISTS gastos_servicios (
   actualizado_en      timestamptz NOT NULL DEFAULT now()
 );
 ALTER TABLE gastos_servicios ENABLE ROW LEVEL SECURITY;
+
+-- ============================================================
+-- Muro de agradecimiento (2026-10-04): opt-in de quienes apoyan cada mes para
+-- aparecer en "Apoya el canal". Mismo SQL que backend/sql/migraciones/2026-10-04-agradecimientos.sql.
+-- ============================================================
+ALTER TABLE perfiles ADD COLUMN IF NOT EXISTS agradecimiento_nombre text NULL;
+ALTER TABLE perfiles ADD COLUMN IF NOT EXISTS agradecimiento_autorizado_en timestamptz NULL;
+ALTER TABLE perfiles DROP CONSTRAINT IF EXISTS perfiles_agradecimiento_nombre_check;
+ALTER TABLE perfiles ADD CONSTRAINT perfiles_agradecimiento_nombre_check
+  CHECK (agradecimiento_nombre IS NULL OR char_length(agradecimiento_nombre) BETWEEN 2 AND 40);

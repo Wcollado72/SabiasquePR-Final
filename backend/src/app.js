@@ -17,6 +17,7 @@ const ordenesRoutes = require('./routes/ordenes');
 const comentariosRoutes = require('./routes/comentarios');
 const reportesRoutes = require('./routes/reportes');
 const newsletterRoutes = require('./routes/newsletter');
+const agradecimientosRoutes = require('./routes/agradecimientos');
 
 function buildApp() {
   const app = express();
@@ -136,6 +137,7 @@ function buildApp() {
   app.use('/api/stripe', stripeRoutes);
   app.use('/api/admin', adminRoutes);
   app.use('/api/perfil', perfilRoutes);
+  app.use('/api/agradecimientos', agradecimientosRoutes);
   app.use('/api/ordenes', ordenesRoutes);
   app.use('/api/comentarios', comentariosRoutes);
   app.use('/api/reportes', reportesRoutes);

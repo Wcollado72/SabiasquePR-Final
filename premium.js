@@ -51,6 +51,7 @@
     updateAuthUI();
     bindSubscribeButton();
     showRedirectStatus();
+    loadAgradecimientos();
   }
 
   function updateAuthUI() {
@@ -96,6 +97,29 @@
       setStatus(statusEl, 'info', '¡Gracias por apoyar a Sabías que PR!');
     } else if (params.get('canceled')) {
       setStatus(statusEl, 'error', 'Cancelaste el proceso. No se hizo ningún cargo.');
+    }
+  }
+
+  // Muro de agradecimiento: nombres que quienes apoyan cada mes autorizaron mostrar (GET publico).
+  // Se pintan con textContent (nunca como HTML).
+  async function loadAgradecimientos() {
+    const lista = document.getElementById('agradecimientos-lista');
+    const vacio = document.getElementById('agradecimientos-vacio');
+    if (!lista) return;
+    try {
+      const res = await fetch(API_URL + '/api/agradecimientos');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error ' + res.status);
+      lista.innerHTML = '';
+      (data.nombres || []).forEach((n) => {
+        const li = document.createElement('li');
+        li.textContent = n;
+        li.setAttribute('data-no-i18n', ''); // nombres de personas: nunca se traducen
+        lista.appendChild(li);
+      });
+      if (vacio) vacio.style.display = (data.nombres || []).length ? 'none' : '';
+    } catch {
+      /* sin conexion con el API: el muro queda con su mensaje de "todavia no hay nombres" */
     }
   }
 

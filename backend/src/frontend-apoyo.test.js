@@ -128,3 +128,62 @@ describe('Traducciones de la Fase 1', () => {
     expect(ingles).not.toMatch(/donat/i);
   });
 });
+
+describe('Muro de agradecimiento', () => {
+  const premium = leer('premium.html');
+  const cuenta = leer('mi-cuenta.html');
+
+  test('"Apoya el canal" tiene la sección y su mensaje mientras no haya nombres', () => {
+    expect(premium).toMatch(/id="agradecimientos"/);
+    expect(premium).toMatch(/Gracias a quienes apoyan/);
+    expect(premium).toMatch(/id="agradecimientos-lista"/);
+    expect(premium).toMatch(/Todavía no hay nombres aquí\./);
+  });
+
+  test('premium.js pinta los nombres con textContent (nunca como HTML) y sin traducirlos', () => {
+    const js = leer('premium.js');
+    const fn = js.slice(js.indexOf('async function loadAgradecimientos'), js.indexOf('function setStatus'));
+    expect(fn).toMatch(/li\.textContent = n/);
+    expect(fn).not.toMatch(/li\.innerHTML|insertAdjacentHTML/);
+    expect(fn).toMatch(/data-no-i18n/);
+    expect(fn).toMatch(/\/api\/agradecimientos/);
+  });
+
+  test('Mi cuenta: formulario opt-in con casilla de autorización SIN marcar, y oculto por defecto', () => {
+    expect(cuenta).toMatch(/id="cuenta-agradecimiento"[^>]*display:none/);
+    expect(cuenta).toMatch(/<input type="checkbox" id="agradecimiento-acepto">/);
+    expect(cuenta).not.toMatch(/id="agradecimiento-acepto"[^>]*checked/);
+    expect(cuenta).toMatch(/Autorizo que este nombre se muestre públicamente/);
+    expect(cuenta).toMatch(/id="agradecimiento-retirar"/);
+    expect(cuenta).toMatch(/maxlength="40"/);
+  });
+
+  test('mi-cuenta.js solo muestra la sección a quien puede, exige la casilla y permite retirar', () => {
+    const js = leer('mi-cuenta.js');
+    expect(js).toMatch(/if \(!d\.puede\) return;/);
+    expect(js).toMatch(/agradecimiento-acepto'\)\.checked/);
+    expect(js).toMatch(/method: 'DELETE'/);
+    expect(js).toMatch(/method: 'PUT'/);
+  });
+
+  test('Privacidad explica el reconocimiento opcional y cómo retirarlo', () => {
+    const priv = leer('privacidad.html');
+    expect(priv).toMatch(/Reconocimiento de colaboradores \(opcional\):/);
+    expect(priv).toMatch(/puedes retirar tu autorización en Mi cuenta o escribiéndonos/);
+  });
+
+  test('textos del muro traducidos al inglés', () => {
+    for (const k of ['Gracias a quienes apoyan', 'Muro de agradecimiento', 'Retirar mi nombre', 'Nombre que aparecerá',
+      'Reconocimiento de colaboradores (opcional):', 'Tu nombre se retiró del muro.']) {
+      expect(typeof dic[k]).toBe('string');
+    }
+  });
+
+  test('las migraciones del muro existen y agregan solo columnas opcionales con límite de largo', () => {
+    const sql = leer('backend/sql/migraciones/2026-10-04-agradecimientos.sql');
+    expect(sql).toMatch(/ADD COLUMN IF NOT EXISTS agradecimiento_nombre text NULL/);
+    expect(sql).toMatch(/ADD COLUMN IF NOT EXISTS agradecimiento_autorizado_en timestamptz NULL/);
+    expect(sql).toMatch(/char_length\(agradecimiento_nombre\) BETWEEN 2 AND 40/);
+    expect(leer('backend/sql/schema.sql')).toMatch(/agradecimiento_autorizado_en/);
+  });
+});

@@ -31,7 +31,7 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon-96.png" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=c2b76d72">
+  <link rel="stylesheet" href="styles.css?v=1fa1d17e">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Mi cuenta","description":"Administra tu perfil y revisa el estado de tu cuenta en Sabías que PR.","url":"https://sabiasquepr.com/mi-cuenta.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -111,6 +111,19 @@
         </p>
         <p style="margin-top:4px;"><a href="admin.html" id="cuenta-link-admin" style="display:none;">Ir al panel de administración →</a></p>
         <p style="margin-top:14px;"><a href="index.html">← Volver al inicio</a></p>
+      </section>
+
+      <section class="box box-blog contact-box" id="cuenta-agradecimiento" style="max-width:460px;margin:24px auto 0;display:none;">
+        <h3>Muro de agradecimiento</h3>
+        <p class="admin-hint">Si quieres, tu nombre puede aparecer en la página Apoya el canal mientras tu apoyo mensual esté activo. Es opcional y puedes retirarlo cuando quieras.</p>
+        <form id="agradecimiento-form">
+          <label for="agradecimiento-nombre">Nombre que aparecerá</label>
+          <input type="text" id="agradecimiento-nombre" maxlength="40" minlength="2" placeholder="Tu nombre o un alias" autocomplete="off">
+          <label class="admin-checkbox"><input type="checkbox" id="agradecimiento-acepto"> Autorizo que este nombre se muestre públicamente en la página Apoya el canal.</label>
+          <button type="submit">Guardar</button>
+          <button type="button" id="agradecimiento-retirar" class="admin-btn-cancel" style="display:none;">Retirar mi nombre</button>
+        </form>
+        <p id="agradecimiento-status" class="form-status" aria-live="polite"></p>
       </section>
 
       <section class="box box-blog contact-box" id="cuenta-pedidos" style="max-width:460px;margin:24px auto 0;display:none;">
@@ -249,7 +262,7 @@
       apiUrl:      'http://localhost:3000',
       youtubeApiKey: '',
       turnstileSiteKey: '0x4AAAAAAFD1ChRrVsC9PVWd',
-      i18nVersion: '758f1793'
+      i18nVersion: 'c35c02af'
     };
   </script>
   <script src="i18n.js"></script>

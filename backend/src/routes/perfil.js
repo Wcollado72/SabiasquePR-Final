@@ -4,6 +4,7 @@ const { enviarError500 } = require('../util/errores');
 const { requireAuth } = require('../middleware/auth');
 const { validatePerfil } = require('../validators/perfil');
 const { validateFechaNacimiento } = require('../validators/fechaNacimiento');
+const { validateNombreAgradecimiento, limpiarNombre } = require('../validators/agradecimiento');
 
 const router = express.Router();
 
@@ -43,6 +44,58 @@ router.post('/fecha-nacimiento', requireAuth, async (req, res) => {
       return res.status(409).json({ ok: false, error: 'Tu fecha de nacimiento ya está registrada y no se puede cambiar.' });
     }
     res.json({ ok: true, user: rows[0] });
+  } catch (err) { enviarError500(res, err); }
+});
+
+// ── Muro de agradecimiento (pagina "Apoya el canal") ───────────────────────────
+// Solo quienes apoyan cada mes (rol premium) o el admin pueden autorizar que su nombre aparezca. Es opt-in:
+// se guarda el nombre elegido y la fecha de la autorizacion; retirarlo borra ambos. El listado publico vive en
+// routes/agradecimientos.js.
+function puedeAparecer(user) {
+  return user && (user.rol === 'premium' || user.rol === 'admin');
+}
+
+// GET /api/perfil/agradecimiento -- lo que la persona tiene autorizado hoy.
+router.get('/agradecimiento', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT agradecimiento_nombre AS nombre, agradecimiento_autorizado_en AS autorizado_en FROM perfiles WHERE id = $1',
+      [req.user.id]
+    );
+    res.json({ ok: true, puede: Boolean(puedeAparecer(req.user)), nombre: rows[0]?.nombre || null, autorizado_en: rows[0]?.autorizado_en || null });
+  } catch (err) { enviarError500(res, err); }
+});
+
+// PUT /api/perfil/agradecimiento -- autoriza (o cambia) el nombre que se muestra. body: { nombre }
+router.put('/agradecimiento', requireAuth, async (req, res) => {
+  if (!puedeAparecer(req.user)) {
+    return res.status(403).json({ ok: false, error: 'El muro de agradecimiento es para quienes apoyan cada mes.' });
+  }
+  const errors = validateNombreAgradecimiento(req.body && req.body.nombre);
+  if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
+  try {
+    const nombre = limpiarNombre(req.body.nombre);
+    const { rows } = await pool.query(
+      `UPDATE perfiles
+         SET agradecimiento_nombre = $2,
+             agradecimiento_autorizado_en = COALESCE(agradecimiento_autorizado_en, now())
+       WHERE id = $1
+       RETURNING agradecimiento_nombre AS nombre, agradecimiento_autorizado_en AS autorizado_en`,
+      [req.user.id, nombre]
+    );
+    res.json({ ok: true, nombre: rows[0].nombre, autorizado_en: rows[0].autorizado_en });
+  } catch (err) { enviarError500(res, err); }
+});
+
+// DELETE /api/perfil/agradecimiento -- retira la autorizacion: deja de aparecer y se borra el nombre.
+// Se permite siempre (aunque ya no sea colaborador): retirar el consentimiento nunca se puede bloquear.
+router.delete('/agradecimiento', requireAuth, async (req, res) => {
+  try {
+    await pool.query(
+      'UPDATE perfiles SET agradecimiento_nombre = NULL, agradecimiento_autorizado_en = NULL WHERE id = $1',
+      [req.user.id]
+    );
+    res.json({ ok: true });
   } catch (err) { enviarError500(res, err); }
 });
 

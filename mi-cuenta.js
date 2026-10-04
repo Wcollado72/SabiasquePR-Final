@@ -37,6 +37,7 @@
       const data = await apiFetch('/api/me');
       renderPerfil(data.user);
       bindForm();
+      loadAgradecimiento();
       loadPedidos();
     } catch (err) {
       showGate('⚠️ ' + err.message);
@@ -74,6 +75,55 @@
     } catch (err) {
       list.innerHTML = `<p class="form-status error">${err.message}</p>`;
     }
+  }
+
+  // ── Muro de agradecimiento: opt-in de quienes apoyan cada mes ───────────────────────
+  async function loadAgradecimiento() {
+    const box = document.getElementById('cuenta-agradecimiento');
+    if (!box) return;
+    try {
+      const d = await apiFetch('/api/perfil/agradecimiento');
+      if (!d.puede) return; // solo colaboradores (y admin): a los demas no se les muestra
+      box.style.display = 'block';
+      pintarAgradecimiento(d.nombre);
+      bindAgradecimiento();
+    } catch { /* sin API: la seccion simplemente no aparece */ }
+  }
+
+  function pintarAgradecimiento(nombre) {
+    document.getElementById('agradecimiento-nombre').value = nombre || '';
+    document.getElementById('agradecimiento-acepto').checked = Boolean(nombre);
+    document.getElementById('agradecimiento-retirar').style.display = nombre ? '' : 'none';
+  }
+
+  function bindAgradecimiento() {
+    const form = document.getElementById('agradecimiento-form');
+    const status = document.getElementById('agradecimiento-status');
+    if (!form || form.dataset.listo) return;
+    form.dataset.listo = '1';
+    const decir = (msg, tipo) => { status.textContent = msg; status.className = 'form-status ' + tipo; };
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!document.getElementById('agradecimiento-acepto').checked) {
+        decir('Marca la casilla para autorizar que tu nombre se muestre.', 'error');
+        return;
+      }
+      decir('Guardando...', 'info');
+      try {
+        const nombre = document.getElementById('agradecimiento-nombre').value.trim();
+        const d = await apiFetch('/api/perfil/agradecimiento', { method: 'PUT', body: JSON.stringify({ nombre }) });
+        pintarAgradecimiento(d.nombre);
+        decir('Listo: tu nombre aparecerá en la página Apoya el canal.', 'ok');
+      } catch (err) { decir(err.message, 'error'); }
+    });
+    document.getElementById('agradecimiento-retirar').addEventListener('click', async () => {
+      decir('Retirando...', 'info');
+      try {
+        await apiFetch('/api/perfil/agradecimiento', { method: 'DELETE' });
+        pintarAgradecimiento(null);
+        decir('Tu nombre se retiró del muro.', 'ok');
+      } catch (err) { decir(err.message, 'error'); }
+    });
   }
 
   function showGate(msg) {
