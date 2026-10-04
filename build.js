@@ -55,6 +55,12 @@ const SITE = {
   // activar Google en Supabase con credenciales reales de Google Cloud.
   googleLogin: true,
 
+  // ── Apoyo voluntario (2026-10) ───────────────────────────
+  // Enlace de pago de Stripe (Payment Link, monto libre) para el apoyo UNICO. Vive en la variable de entorno
+  // APOYO_UNICO_URL (Netlify), igual patron que API_URL. Vacio = el boton "Apoyar una vez" no se muestra.
+  // Ojo: el enlace de PRUEBA (el que tiene "test" en la direccion) NO debe quedar en produccion; en modo real se crea otro.
+  apoyoUnicoUrl: process.env.APOYO_UNICO_URL || '',
+
   // ── YouTube Data API (panel admin — elegir video del canal) ──
   // Llave PÚBLICA restringida por dominio (HTTP referrer) en Google
   // Cloud Console — es seguro exponerla en el navegador solo si está
@@ -70,7 +76,7 @@ const SITE = {
 // ── CONTENIDO DESDE CMS JSON ────────────────────────────────
 // Fecha que muestran Terminos y Privacidad. NO usar new Date(): cada deploy re-fecharia
 // textos legales que no cambiaron. Actualizar a mano SOLO cuando cambie el texto legal.
-const LEGAL_ACTUALIZADO = '2 de octubre de 2026';
+const LEGAL_ACTUALIZADO = '13 de octubre de 2026'; // Apoyo voluntario (Terminos secc. 5 y Privacidad): verificar que coincida con el dia de publicacion
 
 const noticias  = JSON.parse(fs.readFileSync('_content/noticias.json',  'utf8'));
 
@@ -298,7 +304,7 @@ const FOOTER = `
           <ul>
             <li><a href="contacto.html#manifiesto">Manifiesto</a></li>
             <li><a href="details.html">Servicios</a></li>
-            <li><a href="premium.html">Hazte premium</a></li>
+            <li><a href="premium.html">Apoya el canal</a></li>
             <li><a href="contacto.html">Quiénes somos</a></li>
             <li><a href="rss.xml">RSS</a></li>
           </ul>
@@ -413,7 +419,7 @@ function buildPage(p) {
             <li><a href="educacion.html">Educación</a></li>
             <li><a href="tienda.html">Tienda</a></li>
             <li><a href="contacto.html">Quiénes somos</a></li>
-            <li><a href="premium.html" class="nav-premium">Hazte premium</a></li>
+            <li><a href="premium.html" class="nav-premium">Apoya el canal</a></li>
           </ul>
         </nav>
         <div class="header-controls">
@@ -796,21 +802,40 @@ const PAGES = [
 
   {
     file: 'premium.html',
-    title: 'Sabías que PR — Premium',
-    description: 'Hazte miembro premium de Sabías que PR y accede al contenido completo de Revolución Humana.',
-    heroH2: 'Sabías que PR Premium',
-    heroP: 'Acceso completo al contenido premium y apoya el proyecto.',
+    title: 'Sabías que PR — Apoya el canal',
+    description: 'Sabías que PR es gratis para todas las personas. Si te sirve, ayúdanos a mantenerlo con un apoyo voluntario, mensual o único.',
+    heroH2: 'Apoya el canal',
+    heroP: 'Sabías que PR es gratis para todas las personas. Si te sirve, ayúdanos a mantenerlo.',
     mainClass: 'main-stack',
     mainContent: `
       <section class="box box-blog foro-intro">
-        <h3>Beneficios premium</h3>
+        <h3>Por qué existe este apoyo</h3>
+        <p>Sabías que PR es un proyecto social: busca entender, cuestionar y mejorar la sociedad en la que vivimos, sin muros de pago para leerlo. Tu apoyo es voluntario: no abre ni cierra contenido, solo ayuda a que el proyecto siga.</p>
+      </section>
+      <section class="box box-blog foro-intro">
+        <h3>Cómo puedes apoyar</h3>
         <ul>
-          <li>Acceso completo a los artículos, videos y pódcasts marcados como premium en Revolución Humana (sin vista previa cortada).</li>
-          <li>Apoyas directamente el sostenimiento del proyecto.</li>
+          <li><strong>Apoyo mensual:</strong> una aportación recurrente que puedes cancelar cuando quieras. Como agradecimiento recibes la insignia <strong>Colaborador</strong> en el foro y puedes escribir hasta <strong>1000 palabras</strong> en tus publicaciones (el límite habitual es 200). Requiere iniciar sesión.</li>
+          <li><strong>Apoyo único:</strong> la cantidad que tú decidas, una sola vez, sin cuenta. Es un gesto de gratitud: no incluye insignia ni cambios en tu cuenta.</li>
+          <li><strong>La tienda:</strong> cada producto que compras también sostiene el canal.</li>
         </ul>
         <p id="premium-status" class="form-status" aria-live="polite"></p>
-        <button type="button" id="premium-subscribe-btn" class="btn btn-premium">Suscribirme</button>
-        <p class="foro-login-hint" id="premium-login-hint" style="display:none;"><a href="#" class="login-modal-trigger">Inicia sesión</a> para suscribirte.</p>
+        <div class="apoyo-botones">
+          <button type="button" id="premium-subscribe-btn" class="btn btn-premium">Apoyar cada mes</button>
+          ${SITE.apoyoUnicoUrl ? `<a href="${SITE.apoyoUnicoUrl}" id="apoyo-unico-btn" class="btn btn-alt" target="_blank" rel="noopener noreferrer">Apoyar una vez</a>` : ''}
+        </div>
+        <p class="foro-login-hint" id="premium-login-hint" style="display:none;"><a href="#" class="login-modal-trigger">Inicia sesión</a> para activar el apoyo mensual y recibir tu insignia.</p>
+      </section>
+      <section class="box box-blog foro-intro">
+        <h3>Lo que debes saber</h3>
+        <ul>
+          <li>El apoyo es <strong>voluntario y para mayores de 18 años</strong>.</li>
+          <li><strong>No es una donación deducible de impuestos.</strong> Sabías que PR no es (hoy) una organización exenta; no emitimos recibos para deducción.</li>
+          <li>Los pagos los procesa Stripe; nosotros no vemos ni guardamos los datos de tu tarjeta.</li>
+          <li>Puedes cancelar el apoyo mensual en cualquier momento escribiendo a <a href="mailto:${SITE.email}">${SITE.email}</a> o desde el enlace de tu recibo.</li>
+          <li>Los cargos ya procesados no son reembolsables, salvo error nuestro o cargo no autorizado; en esos casos escríbenos y lo resolvemos.</li>
+          <li>Si algún día el proyecto cambia la forma de sostenerse, lo anunciaremos aquí.</li>
+        </ul>
       </section>`,
     extraScript: `<script src="premium.js"></script>`,
   },
@@ -1613,7 +1638,7 @@ const PAGES = [
           <li><strong>Boletín / Newsletter:</strong> tu correo electrónico, gestionado por <a href="https://www.beehiiv.com" target="_blank" rel="noopener noreferrer">beehiiv</a>.</li>
           <li><strong>Cuenta de usuario (login):</strong> correo y contraseña (cifrada), gestionados por <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">Supabase</a>.</li>
           <li><strong>Analítica de navegación:</strong> páginas visitadas, dispositivo y ubicación aproximada, mediante <a href="https://analytics.google.com" target="_blank" rel="noopener noreferrer">Google Analytics 4</a>.</li>
-          <li><strong>Compras en la tienda:</strong> los pagos son procesados directamente por <a href="https://stripe.com" target="_blank" rel="noopener noreferrer">Stripe</a>; nosotros no almacenamos datos de tarjetas.</li>
+          <li><strong>Compras y apoyo voluntario:</strong> los pagos (tienda, apoyo mensual y apoyo único) los procesa directamente <a href="https://stripe.com" target="_blank" rel="noopener noreferrer">Stripe</a>; nosotros no almacenamos datos de tarjetas. Guardamos solo lo necesario para atenderte: tu correo, el identificador de cliente de Stripe y el estado de tu apoyo mensual (activo o cancelado).</li>
         </ul>
 
         <h3>2. Para qué usamos tus datos</h3>
@@ -1661,18 +1686,21 @@ const PAGES = [
         <p>Eres responsable de mantener la confidencialidad de tu contraseña y de toda actividad realizada en tu cuenta.</p>
 
         <h3>4. Tienda y pagos</h3>
-        <p>Los pagos se procesan a través de Stripe. Los precios están en dólares estadounidenses. Para reclamos, cambios o reembolsos, escríbenos a <a href="mailto:${SITE.email}">${SITE.email}</a>.</p>
+        <p>Los pagos de la tienda y los aportes de apoyo se procesan a través de Stripe. Los precios están en dólares estadounidenses. Para reclamos, cambios o reembolsos, escríbenos a <a href="mailto:${SITE.email}">${SITE.email}</a>.</p>
 
-        <h3>5. Conducta del usuario</h3>
+        <h3>5. Apoyo voluntario al canal</h3>
+        <p>Puedes apoyar a Sabías que PR con aportaciones voluntarias, mensuales o únicas, procesadas por Stripe. Solo pueden aportar personas mayores de 18 años. Las aportaciones no son donaciones deducibles de impuestos y no crean ningún derecho de propiedad, participación ni reembolso sobre el proyecto. El apoyo mensual otorga la insignia "Colaborador" y un límite ampliado de 1000 palabras en tus publicaciones del foro mientras el apoyo esté activo; el apoyo único no otorga beneficios. Puedes cancelar el apoyo mensual en cualquier momento; los cargos ya procesados no son reembolsables, salvo error nuestro o cargo no autorizado. Podemos modificar o retirar estos beneficios avisándolo en el sitio.</p>
+
+        <h3>6. Conducta del usuario</h3>
         <p>No está permitido usar el sitio para difundir contenido difamatorio, ilegal o que infrinja derechos de terceros.</p>
 
-        <h3>6. Limitación de responsabilidad</h3>
+        <h3>7. Limitación de responsabilidad</h3>
         <p>El contenido informativo se ofrece "tal cual", con fines educativos y de divulgación. Sabías que PR no garantiza la exactitud absoluta de análisis u opiniones y no se hace responsable por decisiones tomadas con base en el contenido del sitio.</p>
 
-        <h3>7. Cambios a estos términos</h3>
+        <h3>8. Cambios a estos términos</h3>
         <p>Podemos actualizar estos términos ocasionalmente. La fecha de "última actualización" indica la versión vigente.</p>
 
-        <h3>8. Ley aplicable</h3>
+        <h3>9. Ley aplicable</h3>
         <p>Estos términos se rigen por las leyes de Puerto Rico.</p>
       </section>`,
   },

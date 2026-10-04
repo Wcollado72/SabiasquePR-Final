@@ -2447,3 +2447,6 @@ html[data-theme="dark"] .social-links img{ filter:invert(1) hue-rotate(180deg); 
 .perfil-pendiente .perfil-pendiente-nota{ font-size:.85rem; color:var(--ink-soft); }
 .perfil-pendiente input[type="date"]{ width:100%; margin:4px 0 10px; padding:8px; border:1px solid var(--input-border); background:var(--input-bg); color:var(--ink); border-radius:var(--radius); }
 .perfil-pendiente .perfil-pendiente-salir{ background:none; border:none; color:var(--ink-mute); text-decoration:underline; cursor:pointer; padding:4px 0; margin-top:6px; }
+
+/* Pagina "Apoya el canal": botones de apoyo mensual y unico. */
+.apoyo-botones{ display:flex; flex-wrap:wrap; gap:12px; margin:18px 0 8px; }

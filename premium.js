@@ -1,5 +1,5 @@
 // ============================================================
-// premium.js — Sabías que PR · Suscripción premium
+// premium.js — Sabías que PR · Apoyo mensual (pagina "Apoya el canal")
 // ============================================================
 // Inicia el checkout de Stripe (POST /api/stripe/create-checkout-session)
 // y muestra el resultado al volver de Stripe (?success=1 / ?canceled=1).
@@ -93,9 +93,9 @@
     const params = new URLSearchParams(location.search);
     const statusEl = document.getElementById('premium-status');
     if (params.get('success')) {
-      setStatus(statusEl, 'info', '¡Gracias! Tu cuenta se está actualizando, esto puede tardar unos segundos.');
+      setStatus(statusEl, 'info', '¡Gracias por apoyar a Sabías que PR!');
     } else if (params.get('canceled')) {
-      setStatus(statusEl, 'error', 'Suscripción cancelada. Puedes intentarlo de nuevo cuando quieras.');
+      setStatus(statusEl, 'error', 'Cancelaste el proceso. No se hizo ningún cargo.');
     }
   }
 

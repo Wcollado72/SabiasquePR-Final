@@ -113,7 +113,7 @@ async function checkSession() {
   }
 }
 
-const ESTADO_LABEL = { admin: 'Administrador', premium: 'Premium activo', usuario: 'Cuenta gratuita' };
+const ESTADO_LABEL = { admin: 'Administrador', premium: 'Colaborador', usuario: 'Cuenta gratuita' };
 const ESTADO_CLASE = { admin: 'foro-badge-admin', premium: 'foro-badge-premium', usuario: '' };
 
 // ── UI — actualizar login box según estado ──────────────────

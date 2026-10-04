@@ -103,8 +103,8 @@
     const cuerpo = item.bloqueado
       ? '<div class="article-body paywall-teaser">' + cuerpoTexto + '<div class="paywall-fade"></div></div>'
         + '<div class="paywall-cta">'
-        + '<p>Este es contenido Premium. Suscríbete para seguir leyendo/viendo completo.</p>'
-        + '<a href="premium.html" class="btn btn-premium">Hazte Premium →</a>'
+        + '<p>Este contenido es para quienes apoyan el canal. Apoya cada mes para seguir leyendo/viendo completo.</p>'
+        + '<a href="premium.html" class="btn btn-premium">Apoya el canal →</a>'
         + '</div>'
       : '<div class="article-body">' + cuerpoTexto + '</div>';
 
