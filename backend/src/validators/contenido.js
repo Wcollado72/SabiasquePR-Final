@@ -1,7 +1,7 @@
 const SECCIONES_VALIDAS = ['revolucion-humana', 'educacion', 'noticias'];
 const TIPOS_VALIDOS = ['video', 'ensayo', 'noticia', 'lectura_corta', 'audio', 'foto'];
 const CATEGORIAS_VALIDAS = [
-  'general', 'internacionales', 'crimen', 'salud', 'deportes',
+  'internacionales', 'crimen', 'salud', 'deportes',
   'finanzas', 'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura', 'ciencia',
   'leyes-educativas', 'estudiantes-sobresalientes', 'sistemas-mundiales', 'programas-educativos',
 ];
@@ -25,7 +25,7 @@ const ENFOQUES_VALIDOS = [
 
 function validateContenido(body, { partial = false } = {}) {
   const errors = [];
-  const required = ['seccion', 'tipoFormato', 'titulo', 'subtituloResumen', 'urlPortada', 'portadaAlt', 'fechaPublicacion'];
+  const required = ['seccion', 'tipoFormato', 'categoria', 'titulo', 'subtituloResumen', 'urlPortada', 'portadaAlt', 'fechaPublicacion'];
   for (const field of required) {
     if (!partial && !body[field]) errors.push(`El campo "${field}" es obligatorio.`);
   }

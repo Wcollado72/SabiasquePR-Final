@@ -3,6 +3,7 @@ const { validateNoticia } = require('./noticia');
 const NOTICIA_VALIDA = {
   titulo: 'Un titulo cualquiera',
   fecha: '2026-01-15',
+  categoria: 'salud',
   imagen: 'images/foto.webp',
   imagenAlt: 'Descripcion de la foto',
   fuenteUrl: 'https://ejemplo.com',
@@ -68,8 +69,17 @@ describe('validateNoticia', () => {
     expect(errors).toContain('Categoria no valida.');
   });
 
-  test('categoria es opcional (se asume "general")', () => {
-    expect(validateNoticia(NOTICIA_VALIDA)).toEqual([]);
+  test('categoria es obligatoria al crear (ya no existe "general" por defecto)', () => {
+    const { categoria, ...sin } = NOTICIA_VALIDA;
+    expect(validateNoticia(sin)).toContain('El campo "categoria" es obligatorio.');
+  });
+
+  test('"general" ya no es una categoria valida', () => {
+    expect(validateNoticia({ ...NOTICIA_VALIDA, categoria: 'general' })).toContain('Categoria no valida.');
+  });
+
+  test('al editar (parcial) la categoria sigue siendo opcional', () => {
+    expect(validateNoticia({ titulo: 'Nuevo titulo' }, { partial: true })).toEqual([]);
   });
 
   test('acepta los 3 niveles de divulgacionIa y rechaza invalido', () => {

@@ -13,6 +13,7 @@ const USUARIO = JSON.stringify({ id: 'user-1', rol: 'usuario' });
 const NOTICIA_VALIDA = {
   titulo: 'Un titulo cualquiera',
   fecha: '2026-01-15',
+  categoria: 'salud',
   imagen: 'images/foto.webp',
   imagenAlt: 'Descripcion',
   fuenteUrl: 'https://ejemplo.com',

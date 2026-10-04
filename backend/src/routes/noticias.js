@@ -24,7 +24,7 @@ function toRow(id, body, existing = {}) {
     body.fuenteUrl ?? existing.fuente_url,
     body.fuenteTexto ?? existing.fuente_texto,
     JSON.stringify((body.parrafos ?? existing.parrafos ?? []).filter((p) => p && p.trim())),
-    body.categoria ?? existing.categoria ?? 'general',
+    body.categoria ?? existing.categoria,
     body.destacado ?? existing.destacado ?? false,
     body.divulgacionIa ?? existing.divulgacion_ia ?? 'no',
     body.publicado ?? existing.publicado ?? true,

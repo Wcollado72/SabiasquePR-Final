@@ -112,7 +112,7 @@ function optionsHtml(map, { includeEmpty } = {}) {
 // el mapa CATEGORIAS completo, para que las categorias de Educacion no se
 // cuelen como filtro de Noticias).
 const CATEGORIAS_NOTICIAS_FILTRO = {
-  general: 'General', internacionales: 'Internacionales', crimen: 'Crimen', salud: 'Salud',
+  internacionales: 'Internacionales', crimen: 'Crimen', salud: 'Salud',
   deportes: 'Deportes', finanzas: 'Finanzas', tecnologia: 'Tecnología', descubrimientos: 'Descubrimientos',
   politica: 'Política', clima: 'Clima y Medio Ambiente', cultura: 'Cultura', ciencia: 'Ciencia',
 };
@@ -190,11 +190,11 @@ const ENFOQUES = {
   internacionales: 'Internacionales',
 };
 
-// Botones de filtro por categoría de Noticias. "Todas" siempre primero,
-// sin ordenar (es el reset). Educación ya no usa este filtro -- tiene su
-// propia identidad sin botones.
-const CATEGORIA_FILTER_BUTTONS = `<button type="button" class="foro-filter-btn active" data-categoria="">Todas</button>\n`
-  + sortLabelEntries(CATEGORIAS_NOTICIAS_FILTRO).map(([v, l]) => `        <button type="button" class="foro-filter-btn" data-categoria="${v}">${l}</button>`).join('\n');
+// Botones de filtro por categoría de Noticias. Sin "Todas" (2026-10-03): son interruptores -- pulsar activa,
+// pulsar otra vez desactiva, y ninguna queda activa al entrar (ver noticias.js). "General" ya no existe como
+// categoría. Educación usa sus 4 categorías propias (ver EDUCACION_CATEGORIA_FILTRO).
+const CATEGORIA_FILTER_BUTTONS = sortLabelEntries(CATEGORIAS_NOTICIAS_FILTRO)
+  .map(([v, l]) => `        <button type="button" class="foro-filter-btn" aria-pressed="false" data-categoria="${v}">${l}</button>`).join('\n');
 
 // Fila de botones de filtro (misma apariencia que la de regiones de Revolucion Humana): el
 // primero queda activo. `param` es el nombre del filtro y del atributo data-* de cada boton.
@@ -907,8 +907,8 @@ const PAGES = [
                   <option value="en">English</option>
                 </select>
                 <label for="an-categoria">Categoría</label>
-                <select id="an-categoria">
-                  ${optionsHtml(CATEGORIAS)}
+                <select id="an-categoria" required>
+                  ${optionsHtml(CATEGORIAS, { includeEmpty: 'Elige una categoría' })}
                 </select>
               </section>
 
@@ -1046,8 +1046,8 @@ const PAGES = [
                   ${optionsHtml(SUBFORMATOS, { includeEmpty: 'Ninguno' })}
                 </select>
                 <label for="ac-categoria">Categoría</label>
-                <select id="ac-categoria">
-                  ${optionsHtml(CATEGORIAS)}
+                <select id="ac-categoria" required>
+                  ${optionsHtml(CATEGORIAS, { includeEmpty: 'Elige una categoría' })}
                 </select>
               </section>
 

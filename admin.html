@@ -32,7 +32,7 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon-96.png" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=bc353d7a">
+  <link rel="stylesheet" href="styles.css?v=7364b2f8">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Panel de administración","description":"Panel de administración de Sabías que PR: gestión de noticias y productos.","url":"https://sabiasquepr.com/admin.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -168,8 +168,9 @@
                   <option value="en">English</option>
                 </select>
                 <label for="an-categoria">Categoría</label>
-                <select id="an-categoria">
-                  <option value="ciencia">Ciencia</option>
+                <select id="an-categoria" required>
+                  <option value="">Elige una categoría</option>
+<option value="ciencia">Ciencia</option>
 <option value="clima">Clima y Medio Ambiente</option>
 <option value="crimen">Crimen</option>
 <option value="cultura">Cultura</option>
@@ -177,7 +178,6 @@
 <option value="descubrimientos">Descubrimientos</option>
 <option value="estudiantes-sobresalientes">Estudiantes sobresalientes</option>
 <option value="finanzas">Finanzas</option>
-<option value="general">General</option>
 <option value="internacionales">Internacionales</option>
 <option value="leyes-educativas">Leyes educativas</option>
 <option value="politica">Política</option>
@@ -349,8 +349,9 @@
 <option value="tutorial">Tutorial</option>
                 </select>
                 <label for="ac-categoria">Categoría</label>
-                <select id="ac-categoria">
-                  <option value="ciencia">Ciencia</option>
+                <select id="ac-categoria" required>
+                  <option value="">Elige una categoría</option>
+<option value="ciencia">Ciencia</option>
 <option value="clima">Clima y Medio Ambiente</option>
 <option value="crimen">Crimen</option>
 <option value="cultura">Cultura</option>
@@ -358,7 +359,6 @@
 <option value="descubrimientos">Descubrimientos</option>
 <option value="estudiantes-sobresalientes">Estudiantes sobresalientes</option>
 <option value="finanzas">Finanzas</option>
-<option value="general">General</option>
 <option value="internacionales">Internacionales</option>
 <option value="leyes-educativas">Leyes educativas</option>
 <option value="politica">Política</option>
@@ -862,7 +862,7 @@
       apiUrl:      'http://localhost:3000',
       youtubeApiKey: '',
       turnstileSiteKey: '0x4AAAAAAFD1ChRrVsC9PVWd',
-      i18nVersion: '68be53f2'
+      i18nVersion: '04a4ac2d'
     };
   </script>
   <script src="i18n.js"></script>

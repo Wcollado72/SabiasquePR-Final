@@ -1,5 +1,5 @@
 const CATEGORIAS_VALIDAS = [
-  'general', 'internacionales', 'crimen', 'salud', 'deportes',
+  'internacionales', 'crimen', 'salud', 'deportes',
   'finanzas', 'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura', 'ciencia',
 ];
 const DIVULGACION_IA_VALIDAS = ['no', 'parcial', 'generado'];
@@ -7,7 +7,7 @@ const IDIOMAS_ORIGINAL_VALIDOS = ['es', 'en'];
 
 function validateNoticia(body, { partial = false } = {}) {
   const errors = [];
-  const required = ['titulo', 'fecha', 'imagen', 'imagenAlt', 'fuenteUrl', 'fuenteTexto'];
+  const required = ['titulo', 'fecha', 'categoria', 'imagen', 'imagenAlt', 'fuenteUrl', 'fuenteTexto'];
   for (const field of required) {
     if (!partial && !body[field]) errors.push(`El campo "${field}" es obligatorio.`);
   }

@@ -55,3 +55,60 @@ describe('Traducciones nuevas', () => {
     expect(dic[k].length).toBeGreaterThan(3);
   });
 });
+
+describe('Noticias: categorías como interruptores y sin "General"', () => {
+  const html = leer('noticias.html');
+  const filtros = html.slice(html.indexOf('id="noticias-filters"'), html.indexOf('id="noticias-enfoque-filter"'));
+
+  test('no hay botón "Todas" ni categoría "general"', () => {
+    expect(filtros).not.toMatch(/>Todas</);
+    expect(filtros).not.toMatch(/data-categoria="general"/);
+    expect(filtros).not.toMatch(/data-categoria=""/);
+  });
+
+  test('hay 11 categorías y ninguna queda activa al entrar', () => {
+    const valores = [...filtros.matchAll(/data-categoria="([a-z-]+)"/g)].map((m) => m[1]);
+    expect(valores).toHaveLength(11);
+    expect(filtros).not.toMatch(/foro-filter-btn active/);
+    expect(filtros.match(/aria-pressed="false"/g)).toHaveLength(11);
+  });
+
+  test('noticias.js pide todas las secciones (sin ?seccion=) y usa armarCollage', () => {
+    const js = leer('noticias.js');
+    expect(js).not.toMatch(/seccion=noticias/);
+    expect(js).toMatch(/armarCollage/);
+    expect(js).toMatch(/sqpr_edad_confirmada_18mas/);
+  });
+});
+
+describe('Admin: sin "General" y la categoría hay que elegirla', () => {
+  const html = leer('admin.html');
+  test.each(['an-categoria', 'ac-categoria'])('el selector %s no ofrece "general" y exige elegir', (id) => {
+    const i = html.indexOf(`<select id="${id}"`);
+    const sel = html.slice(i, html.indexOf('</select>', i));
+    expect(sel).toMatch(/required/);
+    expect(sel).toMatch(/Elige una categoría/);
+    expect(sel).not.toMatch(/value="general"/);
+  });
+  test('admin.js ya no usa "general" como valor por defecto', () => {
+    expect(leer('admin.js')).not.toMatch(/\|\| 'general'/);
+  });
+});
+
+describe('Migración de categorías', () => {
+  test('la migración reclasifica "general" y reemplaza las dos restricciones CHECK sin "general"', () => {
+    const sql = leer('backend/sql/migraciones/2026-10-03-quitar-categoria-general.sql');
+    expect(sql).toMatch(/UPDATE contenidos SET categoria = 'cultura' WHERE categoria = 'general'/);
+    expect(sql).toMatch(/noticias_categoria_check/);
+    expect(sql).toMatch(/contenidos_categoria_check/);
+    const checks = sql.slice(sql.indexOf('ADD CONSTRAINT noticias_categoria_check'));
+    expect(checks).not.toMatch(/'general'/);
+  });
+});
+
+describe('Traducciones del collage', () => {
+  const dic = JSON.parse(leer('i18n/en.json'));
+  test.each(['Original', 'Elige una categoría'])('"%s" está en el diccionario', (k) => {
+    expect(typeof dic[k]).toBe('string');
+  });
+});

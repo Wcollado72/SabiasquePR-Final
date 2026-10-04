@@ -616,6 +616,36 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   background:color-mix(in srgb, var(--premium) 22%, transparent);
   color:var(--premium-ink);
 }
+/* Insignia "Original": contenido propio, sin fuente externa. */
+.badge-original{
+  display:inline-block;
+  margin-top:6px;
+  margin-left:6px;
+  padding:3px 10px;
+  border-radius:999px;
+  font-family:var(--font-ui);
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  border:1px solid var(--ink);
+  color:var(--ink);
+}
+/* Collage de Noticias: la primera pieza ocupa todo el ancho, como la portada de una revista. */
+@media (min-width:900px){
+  .card-grid .card-hero{ grid-column:1 / -1; }
+  .card-hero:has(> .card-link) > .card-link,
+  .card-hero:has(> .card-media){
+    display:grid;
+    grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);
+    gap:32px;
+    align-items:center;
+  }
+  .card-hero:has(> .card-media) > .card-media{ grid-column:1; }
+  .card-hero:has(> .card-media) > .card-title-link{ grid-column:2; }
+  .card-hero .card-title{ font-size:clamp(1.7rem, 2.6vw, 2.4rem); line-height:1.15; }
+  .card-hero .card-dek{ font-size:1.08rem; }
+}
 /* Fase C3: pieza sin traduccion al idioma elegido -- se muestra en su
    idioma original con este aviso (backend: `sin_traduccion`, ver
    util/traducciones.js). Pastilla chica en tarjetas, aviso mas visible en

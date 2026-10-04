@@ -13,6 +13,7 @@ const USUARIO = JSON.stringify({ id: 'user-1', rol: 'usuario' });
 const CONTENIDO_VALIDO = {
   seccion: 'educacion',
   tipoFormato: 'lectura_corta',
+  categoria: 'leyes-educativas',
   titulo: 'Un titulo cualquiera',
   subtituloResumen: 'Un resumen de al menos diez caracteres.',
   urlPortada: 'images/educacion.webp',
@@ -275,7 +276,7 @@ describe('PUT /api/contenidos/:id', () => {
       id: 'a',
       seccion: 'educacion',
       tipo_formato: 'ensayo',
-      categoria: 'general',
+      categoria: 'cultura',
       titulo: 'Titulo',
       subtitulo_resumen: 'Resumen de diez caracteres.',
       duracion_min: 5,

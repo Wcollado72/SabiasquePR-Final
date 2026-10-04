@@ -3,6 +3,7 @@ const { validateContenido } = require('./contenido');
 const BASE = {
   seccion: 'educacion',
   tipoFormato: 'ensayo',
+  categoria: 'leyes-educativas',
   titulo: 'Un titulo cualquiera',
   subtituloResumen: 'Un resumen de al menos diez caracteres.',
   urlPortada: 'images/educacion.webp',

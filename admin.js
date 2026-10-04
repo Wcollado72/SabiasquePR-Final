@@ -762,7 +762,7 @@
     document.getElementById('an-id').value = item?.id || '';
     document.getElementById('an-titulo').value = item?.titulo || '';
     document.getElementById('an-idioma-original').value = item?.idioma_original || 'es';
-    document.getElementById('an-categoria').value = item?.categoria || 'general';
+    document.getElementById('an-categoria').value = item?.categoria || '';
     document.getElementById('an-fecha').value = item?.fecha ? String(item.fecha).slice(0, 10) : '';
     document.getElementById('an-imagen').value = item?.imagen || '';
     document.getElementById('an-imagen-alt').value = item?.imagen_alt || '';
@@ -1495,7 +1495,7 @@
     document.getElementById('ac-idioma-original').value = item?.idioma_original || 'es';
     document.getElementById('ac-seccion').value = item?.seccion || 'noticias';
     document.getElementById('ac-tipo-formato').value = item?.tipo_formato || 'noticia';
-    document.getElementById('ac-categoria').value = item?.categoria || 'general';
+    document.getElementById('ac-categoria').value = item?.categoria || '';
     document.getElementById('ac-titulo').value = item?.titulo || '';
     document.getElementById('ac-subtitulo').value = item?.subtitulo_resumen || '';
     document.getElementById('ac-cuerpo').value = item?.cuerpo || '';

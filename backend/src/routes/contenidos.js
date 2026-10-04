@@ -13,7 +13,7 @@ function toRow(id, body, existing = {}) {
     id,
     body.seccion ?? existing.seccion,
     body.tipoFormato ?? existing.tipo_formato,
-    body.categoria ?? existing.categoria ?? 'general',
+    body.categoria ?? existing.categoria,
     body.titulo ?? existing.titulo,
     body.subtituloResumen ?? existing.subtitulo_resumen,
     body.cuerpo !== undefined ? body.cuerpo : (existing.cuerpo ?? null),

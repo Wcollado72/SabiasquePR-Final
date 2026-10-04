@@ -7,6 +7,8 @@
 
 (function () {
   const CATEGORIAS = {
+    // 'General' ya no se ofrece al crear contenido (2026-10-03); la etiqueta queda solo para mostrar
+    // piezas antiguas hasta que se reclasifiquen (migracion backend/sql/migraciones).
     general: 'General',
     internacionales: 'Internacionales',
     crimen: 'Crimen',
@@ -185,6 +187,10 @@
     const premiumBadge = item.es_premium
       ? '<span class="badge-premium">🔒 Premium</span>'
       : '';
+    // "Original": contenido propio, sin fuente externa (campo cita_sin_fuente_externa del admin).
+    const originalBadge = item.cita_sin_fuente_externa
+      ? '<span class="badge-original">Original</span>'
+      : '';
 
     const body = '<div class="card-body">'
       + badge
@@ -192,6 +198,7 @@
       + '<p class="card-dek">' + escapeHtml(item.subtitulo_resumen) + '</p>'
       + '<p class="card-meta">' + contenidoMetaLine(item) + '</p>'
       + iaBadge
+      + originalBadge
       + premiumBadge
       + badgeIdioma(item)
       + '</div>';
@@ -244,6 +251,7 @@
     return {
       id: row.id,
       tipo_formato: 'noticia',
+      seccion: 'noticias',
       categoria: row.categoria,
       titulo: row.titulo,
       subtitulo_resumen: dek(row, 170),
