@@ -196,6 +196,26 @@ const ENFOQUES = {
 const CATEGORIA_FILTER_BUTTONS = `<button type="button" class="foro-filter-btn active" data-categoria="">Todas</button>\n`
   + sortLabelEntries(CATEGORIAS_NOTICIAS_FILTRO).map(([v, l]) => `        <button type="button" class="foro-filter-btn" data-categoria="${v}">${l}</button>`).join('\n');
 
+// Fila de botones de filtro (misma apariencia que la de regiones de Revolucion Humana): el
+// primero queda activo. `param` es el nombre del filtro y del atributo data-* de cada boton.
+function filaFiltros({ id, param, etiqueta, entradas }) {
+  const botones = entradas.map(([valor, texto], i) =>
+    `        <button type="button" class="foro-filter-btn${i === 0 ? ' active' : ''}" aria-pressed="${i === 0}" data-${param}="${valor}">${texto}</button>`).join('\n');
+  return `<nav class="foro-filters foro-filters-sub" id="${id}" data-filter-param="${param}" aria-label="${etiqueta}">\n${botones}\n      </nav>`;
+}
+
+// Noticias: botones de region (Puerto Rico activo por defecto), debajo de los de categoria.
+const NOTICIAS_REGION_FILTRO = filaFiltros({
+  id: 'noticias-enfoque-filter', param: 'enfoque', etiqueta: 'Filtrar por región',
+  entradas: Object.entries(ENFOQUES),
+});
+// Educacion: sin regiones, usa sus 4 categorias propias (el primero activo).
+const EDUCACION_CATEGORIA_FILTRO = filaFiltros({
+  id: 'edu-categoria-filter', param: 'categoria', etiqueta: 'Filtrar por tema',
+  entradas: ['estudiantes-sobresalientes', 'leyes-educativas', 'programas-educativos', 'sistemas-mundiales']
+    .map((v) => [v, CATEGORIAS[v]]),
+});
+
 const SOCIAL_ICONS = `
         <div class="social-links">
           <a href="https://x.com/SabiasquePR" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
@@ -572,10 +592,12 @@ const PAGES = [
       <div class="noticias-hero-categorias" id="noticias-filters">${CATEGORIA_FILTER_BUTTONS}</div>`,
     mainClass: 'main-block',
     mainContent: `
+      ${NOTICIAS_REGION_FILTRO}
       <p class="home-hint" id="noticias-hint" aria-live="polite"></p>
       <div class="card-grid" id="noticias-list" aria-live="polite" aria-busy="true"></div>
       <noscript><p class="empty-state">Activa JavaScript para ver las noticias.</p></noscript>`,
     extraScript: `<script src="editorial.js"></script>
+  <script src="regiones.js"></script>
   <script src="noticias.js"></script>`,
   },
 
@@ -681,7 +703,8 @@ const PAGES = [
     heroP: 'Noticias, leyes, estudiantes sobresalientes y sistemas educativos del mundo — todo lo que ayuda y lo que afecta a la educación.',
     mainClass: 'main-block',
     mainContent: `
-      <div class="card-grid contenidos-grid" id="edu-list" data-seccion="educacion" data-hint="edu-hint" aria-live="polite" aria-busy="true"></div>
+      ${EDUCACION_CATEGORIA_FILTRO}
+      <div class="card-grid contenidos-grid" id="edu-list" data-seccion="educacion" data-filters="edu-categoria-filter" data-hint="edu-hint" aria-live="polite" aria-busy="true"></div>
       <p class="home-hint" id="edu-hint" aria-live="polite"></p>
       <noscript><p class="empty-state">Activa JavaScript para ver este contenido.</p></noscript>
 

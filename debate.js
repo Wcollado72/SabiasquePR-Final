@@ -36,20 +36,9 @@
   // e Ilogica Humana son 18+ (piden el interstitial). Nuevos Humanos y
   // Logica Humana son 12+ y no lo necesitan.
   const SUBSECCIONES_18_MAS = ['corrupcion-humana', 'ilogica-humana'];
-  // Opciones del select "Enfoque" del formulario de nueva publicacion,
-  // segun la sub-seccion activa -- las 4 secciones usan el mismo eje de
-  // region (institucional/individual se descarto 2026-09-27, ver
-  // IDEAS-PENDIENTES.md -- se guarda el concepto por si hace falta mas
-  // adelante, pero ya no es un filtro publico).
-  const REGIONES = [
-    ['puerto-rico', 'Puerto Rico'], ['estados-unidos', 'Estados Unidos'],
-    ['hispanoamerica', 'Hispanoamérica'], ['internacionales', 'Internacionales'],
-  ];
-  const ENFOQUE_OPCIONES = {
-    'corrupcion-humana': REGIONES,
-    'ilogica-humana': REGIONES,
-    'nuevos-humanos': REGIONES,
-  };
+  // (El select "Enfoque" del formulario de nueva publicacion se quito 2026-10-03: la region ahora la
+  // asigna el admin al crear contenido, y ENFOQUE_LABEL solo sirve para mostrar la etiqueta de las
+  // publicaciones que ya la tienen.)
 
   const DISCLAIMER_HTML = `
     <div class="debate-disclaimer box box-blog">
@@ -225,11 +214,6 @@
           </div>
           <label for="debate-titulo">Título</label>
           <input type="text" id="debate-titulo" required maxlength="140" placeholder="Ej.: tema de esta semana">
-          <label for="debate-enfoque">Enfoque</label>
-          <select id="debate-enfoque">
-            <option value="">Sin especificar</option>
-            ${(ENFOQUE_OPCIONES[subseccion] || []).map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}
-          </select>
           <label for="debate-cuerpo">Tu opinión</label>
           <textarea id="debate-cuerpo" rows="5" required minlength="10"></textarea>
           <p id="debate-cuerpo-counter" class="foro-word-counter">0/${limit} palabras</p>
@@ -266,9 +250,10 @@
       const statusEl = document.getElementById('debate-form-status');
       const titulo = document.getElementById('debate-titulo').value.trim();
       const cuerpo = cuerpoTa.value.trim();
-      const enfoque = document.getElementById('debate-enfoque').value || undefined;
       const sitioWeb = document.getElementById('debate-sitio-web').value;
-      const body = { titulo, cuerpo, subseccion, enfoque, sitioWeb, turnstileToken: turnstileToken('debate-turnstile') };
+      // Sin `enfoque`: el campo se quito del formulario (2026-10-03, decision del usuario: el titulo ya
+      // dice de que trata). El API sigue aceptandolo como opcional, asi que nada se rompe.
+      const body = { titulo, cuerpo, subseccion, sitioWeb, turnstileToken: turnstileToken('debate-turnstile') };
       if (esPremium) {
         const enlaceMedia = document.getElementById('debate-enlace-media').value.trim();
         const enlaceMediaTipo = document.getElementById('debate-enlace-media-tipo').value;

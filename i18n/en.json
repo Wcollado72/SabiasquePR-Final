@@ -491,5 +491,8 @@
   "Ese código no es correcto. Revisa tu app de autenticación e inténtalo de nuevo.": "That code isn't correct. Check your authenticator app and try again.",
   "El código expiró. Escribe el nuevo que muestra tu app.": "The code expired. Enter the new one shown by your app.",
   "Ocurrió un error inesperado. Inténtalo de nuevo.": "An unexpected error occurred. Please try again.",
-  "No se pudo verificar": "Could not verify"
+  "No se pudo verificar": "Could not verify",
+  "Filtrar por región": "Filter by region",
+  "Filtrar por tema": "Filter by topic",
+  "Aún no hay noticias en esta selección.": "There are no news in this selection yet."
 }

@@ -96,7 +96,13 @@
 
     <main class="main main-block" id="main-content" tabindex="-1">
       
-      <div class="card-grid contenidos-grid" id="edu-list" data-seccion="educacion" data-hint="edu-hint" aria-live="polite" aria-busy="true"></div>
+      <nav class="foro-filters foro-filters-sub" id="edu-categoria-filter" data-filter-param="categoria" aria-label="Filtrar por tema">
+        <button type="button" class="foro-filter-btn active" aria-pressed="true" data-categoria="estudiantes-sobresalientes">Estudiantes sobresalientes</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-categoria="leyes-educativas">Leyes educativas</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-categoria="programas-educativos">Programas educativos destacados</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-categoria="sistemas-mundiales">Sistemas educativos mundiales</button>
+      </nav>
+      <div class="card-grid contenidos-grid" id="edu-list" data-seccion="educacion" data-filters="edu-categoria-filter" data-hint="edu-hint" aria-live="polite" aria-busy="true"></div>
       <p class="home-hint" id="edu-hint" aria-live="polite"></p>
       <noscript><p class="empty-state">Activa JavaScript para ver este contenido.</p></noscript>
 
@@ -312,7 +318,7 @@
       apiUrl:      'http://localhost:3000',
       youtubeApiKey: '',
       turnstileSiteKey: '0x4AAAAAAFD1ChRrVsC9PVWd',
-      i18nVersion: '2112f720'
+      i18nVersion: '68be53f2'
     };
   </script>
   <script src="i18n.js"></script>

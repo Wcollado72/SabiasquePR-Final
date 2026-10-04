@@ -14,12 +14,15 @@
   const API_URL = cfg.apiUrl || 'http://localhost:3000';
   const SLOW_MS = 6000; // el plan gratuito de Render puede tardar en despertar
   const S = window.SQPR;
+  const R = window.sqprRegiones; // regiones.js: filtro por region (ver ese archivo)
   let activeCategoria = '';
+  let activeEnfoque = ''; // region activa (Puerto Rico por defecto, igual que Revolucion Humana)
 
   document.addEventListener('DOMContentLoaded', () => {
     const fromUrl = new URLSearchParams(location.search).get('categoria');
     if (fromUrl && S.CATEGORIAS[fromUrl]) activeCategoria = fromUrl;
     bindFilters();
+    bindEnfoque();
     const list = document.getElementById('noticias-list');
     if (list) S.bindCardPlayDelegation(list);
     loadNoticias();
@@ -44,6 +47,26 @@
     });
   }
 
+  // Segunda fila de botones (debajo de las categorias): filtra las tarjetas por region.
+  // El filtro se aplica en el navegador sobre lo que ya devuelve la API (cada contenido trae
+  // su `enfoque`), asi que no cambia ni la API ni la base de datos.
+  function bindEnfoque() {
+    const nav = document.getElementById('noticias-enfoque-filter');
+    if (!nav) return;
+    const inicial = nav.querySelector('.foro-filter-btn.active');
+    activeEnfoque = (inicial && inicial.dataset.enfoque) || '';
+    nav.addEventListener('click', (e) => {
+      const btn = e.target.closest('.foro-filter-btn');
+      if (!btn) return;
+      nav.querySelectorAll('.foro-filter-btn').forEach((b) => {
+        b.classList.toggle('active', b === btn);
+        b.setAttribute('aria-pressed', String(b === btn));
+      });
+      activeEnfoque = btn.dataset.enfoque || '';
+      loadNoticias();
+    });
+  }
+
   async function loadNoticias() {
     const el = document.getElementById('noticias-list');
     const hint = document.getElementById('noticias-hint');
@@ -64,13 +87,14 @@
       if (!noticiasRes.ok) throw new Error(noticiasData.error || `Error ${noticiasRes.status}`);
       if (!contenidosRes.ok) throw new Error(contenidosData.error || `Error ${contenidosRes.status}`);
 
-      const items = (noticiasData.noticias || []).map(S.noticiaComoContenido)
+      const todos = (noticiasData.noticias || []).map(S.noticiaComoContenido)
         .concat(contenidosData.contenidos || [])
         .sort((a, b) => (a.fecha_publicacion < b.fecha_publicacion ? 1 : -1));
+      const items = R ? R.filtrarPorRegion(todos, activeEnfoque) : todos;
 
       el.innerHTML = items.length
         ? items.map((item) => S.contenidoCardHtml(item)).join('')
-        : '<p class="empty-state">Aún no hay noticias en esta categoría.</p>';
+        : '<p class="empty-state">Aún no hay noticias en esta selección.</p>';
     } catch (err) {
       el.innerHTML = `<p class="empty-state">No se pudieron cargar las noticias: ${S.escapeHtml(err.message)}</p>`;
     } finally {
