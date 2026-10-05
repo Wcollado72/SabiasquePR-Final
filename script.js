@@ -351,6 +351,57 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ══════════════════════════════════════════════════════════
+  // 5b. RELLENO CON LA SESIÓN — correo (y nombre, si se conoce) en el
+  //     formulario de contacto y en los del boletín
+  // ══════════════════════════════════════════════════════════
+  // Idea del usuario (2026-10-05): con la sesion iniciada el correo ya viene
+  // escrito, pero la persona puede escribir otro. Reglas: solo se rellena un campo
+  // VACIO que la persona no haya tocado; al cerrar sesion se vacia lo que rellenamos
+  // nosotros; sin sesion no se toca nada. Se escribe con .value (nunca como HTML).
+  // INICIO relleno-sesion
+  (async function rellenarConLaSesion() {
+    const camposCorreo = [...document.querySelectorAll('.newsletter-form input[type="email"], #contact-form #email')];
+    const campoNombre = document.querySelector('#contact-form #nombre');
+    const pista = document.getElementById('email-hint');
+    const todos = [...camposCorreo, campoNombre].filter(Boolean);
+    if (!todos.length) return;
+
+    todos.forEach(campo => campo.addEventListener('input', () => {
+      campo.dataset.editado = '1';
+      if (pista && campo.id === 'email') pista.hidden = true;
+    }));
+
+    function poner(campo, valor) {
+      if (valor) {
+        if (campo.value.trim() === '' && campo.dataset.editado !== '1') {
+          campo.value = valor;
+          campo.dataset.rellenado = '1';
+        }
+      } else if (campo.dataset.rellenado === '1' && campo.dataset.editado !== '1') {
+        campo.value = '';
+        delete campo.dataset.rellenado;
+      }
+    }
+
+    function aplicar(session) {
+      const usuario = session?.user ?? null;
+      const meta = usuario?.user_metadata || {};
+      const nombre = String(meta.full_name || meta.name || meta.nombre || '').trim();
+      camposCorreo.forEach(campo => poner(campo, usuario?.email || ''));
+      if (campoNombre) poner(campoNombre, nombre);
+      const correoContacto = document.querySelector('#contact-form #email');
+      if (pista) pista.hidden = !(usuario && correoContacto && correoContacto.dataset.rellenado === '1' && correoContacto.dataset.editado !== '1');
+    }
+
+    const cliente = await waitForSharedSupabase(5000);
+    if (!cliente) return;
+    const { data: { session } = {} } = await cliente.auth.getSession();
+    aplicar(session);
+    cliente.auth.onAuthStateChange((_evento, nuevaSesion) => aplicar(nuevaSesion));
+  })();
+  // FIN relleno-sesion
+
+  // ══════════════════════════════════════════════════════════
   // 6. FORMULARIO DE CONTACTO — Formspree AJAX
   // ══════════════════════════════════════════════════════════
   const contactForm = document.querySelector('#contact-form');

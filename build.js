@@ -1565,6 +1565,7 @@ const PAGES = [
           <input type="text" id="nombre" name="nombre" required autocomplete="name">
           <label for="email">Correo electrónico</label>
           <input type="email" id="email" name="email" required autocomplete="email">
+          <p id="email-hint" class="form-hint" hidden>Usaremos este correo para responderte; puedes cambiarlo.</p>
           <label for="motivo">Motivo de contacto</label>
           <select id="motivo" name="motivo">
             <option value="general">Consulta general</option>
@@ -1873,7 +1874,9 @@ console.log('  ✓ images-manifest.json');
 // - sabiasquepr-backend-uufz.onrender.com: la API propia
 // - www.youtube.com: reproductor embebido + oEmbed del admin
 // - www.googleapis.com: YouTube Data API (selector de canal del admin)
-// - formspree.io: el formulario de contacto envia ahi directamente (form-action)
+// - formspree.io: el formulario de contacto envia ahi con fetch (connect-src; sin esto el
+//   navegador bloquea el envio y la pagina dice "Sin conexion") y, como respaldo sin JS,
+//   con el formulario normal (form-action)
 // - api.pwnedpasswords.com: chequeo de contrasenas filtradas (HIBP, k-anonymity;
 //   solo se manda un prefijo de 5 caracteres del hash, nunca la contrasena)
 // - cdn.jsdelivr.net: YA NO se usa (el cliente de Supabase se sirve desde
@@ -1901,7 +1904,7 @@ function generarHeaders() {
     "style-src-attr 'unsafe-inline'",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https:",
-    "connect-src 'self' https://qmlhjacduuvptxglqxqn.supabase.co https://sabiasquepr-backend-uufz.onrender.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://www.youtube.com https://www.googleapis.com https://api.pwnedpasswords.com",
+    "connect-src 'self' https://qmlhjacduuvptxglqxqn.supabase.co https://sabiasquepr-backend-uufz.onrender.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://www.youtube.com https://www.googleapis.com https://api.pwnedpasswords.com https://formspree.io",
     "frame-src 'self' https://www.youtube.com https://challenges.cloudflare.com",
     "frame-ancestors 'none'",
     "object-src 'none'",
