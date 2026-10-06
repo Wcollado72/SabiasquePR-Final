@@ -13,6 +13,9 @@ regexes = [
   # Llave PUBLICABLE de Supabase: va en el HTML del sitio a proposito (es la
   # llave pensada para ser publica; RLS protege los datos, no esta llave).
   '''sb_publishable_xeRmzsC6kmPflMm7FimG4g_-4mDoSbi''',
+  # Llave PUBLICABLE del proyecto Supabase NUEVO (corte del 13 oct 2026): tambien publica por diseno;
+  # aparece en las herramientas del ensayo y, tras el corte, en el HTML del sitio.
+  '''sb_publishable_W2y2ewCNYGJDlfSKd8dSaw_KRNZNYlz''',
   # Valor de relleno cuando STRIPE_SECRET_KEY no esta configurada (dev/tests).
   '''sk_test_placeholder''',
 ]
