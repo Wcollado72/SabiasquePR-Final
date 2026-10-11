@@ -1,18 +1,50 @@
+# Evita que Supabase PAUSE los proyectos gratuitos por inactividad.
+#
+# Supabase pausa un proyecto del plan Free que lleva ~7 dias sin "actividad suficiente" (aviso recibido el
+# 2026-10-10 para el proyecto nuevo). Nuestro API se conecta directo a Postgres, y eso quizas no cuente como
+# actividad, asi que cada dia se hacen peticiones reales a la API publica de Supabase (Auth) ademas de despertar
+# el backend en Render, que consulta la base de datos.
+#
+# Las llaves "publishable" son PUBLICAS por diseno (van en el HTML del sitio; RLS protege los datos) y estan
+# permitidas una por una en .gitleaks.toml. Nunca poner aqui una llave secreta.
+#
+# Dos trabajos independientes: si Render tarda en despertar y el segundo falla, el primero igual ya mantuvo activa
+# la base de datos (el fallo del 2026-10-07 fue solo un tiempo de espera de Render).
 name: Mantener activa la base de datos
-
-# Supabase (plan gratis) pausa el proyecto tras ~7 dias sin actividad real
-# en la base de datos. Este workflow llama a /api/health cada 3 dias, que
-# internamente hace una consulta real a Postgres (SELECT NOW()), evitando
-# la pausa automatica. De paso, tambien "despierta" el backend de Render
-# si estaba dormido por inactividad.
 
 on:
   schedule:
-    - cron: '0 12 */3 * *' # cada 3 dias a las 12:00 UTC
+    - cron: '0 12 * * *' # todos los dias a las 12:00 UTC
   workflow_dispatch: {} # permite ejecutarlo manualmente desde GitHub
 
+permissions:
+  contents: read
+
 jobs:
-  ping-backend:
+  supabase-api:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        proyecto:
+          - { nombre: nuevo, url: 'https://ldhlayiblphzyvakliaz.supabase.co', key: 'sb_publishable_W2y2ewCNYGJDlfSKd8dSaw_KRNZNYlz' }
+          # El proyecto viejo se conserva unas semanas como plan de retroceso del corte: se borra esta linea
+          # cuando se elimine ese proyecto.
+          - { nombre: viejo, url: 'https://qmlhjacduuvptxglqxqn.supabase.co', key: 'sb_publishable_xeRmzsC6kmPflMm7FimG4g_-4mDoSbi' }
+    steps:
+      - name: Peticiones publicas a la API de Supabase (${{ matrix.proyecto.nombre }})
+        run: |
+          set -e
+          for ruta in /auth/v1/health /auth/v1/settings; do
+            curl -sf --retry 3 --retry-delay 10 --retry-all-errors --max-time 30 \
+              -H "apikey: ${{ matrix.proyecto.key }}" "${{ matrix.proyecto.url }}${ruta}" > /dev/null
+            echo "OK ${ruta}"
+          done
+          # La API de datos esta cerrada a proposito (RLS sin politicas): un 401 aqui es lo esperado y tambien cuenta como peticion.
+          codigo=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 -H "apikey: ${{ matrix.proyecto.key }}" "${{ matrix.proyecto.url }}/rest/v1/")
+          echo "REST /rest/v1/ -> ${codigo} (401 esperado)"
+
+  backend-render:
     runs-on: ubuntu-latest
     steps:
       - name: Consultar /api/health (despierta Render y consulta Postgres)
