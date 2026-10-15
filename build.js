@@ -76,7 +76,7 @@ const SITE = {
 // ── CONTENIDO DESDE CMS JSON ────────────────────────────────
 // Fecha que muestran Terminos y Privacidad. NO usar new Date(): cada deploy re-fecharia
 // textos legales que no cambiaron. Actualizar a mano SOLO cuando cambie el texto legal.
-const LEGAL_ACTUALIZADO = '13 de octubre de 2026'; // Apoyo voluntario (Terminos secc. 5 y Privacidad): verificar que coincida con el dia de publicacion
+const LEGAL_ACTUALIZADO = '15 de octubre de 2026'; // Apoyo voluntario (Terminos secc. 5 y Privacidad): verificar que coincida con el dia de publicacion
 
 const noticias  = JSON.parse(fs.readFileSync('_content/noticias.json',  'utf8'));
 
