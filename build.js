@@ -36,8 +36,8 @@ const SITE = {
   // ── Supabase (autenticación) ─────────────────────────────
   // 1. Crear proyecto en https://supabase.com
   // 2. Settings → API → copiar Project URL y anon public key
-  supabaseUrl:     'https://qmlhjacduuvptxglqxqn.supabase.co',
-  supabaseKey:     'sb_publishable_xeRmzsC6kmPflMm7FimG4g_-4mDoSbi',
+  supabaseUrl:     'https://ldhlayiblphzyvakliaz.supabase.co',
+  supabaseKey:     'sb_publishable_W2y2ewCNYGJDlfSKd8dSaw_KRNZNYlz',
 
   // Newsletter: Beehiiv (reemplazo de Mailchimp, 2026-09-27). La llave de
   // API y el Publication ID viven en el backend (BEEHIIV_API_KEY,
@@ -1870,7 +1870,7 @@ console.log('  ✓ images-manifest.json');
 // - challenges.cloudflare.com: Turnstile (script + iframe del reto)
 // - googletagmanager.com / google-analytics.com / analytics.google.com: GA4
 // - fonts.googleapis.com / fonts.gstatic.com: Google Fonts
-// - qmlhjacduuvptxglqxqn.supabase.co: Supabase (auth + datos)
+// - ldhlayiblphzyvakliaz.supabase.co: Supabase (auth + datos)
 // - sabiasquepr-backend-uufz.onrender.com: la API propia
 // - www.youtube.com: reproductor embebido + oEmbed del admin
 // - www.googleapis.com: YouTube Data API (selector de canal del admin)
@@ -1904,7 +1904,7 @@ function generarHeaders() {
     "style-src-attr 'unsafe-inline'",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https:",
-    "connect-src 'self' https://qmlhjacduuvptxglqxqn.supabase.co https://sabiasquepr-backend-uufz.onrender.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://www.youtube.com https://www.googleapis.com https://api.pwnedpasswords.com https://formspree.io",
+    "connect-src 'self' https://ldhlayiblphzyvakliaz.supabase.co https://sabiasquepr-backend-uufz.onrender.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://www.youtube.com https://www.googleapis.com https://api.pwnedpasswords.com https://formspree.io",
     "frame-src 'self' https://www.youtube.com https://challenges.cloudflare.com",
     "frame-ancestors 'none'",
     "object-src 'none'",
