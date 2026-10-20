@@ -23,6 +23,38 @@
 
 # (Ya no hace falta bloquear /backend, /docs ni /tools: al publicar solo frontend/, esas carpetas no existen en el sitio.)
 
+# Dentro de frontend/ conviven el sitio y sus herramientas de construccion. Estos archivos NO son parte del sitio
+# (generador, notas internas de revision legal, datos de origen del RSS...): se devuelven como 404.
+[[redirects]]
+  from = "/build.js"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/package.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/scripts/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/_content/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/i18n/revisar-legal.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
 # El manifiesto se movio de su propia pagina a una seccion dentro de
 # Contacto -- 301 real (no rewrite) porque la URL visible SI cambia.
 [[redirects]]
