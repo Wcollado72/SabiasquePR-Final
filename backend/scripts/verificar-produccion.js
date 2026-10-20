@@ -28,7 +28,7 @@ function curl({ metodo = 'GET', url, token, cuerpo, soloCabeceras = false }) {
   if (cuerpo !== undefined) args.push('-H', 'Content-Type: application/json', '-d', cuerpo);
   if (token) args.push('-H', `Authorization: Bearer ${token}`);
   args.push(url);
-  let salida = '';
+  let salida;
   try {
     salida = execFileSync('curl', args, { encoding: 'utf8' });
   } catch (e) {
