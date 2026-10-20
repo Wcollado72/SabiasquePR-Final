@@ -32,7 +32,7 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon-96.png" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=7aa8ef66">
+  <link rel="stylesheet" href="styles.css?v=d5943b95">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Panel de administración","description":"Panel de administración de Sabías que PR: gestión de noticias y productos.","url":"https://sabiasquepr.com/admin.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -115,7 +115,7 @@
         <div class="ayuda-tooltip" id="ayuda-tooltip" role="tooltip" hidden></div>
         <div class="consola-body">
         <nav class="foro-filters admin-tabs">
-          <button type="button" class="foro-filter-btn active" data-tab="noticias">Noticias</button>
+          <button type="button" class="foro-filter-btn active" data-tab="noticias">Noticias rápidas</button>
           <button type="button" class="foro-filter-btn" data-tab="contenidos">Contenidos</button>
           <button type="button" class="foro-filter-btn" data-tab="productos">Productos</button>
           <button type="button" class="foro-filter-btn" data-tab="reportes">Reportes</button>
@@ -307,16 +307,11 @@
                   <option value="revolucion-humana">Revolución Humana</option>
                   <option value="educacion">Educación</option>
                 </select>
-                <label for="ac-subseccion">Sub-sección de Revolución Humana (opcional)</label>
-                <select id="ac-subseccion">
-                  <option value="">Ninguna</option>
-<option value="corrupcion-humana">Corrupción Humana</option>
-<option value="ilogica-humana">Ilógica Humana</option>
-<option value="logica-humana">Lógica Humana</option>
-<option value="nuevos-humanos">Nuevos Humanos</option>
-<option value="revolucion-mundial">Revolución Mundial</option>
-                </select>
-                <label for="ac-enfoque">Región (filtra el collage público dentro de cualquier sub-sección de Revolución Humana)</label>
+                <label for="ac-clasificacion" id="ac-clasificacion-label">Sub-sección</label>
+                <select id="ac-clasificacion" data-opciones='{"noticias":[["internacionales","Internacionales"],["crimen","Crimen"],["salud","Salud"],["deportes","Deportes"],["finanzas","Finanzas"],["tecnologia","Tecnología"],["descubrimientos","Descubrimientos"],["politica","Política"],["clima","Clima y Medio Ambiente"],["cultura","Cultura"],["ciencia","Ciencia"]],"educacion":[["leyes-educativas","Leyes educativas"],["estudiantes-sobresalientes","Estudiantes sobresalientes"],["sistemas-mundiales","Sistemas educativos mundiales"],["programas-educativos","Programas educativos destacados"]],"revolucion-humana":[["nuevos-humanos","Nuevos Humanos"],["revolucion-mundial","Revolución Mundial"],["logica-humana","Lógica Humana"],["corrupcion-humana","Corrupción Humana"],["ilogica-humana","Ilógica Humana"]]}'></select>
+                <input type="hidden" id="ac-subseccion">
+                <input type="hidden" id="ac-categoria">
+                <label for="ac-enfoque">Región (filtra el collage público en Noticias, Revolución Humana y Educación)</label>
                 <select id="ac-enfoque">
                   <option value="">Ninguna</option>
 <option value="estados-unidos">Estados Unidos</option>
@@ -347,25 +342,6 @@
 <option value="podcast">Podcast</option>
 <option value="reportaje">Reportaje</option>
 <option value="tutorial">Tutorial</option>
-                </select>
-                <label for="ac-categoria">Categoría</label>
-                <select id="ac-categoria" required>
-                  <option value="">Elige una categoría</option>
-<option value="ciencia">Ciencia</option>
-<option value="clima">Clima y Medio Ambiente</option>
-<option value="crimen">Crimen</option>
-<option value="cultura">Cultura</option>
-<option value="deportes">Deportes</option>
-<option value="descubrimientos">Descubrimientos</option>
-<option value="estudiantes-sobresalientes">Estudiantes sobresalientes</option>
-<option value="finanzas">Finanzas</option>
-<option value="internacionales">Internacionales</option>
-<option value="leyes-educativas">Leyes educativas</option>
-<option value="politica">Política</option>
-<option value="programas-educativos">Programas educativos destacados</option>
-<option value="salud">Salud</option>
-<option value="sistemas-mundiales">Sistemas educativos mundiales</option>
-<option value="tecnologia">Tecnología</option>
                 </select>
               </section>
 
@@ -862,7 +838,7 @@
       apiUrl:      'http://localhost:3000',
       youtubeApiKey: '',
       turnstileSiteKey: '0x4AAAAAAFD1ChRrVsC9PVWd',
-      i18nVersion: '6a02d2b6'
+      i18nVersion: '67a177fc'
     };
   </script>
   <script src="i18n.js"></script>
@@ -872,6 +848,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=Karla:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap">
   <script src="editorial.js"></script>
   <script src="citas.js"></script>
+  <script src="clasificacion.js"></script>
   <script src="admin.js"></script>
   <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
