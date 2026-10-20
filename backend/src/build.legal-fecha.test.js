@@ -4,7 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const build = fs.readFileSync(path.join(__dirname, '../../build.js'), 'utf8');
+const build = fs.readFileSync(path.join(__dirname, '../../frontend/build.js'), 'utf8');
 
 describe('fecha de actualización de las páginas legales', () => {
   test('no se calcula con new Date()', () => {

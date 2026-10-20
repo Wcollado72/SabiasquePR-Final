@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { pool } = require('../src/db');
 
-const CONTENT_DIR = path.join(__dirname, '..', '..', '_content');
+const CONTENT_DIR = path.join(__dirname, '..', '..', 'frontend', '_content');
 
 async function migrateNoticias() {
   const noticias = JSON.parse(fs.readFileSync(path.join(CONTENT_DIR, 'noticias.json'), 'utf8'));

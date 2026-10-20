@@ -6,8 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const raiz = path.join(__dirname, '..', '..');
-const leer = (f) => fs.readFileSync(path.join(raiz, f), 'utf8');
+const raiz = path.join(__dirname, '..', '..'); // raiz del repositorio
+const frontend = path.join(raiz, 'frontend'); // el sitio
+// Los archivos del sitio salen de frontend/; docs/, backend/ y netlify.toml viven en la raiz del repositorio.
+const leer = (f) => fs.readFileSync(path.join(/^(docs|backend)\/|^netlify\.toml$/.test(f) ? raiz : frontend, f), 'utf8');
 const dic = JSON.parse(leer('i18n/en.json'));
 
 describe('El CSP deja que el formulario de contacto se envíe', () => {

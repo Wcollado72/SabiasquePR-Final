@@ -1,6 +1,6 @@
 // Extrae los textos visibles (nodos de texto + placeholder/aria-label/title/alt)
 // de las paginas HTML generadas y lista los que aun NO estan en i18n/en.json.
-// Uso:  node scripts/i18n-extraer.js [--chrome] [archivo.html ...]
+// Uso (desde frontend/):  node scripts/i18n-extraer.js [--chrome] [archivo.html ...]
 //   --chrome  solo header/footer/modales/carrito (todo menos <main>)
 // Salida: i18n/faltantes.json (clave = texto en espanol tal como lo ve el visitante).
 const fs = require('fs');

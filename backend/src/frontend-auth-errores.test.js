@@ -1,5 +1,5 @@
-// Prueba del traductor de errores de Supabase Auth (auth-errores.js, raiz del repo).
-const { errorAuthEnEspanol, POR_CODIGO } = require('../../auth-errores.js');
+// Prueba del traductor de errores de Supabase Auth (frontend/auth-errores.js).
+const { errorAuthEnEspanol, POR_CODIGO } = require('../../frontend/auth-errores.js');
 
 describe('errorAuthEnEspanol', () => {
   test.each([
@@ -37,8 +37,8 @@ describe('errorAuthEnEspanol', () => {
 });
 
 describe('idioma del visitante', () => {
-  const dic = require('../../i18n/en.json');
-  const { traducir } = require('../../i18n.js');
+  const dic = require('../../frontend/i18n/en.json');
+  const { traducir } = require('../../frontend/i18n.js');
 
   test('cada mensaje de error tiene traduccion al ingles en i18n/en.json', () => {
     const sinTraducir = [...new Set(Object.values(POR_CODIGO))].filter((t) => typeof dic[t] !== 'string' || !dic[t].trim());
