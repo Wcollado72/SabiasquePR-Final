@@ -6,8 +6,9 @@
   publish = "."
   # Cada deploy a produccion cuesta 15 creditos de Netlify. Si el commit no toca nada de frontend/, Netlify se salta el
   # build. Codigo 0 = saltar; cualquier otro (incluye error) = construir, asi que ante la duda se publica.
-  # (El comando corre dentro de la carpeta base, por eso el "." es frontend/.)
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ."
+  # (El comando corre dentro de la carpeta base, por eso el "." es frontend/ y "../netlify.toml" es este archivo:
+  # un cambio en la configuracion, como las reglas de redireccion, tambien debe publicarse.)
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ../netlify.toml"
 
 # Quien entre por la direccion de Netlify (fabulous-tartufo-fcb839.netlify.app) pasa a
 # sabiasquepr.com. Motivo (2026-10-04): Stripe devolvia a los compradores a la direccion de

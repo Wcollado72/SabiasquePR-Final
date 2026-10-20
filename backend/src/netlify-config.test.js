@@ -26,6 +26,10 @@ describe('netlify.toml', () => {
     }
   );
 
+  test('un cambio en netlify.toml tambien dispara el build (la regla ignore lo incluye)', () => {
+    expect(toml).toMatch(/ignore = "git diff --quiet \$CACHED_COMMIT_REF \$COMMIT_REF -- \. \.\.\/netlify\.toml"/);
+  });
+
   test('la redireccion de la direccion de netlify.app a sabiasquepr.com sigue primero', () => {
     const primero = toml.indexOf('[[redirects]]');
     expect(toml.slice(primero, primero + 200)).toMatch(/fabulous-tartufo-fcb839\.netlify\.app/);
