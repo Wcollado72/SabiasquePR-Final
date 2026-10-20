@@ -4,8 +4,12 @@ Genera docs/planificacion-y-diseno-bd.pdf para Sabias Que PR:
 Fase 1 (Planificacion y Diseno) + Fase 2 (Diseno de la Base de Datos)
 de la rubrica del curso Full-Stack.
 """
+import datetime
+import json
 import math
 import os
+import re
+import sys
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.lib import colors
@@ -13,7 +17,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle,
-    HRFlowable, ListFlowable, ListItem, Preformatted
+    HRFlowable, ListFlowable, ListItem, Preformatted, CondPageBreak
 )
 from reportlab.graphics.shapes import Drawing, Rect, String, Line, Polygon
 from reportlab.pdfgen import canvas as pdfcanvas
@@ -39,6 +43,10 @@ DOCS_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(DOCS_DIR)
 OUT_PATH = os.path.join(DOCS_DIR, 'planificacion-y-diseno-bd.pdf')
 SCHEMA_SQL_PATH = os.path.join(REPO_ROOT, 'backend', 'sql', 'schema.sql')
+ESTRUCTURA_PATH = os.path.join(DOCS_DIR, 'entrega', 'estructura-bd.json')
+DATOS_ESTUDIANTE_PATH = os.path.join(DOCS_DIR, 'privado', 'datos-estudiante.json')
+sys.path.insert(0, DOCS_DIR)
+from descripciones_bd import DESC, PROPOSITO
 
 # ── ESTILOS ─────────────────────────────────────────────────
 styles = getSampleStyleSheet()
@@ -57,11 +65,11 @@ styles.add(ParagraphStyle(
 ))
 styles.add(ParagraphStyle(
     name='H1', fontName='Helvetica-Bold', fontSize=15, leading=19,
-    textColor=INK, spaceBefore=22, spaceAfter=10,
+    textColor=INK, spaceBefore=22, spaceAfter=10, keepWithNext=1,
 ))
 styles.add(ParagraphStyle(
     name='H2', fontName='Helvetica-Bold', fontSize=11.5, leading=15,
-    textColor=ACCENT_DARK, spaceBefore=14, spaceAfter=6,
+    textColor=ACCENT_DARK, spaceBefore=14, spaceAfter=6, keepWithNext=1,
 ))
 styles.add(ParagraphStyle(
     name='Body', fontName='Helvetica', fontSize=10, leading=15,
@@ -168,124 +176,118 @@ def pk_fk_path(d, points, label):
                  fillColor=ACCENT_DARK, textAnchor='middle'))
 
 
+
 # ── DIAGRAMA 1: ARQUITECTURA ────────────────────────────────
 
+AMBAR = colors.HexColor('#B8791A')
+AMBAR_TXT = colors.HexColor('#8A5A10')
+VERDE_SOFT = colors.HexColor('#EAF3EF')
+AMBAR_SOFT = colors.HexColor('#F5ECE1')
+
+
 def diagrama_arquitectura():
-    W, H = CONTENT_W, 300
+    W, H = CONTENT_W, 330
     d = Drawing(W, H)
     d.hAlign = 'CENTER'
+    bw = 170
+    xl, xr = 12, W - 12 - bw
 
-    # Navegador
     box(d, W/2 - 90, H - 40, 180, 32, 'Navegador del usuario', 'cliente HTTP')
 
-    # Frontend
-    box(d, 20, H - 130, 200, 46, 'Frontend estatico', 'HTML5 + CSS3 + JavaScript', fill=colors.HexColor('#EAF3EF'), stroke=DONE, title_color=DONE)
-    # Supabase Auth
-    box(d, W - 220, H - 130, 200, 46, 'Supabase Auth', 'login, registro, Google OAuth, JWKS', fill=colors.HexColor('#F5ECE1'), stroke=colors.HexColor('#B8791A'), title_color=colors.HexColor('#8A5A10'))
+    box(d, xl, H - 130, bw, 46, 'Frontend estático', 'HTML5 + CSS3 + JavaScript · Netlify', fill=VERDE_SOFT, stroke=DONE, title_color=DONE)
+    box(d, xr, H - 130, bw, 46, 'Supabase Auth', 'login, registro, Google, 2FA, JWKS', fill=AMBAR_SOFT, stroke=AMBAR, title_color=AMBAR_TXT)
+    box(d, xl, H - 220, bw, 46, 'Backend API propio', 'Node.js + Express · Render')
+    box(d, xr, H - 220, bw, 46, 'Base de datos', 'PostgreSQL (Supabase) · 14 tablas', fill=VERDE_SOFT, stroke=DONE, title_color=DONE)
 
-    # Backend
-    box(d, 20, H - 220, 200, 46, 'Backend API propio', 'Node.js + Express (backend/src)')
-    # Postgres
-    box(d, W - 220, H - 220, 200, 46, 'Base de datos', 'PostgreSQL (proyecto Supabase)', fill=colors.HexColor('#EAF3EF'), stroke=DONE, title_color=DONE)
+    d.add(String(W/2, 92, 'Servicios de terceros', fontName='Helvetica-Oblique', fontSize=7.5,
+                 fillColor=INK_SOFT, textAnchor='middle'))
+    serv = [('Stripe', 'pagos y apoyo'), ('Claude API', 'agentes de IA'), ('Beehiiv', 'boletín'),
+            ('Formspree', 'contacto'), ('Turnstile', 'anti-robots'), ('Resend', 'correos de Auth')]
+    sw, gap = 74, 12
+    x0 = (W - (len(serv) * sw + (len(serv) - 1) * gap)) / 2
+    for i, (t, st) in enumerate(serv):
+        box(d, x0 + i * (sw + gap), 46, sw, 36, t, st, title_size=7.6, fill=WHITE, stroke=LINE, title_color=INK_SOFT)
+    box(d, W/2 - 150, 4, 300, 30, 'Respaldo diario cifrado · CI (GitHub Actions)', 'pruebas, lint y auditoría en cada cambio',
+        fill=WHITE, stroke=LINE, title_color=INK_SOFT, dashed=True, title_size=7.4)
 
-    # Despliegue (planeado)
-    box(d, W/2 - 150, 8, 300, 34, 'Despliegue academico (Fase 6)', 'Netlify/Vercel + Render/Railway + Supabase',
-        fill=WHITE, stroke=LINE, title_color=INK_SOFT, dashed=True)
-
-    cx_nav = W/2
-    cx_front, cx_auth = 20 + 100, W - 220 + 100
-    cx_back, cx_db = 20 + 100, W - 220 + 100
-
-    arrow(d, cx_nav - 30, H - 40, cx_front + 15, H - 84, 'HTML/CSS/JS')
-    arrow(d, cx_nav + 30, H - 40, cx_auth - 15, H - 84, 'sesion / login')
-
-    arrow(d, cx_front, H - 130, cx_back, H - 174, 'fetch API REST + Bearer JWT')
-    arrow(d, cx_front + 60, H - 107, cx_auth - 60, H - 107, 'signInWithPassword / OAuth', dashed=True)
-
-    arrow(d, cx_back, H - 220, cx_db, H - 220, 'pool.query (pg)')
-    arrow(d, cx_back + 60, H - 197, cx_auth - 60, H - 197, 'verifica JWT (JWKS, ES256)', dashed=True)
-
+    arrow(d, W/2 - 30, H - 40, xl + bw/2 + 20, H - 84, 'HTML/CSS/JS')
+    arrow(d, W/2 + 30, H - 40, xr + bw/2 - 20, H - 84, 'sesión / login')
+    arrow(d, xl + bw/2, H - 130, xl + bw/2, H - 174, 'fetch + Bearer JWT')
+    arrow(d, xl + bw, H - 107, xr, H - 107, 'signInWithPassword / OAuth', dashed=True)
+    arrow(d, xl + bw, H - 197, xr, H - 197, 'pool.query (pg)')
+    arrow(d, xl + bw, H - 178, xr + 40, H - 130, 'verifica JWT (JWKS, ES256)', dashed=True)
     return d
 
 
 # ── DIAGRAMA 2: NAVEGACION ──────────────────────────────────
 
 def diagrama_navegacion():
-    W, H = CONTENT_W, 400
+    W, H = CONTENT_W, 360
     d = Drawing(W, H)
     d.hAlign = 'CENTER'
 
-    # Inicio
     icx = W / 2
-    box(d, icx - 70, 360, 140, 28, 'Inicio', 'index.html', fill=ACCENT_SOFT, stroke=ACCENT)
+    box(d, icx - 70, 322, 140, 28, 'Inicio', 'index.html', fill=ACCENT_SOFT, stroke=ACCENT)
 
-    # Fila unica con las secciones del menu principal (orden real del nav)
-    publicas = [
-        ('Noticias', None), ('Revolucion', 'Humana'), ('Educacion', None),
-        ('Foro', None), ('Tienda', None), ('Contacto', None), ('Premium', None),
+    menu = [
+        ('Noticias', 'noticias.html'), ('Revolución', 'Humana'), ('Educación', 'educacion.html'),
+        ('Tienda', 'tienda.html'), ('Quiénes', 'somos'), ('Apoya', 'el canal'),
     ]
-    n = len(publicas)
-    bw, gap = 50, 6
+    n = len(menu)
+    bw, gap = 64, 10
     total = n * bw + (n - 1) * gap
     x0 = (W - total) / 2
-    row_y, row_h = 290, 32
-    spine_y = 330
-
-    arrow(d, icx, 360, icx, spine_y + 2)
+    row_y, row_h, spine_y = 250, 36, 298
+    arrow(d, icx, 322, icx, spine_y + 2)
     d.add(Line(x0 + bw/2, spine_y, x0 + total - bw/2, spine_y, strokeColor=INK_SOFT, strokeWidth=1))
-
-    centers = []
-    foro_center = None
-    for i, (t1, t2) in enumerate(publicas):
+    centros = []
+    for i, (t1, t2) in enumerate(menu):
         x = x0 + i * (bw + gap)
         cx = x + bw / 2
-        centers.append(cx)
-        is_foro = (t1 == 'Foro')
-        is_premium = (t1 == 'Premium')
-        if is_foro:
-            fill, stroke, tcolor = DONE_SOFT, DONE, DONE
-        elif is_premium:
-            fill, stroke, tcolor = colors.HexColor('#F5ECE1'), colors.HexColor('#B8791A'), colors.HexColor('#8A5A10')
-        else:
-            fill, stroke, tcolor = ACCENT_SOFT, ACCENT, ACCENT_DARK
-        box(d, x, row_y, bw, row_h, t1, t2, title_size=6.3, fill=fill, stroke=stroke, title_color=tcolor)
+        centros.append(cx)
+        premium = (i == 5)
+        fill, stroke, tc = (AMBAR_SOFT, AMBAR, AMBAR_TXT) if premium else (ACCENT_SOFT, ACCENT, ACCENT_DARK)
+        box(d, x, row_y, bw, row_h, t1, t2, title_size=7, fill=fill, stroke=stroke, title_color=tc)
         d.add(Line(cx, spine_y, cx, row_y + row_h, strokeColor=INK_SOFT, strokeWidth=1))
-        if is_foro:
-            foro_center = cx
 
-    # Rama del foro: requiere sesion para publicar/comentar.
-    # Se ancla a la derecha de la columna "Iniciar sesion / Panel admin"
-    # (que ocupa x 40-210) en vez de centrarse bajo Foro, para no
-    # superponerse con esa columna a este ancho de diagrama.
-    np_x, np_w, np_y, np_h = 220, 160, 220, 36
-    box(d, np_x, np_y, np_w, np_h, 'Nueva publicacion / comentar', 'requiere sesion',
-        fill=WHITE, stroke=LINE, dashed=True, title_color=INK_SOFT, title_size=7.2)
-    arrow(d, foro_center, row_y, np_x + np_w/2, np_y + np_h, 'sesion activa', dashed=True)
+    # Revolución Humana → sub-secciones con debate
+    sub_y = 168
+    box(d, 8, sub_y, 168, 54, 'Sub-secciones (cada una con debate)',
+        lines=['Nuevos Humanos · Lógica Humana', 'Corrupción Humana (18+)', 'Ilógica Humana (18+)'],
+        fill=VERDE_SOFT, stroke=DONE, title_color=DONE, title_size=6.6)
+    arrow(d, centros[1], row_y, 92, sub_y + 54, None, dashed=True)
 
-    # Iniciar sesion -> Panel de administracion (control disponible en toda pagina)
-    login_x, login_w, login_y, login_h = 40, 170, 220, 36
-    box(d, login_x, login_y, login_w, login_h, 'Iniciar sesion', 'disponible en toda pagina (header)',
-        fill=ACCENT_SOFT, stroke=ACCENT)
-    admin_x, admin_y, admin_w, admin_h = 40, 150, 170, 42
-    box(d, admin_x, admin_y, admin_w, admin_h, 'Panel de administracion', 'admin.html - solo rol admin',
-        fill=colors.HexColor('#F5ECE1'), stroke=colors.HexColor('#B8791A'), title_color=colors.HexColor('#8A5A10'))
-    arrow(d, login_x + login_w/2, login_y, admin_x + admin_w/2, admin_y + admin_h, 'rol = admin', dashed=True)
+    # Educación / Noticias → artículo
+    box(d, 190, sub_y, 128, 54, 'Artículo / recurso', lines=['articulo.html', 'recurso.html'],
+        fill=WHITE, stroke=LINE, title_color=INK_SOFT, dashed=True, title_size=7)
+    arrow(d, centros[0], row_y, 230, sub_y + 54, None, dashed=True)
+    arrow(d, centros[2], row_y, 280, sub_y + 54, None, dashed=True)
 
-    # Paginas secundarias (fuera del menu principal) -- mas abajo que la
-    # rama del foro para no montarse encima (el foro ya no es el 7mo de 9
-    # items sino el 4to de 7, y su rama quedo mas a la izquierda)
-    sec_x, sec_y, sec_w, sec_h = W - 210, 130, 170, 46
-    box(d, sec_x, sec_y, sec_w, sec_h, 'Paginas secundarias',
-        lines=['Servicios, Privacidad,', 'Terminos, 404'],
+    # Tienda / apoyo → Stripe
+    box(d, 332, sub_y, 164, 54, 'Pago en Stripe (modo prueba)', 'compra o apoyo voluntario',
+        fill=AMBAR_SOFT, stroke=AMBAR, title_color=AMBAR_TXT, title_size=7)
+    arrow(d, centros[3], row_y, 380, sub_y + 54, 'checkout', dashed=True)
+    arrow(d, centros[5], row_y, 450, sub_y + 54, 'apoyo', dashed=True)
+
+    # Control de sesión
+    box(d, 8, 84, 168, 44, 'Iniciar sesión (en toda página)', 'registro, Google, recuperar contraseña',
+        fill=ACCENT_SOFT, stroke=ACCENT, title_size=7)
+    box(d, 190, 84, 128, 44, 'Mi cuenta', 'mi-cuenta.html · requiere sesión',
+        fill=WHITE, stroke=LINE, dashed=True, title_color=INK_SOFT, title_size=7.4)
+    box(d, 332, 84, 164, 44, 'Panel de administración', 'admin.html · rol admin + 2FA',
+        fill=AMBAR_SOFT, stroke=AMBAR, title_color=AMBAR_TXT, title_size=7.4)
+    arrow(d, 176, 106, 190, 106, None)
+    arrow(d, 318, 106, 332, 106, None, dashed=True)
+
+    box(d, 8, 14, 488, 40, 'Páginas de apoyo', lines=['Privacidad · Términos · Restablecer contraseña · 404 · selector de idioma ES/EN'],
         fill=PAPER_RULED, stroke=LINE, dashed=True, title_color=INK_SOFT, title_size=7.4)
-
     return d
 
 
-# ── DIAGRAMA 3: MODELO ENTIDAD-RELACION ─────────────────────
+# ── DIAGRAMA 3: MODELO ENTIDAD-RELACION (14 tablas) ─────────
 
 def diagrama_mer():
-    W, H = CONTENT_W, 520
+    W, H = CONTENT_W, 650
     d = Drawing(W, H)
     d.hAlign = 'CENTER'
 
@@ -294,196 +296,222 @@ def diagrama_mer():
             fill=WHITE if not ext else PAPER_RULED, stroke=ACCENT if not ext else LINE,
             title_color=ACCENT_DARK if not ext else INK_SOFT)
 
-    # auth.users (externo, gestionado por Supabase) -> perfiles (1:1)
-    ux, uy, uw, uh = 182, 480, 140, 30
-    ent(ux, uy, uw, uh, 'auth.users (Supabase)', ['id uuid PK'], ext=True)
+    lw, bh = 134, 70
+    px, py, pw, ph = 177, 508, 150, 70
+    pcx = px + pw / 2
 
-    px, py, pw, ph = 167, 370, 170, 74
-    ent(px, py, pw, ph, 'perfiles', ['id uuid PK, FK', 'email text', 'rol text'])
-    pk_fk_line(d, ux + uw/2, uy, px + pw/2, py + ph, '1:1')
+    ent(pcx - 70, 606, 140, 36, 'auth.users (Supabase)', ['id uuid PK'], ext=True)
+    ent(px, py, pw, ph, 'perfiles', ['id uuid PK, FK', 'email, rol, nombre', 'stripe_customer_id'])
+    pk_fk_line(d, pcx, 606, pcx, py + ph, '1:1')
 
-    # perfiles -> ordenes, perfiles -> foro_posts (1:N cada una)
-    ox, oy, ow, oh = 70, 264, 170, 70
-    ent(ox, oy, ow, oh, 'ordenes', ['id uuid PK', 'usuario_id FK', 'items jsonb, total'])
-    pk_fk_line(d, px + pw*0.25, py, ox + ow/2, oy + oh, '1:N')
+    # Columna izquierda
+    izq = [
+        (520, 'ordenes', ['id uuid PK', 'usuario_id FK', 'items jsonb, total'], 58),
+        (414, 'comentarios', ['id uuid PK', 'autor_id FK', 'tipo, item_id (lógico)'], 42),
+        (308, 'reportes', ['id uuid PK', 'reportado_por FK', 'tipo, item_id (lógico)'], 26),
+        (202, 'traducciones', ['PK (tipo,item_id,idioma)', 'actualizado_por FK', 'campos jsonb'], 10),
+    ]
+    for y, name, cols, off in izq:
+        ent(0, y, lw, bh, name, cols)
+        pk_fk_line(d, px, py + off, lw, y + bh / 2, '1:N')
 
-    fx, fy, fw, fh = 270, 264, 170, 70
-    ent(fx, fy, fw, fh, 'foro_posts', ['id uuid PK', 'autor_id FK', 'titulo, categoria'])
-    pk_fk_line(d, px + pw*0.75, py, fx + fw/2, fy + fh, '1:N')
+    # Columna derecha
+    rx = W - lw
+    ent(rx, 560, lw, bh, 'contenidos', ['id text PK', 'seccion, categoria', 'titulo, es_premium'])
+    ent(rx, 454, lw, bh, 'foro_posts', ['id uuid PK', 'autor_id FK', 'tema_contenido_id FK'])
+    ent(rx, 348, lw, bh, 'foro_comentarios', ['id uuid PK', 'post_id FK', 'autor_id FK'])
+    ent(rx, 242, lw, bh, 'ia_generaciones', ['id uuid PK', 'creado_por FK', 'agente, costo_usd'])
+    pk_fk_line(d, rx + lw/2, 560, rx + lw/2, 454 + bh, 'N:1 (opcional)')
+    pk_fk_line(d, rx + lw/2, 454, rx + lw/2, 348 + bh, '1:N (post)')
+    pk_fk_line(d, px + pw, py + 58, rx, 454 + bh / 2, '1:N')
+    pk_fk_line(d, px + pw, py + 34, rx, 348 + bh / 2, '1:N (autor)')
+    pk_fk_line(d, px + pw, py + 10, rx, 242 + bh / 2, '1:N')
 
-    # foro_posts -> foro_comentarios (1:N)
-    cx, cy, cw, ch = 280, 158, 190, 70
-    ent(cx, cy, cw, ch, 'foro_comentarios', ['id uuid PK', 'post_id FK', 'autor_id FK'])
-    pk_fk_line(d, fx + fw/2, fy, cx + cw/2, cy + ch, '1:N')
-
-    # perfiles -> foro_comentarios (autor_id, 1:N) -- ruteado por el margen
-    # derecho para no cruzar por encima de foro_posts.
-    lane_x = 498
-    pk_fk_path(d, [
-        (px + pw, py + ph * 0.35),
-        (lane_x, py + ph * 0.35),
-        (lane_x, cy + ch * 0.5),
-        (cx + cw, cy + ch * 0.5),
-    ], '1:N (autor_id)')
-
-    # Entidades independientes (sin llaves foraneas)
-    label_y = 142
-    d.add(String(W/2, label_y, 'Entidades independientes (sin relaciones foraneas)',
+    # Independientes
+    d.add(String(W/2, 172, 'Entidades independientes (sin llaves foráneas)',
                  fontName='Helvetica-Oblique', fontSize=7.5, fillColor=INK_SOFT, textAnchor='middle'))
-    row_e_y = 58
     ind = [
         ('noticias', ['id text PK', 'titulo, fecha', 'parrafos jsonb']),
-        ('productos', ['id text PK', 'nombre, precio', 'disponible bool']),
+        ('productos', ['id text PK', 'nombre, precio', 'stripe_price_id']),
         ('mensajes_contacto', ['id uuid PK', 'nombre, email', 'mensaje']),
         ('suscriptores', ['id uuid PK', 'email UNIQUE']),
+        ('gastos_servicios', ['id text PK', 'nombre, estado', 'costo_mensual_usd']),
     ]
-    bw, gap = 110, 14
-    total = 4 * bw + 3 * gap
-    x0 = (W - total) / 2
+    bw, gap = 92, 11
+    x0 = (W - (5 * bw + 4 * gap)) / 2
     for i, (name, cols) in enumerate(ind):
-        ent(x0 + i * (bw + gap), row_e_y, bw, 70, name, cols)
-
+        ent(x0 + i * (bw + gap), 88, bw, 70, name, cols)
+    # Escalado para que el diagrama completo quepa en una página junto a su texto.
+    k = 0.76
+    d.scale(k, k)
+    d.width, d.height = W * k, H * k
     return d
 
 
-# ── TABLAS: esquema relacional y diccionario de datos ───────
+# ── DICCIONARIO DESDE LA ESTRUCTURA REAL ────────────────────
 
-DICCIONARIO = [
-    ('noticias', [
-        ('id', 'text', 'PK', 'Slug unico generado del titulo'),
-        ('titulo', 'text', 'NOT NULL', 'Titular de la noticia'),
-        ('fecha', 'date', 'NOT NULL', 'Fecha editorial de la noticia'),
-        ('fecha_display', 'text', 'NOT NULL', 'Fecha en formato legible (es-PR)'),
-        ('imagen', 'text', 'NOT NULL', 'Ruta o URL de la imagen principal'),
-        ('imagen_alt', 'text', 'NOT NULL', 'Texto alternativo (accesibilidad)'),
-        ('imagen_caption', 'text', 'NOT NULL', 'Pie de foto / credito'),
-        ('clase', 'text', 'NOT NULL', 'Clase CSS para estilos particulares'),
-        ('fuente_url', 'text', 'NOT NULL', 'URL de la fuente original'),
-        ('fuente_texto', 'text', 'NOT NULL', 'Nombre visible de la fuente'),
-        ('parrafos', 'jsonb', "NOT NULL, DEFAULT '[]'", 'Arreglo de parrafos del cuerpo'),
-        ('categoria', 'text', "NOT NULL, DEFAULT 'general', CHECK IN (11 valores)", 'Categoria tematica (filtrable desde el frontend)'),
-        ('creado_en', 'timestamptz', "NOT NULL, DEFAULT now()", 'Fecha de creacion del registro'),
-    ]),
-    ('productos', [
-        ('id', 'text', 'PK', 'Slug unico generado del nombre'),
-        ('nombre', 'text', 'NOT NULL', 'Nombre del producto'),
-        ('descripcion', 'text', 'NOT NULL', 'Descripcion corta'),
-        ('precio', 'numeric(10,2)', 'NOT NULL', 'Precio en USD'),
-        ('imagen', 'text', 'NOT NULL', 'Ruta o URL de la imagen'),
-        ('imagen_alt', 'text', 'NOT NULL', 'Texto alternativo'),
-        ('stripe_link', 'text', 'NULL', 'Enlace de pago de Stripe (Fase 5 del roadmap de producto)'),
-        ('disponible', 'boolean', 'NOT NULL, DEFAULT true', 'Visible en la tienda'),
-        ('creado_en', 'timestamptz', "NOT NULL, DEFAULT now()", 'Fecha de creacion del registro'),
-    ]),
-    ('perfiles', [
-        ('id', 'uuid', 'PK, FK -> auth.users(id) ON DELETE CASCADE', 'Mismo id que el usuario de Supabase Auth'),
-        ('email', 'text', 'NOT NULL', 'Correo del usuario'),
-        ('rol', 'text', "NOT NULL, DEFAULT 'usuario', CHECK IN ('usuario','admin','premium')", 'Rol de autorizacion (premium ampliado por Stripe)'),
-        ('stripe_customer_id', 'text', 'NULL, UNIQUE (parcial)', 'Id del cliente en Stripe, una vez se suscribe'),
-        ('stripe_subscription_id', 'text', 'NULL', 'Id de la suscripcion activa en Stripe'),
-        ('creado_en', 'timestamptz', "NOT NULL, DEFAULT now()", 'Fecha de creacion del perfil'),
-    ]),
-    ('mensajes_contacto', [
-        ('id', 'uuid', 'PK, DEFAULT gen_random_uuid()', 'Identificador del mensaje'),
-        ('nombre', 'text', 'NOT NULL', 'Nombre de quien escribe'),
-        ('email', 'text', 'NOT NULL', 'Correo de contacto'),
-        ('motivo', 'text', 'NOT NULL', 'Motivo del mensaje'),
-        ('mensaje', 'text', 'NOT NULL', 'Contenido del mensaje'),
-        ('creado_en', 'timestamptz', "NOT NULL, DEFAULT now()", 'Fecha de envio'),
-    ]),
-    ('suscriptores', [
-        ('id', 'uuid', 'PK, DEFAULT gen_random_uuid()', 'Identificador del suscriptor'),
-        ('email', 'text', 'NOT NULL, UNIQUE', 'Correo suscrito al boletin'),
-        ('creado_en', 'timestamptz', "NOT NULL, DEFAULT now()", 'Fecha de suscripcion'),
-    ]),
-    ('ordenes', [
-        ('id', 'uuid', 'PK, DEFAULT gen_random_uuid()', 'Identificador de la orden'),
-        ('usuario_id', 'uuid', 'FK -> perfiles(id) ON DELETE SET NULL', 'Comprador (si inicio sesion)'),
-        ('items', 'jsonb', 'NOT NULL', 'Lista de productos y cantidades'),
-        ('total', 'numeric(10,2)', 'NOT NULL', 'Total cobrado'),
-        ('stripe_session_id', 'text', 'NULL', 'Referencia de la sesion de pago'),
-        ('estado', 'text', "NOT NULL, DEFAULT 'pendiente', CHECK IN ('pendiente','pagada','cancelada')", 'Estado del pago'),
-        ('creado_en', 'timestamptz', "NOT NULL, DEFAULT now()", 'Fecha de la orden'),
-    ]),
-    ('foro_posts', [
-        ('id', 'uuid', 'PK, DEFAULT gen_random_uuid()', 'Identificador de la publicacion'),
-        ('autor_id', 'uuid', 'NOT NULL, FK -> perfiles(id) ON DELETE CASCADE', 'Autor de la publicacion'),
-        ('titulo', 'text', 'NOT NULL', 'Titulo de la publicacion'),
-        ('cuerpo', 'text', 'NOT NULL', 'Contenido de la publicacion'),
-        ('categoria', 'text', "NOT NULL, DEFAULT 'general', CHECK IN (5 valores)", 'Categoria tematica'),
-        ('creado_en', 'timestamptz', "NOT NULL, DEFAULT now()", 'Fecha de publicacion'),
-        ('editado_en', 'timestamptz', 'NULL', 'Fecha de la ultima edicion'),
-    ]),
-    ('foro_comentarios', [
-        ('id', 'uuid', 'PK, DEFAULT gen_random_uuid()', 'Identificador del comentario'),
-        ('post_id', 'uuid', 'NOT NULL, FK -> foro_posts(id) ON DELETE CASCADE', 'Publicacion comentada'),
-        ('autor_id', 'uuid', 'NOT NULL, FK -> perfiles(id) ON DELETE CASCADE', 'Autor del comentario'),
-        ('cuerpo', 'text', 'NOT NULL', 'Contenido del comentario'),
-        ('creado_en', 'timestamptz', "NOT NULL, DEFAULT now()", 'Fecha del comentario'),
-    ]),
-]
+def cargar_estructura():
+    with open(ESTRUCTURA_PATH, encoding='utf-8') as f:
+        return json.load(f)
 
 
-def tabla_diccionario(tabla, campos):
-    header = [Paragraph('Campo', styles['TableHead']), Paragraph('Tipo', styles['TableHead']),
-              Paragraph('Restricciones', styles['TableHead']), Paragraph('Descripcion', styles['TableHead'])]
+def lista_check(definicion):
+    """'CHECK ((x = ANY (ARRAY['a'::text, ...])))' -> ['a', ...]; otros CHECK -> None."""
+    valores = re.findall(r"'([^']*)'::text", definicion)
+    return valores or None
+
+
+def restricciones_de(estructura, tabla, columna, fila):
+    out = []
+    pk = [r for r in estructura['restricciones'] if r['t'] == tabla and r['tipo'] == 'p']
+    if pk and re.search(r'\b' + columna + r'\b', pk[0]['def']):
+        out.append('PK')
+    for r in estructura['restricciones']:
+        if r['t'] != tabla:
+            continue
+        if r['tipo'] == 'f':
+            m = re.match(r'FOREIGN KEY \((\w+)\) REFERENCES ([\w.]+)\((\w+)\)(?: ON DELETE ([A-Z ]+))?', r['def'])
+            if m and m.group(1) == columna:
+                accion = f' ON DELETE {m.group(4)}' if m.group(4) else ''
+                out.append(f'FK → {m.group(2)}({m.group(3)}){accion}')
+        elif r['tipo'] == 'u' and re.search(r'\(' + columna + r'\)$', r['def']):
+            out.append('UNIQUE')
+        elif r['tipo'] == 'c' and re.search(r'\b' + columna + r'\b', r['def'][:60]):
+            vals = lista_check(r['def'])
+            if vals and len(vals) <= 5:
+                out.append('CHECK IN (' + ', '.join(vals) + ')')
+            elif vals:
+                out.append(f'CHECK IN ({len(vals)} valores)')
+            else:
+                out.append('CHECK ' + re.sub(r'[()]', '', r['def'][len('CHECK '):])[:24])
+    if fila['nulo'] == 'NO' and 'PK' not in out:
+        out.append('NOT NULL')
+    if fila['def']:
+        d = fila['def'].replace('::text', '').replace('::jsonb', '')
+        out.append('DEFAULT ' + d)
+    return ', '.join(out)
+
+
+def tablas_del_diccionario(estructura):
+    por_tabla = {}
+    for c in estructura['columnas']:
+        por_tabla.setdefault(c['t'], []).append(c)
+    faltan = [f'{t}.{c["col"]}' for t, cols in por_tabla.items() for c in cols if c['col'] not in DESC.get(t, {})]
+    if faltan:
+        raise SystemExit('Faltan descripciones en docs/descripciones_bd.py para: ' + ', '.join(faltan))
+    sin_tabla = [t for t in por_tabla if t not in PROPOSITO]
+    if sin_tabla:
+        raise SystemExit('Falta el propósito de las tablas: ' + ', '.join(sin_tabla))
+    return por_tabla
+
+
+def tabla_diccionario(estructura, tabla, columnas):
+    header = [Paragraph(h, styles['TableHead']) for h in ('Campo', 'Tipo', 'Restricciones', 'Descripción')]
     data = [header]
-    for campo, tipo, restr, desc in campos:
+    for c in columnas:
         data.append([
-            Paragraph(f'<font face="Courier-Bold">{campo}</font>', styles['TableCell']),
-            Paragraph(f'<font face="Courier">{tipo}</font>', styles['TableCellSoft']),
-            Paragraph(restr, styles['TableCellSoft']),
-            Paragraph(desc, styles['TableCell']),
+            Paragraph(f'<font face="Courier-Bold">{c["col"]}</font>', styles['TableCell']),
+            Paragraph(f'<font face="Courier">{c["tipo"]}</font>', styles['TableCellSoft']),
+            Paragraph(restricciones_de(estructura, tabla, c['col'], c).replace('<', '&lt;'), styles['TableCellSoft']),
+            Paragraph(DESC[tabla][c['col']], styles['TableCell']),
         ])
-    t = Table(data, colWidths=[80, 70, 165, CONTENT_W - 80 - 70 - 165], hAlign='LEFT')
+    t = Table(data, colWidths=[88, 62, 170, CONTENT_W - 88 - 62 - 170], hAlign='LEFT', repeatRows=1)
     t.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), ACCENT_DARK),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [WHITE, PAPER_RULED]),
         ('GRID', (0, 0), (-1, -1), 0.5, LINE),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-        ('LEFTPADDING', (0, 0), (-1, -1), 6),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 3.5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3.5),
+        ('LEFTPADDING', (0, 0), (-1, -1), 5),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
     ]))
     return t
+
+
+def esquema_relacional(estructura, por_tabla):
+    """Notación textual: tabla(PK subrayada*, atributos…) con las llaves foráneas debajo."""
+    filas = []
+    for tabla, cols in por_tabla.items():
+        pk = next((r for r in estructura['restricciones'] if r['t'] == tabla and r['tipo'] == 'p'), None)
+        pks = re.findall(r'\w+', pk['def'].replace('PRIMARY KEY', '')) if pk else []
+        attrs = ', '.join(f'<u>{c["col"]}</u>' if c['col'] in pks else c['col'] for c in cols)
+        fks = []
+        for r in estructura['restricciones']:
+            if r['t'] == tabla and r['tipo'] == 'f':
+                m = re.match(r'FOREIGN KEY \((\w+)\) REFERENCES ([\w.]+)\((\w+)\)', r['def'])
+                fks.append(f'{m.group(1)} → {m.group(2)}.{m.group(3)}')
+        texto = f'<b>{tabla}</b>({attrs})'
+        if fks:
+            texto += '<br/><font color="#51606E">FK: ' + '; '.join(fks) + '</font>'
+        filas.append(Paragraph(texto, styles['TableCell']))
+    return filas
 
 
 # ── PAGINA / PIE DE PAGINA ──────────────────────────────────
 
 def draw_footer(c: pdfcanvas.Canvas, doc):
+    if doc.page == 1:
+        return
     c.saveState()
     c.setStrokeColor(LINE)
     c.setLineWidth(0.5)
     c.line(MARGIN, 44, PAGE_W - MARGIN, 44)
     c.setFont('Helvetica', 7.5)
     c.setFillColor(INK_SOFT)
-    c.drawString(MARGIN, 32, 'Sabias Que PR — Planificacion y Diseno de Base de Datos')
-    c.drawRightString(PAGE_W - MARGIN, 32, f'Pagina {doc.page}')
+    c.drawString(MARGIN, 32, 'Sabías que PR — Planificación y Diseño de Base de Datos')
+    c.drawRightString(PAGE_W - MARGIN, 32, f'Página {doc.page}')
     c.restoreState()
+
+
+MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto',
+         'septiembre', 'octubre', 'noviembre', 'diciembre']
+
+
+def fecha_en_letras(hoy=None):
+    hoy = hoy or datetime.date.today()
+    return f'{hoy.day} de {MESES[hoy.month - 1]} de {hoy.year}'
+
+
+def datos_estudiante():
+    """Nombre y número de estudiante: de docs/privado/datos-estudiante.json (no se sube al repositorio).
+    Si el archivo no existe se usa el nombre ya usado en entregas anteriores y no se inventa el número."""
+    datos = {'nombre': 'William Collado', 'numero': None}
+    try:
+        with open(DATOS_ESTUDIANTE_PATH, encoding='utf-8') as f:
+            datos.update(json.load(f))
+    except FileNotFoundError:
+        pass
+    return datos
 
 
 # ── PORTADA ──────────────────────────────────────────────────
 
 def build_portada(story):
-    story.append(Spacer(1, 130))
+    est = datos_estudiante()
+    story.append(Spacer(1, 90))
+    story.append(Paragraph('UNIVERSIDAD INTERAMERICANA DE PUERTO RICO · RECINTO DE FAJARDO', styles['Eyebrow']))
+    story.append(Spacer(1, 40))
     story.append(Paragraph('PROYECTO FINAL · DESARROLLO WEB FULL-STACK', styles['Eyebrow']))
-    story.append(Paragraph('Sabías Que PR', ParagraphStyle('CoverTitle', parent=styles['DocTitle'], fontSize=32, leading=36)))
+    story.append(Paragraph('Sabías que PR', ParagraphStyle('CoverTitle', parent=styles['DocTitle'], fontSize=32, leading=36)))
     story.append(Paragraph('Planificación y Diseño de la Base de Datos', ParagraphStyle('CoverSub', parent=styles['DocSub'], fontSize=14, leading=19, textColor=ACCENT_DARK)))
     story.append(Spacer(1, 10))
     story.append(Paragraph('Fase 1: Planificación y Diseño &nbsp;·&nbsp; Fase 2: Diseño de la Base de Datos', styles['DocSub']))
-    story.append(Spacer(1, 200))
+    story.append(Spacer(1, 150))
 
-    meta = [
-        ['Estudiante', 'William Collado'],
+    meta = [['Estudiante', est['nombre']]]
+    if est.get('numero'):
+        meta.append(['Número de estudiante', est['numero']])
+    meta += [
         ['Curso', 'COMP2053 — Desarrollo Web Full-Stack'],
+        ['Profesora', 'Milagros Donato Cintrón'],
         ['Institución', 'Universidad Interamericana de Puerto Rico, Recinto de Fajardo'],
         ['Repositorio', 'github.com/Wcollado72/SabiasquePR'],
-        ['Sitio en vivo', 'fabulous-tartufo-fcb839.netlify.app'],
-        ['Fecha', '17 de septiembre de 2026 (actualizado)'],
+        ['Sitio en línea', 'sabiasquepr.com'],
+        ['Fecha', fecha_en_letras()],
     ]
     data = [[Paragraph(f'<font color="#51606E">{k}</font>', styles['Body']), Paragraph(v, styles['Body'])] for k, v in meta]
-    t = Table(data, colWidths=[110, CONTENT_W - 110], hAlign='LEFT')
+    t = Table(data, colWidths=[130, CONTENT_W - 130], hAlign='LEFT')
     t.setStyle(TableStyle([
         ('TOPPADDING', (0, 0), (-1, -1), 3),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
@@ -504,12 +532,37 @@ def bullets(story, items):
     ))
 
 
+def tabla_simple(filas, anchos):
+    t = Table([[Paragraph(str(c), styles['TableHead'] if i == 0 else styles['TableCell']) for c in row] for i, row in enumerate(filas)],
+              colWidths=anchos, hAlign='LEFT', repeatRows=1)
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), ACCENT_DARK),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [WHITE, PAPER_RULED]),
+        ('GRID', (0, 0), (-1, -1), 0.5, LINE),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('TOPPADDING', (0, 0), (-1, -1), 3.5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3.5),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    return t
+
+
 def build():
+    estructura = cargar_estructura()
+    por_tabla = tablas_del_diccionario(estructura)
+    n_tablas = len(por_tabla)
+    n_pk = sum(1 for r in estructura['restricciones'] if r['tipo'] == 'p')
+    n_fk = sum(1 for r in estructura['restricciones'] if r['tipo'] == 'f')
+    n_check = sum(1 for r in estructura['restricciones'] if r['tipo'] == 'c')
+    n_idx = sum(1 for i in estructura['indices'] if not i['nombre'].endswith('_pkey'))
+    n_rls = sum(1 for r in estructura['rls'] if r['rls'])
+
+    est = datos_estudiante()
     doc = SimpleDocTemplate(OUT_PATH, pagesize=letter,
                              leftMargin=MARGIN, rightMargin=MARGIN,
                              topMargin=64, bottomMargin=58,
-                             title='Sabías Que PR — Planificación y Diseño de Base de Datos',
-                             author='William Collado')
+                             title='Sabías que PR — Planificación y Diseño de Base de Datos',
+                             author=est['nombre'])
     story = []
     build_portada(story)
 
@@ -518,120 +571,102 @@ def build():
 
     h1(story, 1, 'Descripción del proyecto')
     story.append(Paragraph(
-        '<b>Sabías Que PR</b> es una plataforma web informativa y comunitaria, nacida en Puerto Rico con una '
-        'misión sin fronteras: cualquier persona, en cualquier país, que quiera entender su entorno y ser '
-        'agente de cambio. Combina noticias categorizadas con contexto histórico y análisis crítico, contenido '
-        'educativo organizado por rutas de aprendizaje, una tienda de artículos que apoya el sostenimiento '
-        'del proyecto, y un foro comunitario donde los usuarios registrados publican y comentan — con un '
-        'modelo de suscripción premium que amplía lo que pueden publicar.', styles['Body']))
+        '<b>Sabías que PR</b> es una plataforma web informativa y comunitaria nacida en Puerto Rico con una '
+        'misión sin fronteras: ayudar a cualquier persona a entender su entorno. Reúne noticias con contexto, '
+        'contenido educativo, la sección <b>Revolución Humana</b> (ensayos, videos y audios con sus propios '
+        'espacios de debate), una tienda, y un <b>apoyo voluntario</b> al proyecto. Todo el contenido es gratis; '
+        'quien apoya recibe reconocimiento y puede escribir textos más largos en el debate.', styles['Body']))
     story.append(Paragraph(
-        'El sitio nació como una aplicación estática (13 páginas HTML generadas por un script de plantillas '
-        'propio) y, como proyecto final del curso, evolucionó hacia una aplicación <b>full-stack</b> real: un '
-        'frontend en HTML5/CSS3/JavaScript que consume una <b>API REST propia</b> construida en Node.js y '
-        'Express, con persistencia en una base de datos <b>PostgreSQL</b> (alojada en Supabase), '
-        'autenticación de usuarios mediante <b>JSON Web Tokens verificados en el servidor</b> — no solo '
-        'en el navegador — y suscripciones recurrentes procesadas por <b>Stripe</b>. La aplicación ya está '
-        '<b>desplegada y accesible públicamente</b> (Netlify + Render), no solo en un entorno local.', styles['Body']))
+        'El sitio es una aplicación <b>full-stack</b>: un frontend en HTML5, CSS3 y JavaScript que consume una '
+        '<b>API REST propia</b> (Node.js y Express), con persistencia en <b>PostgreSQL</b> (Supabase), '
+        'autenticación con <b>JSON Web Tokens verificados en el servidor</b> y pagos con <b>Stripe</b> '
+        '(modo de prueba). Está <b>desplegada y accesible públicamente</b> en '
+        '<font face="Courier">sabiasquepr.com</font> (Netlify + Render + Supabase).', styles['Body']))
 
     h1(story, 2, 'Objetivo general')
     story.append(Paragraph(
-        'Diseñar, desarrollar, probar y desplegar una aplicación web full-stack funcional para el proyecto '
-        '<b>Sabías Que PR</b>, que integre un frontend responsivo, una API REST propia con operaciones CRUD '
-        'completas, una base de datos relacional persistente y un sistema de autenticación con JWT verificado '
-        'en el servidor, aplicando de manera integrada las tecnologías y metodologías estudiadas durante el '
-        'curso de Desarrollo Web Full-Stack.', styles['Body']))
+        'Diseñar, desarrollar, probar y desplegar una aplicación web full-stack funcional que integre un '
+        'frontend responsivo, una API REST propia con operaciones CRUD completas, una base de datos '
+        'relacional persistente y un sistema de autenticación con JWT verificado en el servidor, aplicando '
+        'de manera integrada las tecnologías estudiadas en el curso de Desarrollo Web Full-Stack.', styles['Body']))
+    story.append(Paragraph('Objetivos específicos', styles['H2']))
+    bullets(story, [
+        'Construir una API REST con rutas organizadas, validación de datos, manejo centralizado de errores y rutas protegidas por rol.',
+        f'Diseñar una base de datos relacional de {n_tablas} tablas con llaves primarias y foráneas, restricciones y seguridad por fila.',
+        'Implementar registro, inicio de sesión y verificación en dos pasos para el panel de administración.',
+        'Publicar la aplicación en línea con pruebas automáticas y un flujo de integración continua.',
+    ])
 
     h1(story, 3, 'Justificación')
     story.append(Paragraph(
-        'Antes de este proyecto, todo lo "dinámico" del sitio dependía de que el navegador llamara '
-        'directamente a servicios de terceros sin configurar (Formspree, Supabase, Mailchimp, Stripe), y el '
-        'contenido se editaba a mano en archivos JSON. Un proyecto final de desarrollo full-stack evalúa que '
-        'el equipo construya y controle las tres capas de una aplicación real: un backend/API propio, una '
-        'base de datos con esquema propio, y un frontend que consuma esa API — no solo enlaces a widgets '
-        'externos.', styles['Body']))
+        'Un proyecto final de desarrollo full-stack evalúa que se construyan y controlen las tres capas de '
+        'una aplicación real: un backend propio, una base de datos con esquema propio y un frontend que '
+        'consuma esa API, no solo enlaces a servicios externos. El sitio responde además a una necesidad real: '
+        'un espacio en español, desde Puerto Rico, donde las noticias vienen con contexto y la comunidad '
+        'puede debatir con respeto y moderación.', styles['Body']))
     story.append(Paragraph(
-        'Construir un <b>foro comunitario real</b> como eje del CRUD, junto con la gestión de noticias y '
-        'productos vía API, resuelve ambos objetivos a la vez: cumple el criterio de mayor peso de la '
-        'rúbrica del curso (30%, funcionalidad y CRUD completo) y avanza la visión original del proyecto de '
-        'convertirse en un espacio donde la comunidad no solo lee, sino que participa.', styles['Body']))
+        'El debate comunitario, la gestión de contenidos y la tienda sirven de eje del CRUD, el criterio de '
+        'mayor peso de la rúbrica (30 %), y a la vez avanzan la visión del producto: que la comunidad no '
+        'solo lea, sino que participe.', styles['Body']))
 
     h1(story, 4, 'Alcance del sistema')
-    story.append(Paragraph('<b>Incluido en esta entrega:</b>', styles['H2']))
+    story.append(Paragraph('<b>Funcionalidades incluidas en esta entrega:</b>', styles['H2']))
     bullets(story, [
-        'Foro comunitario con CRUD completo (publicaciones y comentarios), filtrable por categoría, con límite de palabras según el rol del usuario (100 para usuarios regulares, 500 para premium), autenticación JWT verificada en el servidor y permisos de dueño/administrador.',
-        'CRUD vía API REST propia para noticias (filtrables por 11 categorías) y productos (antes generados estáticamente por un script de plantillas).',
-        'Autenticación completa de extremo a extremo: registro, inicio de sesión, recuperación de contraseña e inicio de sesión con Google (Supabase Auth), verificada también del lado del servidor, con acceso disponible desde una ventana de inicio de sesión en todas las páginas.',
-        'Suscripciones premium recurrentes vía Stripe (checkout + webhook que sincroniza el rol del usuario automáticamente) — construidas y funcionando en modo de prueba (sandbox), sin cobrar dinero real todavía.',
-        'Panel de administración protegido por rol, con formularios CRUD sobre noticias (incluyendo categoría) y productos.',
-        'Suite de pruebas automatizadas (94 pruebas, unitarias e integración) sobre la API.',
-        'Despliegue público real de la aplicación (frontend en Netlify, backend en Render) en una URL accesible para evaluación, con un flujo automatizado (GitHub Actions) que mantiene la base de datos activa.',
+        '<b>CRUD vía API REST</b> sobre noticias, contenidos multi-formato, productos y publicaciones del debate; comentarios, reportes de moderación y órdenes con las operaciones que aplican.',
+        '<b>Autenticación completa:</b> registro, inicio de sesión, recuperación de contraseña y Google (Supabase Auth); JWT verificado en el servidor; roles usuario, apoyo (premium), moderador y administrador; verificación en dos pasos (TOTP) para el panel de administración.',
+        '<b>Debate comunitario</b> en cada sub-sección, con moderación, reportes y filtro automático; límite de palabras según el rol (200 para cuentas gratuitas y 1000 para quienes apoyan).',
+        '<b>Panel de administración</b> protegido: formularios CRUD de noticias y contenidos, productos, moderación, métricas de uso de IA y control de gastos de servicios.',
+        '<b>Agentes de IA</b> (Investigador, Redactor y Traductor, sobre la API de Claude) para preparar contenido, con registro de costo por uso.',
+        '<b>Tienda y apoyo voluntario</b> con Stripe (checkout y webhook firmado) en modo de prueba.',
+        '<b>Sitio bilingüe</b> (español e inglés), diseño responsivo, accesible y con modo claro y oscuro.',
+        f'<b>Calidad:</b> 694 pruebas automáticas (Jest y Supertest), ESLint, auditoría de dependencias y de secretos en cada cambio (GitHub Actions) y respaldo diario cifrado de la base de datos.',
     ])
-    story.append(Paragraph('<b>Fuera de alcance para esta entrega académica</b> (parte del roadmap de producto, no del criterio de evaluación):', styles['H2']))
+    story.append(Paragraph('<b>Fuera de alcance de esta entrega</b> (roadmap de producto, no criterio de evaluación):', styles['H2']))
     bullets(story, [
-        'Activar Stripe en modo real (llaves de producción) — las suscripciones premium están construidas y probadas, pero solo con llaves de prueba.',
-        'Checkout de carrito multi-producto para la tienda (hoy usa enlaces de pago individuales de Stripe por producto).',
-        'Sistema de newsletter propio para reemplazar Mailchimp.',
-        'Conexión al dominio de producción real (sabiasquepr.com) — deliberadamente pospuesta hasta tener más contenido publicado; el despliegue académico usa la URL de Netlify/Render, que ya es pública y funcional.',
-        'Catalogador de noticias asistido por IA, sección de videos y soporte multi-idioma — roadmap de producto a futuro.',
+        'Activar Stripe en modo real (llaves de producción): el flujo está construido y probado con llaves de prueba.',
+        'Lanzamiento público y promoción: se hará cuando haya suficiente contenido en cada sección.',
+        'Debates en vivo tipo chat y nuevas zonas de debate.',
     ])
 
     h1(story, 5, 'Tecnologías seleccionadas')
-    tech_data = [
-        [Paragraph('<b>Capa</b>', styles['TableCell']), Paragraph('<b>Tecnología</b>', styles['TableCell']), Paragraph('<b>Uso en el proyecto</b>', styles['TableCell'])],
-        ['Frontend', 'HTML5, CSS3, JavaScript (ES modules)', 'Sitio responsive, modo oscuro con persistencia, PWA (manifest + service worker)'],
-        ['Backend', 'Node.js + Express', 'API REST propia (backend/src) con middleware de validación y manejo de errores centralizado'],
-        ['Base de datos', 'PostgreSQL (Supabase)', 'Esquema relacional propio con Row Level Security activo'],
-        ['Autenticación', 'Supabase Auth + jose (JWKS, ES256)', 'Login/registro/OAuth en el cliente; verificación de JWT en cada ruta protegida del servidor'],
-        ['Pagos', 'Stripe (suscripciones)', 'Checkout de suscripción premium + webhook que actualiza el rol del usuario automáticamente (modo prueba)'],
-        ['Pruebas', 'Jest + Supertest', '94 pruebas unitarias de validadores/middleware y de integración de la API'],
-        ['Control de versiones', 'Git + GitHub', 'Historial de commits por fase (github.com/Wcollado72/SabiasquePR)'],
-        ['Despliegue', 'Netlify + Render', 'Frontend estático (Netlify) y backend Express (Render) — ya desplegados y accesibles públicamente'],
-        ['Automatización', 'GitHub Actions', 'Ping periódico a la API (cada 3 días) para evitar que Supabase pause la base de datos por inactividad'],
-    ]
-    t = Table([[Paragraph(str(c), styles['TableCell']) if not isinstance(c, Paragraph) else c for c in row] for row in tech_data],
-               colWidths=[85, 165, CONTENT_W - 85 - 165], hAlign='LEFT')
-    t.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), ACCENT_DARK),
-        ('TEXTCOLOR', (0, 0), (-1, 0), WHITE),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [WHITE, PAPER_RULED]),
-        ('GRID', (0, 0), (-1, -1), 0.5, LINE),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('TOPPADDING', (0, 0), (-1, -1), 5),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-        ('LEFTPADDING', (0, 0), (-1, -1), 6),
-    ]))
-    story.append(t)
+    story.append(tabla_simple([
+        ['Capa', 'Tecnología', 'Uso en el proyecto'],
+        ['Frontend', 'HTML5, CSS3, JavaScript (sin framework)', 'Sitio responsivo generado por un script de plantillas (build.js), PWA con service worker, modo claro/oscuro, bilingüe'],
+        ['Backend', 'Node.js 22 + Express 5', 'API REST propia (54 endpoints) con validadores, middleware de autenticación y manejo de errores centralizado'],
+        ['Base de datos', 'PostgreSQL (Supabase)', f'{n_tablas} tablas relacionales con Row Level Security activo'],
+        ['Autenticación', 'Supabase Auth + jose (JWKS, ES256)', 'Registro, inicio de sesión, Google y 2FA en el cliente; verificación del JWT en cada ruta protegida del servidor'],
+        ['Pagos', 'Stripe', 'Checkout de tienda y apoyo voluntario, con webhook firmado (modo de prueba)'],
+        ['Servicios', 'Resend, Cloudflare Turnstile, Beehiiv, Formspree, API de Claude', 'Correos de autenticación, anti-robots, boletín, formulario de contacto y agentes de IA'],
+        ['Calidad', 'Jest + Supertest, ESLint', '694 pruebas automáticas y revisión de estilo en cada cambio'],
+        ['Control de versiones', 'Git + GitHub + GitHub Actions', 'Historial de commits, ramas y pull requests; flujos de pruebas, auditoría, respaldo y mantenimiento'],
+        ['Despliegue', 'Netlify + Render + Supabase', 'Frontend estático (Netlify, dominio propio), API (Render) y base de datos (Supabase)'],
+    ], [88, 150, CONTENT_W - 88 - 150]))
     story.append(Spacer(1, 4))
 
-    story.append(PageBreak())
+    story.append(CondPageBreak(420))
     h1(story, 6, 'Diagrama de arquitectura')
     story.append(Paragraph(
-        'El navegador carga el frontend estático y, por separado, se comunica directamente con Supabase Auth '
-        'para autenticarse (obteniendo un JWT firmado). El frontend consulta el backend propio mediante fetch, '
-        'enviando ese JWT en el encabezado <font face="Courier">Authorization: Bearer</font>. El backend valida '
-        'el JWT contra el JWKS público de Supabase (sin necesidad de compartir ningún secreto) y solo entonces '
-        'consulta PostgreSQL.', styles['Body']))
+        'El navegador carga el frontend estático y, por separado, se comunica con Supabase Auth para '
+        'autenticarse y obtener un JWT firmado. El frontend consulta el backend propio mediante '
+        '<font face="Courier">fetch</font> enviando ese JWT en el encabezado '
+        '<font face="Courier">Authorization: Bearer</font>. El backend valida el JWT contra las llaves públicas '
+        'de Supabase (JWKS) —sin compartir ningún secreto— y solo entonces consulta PostgreSQL.', styles['Body']))
     story.append(diagrama_arquitectura())
-    story.append(Paragraph('Figura 1. Arquitectura de tres capas: frontend, API propia y base de datos, con Supabase Auth como servicio de identidad compartido.', styles['Caption']))
+    story.append(Paragraph('Figura 1. Arquitectura de tres capas con Supabase Auth como servicio de identidad compartido y los servicios de terceros que usa cada capa.', styles['Caption']))
     story.append(Paragraph(
-        'Un cuarto integrante, no mostrado en el diagrama por espacio, es <b>Stripe</b>: cuando un usuario se '
-        'suscribe a premium desde <font face="Courier">premium.html</font>, el backend crea una sesión de '
-        'checkout de Stripe; al completarse el pago, Stripe llama a un <i>webhook</i> propio '
+        'Cuando alguien apoya el proyecto o compra en la tienda, el backend crea una sesión de checkout de '
+        'Stripe; al completarse el pago, Stripe llama al webhook propio '
         '(<font face="Courier">POST /api/stripe/webhook</font>), verificado con la firma de Stripe, que '
-        'actualiza directamente el rol del usuario en PostgreSQL — sin que el frontend tenga que hacer nada '
-        'adicional.', styles['Body']))
+        'actualiza la orden y el rol del usuario en PostgreSQL sin intervención del frontend.', styles['Body']))
 
+    story.append(CondPageBreak(420))
     h1(story, 7, 'Diagrama general de navegación')
     story.append(Paragraph(
-        'Todas las páginas públicas comparten la barra de navegación superior y un botón de inicio de sesión '
-        'en el encabezado (ventana emergente, disponible en toda página). El foro permite lectura pública '
-        'y restringe la escritura (publicar, comentar) a usuarios con sesión activa; el panel de administración '
-        'está completamente restringido al rol <font face="Courier">admin</font>; la página Premium inicia el '
-        'checkout de Stripe para quien quiera suscribirse. Las páginas "Sobre el proyecto", "Crítica '
-        'Internacional" y "Tecnología" se retiraron: la primera se fusionó dentro de Inicio, y los temas de '
-        'las otras dos se absorbieron en las categorías del feed de Noticias.', styles['Body']))
+        'Todas las páginas comparten la barra de navegación y el acceso a iniciar sesión. Cada sub-sección de '
+        'Revolución Humana y Educación tiene su propio debate: se lee sin cuenta y se escribe con sesión. '
+        'El panel de administración exige el rol de administrador y verificación en dos pasos.', styles['Body']))
     story.append(diagrama_navegacion())
-    story.append(Paragraph('Figura 2. Mapa de navegación del sitio: páginas públicas, área que requiere sesión (foro) y área restringida por rol (panel de administración).', styles['Caption']))
+    story.append(Paragraph('Figura 2. Mapa de navegación: páginas públicas, área con sesión y área restringida por rol.', styles['Caption']))
 
     # ── FASE 2 ──────────────────────────────────────────────
     story.append(PageBreak())
@@ -639,47 +674,77 @@ def build():
 
     h1(story, 8, 'Modelo Entidad-Relación (MER)')
     story.append(Paragraph(
-        'La base de datos vive en el proyecto de Supabase (PostgreSQL administrado). '
-        '<font face="Courier">auth.users</font> es la tabla gestionada por Supabase Auth; '
-        '<font face="Courier">perfiles</font> extiende esa identidad con el rol de autorización '
-        '(<font face="Courier">usuario</font> / <font face="Courier">admin</font>) y es el punto de origen de '
-        'todas las relaciones de autoría del sistema. Todas las tablas tienen <b>Row Level Security</b> activo.', styles['Body']))
+        'La base de datos vive en un proyecto de Supabase (PostgreSQL administrado). '
+        '<font face="Courier">auth.users</font> es la tabla de identidad que gestiona Supabase Auth; '
+        '<font face="Courier">perfiles</font> la extiende con el rol y los datos de la cuenta, y es el origen '
+        f'de las relaciones de autoría. El modelo tiene <b>{n_tablas} tablas propias</b>, {n_pk} llaves primarias, '
+        f'<b>{n_fk} llaves foráneas</b> y Row Level Security activo en {n_rls} de {n_tablas}.', styles['Body']))
     story.append(diagrama_mer())
-    story.append(Paragraph('Figura 3. Modelo Entidad-Relación: 8 tablas propias más la tabla de identidad de Supabase Auth (externa, gestionada por la plataforma).', styles['Caption']))
+    story.append(Paragraph(
+        'Figura 3. Modelo Entidad-Relación. Las líneas son llaves foráneas; en comentarios, reportes y '
+        'traducciones la pieza referida se identifica por (tipo, item_id), una relación lógica sin llave foránea '
+        'porque apunta a tablas distintas según el tipo.', styles['Caption']))
 
     story.append(PageBreak())
-    h1(story, 9, 'Esquema relacional y diccionario de datos')
+    h1(story, 9, 'Esquema relacional')
     story.append(Paragraph(
-        'A continuación, el diccionario de datos completo: cada tabla, sus columnas, tipo de dato, '
-        'restricciones (llaves primarias/foráneas, valores por defecto, validaciones) y una descripción '
-        'de su propósito. Corresponde exactamente al script <font face="Courier">backend/sql/schema.sql</font> '
-        'del repositorio.', styles['Body']))
-    for i, (tabla, campos) in enumerate(DICCIONARIO):
+        'Notación relacional del modelo: cada tabla con sus atributos, la llave primaria <u>subrayada</u> y '
+        'las llaves foráneas debajo.', styles['Body']))
+    filas = esquema_relacional(estructura, por_tabla)
+    t = Table([[f] for f in filas], colWidths=[CONTENT_W], hAlign='LEFT')
+    t.setStyle(TableStyle([
+        ('ROWBACKGROUNDS', (0, 0), (-1, -1), [WHITE, PAPER_RULED]),
+        ('GRID', (0, 0), (-1, -1), 0.5, LINE),
+        ('TOPPADDING', (0, 0), (-1, -1), 4), ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    story.append(t)
+
+    story.append(PageBreak())
+    h1(story, 10, 'Diccionario de datos')
+    story.append(Paragraph(
+        'Cada tabla con sus columnas, tipo de dato, restricciones (llaves, valores por defecto y '
+        'validaciones) y una descripción. Se genera a partir de la estructura real de la base de datos, por '
+        'lo que coincide exactamente con el script <font face="Courier">backend/sql/schema.sql</font>.', styles['Body']))
+    orden = ['perfiles', 'noticias', 'contenidos', 'productos', 'ordenes', 'foro_posts', 'foro_comentarios',
+             'comentarios', 'reportes', 'traducciones', 'ia_generaciones', 'gastos_servicios',
+             'mensajes_contacto', 'suscriptores']
+    assert sorted(orden) == sorted(por_tabla), 'La lista de orden no coincide con las tablas de la base'
+    for i, tabla in enumerate(orden):
         story.append(Spacer(1, 10 if i else 4))
-        story.append(Paragraph(tabla, styles['H2']))
-        story.append(tabla_diccionario(tabla, campos))
+        bloque = [Paragraph(tabla, styles['H2']), Paragraph(PROPOSITO[tabla], styles['BodySmall'])]
+        story.extend(bloque)
+        story.append(tabla_diccionario(estructura, tabla, por_tabla[tabla]))
 
     story.append(Spacer(1, 14))
-    h1(story, 10, 'Normalización e índices')
+    h1(story, 11, 'Normalización, índices y seguridad')
     story.append(Paragraph(
         'El esquema está normalizado a Tercera Forma Normal (3FN): cada tabla describe una sola entidad, sin '
-        'grupos repetitivos ni dependencias transitivas. La única excepción deliberada es '
-        '<font face="Courier">noticias.parrafos</font> y <font face="Courier">ordenes.items</font>, almacenados '
-        'como <font face="Courier">jsonb</font> por tratarse de listas ordenadas sin necesidad de consultarse '
-        'individualmente por fuera de su registro padre.', styles['Body']))
-    bullets(story, [
-        '<font face="Courier">idx_foro_posts_categoria</font> — acelera el filtrado del foro por categoría, ordenado por fecha.',
-        '<font face="Courier">idx_foro_comentarios_post_id</font> — acelera la carga de comentarios de una publicación.',
-        'Restricciones <font face="Courier">CHECK</font> en <font face="Courier">perfiles.rol</font>, <font face="Courier">foro_posts.categoria</font> y <font face="Courier">ordenes.estado</font> sustituyen tablas de catálogo separadas, dado el número reducido y fijo de valores válidos.',
-    ])
-
-    h1(story, 11, 'Script de creación de la base de datos')
+        'grupos repetitivos ni dependencias transitivas. Las excepciones son deliberadas: listas ordenadas que '
+        'no se consultan por separado se guardan como <font face="Courier">jsonb</font> '
+        '(<font face="Courier">noticias.parrafos</font>, <font face="Courier">ordenes.items</font>, las '
+        'direcciones de envío y los campos de <font face="Courier">traducciones</font>).', styles['Body']))
     story.append(Paragraph(
-        'El script completo de creación (DDL) vive en el repositorio en '
-        '<font face="Courier">backend/sql/schema.sql</font> y se aplica con '
-        '<font face="Courier">npm run db:schema</font> (backend/scripts/apply-schema.js). Fue verificado '
-        'aplicándolo contra el proyecto real de Supabase durante la Fase 1 del desarrollo. Se incluye a '
-        'continuación tal como está en el repositorio.', styles['Body']))
+        f'Hay <b>{n_check} restricciones CHECK</b> que sustituyen tablas de catálogo (roles, categorías, estados) '
+        f'por ser listas cortas y fijas, y <b>{n_idx} índices</b> adicionales a las llaves primarias, entre ellos:', styles['Body']))
+    bullets(story, [
+        '<font face="Courier">idx_contenidos_seccion</font> — filtra y ordena el contenido por sección, categoría y fecha.',
+        '<font face="Courier">idx_foro_posts_categoria</font> y <font face="Courier">idx_foro_comentarios_post_id</font> — cargan el debate por categoría y los comentarios de cada publicación.',
+        '<font face="Courier">idx_noticias_un_destacado</font> e <font face="Courier">idx_contenidos_un_destacado</font> — índices únicos parciales: solo puede haber una pieza destacada.',
+        '<font face="Courier">idx_ordenes_stripe_session_id</font> y <font face="Courier">idx_perfiles_stripe_customer_id</font> — búsquedas rápidas desde el webhook de Stripe.',
+    ])
+    story.append(Paragraph(
+        f'Las {n_rls} tablas tienen <b>Row Level Security</b> activo sin políticas públicas: la API de datos de '
+        'Supabase queda cerrada a propósito y solo el backend propio, con conexión directa y verificación '
+        'previa del JWT, accede a los datos.', styles['Body']))
+
+    h1(story, 12, 'Script de creación de la base de datos')
+    story.append(Paragraph(
+        'El script completo de creación vive en <font face="Courier">backend/sql/schema.sql</font> y se aplica con '
+        '<font face="Courier">npm run db:schema</font>. Un script de comprobación '
+        '(<font face="Courier">npm run db:probar-schema</font>) lo ejecuta en un esquema temporal y compara '
+        'columnas, restricciones, índices y RLS con la base real y coinciden todos. Se incluye '
+        'a continuación tal como está en el repositorio.', styles['Body']))
     story.append(Spacer(1, 6))
     with open(SCHEMA_SQL_PATH, 'r', encoding='utf-8') as f:
         sql_text = f.read()
