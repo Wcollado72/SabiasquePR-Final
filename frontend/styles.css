@@ -1125,7 +1125,7 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .lh-ensayo h5{ font-size:1rem; margin:22px 0 8px; }
 .lh-ensayo p{ margin:0 0 14px; }
 
-/* Educacion: tablas de ranking mundial + banner de reglas 12+. */
+/* Educacion: tablas de ranking mundial + banner de reglas del foro. */
 .edu-rankings-intro{ color:var(--ink-soft); max-width:var(--measure); margin:0 0 24px; }
 .edu-ranking-box{
   background:var(--panel);
@@ -1193,21 +1193,6 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   border-radius:var(--radius);
   padding:20px 22px;
   margin:0 0 24px;
-}
-.edu-reglas-badge{
-  flex-shrink:0;
-  margin:0;
-  width:44px;
-  height:44px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:50%;
-  background:var(--premium);
-  color:var(--premium-ink);
-  font-family:var(--font-display);
-  font-weight:700;
-  font-size:.95rem;
 }
 .edu-reglas-banner h3{ margin:0 0 6px; font-size:1.05rem; }
 .edu-reglas-banner p{ margin:0; color:var(--ink-soft); line-height:1.6; }

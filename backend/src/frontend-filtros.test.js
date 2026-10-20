@@ -166,5 +166,12 @@ describe('Debate y comentarios: el correo del autor no se muestra (privacidad)',
     const js = leer(archivo);
     expect(js).toMatch(/autor_nombre/);
     expect(js).not.toMatch(/autor_email/);
+
+describe('Educación: sin etiqueta de edad (política legal, COPPA)', () => {
+  const html = leer('educacion.html');
+  test('el banner de reglas del foro no declara ninguna edad', () => {
+    expect(html).toContain('Reglas del foro de Educación');
+    expect(html).not.toMatch(/12\+|12 años|a partir de \d+ años/);
+    expect(html).not.toContain('edu-reglas-badge');
   });
 });

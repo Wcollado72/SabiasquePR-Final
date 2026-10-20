@@ -173,7 +173,7 @@ describe('POST /api/foro/posts', () => {
     expect(pool.query).toHaveBeenCalledTimes(1);
   });
 
-  test('201 en educacion sin confirmar edad (foro 12+ sin gate)', async () => {
+  test('201 en educacion sin confirmar edad (audiencia general, sin gate)', async () => {
     pool.query.mockResolvedValueOnce({ rows: [{ id: 'p1', autor_id: 'user-menor', titulo: 'Titulo valido' }] });
     const res = await request(app)
       .post('/api/foro/posts')
@@ -395,7 +395,7 @@ describe('POST /api/foro/posts/:postId/comentarios', () => {
     expect(res.status).toBe(201);
   });
 
-  test('201 al comentar en educacion sin confirmar edad (foro 12+ sin gate)', async () => {
+  test('201 al comentar en educacion sin confirmar edad (audiencia general, sin gate)', async () => {
     pool.query
       .mockResolvedValueOnce({ rows: [{ id: 'p3', subseccion: 'educacion' }] })
       .mockResolvedValueOnce({ rows: [{ id: 'c1', post_id: 'p3', cuerpo: 'Un comentario' }] });

@@ -10,7 +10,7 @@ const { nombreVisibleSql } = require('../util/autorVisible');
 const router = express.Router();
 
 // El gate de edad 18+ solo aplica a sub-secciones de tono fuerte/moderacion
-// minima -- Nuevos Humanos y Logica Humana (12+) no lo necesitan. Politica
+// minima -- Nuevos Humanos y Logica Humana (audiencia general) no lo necesitan. Politica
 // de edad por seccion fijada 2026-09-27: solo Corrupcion Humana e Ilogica
 // Humana son 18+.
 const SUBSECCIONES_18_MAS = ['corrupcion-humana', 'ilogica-humana'];

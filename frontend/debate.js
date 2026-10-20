@@ -34,7 +34,7 @@
   };
   // Politica de edad por seccion fijada 2026-09-27: solo Corrupcion Humana
   // e Ilogica Humana son 18+ (piden el interstitial). Nuevos Humanos y
-  // Logica Humana son 12+ y no lo necesitan.
+  // Logica Humana son audiencia general y no lo necesitan.
   const SUBSECCIONES_18_MAS = ['corrupcion-humana', 'ilogica-humana'];
   // (El select "Enfoque" del formulario de nueva publicacion se quito 2026-10-03: la region ahora la
   // asigna el admin al crear contenido, y ENFOQUE_LABEL solo sirve para mostrar la etiqueta de las
