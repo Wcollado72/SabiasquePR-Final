@@ -31,8 +31,8 @@ coverage/
 .junie/
 skills-lock.json
 
-# Generado por scripts/i18n-extraer.js (lista de trabajo, no se publica)
-i18n/faltantes.json
+# Generado por frontend/scripts/i18n-extraer.js (lista de trabajo, no se publica)
+frontend/i18n/faltantes.json
 
 # Documentos personales y legales sensibles (solo locales, nunca se suben)
 docs/privado/

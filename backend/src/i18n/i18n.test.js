@@ -1,7 +1,7 @@
 const {
   normalizar, idiomaGuardado, esPaginaAdmin, localeFecha, formatear,
   compilarPatrones, traducirTexto, traducir,
-} = require('../../../i18n.js');
+} = require('../../../frontend/i18n.js');
 
 describe('normalizar', () => {
   test('colapsa espacios y saltos de linea, y recorta', () => {

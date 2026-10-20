@@ -1,5 +1,5 @@
 // Filtro por región y armado del collage de Noticias (regiones.js, raíz del repo).
-const { filtrarPorRegion, es18Mas, espaciarPremium, armarCollage } = require('../../regiones.js');
+const { filtrarPorRegion, es18Mas, espaciarPremium, armarCollage } = require('../../frontend/regiones.js');
 
 const items = [
   { id: 1, enfoque: 'puerto-rico' },

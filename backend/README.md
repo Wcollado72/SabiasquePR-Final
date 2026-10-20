@@ -1,5 +1,7 @@
 # Backend — Sabías que PR
 
+> Documentación general, estructura del repositorio e instrucciones de todo el proyecto: [`../README.md`](../README.md).
+
 API en Node.js + Express, conectada a la base de datos Postgres del proyecto de Supabase.
 
 ## Configuración inicial

@@ -3,8 +3,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const raiz = path.join(__dirname, '..', '..');
-const leer = (f) => fs.readFileSync(path.join(raiz, f), 'utf8');
+const raiz = path.join(__dirname, '..', '..'); // raiz del repositorio
+const frontend = path.join(raiz, 'frontend'); // el sitio
+// Los archivos del sitio salen de frontend/; docs/, backend/ y netlify.toml viven en la raiz del repositorio.
+const leer = (f) => fs.readFileSync(path.join(/^(docs|backend)\/|^netlify\.toml$/.test(f) ? raiz : frontend, f), 'utf8');
 const dic = JSON.parse(leer('i18n/en.json'));
 
 describe('Página "Apoya el canal" (premium.html)', () => {
@@ -62,7 +64,7 @@ describe('Enlace de apoyo único (Payment Link)', () => {
 
 describe('Nombres en la interfaz', () => {
   test('el menú dice "Apoya el canal" y no "Hazte premium" en ninguna página', () => {
-    for (const f of fs.readdirSync(raiz).filter((x) => x.endsWith('.html'))) {
+    for (const f of fs.readdirSync(frontend).filter((x) => x.endsWith('.html'))) {
       const html = leer(f);
       expect(html).not.toMatch(/Hazte premium/i);
       if (f !== 'admin.html') expect(html).toMatch(/Apoya el canal/);

@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 
 const RAIZ = path.join(__dirname, '..', '..');
-const DICCIONARIO_PATH = path.join(RAIZ, 'i18n', 'en.json');
+const DICCIONARIO_PATH = path.join(RAIZ, 'frontend', 'i18n', 'en.json');
 const MODEL = 'claude-sonnet-5';
 const API_URL = 'https://api.anthropic.com/v1/messages';
 

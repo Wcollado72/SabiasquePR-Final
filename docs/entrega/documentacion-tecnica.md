@@ -1,9 +1,9 @@
 # Documentación técnica — Sabías que PR
 
-Borrador generado automáticamente a partir del código (`backend/scripts/generar-doc-tecnica.js`) para la parte 4 de la entrega: estructura del proyecto, rutas API, endpoints, configuración del entorno, autenticación y dependencias. **Se vuelve a generar después del corte y de la reestructura a `/frontend` + `/backend`.**
+Borrador generado automáticamente a partir del código (`backend/scripts/generar-doc-tecnica.js`) para la parte 4 de la entrega: estructura del proyecto, rutas API, endpoints, configuración del entorno, autenticación y dependencias. Se vuelve a generar con `node backend/scripts/generar-doc-tecnica.js`.
 
 ## 1. Estructura del proyecto
-Estructura objetivo (la exige el PDF de la rúbrica):
+Estructura del repositorio (la pide el PDF de la rúbrica):
 
 ```
 /frontend   sitio estático: páginas HTML generadas por build.js, scripts JS, CSS, imágenes, i18n, service worker
@@ -11,8 +11,6 @@ Estructura objetivo (la exige el PDF de la rúbrica):
 README.md   descripción, requisitos, instalación, ejecución y estructura
 docs/       documentación, PDFs y guiones
 ```
-
-Estado actual (antes de reestructurar): el frontend vive en la raíz del repositorio y el backend en `backend/`.
 
 ## 2. Rutas API y endpoints
 La API es REST, responde JSON y está publicada en `https://sabiasquepr-backend-uufz.onrender.com`. **Acceso:** *Público* = sin sesión; *Opcional* = funciona con o sin sesión; *Sesión* = requiere un JWT válido; *Moderador/Admin* y *Admin* = además exigen ese rol guardado en la tabla `perfiles`.

@@ -3,8 +3,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const raiz = path.join(__dirname, '..', '..');
-const leer = (f) => fs.readFileSync(path.join(raiz, f), 'utf8');
+const raiz = path.join(__dirname, '..', '..'); // raiz del repositorio
+const frontend = path.join(raiz, 'frontend'); // el sitio
+// Los archivos del sitio salen de frontend/; docs/, backend/ y netlify.toml viven en la raiz del repositorio.
+const leer = (f) => fs.readFileSync(path.join(/^(docs|backend)\/|^netlify\.toml$/.test(f) ? raiz : frontend, f), 'utf8');
 
 describe('Noticias: botones de región', () => {
   const html = leer('noticias.html');

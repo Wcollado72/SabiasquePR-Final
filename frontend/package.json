@@ -1,0 +1,11 @@
+{
+  "name": "sabiasquepr-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frontend de Sabías que PR: sitio estático (HTML, CSS y JavaScript) generado por build.js y publicado en Netlify",
+  "scripts": {
+    "build": "node build.js",
+    "extraer-i18n": "node scripts/i18n-extraer.js"
+  },
+  "license": "ISC"
+}
