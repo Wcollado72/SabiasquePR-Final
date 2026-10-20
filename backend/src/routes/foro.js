@@ -5,6 +5,7 @@ const { requireAuth } = require('../middleware/auth');
 const { validatePost } = require('../validators/foroPost');
 const { esMenorConocido } = require('../util/edad');
 const { detectarRiesgo } = require('../util/deteccionRiesgo');
+const { nombreVisibleSql } = require('../util/autorVisible');
 
 const router = express.Router();
 
@@ -116,7 +117,7 @@ router.get('/posts', async (req, res) => {
 
     const { rows } = await pool.query(
       `SELECT p.id, p.titulo, p.subseccion, p.enfoque, p.destacado, p.tema_contenido_id,
-              p.enlace_media, p.enlace_media_tipo, p.creado_en, p.editado_en, pf.email AS autor_email,
+              p.enlace_media, p.enlace_media_tipo, p.creado_en, p.editado_en, ${nombreVisibleSql('pf')} AS autor_nombre,
               (SELECT COUNT(*) FROM foro_comentarios c WHERE c.post_id = p.id)::int AS comentarios_count
        FROM foro_posts p JOIN perfiles pf ON pf.id = p.autor_id
        ${where}
@@ -133,14 +134,14 @@ router.get('/posts/:id', async (req, res) => {
   try {
     const { rows: postRows } = await pool.query(
       `SELECT p.id, p.titulo, p.cuerpo, p.subseccion, p.enfoque, p.destacado, p.tema_contenido_id,
-              p.enlace_media, p.enlace_media_tipo, p.autor_id, p.creado_en, p.editado_en, pf.email AS autor_email
+              p.enlace_media, p.enlace_media_tipo, p.autor_id, p.creado_en, p.editado_en, ${nombreVisibleSql('pf')} AS autor_nombre
        FROM foro_posts p JOIN perfiles pf ON pf.id = p.autor_id WHERE p.id = $1`,
       [req.params.id]
     );
     if (postRows.length === 0) return res.status(404).json({ ok: false, error: 'Publicacion no encontrada.' });
 
     const { rows: comentarios } = await pool.query(
-      `SELECT c.id, c.cuerpo, c.autor_id, c.creado_en, pf.email AS autor_email
+      `SELECT c.id, c.cuerpo, c.autor_id, c.creado_en, ${nombreVisibleSql('pf')} AS autor_nombre
        FROM foro_comentarios c JOIN perfiles pf ON pf.id = c.autor_id
        WHERE c.post_id = $1 ORDER BY c.creado_en ASC`,
       [req.params.id]

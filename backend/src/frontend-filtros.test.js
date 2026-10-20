@@ -161,6 +161,14 @@ describe('Educación: región independiente del tema', () => {
   });
 });
 
+describe('Debate y comentarios: el correo del autor no se muestra (privacidad)', () => {
+  test.each(['debate.js', 'comentarios.js'])('%s muestra autor_nombre, no autor_email', (archivo) => {
+    const js = leer(archivo);
+    expect(js).toMatch(/autor_nombre/);
+    expect(js).not.toMatch(/autor_email/);
+  });
+});
+
 describe('Educación: sin etiqueta de edad (política legal, COPPA)', () => {
   const html = leer('educacion.html');
   test('el banner de reglas del foro no declara ninguna edad', () => {

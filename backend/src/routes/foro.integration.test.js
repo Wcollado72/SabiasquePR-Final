@@ -41,6 +41,9 @@ describe('GET /api/foro/posts', () => {
     const res = await request(app).get('/api/foro/posts?subseccion=corrupcion-humana');
     expect(res.status).toBe(200);
     expect(res.body.posts).toHaveLength(1);
+    const [sql] = pool.query.mock.calls[0];
+    expect(sql).toMatch(/AS autor_nombre/);
+    expect(sql).not.toMatch(/email/i); // el correo del autor nunca sale en la API publica
   });
 });
 
@@ -310,6 +313,7 @@ describe('GET /api/foro/posts/:id', () => {
     expect(res.status).toBe(200);
     expect(res.body.post.id).toBe('p1');
     expect(res.body.comentarios).toHaveLength(1);
+    for (const [sql] of pool.query.mock.calls) expect(sql).not.toMatch(/email/i);
   });
 });
 

@@ -22,12 +22,15 @@ describe('GET /api/comentarios', () => {
   });
 
   test('200 con la lista de comentarios de un item', async () => {
-    pool.query.mockResolvedValueOnce({ rows: [{ id: 'c1', cuerpo: 'Hola', autor_email: 'a@ejemplo.com' }] });
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'c1', cuerpo: 'Hola', autor_nombre: 'Participante-ab12' }] });
     const res = await request(app).get('/api/comentarios?tipo=contenido&itemId=un-articulo');
     expect(res.status).toBe(200);
     expect(res.body.comentarios).toHaveLength(1);
     const [sql, params] = pool.query.mock.calls[0];
     expect(sql).toMatch(/WHERE c.tipo = \$1 AND c.item_id = \$2/);
+    expect(sql).toMatch(/AS autor_nombre/);
+    expect(sql).not.toMatch(/email/i); // el correo del autor nunca sale en la API publica
+    expect(JSON.stringify(res.body)).not.toMatch(/@/);
     expect(params).toEqual(['contenido', 'un-articulo']);
   });
 });
@@ -55,11 +58,12 @@ describe('POST /api/comentarios', () => {
   test('201 crea el comentario contra "contenidos" cuando tipo=contenido', async () => {
     pool.query
       .mockResolvedValueOnce({ rows: [{ id: 'un-articulo' }] }) // existe en contenidos
-      .mockResolvedValueOnce({ rows: [{ id: 'c1', cuerpo: 'Hola', autor_id: 'user-1', creado_en: '2026-01-01' }] });
+      .mockResolvedValueOnce({ rows: [{ id: 'c1', cuerpo: 'Hola', autor_id: 'user-1', creado_en: '2026-01-01', autor_nombre: 'Participante-ab12' }] });
     const res = await request(app).post('/api/comentarios')
       .set('x-test-user', USUARIO).send({ tipo: 'contenido', itemId: 'un-articulo', cuerpo: 'Hola' });
     expect(res.status).toBe(201);
-    expect(res.body.comentario.autor_email).toBe('a@ejemplo.com');
+    expect(res.body.comentario.autor_nombre).toBe('Participante-ab12');
+    expect(res.body.comentario.autor_email).toBeUndefined();
     const [existsSql] = pool.query.mock.calls[0];
     expect(existsSql).toMatch(/FROM contenidos WHERE id/);
   });

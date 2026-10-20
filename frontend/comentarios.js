@@ -101,7 +101,7 @@
       <div class="foro-comments">${comentarios.length
         ? comentarios.map((c) => `
         <div class="foro-comment">
-          <p class="foro-meta">${escapeHtml(c.autor_email || 'anónimo')} · ${formatDate(c.creado_en)}</p>
+          <p class="foro-meta">${escapeHtml(c.autor_nombre || 'anónimo')} · ${formatDate(c.creado_en)}</p>
           <p>${escapeHtml(c.cuerpo)}</p>
           ${(currentUser && (currentUser.id === c.autor_id || currentUserRol === 'admin'))
             ? `<button type="button" class="foro-comment-delete btn-alt foro-danger" data-id="${c.id}">Eliminar</button>` : ''}
