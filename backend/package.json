@@ -13,7 +13,8 @@
     "db:schema": "node scripts/apply-schema.js",
     "db:migrate-content": "node scripts/migrate-content.js",
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "db:probar-schema": "node scripts/probar-schema.js"
   },
   "jest": {
     "testEnvironment": "node",

@@ -505,6 +505,8 @@ CREATE TABLE IF NOT EXISTS gastos_servicios (
   actualizado_en      timestamptz NOT NULL DEFAULT now()
 );
 ALTER TABLE gastos_servicios ENABLE ROW LEVEL SECURITY;
+-- ia_generaciones ya tenia RLS activo en la base viva (2026-10); el script no lo activaba: ahora si, para que una instalacion nueva quede igual.
+ALTER TABLE ia_generaciones ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- Muro de agradecimiento (2026-10-04): opt-in de quienes apoyan cada mes para
@@ -515,3 +517,25 @@ ALTER TABLE perfiles ADD COLUMN IF NOT EXISTS agradecimiento_autorizado_en times
 ALTER TABLE perfiles DROP CONSTRAINT IF EXISTS perfiles_agradecimiento_nombre_check;
 ALTER TABLE perfiles ADD CONSTRAINT perfiles_agradecimiento_nombre_check
   CHECK (agradecimiento_nombre IS NULL OR char_length(agradecimiento_nombre) BETWEEN 2 AND 40);
+
+-- ============================================================
+-- Categoria "general" eliminada (2026-10-03, aplicado al proyecto nuevo el 2026-10-15): todas las piezas llevan una
+-- categoria descriptiva. Mismo SQL que backend/sql/migraciones/2026-10-03-quitar-categoria-general.sql.
+-- ============================================================
+UPDATE noticias   SET categoria = 'cultura' WHERE categoria = 'general';
+UPDATE contenidos SET categoria = 'cultura' WHERE categoria = 'general';
+
+ALTER TABLE noticias DROP CONSTRAINT IF EXISTS noticias_categoria_check;
+ALTER TABLE noticias ADD CONSTRAINT noticias_categoria_check
+  CHECK (categoria IN (
+    'internacionales', 'crimen', 'salud', 'deportes', 'finanzas',
+    'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura', 'ciencia'
+  ));
+
+ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_categoria_check;
+ALTER TABLE contenidos ADD CONSTRAINT contenidos_categoria_check
+  CHECK (categoria IN (
+    'internacionales', 'crimen', 'salud', 'deportes', 'finanzas',
+    'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura', 'ciencia',
+    'leyes-educativas', 'estudiantes-sobresalientes', 'sistemas-mundiales', 'programas-educativos'
+  ));
