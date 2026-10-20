@@ -196,7 +196,7 @@ def build():
         ['Autenticación', 'Supabase Auth + jose (JWKS, ES256)', 'Registro, inicio de sesión, Google y 2FA; el servidor verifica cada JWT'],
         ['Pagos', 'Stripe', 'Tienda y apoyo voluntario con webhook firmado (modo de prueba)'],
         ['Servicios', 'Resend, Cloudflare Turnstile, Beehiiv, Formspree, API de Claude', 'Correos de autenticación, anti-robots, boletín, contacto y agentes de IA del panel'],
-        ['Calidad', 'Jest + Supertest, ESLint', f'{ev["pruebas"]["total"]} pruebas automáticas y revisión de estilo en cada cambio'],
+        ['Calidad', 'Jest + Supertest, ESLint', f'{ev["pruebas_total"]} pruebas automáticas y revisión de estilo en cada cambio'],
         ['Control de versiones y CI', 'Git, GitHub, GitHub Actions', 'Ramas y pull requests; flujos de pruebas, auditoría de dependencias y secretos, respaldo diario cifrado'],
         ['Despliegue', 'Netlify + Render + Supabase', 'Frontend estático con dominio propio, API y base de datos en servicios gestionados'],
     ], [88, 150, CONTENT_W - 88 - 150]))
@@ -213,9 +213,12 @@ def build():
     story.append(P.diagrama_arquitectura())
     _fig['n'] += 1
     story.append(Paragraph(f'Figura {_fig["n"]}. Arquitectura de tres capas con Supabase Auth como servicio de identidad compartido.', styles['Caption']))
-    story.append(CondPageBreak(420))
     story.append(Paragraph('Navegación del sitio', styles['H2']))
-    story.append(P.diagrama_navegacion())
+    nav = P.diagrama_navegacion()
+    k = 0.68
+    nav.scale(k, k)
+    nav.width, nav.height = nav.width * k, nav.height * k
+    story.append(nav)
     _fig['n'] += 1
     story.append(Paragraph(f'Figura {_fig["n"]}. Mapa de navegación: páginas públicas, área con sesión y área restringida por rol.', styles['Caption']))
 
@@ -226,7 +229,9 @@ def build():
         'rutas de escritura exigen un JWT válido (401 si falta o es inválido) y el rol necesario (403 si no lo '
         'tiene). La siguiente matriz se genera a partir del código de las rutas.', styles['Body']))
     filas = matriz_crud(endpoints)
-    story.append(P.tabla_simple(filas, [110, 52, 62, 66, 56, CONTENT_W - 110 - 52 - 62 - 66 - 56]))
+    t = P.tabla_simple(filas, [110, 52, 62, 66, 56, CONTENT_W - 110 - 52 - 62 - 66 - 56])
+    t.setStyle(TableStyle([('TOPPADDING', (0, 0), (-1, -1), 2), ('BOTTOMPADDING', (0, 0), (-1, -1), 2)]))
+    story.append(t)
     story.append(Paragraph(
         '<i>Acceso:</i> Público = sin sesión; Opcional = con o sin sesión; Sesión = JWT válido; '
         'Moderador/Admin y Admin = además exigen ese rol.', styles['BodySmall']))
@@ -282,11 +287,10 @@ def build():
     # 8. Evidencias de pruebas
     story.append(PageBreak())
     h1(story, 8, 'Evidencias de pruebas')
-    c = ev['cobertura']
-    p = ev['pruebas']
+    c = ev['cobertura_global']
     story.append(Paragraph(
-        f'Las pruebas automáticas (Jest y Supertest) suman <b>{p["total"]} pruebas en {p["suites"]} archivos</b>; '
-        f'<b>{p["pasadas"]} pasan y {p["falladas"]} fallan</b>. La cobertura global es de '
+        f'Las pruebas automáticas (Jest y Supertest) suman <b>{ev["pruebas_total"]} pruebas en {ev["suites_total"]} archivos</b>; '
+        f'<b>{ev["pruebas_pasadas"]} pasan y {ev["pruebas_falladas"]} fallan</b>. La cobertura global es de '
         f'<b>{c["sentencias"]} % de las sentencias</b> ({c["ramas"]} % de las ramas, {c["funciones"]} % de las funciones y '
         f'{c["lineas"]} % de las líneas). Se ejecutan en cada cambio mediante GitHub Actions junto con ESLint, '
         'la auditoría de dependencias y el análisis de secretos.', styles['Body']))
