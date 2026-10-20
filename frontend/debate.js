@@ -308,7 +308,7 @@
         ${p.destacado ? '<span class="foro-badge foro-badge-premium">★ Tema oficial de la semana</span>' : ''}
         ${p.enfoque ? `<span class="foro-badge">${escapeHtml(ENFOQUE_LABEL[p.enfoque] || p.enfoque)}</span>` : ''}
         <h3 class="debate-post-toggle" data-id="${p.id}">${escapeHtml(p.titulo)}</h3>
-        <p class="foro-meta">Por ${escapeHtml(p.autor_email || 'anónimo')} · ${formatDate(p.creado_en)} · ${p.comentarios_count} ${p.comentarios_count === 1 ? 'comentario' : 'comentarios'}</p>
+        <p class="foro-meta">Por ${escapeHtml(p.autor_nombre || 'anónimo')} · ${formatDate(p.creado_en)} · ${p.comentarios_count} ${p.comentarios_count === 1 ? 'comentario' : 'comentarios'}</p>
         ${media}
         <div class="debate-post-body" id="debate-post-body-${p.id}" hidden></div>
       </article>`;
@@ -357,7 +357,7 @@
       <div class="foro-comments">${comentarios.length
         ? comentarios.map((c) => `
         <div class="foro-comment">
-          <p class="foro-meta">${escapeHtml(c.autor_email || 'anónimo')} · ${formatDate(c.creado_en)}</p>
+          <p class="foro-meta">${escapeHtml(c.autor_nombre || 'anónimo')} · ${formatDate(c.creado_en)}</p>
           <p>${escapeHtml(c.cuerpo)}</p>
           <div class="foro-actions">
             <button type="button" class="foro-comment-delete btn-alt foro-danger debate-reportar" data-tipo="debate_comentario" data-id="${c.id}">Reportar</button>

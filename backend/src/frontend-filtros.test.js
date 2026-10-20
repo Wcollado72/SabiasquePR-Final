@@ -160,3 +160,11 @@ describe('Educación: región independiente del tema', () => {
     expect(js).toMatch(/filtrarPorRegion/);
   });
 });
+
+describe('Debate y comentarios: el correo del autor no se muestra (privacidad)', () => {
+  test.each(['debate.js', 'comentarios.js'])('%s muestra autor_nombre, no autor_email', (archivo) => {
+    const js = leer(archivo);
+    expect(js).toMatch(/autor_nombre/);
+    expect(js).not.toMatch(/autor_email/);
+  });
+});
