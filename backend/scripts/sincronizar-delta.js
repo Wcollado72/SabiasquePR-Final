@@ -141,7 +141,7 @@ async function main() {
     }
   } catch (e) {
     await nuevo.query('ROLLBACK').catch(() => {});
-    throw new Error('No se aplico nada (transaccion revertida): ' + e.message);
+    throw new Error('No se aplico nada (transaccion revertida): ' + e.message, { cause: e });
   } finally {
     await viejo.query('ROLLBACK').catch(() => {});
     await viejo.end(); await nuevo.end();

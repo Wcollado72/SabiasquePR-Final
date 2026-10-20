@@ -1,0 +1,38 @@
+# Integracion continua: en cada cambio a `main` y en cada Pull Request corre la revision de estilo (ESLint) y las
+# pruebas automaticas del backend (Jest + Supertest) con su informe de cobertura. Si algo falla, GitHub lo marca en rojo
+# y avisa antes de que el cambio llegue a produccion (rubrica COMP2053: pruebas, buenas practicas y calidad del codigo).
+name: Pruebas y calidad del codigo
+
+on:
+  push: { branches: [main] }
+  pull_request: {}
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Instalar dependencias
+        run: npm ci
+      - name: Revision de estilo (ESLint)
+        run: npm run lint
+      - name: Pruebas automaticas con cobertura
+        run: npm run test:coverage -- --coverageReporters=text-summary --coverageReporters=lcov
+      - name: Guardar el informe de cobertura
+        uses: actions/upload-artifact@v7
+        with:
+          name: cobertura-backend
+          path: backend/coverage/lcov-report
+          retention-days: 14

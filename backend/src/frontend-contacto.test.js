@@ -94,7 +94,6 @@ describe('Relleno del correo con la sesión: comportamiento', () => {
         onAuthStateChange: (fn) => { oyentes.push(fn); },
       },
     };
-    // eslint-disable-next-line no-new-func
     new Function('document', 'waitForSharedSupabase', codigo)(documento, async () => cliente);
     return { email, nombre, boletin, pista, oyentes };
   }

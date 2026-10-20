@@ -8,7 +8,6 @@
 //   --github         -> `gh secret set DATABASE_URL` (la cadena viaja por entrada estandar, no por la linea de comandos)
 //   --portapapeles   -> la copia al portapapeles y la BORRA solo a los 90 segundos (copiar luego otra cosa tambien la borra)
 // Regla de oro: copia la contrasena desde Bitwarden y pegala en el cuadro del script; no copies nada mas hasta terminar.
-const readline = require('readline');
 const { spawnSync, spawn } = require('child_process');
 const { Client } = require('pg');
 const { armarDatabaseUrl } = require('./lib/env-ensayo');
@@ -18,13 +17,6 @@ const HOST = 'aws-0-us-east-1.pooler.supabase.com';
 const args = process.argv.slice(2);
 const aGithub = args.includes('--github');
 const aPortapapeles = args.includes('--portapapeles');
-
-function preguntar(pregunta) {
-  return new Promise((resolve) => {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    rl.question(pregunta, (r) => { rl.close(); resolve(r.trim()); });
-  });
-}
 
 function preguntarOculto(pregunta) {
   return new Promise((resolve, reject) => {

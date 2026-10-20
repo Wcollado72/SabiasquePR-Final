@@ -70,7 +70,8 @@ describe('validateNoticia', () => {
   });
 
   test('categoria es obligatoria al crear (ya no existe "general" por defecto)', () => {
-    const { categoria, ...sin } = NOTICIA_VALIDA;
+    const sin = { ...NOTICIA_VALIDA };
+    delete sin.categoria;
     expect(validateNoticia(sin)).toContain('El campo "categoria" es obligatorio.');
   });
 
