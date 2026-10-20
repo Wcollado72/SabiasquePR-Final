@@ -40,7 +40,7 @@ const L = [];
 const p = (s = '') => L.push(s);
 p('# Documentación técnica — Sabías que PR');
 p();
-p('Borrador generado automáticamente a partir del código (`backend/scripts/generar-doc-tecnica.js`) para la parte 4 de la entrega: estructura del proyecto, rutas API, endpoints, configuración del entorno, autenticación y dependencias. Se vuelve a generar con `node backend/scripts/generar-doc-tecnica.js`.');
+p('Documento generado automáticamente a partir del código (`backend/scripts/generar-doc-tecnica.js`) para la parte 4 de la entrega: estructura del proyecto, rutas API, endpoints, configuración del entorno, autenticación y dependencias. Se vuelve a generar con `node backend/scripts/generar-doc-tecnica.js`.');
 p();
 p('## 1. Estructura del proyecto');
 p('Estructura del repositorio (la pide el PDF de la rúbrica):');

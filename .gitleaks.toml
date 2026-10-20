@@ -18,4 +18,7 @@ regexes = [
   '''sb_publishable_W2y2ewCNYGJDlfSKd8dSaw_KRNZNYlz''',
   # Valor de relleno cuando STRIPE_SECRET_KEY no esta configurada (dev/tests).
   '''sk_test_placeholder''',
+  # JWT INVENTADO a proposito (firma "firma-falsa", sin emisor real): lo usa
+  # backend/scripts/verificar-produccion.js para comprobar que la API responde 401.
+  '''eyJhbGciOiJIUzI1NiJ9\.eyJzdWIiOiJpbnZlbnRhZG8ifQ\.firma-falsa''',
 ]
