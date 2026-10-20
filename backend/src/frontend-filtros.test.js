@@ -160,3 +160,12 @@ describe('Educación: región independiente del tema', () => {
     expect(js).toMatch(/filtrarPorRegion/);
   });
 });
+
+describe('Educación: sin etiqueta de edad (política legal, COPPA)', () => {
+  const html = leer('educacion.html');
+  test('el banner de reglas del foro no declara ninguna edad', () => {
+    expect(html).toContain('Reglas del foro de Educación');
+    expect(html).not.toMatch(/12\+|12 años|a partir de \d+ años/);
+    expect(html).not.toContain('edu-reglas-badge');
+  });
+});

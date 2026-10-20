@@ -789,10 +789,9 @@ const PAGES = [
       </div>
 
       <section class="edu-reglas-banner" aria-labelledby="edu-reglas-h">
-        <p class="edu-reglas-badge">12+</p>
         <div>
           <h3 id="edu-reglas-h">Reglas del foro de Educación</h3>
-          <p>Este espacio es para todas las edades a partir de 12 años. No se tolera lenguaje ofensivo, contenido sexual, ni ataques personales — el tono debe ser constructivo, igual que el resto de esta sección. Cualquier publicación o comentario que rompa estas reglas puede reportarse con el botón "Reportar"; el equipo de Sabías que PR lo revisa y actúa.</p>
+          <p>Este espacio es para todo público. No se tolera lenguaje ofensivo, contenido sexual, ni ataques personales — el tono debe ser constructivo, igual que el resto de esta sección. Cualquier publicación o comentario que rompa estas reglas puede reportarse con el botón "Reportar"; el equipo de Sabías que PR lo revisa y actúa.</p>
         </div>
       </section>
       <section class="debate-seccion" id="edu-debate"></section>
