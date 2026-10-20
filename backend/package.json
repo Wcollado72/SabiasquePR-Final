@@ -14,7 +14,9 @@
     "db:migrate-content": "node scripts/migrate-content.js",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "db:probar-schema": "node scripts/probar-schema.js"
+    "db:probar-schema": "node scripts/probar-schema.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "jest": {
     "testEnvironment": "node",
@@ -42,6 +44,9 @@
     "stripe": "^22.6.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
     "jest": "^30.5.0",
     "supertest": "^7.2.2"
   }
