@@ -14,6 +14,9 @@
 // defecto, porque el segundo eje depende del primero (un enfoque de Nueva
 // Humanidad no tiene sentido si se cambia a Lógica Humana).
 //
+// La región de Educación (data-local + data-sin-reinicio) se filtra en el navegador con regiones.js:
+// una pieza sin región se ve en todas, y cambiar de tema no borra la región elegida.
+//
 // El renderizado de tarjetas y la reproducción en línea (video/audio) viven
 // en editorial.js (SQPR.contenidoCardHtml / SQPR.bindCardPlayDelegation) —
 // las usa también noticias.js, así que este script solo se encarga de
@@ -69,7 +72,8 @@
         // del anterior (ej. "enfoque" depende de la sub-seccion activa), asi
         // que cambiar un grupo reinicia solo los que vienen DESPUES de el a
         // su boton por defecto -- nunca los anteriores.
-        grupos.slice(indice + 1).forEach(({ el: otroEl, param: otroParam }) => {
+        // Los grupos marcados data-sin-reinicio (ej. la región de Educación) son independientes.
+        grupos.slice(indice + 1).filter(({ el }) => !el.hasAttribute('data-sin-reinicio')).forEach(({ el: otroEl, param: otroParam }) => {
           otroEl.querySelectorAll('.foro-filter-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
           otroEl.querySelectorAll('.foro-filter-btn').forEach((b) => b.setAttribute('aria-pressed', String(b.classList.contains('active'))));
           actuales[otroParam] = activeValue(otroEl, otroParam);
@@ -92,11 +96,14 @@
     const filtros = filtrosPorGrid.get(grid) || {};
     try {
       const params = new URLSearchParams({ seccion });
-      Object.entries(filtros).forEach(([param, valor]) => { if (valor) params.set(param, valor); });
+      // Los grupos con data-local se aplican aquí (no en la API): la región deja pasar también las piezas sin región.
+      const locales = (gruposPorGrid.get(grid) || []).filter(({ el }) => el.hasAttribute('data-local')).map(({ param }) => param);
+      Object.entries(filtros).forEach(([param, valor]) => { if (valor && !locales.includes(param)) params.set(param, valor); });
       const res = await fetch(S.withLang(API_URL + '/api/contenidos?' + params.toString()));
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error ' + res.status);
-      const items = data.contenidos || [];
+      let items = data.contenidos || [];
+      if (locales.includes('enfoque') && window.sqprRegiones) items = window.sqprRegiones.filtrarPorRegion(items, filtros.enfoque);
       const hayFiltro = Object.values(filtros).some(Boolean);
       grid.innerHTML = items.length
         ? items.map(S.contenidoCardHtml).join('')

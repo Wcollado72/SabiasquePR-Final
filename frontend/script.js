@@ -383,7 +383,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    let sesionActual = null;
     function aplicar(session) {
+      sesionActual = session ?? null;
       const usuario = session?.user ?? null;
       const meta = usuario?.user_metadata || {};
       const nombre = String(meta.full_name || meta.name || meta.nombre || '').trim();
@@ -392,6 +394,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const correoContacto = document.querySelector('#contact-form #email');
       if (pista) pista.hidden = !(usuario && correoContacto && correoContacto.dataset.rellenado === '1' && correoContacto.dataset.editado !== '1');
     }
+
+    // Tras enviar, form.reset() vacia los campos: se olvidan las marcas y se vuelve a rellenar
+    // (o se oculta la pista si no hay sesion). 'reset' se dispara ANTES de vaciar, de ahi el setTimeout.
+    document.querySelector('#contact-form')?.addEventListener('reset', () => setTimeout(() => {
+      [document.querySelector('#contact-form #email'), campoNombre].forEach(campo => {
+        if (campo) { delete campo.dataset.editado; delete campo.dataset.rellenado; }
+      });
+      aplicar(sesionActual);
+    }, 0));
 
     const cliente = await waitForSharedSupabase(5000);
     if (!cliente) return;

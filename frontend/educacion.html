@@ -31,7 +31,7 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon-96.png" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=7aa8ef66">
+  <link rel="stylesheet" href="styles.css?v=d5943b95">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Educación","description":"Noticias, videos, ensayos y programas sobre educación — leyes, estudiantes sobresalientes, sistemas educativos del mundo y el foro de discusión de la sección.","url":"https://sabiasquepr.com/educacion.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -102,7 +102,14 @@
         <button type="button" class="foro-filter-btn" aria-pressed="false" data-categoria="programas-educativos">Programas educativos destacados</button>
         <button type="button" class="foro-filter-btn" aria-pressed="false" data-categoria="sistemas-mundiales">Sistemas educativos mundiales</button>
       </nav>
-      <div class="card-grid contenidos-grid" id="edu-list" data-seccion="educacion" data-filters="edu-categoria-filter" data-hint="edu-hint" aria-live="polite" aria-busy="true"></div>
+      <nav class="foro-filters foro-filters-sub" id="edu-enfoque-filter" data-filter-param="enfoque" data-local data-sin-reinicio aria-label="Filtrar por región">
+        <button type="button" class="foro-filter-btn active" aria-pressed="true" data-enfoque="">Todas</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="puerto-rico">Puerto Rico</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="estados-unidos">Estados Unidos</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="hispanoamerica">Hispanoamérica</button>
+        <button type="button" class="foro-filter-btn" aria-pressed="false" data-enfoque="internacionales">Internacionales</button>
+      </nav>
+      <div class="card-grid contenidos-grid" id="edu-list" data-seccion="educacion" data-filters="edu-categoria-filter edu-enfoque-filter" data-hint="edu-hint" aria-live="polite" aria-busy="true"></div>
       <p class="home-hint" id="edu-hint" aria-live="polite"></p>
       <noscript><p class="empty-state">Activa JavaScript para ver este contenido.</p></noscript>
 
@@ -318,7 +325,7 @@
       apiUrl:      'http://localhost:3000',
       youtubeApiKey: '',
       turnstileSiteKey: '0x4AAAAAAFD1ChRrVsC9PVWd',
-      i18nVersion: '6a02d2b6'
+      i18nVersion: '67a177fc'
     };
   </script>
   <script src="i18n.js"></script>
@@ -327,6 +334,7 @@
   <script src="script.js"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <script src="editorial.js"></script>
+  <script src="regiones.js"></script>
   <script src="contenidos.js"></script>
   <script src="debate.js"></script>
   <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});</script>

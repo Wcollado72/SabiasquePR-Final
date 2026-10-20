@@ -182,6 +182,16 @@ const SUBSECCIONES = {
   'logica-humana': 'Lógica Humana', 'corrupcion-humana': 'Corrupción Humana',
   'ilogica-humana': 'Ilógica Humana',
 };
+// Lista de "Sub-sección" del formulario de Contenidos por Sección (claves en clasificacion.js,
+// etiquetas aquí). Se entrega al navegador como data-opciones del <select>.
+const clasificacion = require('./clasificacion.js');
+const OPCIONES_CLASIFICACION = Object.fromEntries(
+  ['noticias', 'educacion', 'revolucion-humana'].map((sec) => {
+    const etiquetas = sec === 'revolucion-humana' ? SUBSECCIONES : CATEGORIAS;
+    return [sec, clasificacion.clavesDe(sec).map((k) => [k, etiquetas[k]])];
+  })
+);
+
 
 // Region dentro de cualquier sub-seccion de Revolucion Humana (Corrupcion
 // Humana, Ilogica Humana, Logica Humana, Nuevos Humanos) -- mismo campo que
@@ -215,12 +225,18 @@ const NOTICIAS_REGION_FILTRO = filaFiltros({
   id: 'noticias-enfoque-filter', param: 'enfoque', etiqueta: 'Filtrar por región',
   entradas: Object.entries(ENFOQUES),
 });
-// Educacion: sin regiones, usa sus 4 categorias propias (el primero activo).
+// Educacion: sus 4 categorias propias (el primero activo) y, aparte, la region (2026-10-20).
 const EDUCACION_CATEGORIA_FILTRO = filaFiltros({
   id: 'edu-categoria-filter', param: 'categoria', etiqueta: 'Filtrar por tema',
   entradas: ['estudiantes-sobresalientes', 'leyes-educativas', 'programas-educativos', 'sistemas-mundiales']
     .map((v) => [v, CATEGORIAS[v]]),
 });
+
+// Region de Educacion: "Todas" por defecto; independiente del tema y filtrada en el navegador (ver contenidos.js).
+const EDUCACION_REGION_FILTRO = filaFiltros({
+  id: 'edu-enfoque-filter', param: 'enfoque', etiqueta: 'Filtrar por región',
+  entradas: [['', 'Todas'], ...Object.entries(ENFOQUES)],
+}).replace('data-filter-param="enfoque"', 'data-filter-param="enfoque" data-local data-sin-reinicio');
 
 const SOCIAL_ICONS = `
         <div class="social-links">
@@ -710,7 +726,8 @@ const PAGES = [
     mainClass: 'main-block',
     mainContent: `
       ${EDUCACION_CATEGORIA_FILTRO}
-      <div class="card-grid contenidos-grid" id="edu-list" data-seccion="educacion" data-filters="edu-categoria-filter" data-hint="edu-hint" aria-live="polite" aria-busy="true"></div>
+      ${EDUCACION_REGION_FILTRO}
+      <div class="card-grid contenidos-grid" id="edu-list" data-seccion="educacion" data-filters="edu-categoria-filter edu-enfoque-filter" data-hint="edu-hint" aria-live="polite" aria-busy="true"></div>
       <p class="home-hint" id="edu-hint" aria-live="polite"></p>
       <noscript><p class="empty-state">Activa JavaScript para ver este contenido.</p></noscript>
 
@@ -796,6 +813,7 @@ const PAGES = [
       </section>`,
     extraScript: `<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <script src="editorial.js"></script>
+  <script src="regiones.js"></script>
   <script src="contenidos.js"></script>
   <script src="debate.js"></script>`,
   },
@@ -885,7 +903,7 @@ const PAGES = [
         <div class="ayuda-tooltip" id="ayuda-tooltip" role="tooltip" hidden></div>
         <div class="consola-body">
         <nav class="foro-filters admin-tabs">
-          <button type="button" class="foro-filter-btn active" data-tab="noticias">Noticias</button>
+          <button type="button" class="foro-filter-btn active" data-tab="noticias">Noticias rápidas</button>
           <button type="button" class="foro-filter-btn" data-tab="contenidos">Contenidos</button>
           <button type="button" class="foro-filter-btn" data-tab="productos">Productos</button>
           <button type="button" class="foro-filter-btn" data-tab="reportes">Reportes</button>
@@ -1060,11 +1078,11 @@ const PAGES = [
                   <option value="revolucion-humana">Revolución Humana</option>
                   <option value="educacion">Educación</option>
                 </select>
-                <label for="ac-subseccion">Sub-sección de Revolución Humana (opcional)</label>
-                <select id="ac-subseccion">
-                  ${optionsHtml(SUBSECCIONES, { includeEmpty: 'Ninguna' })}
-                </select>
-                <label for="ac-enfoque">Región (filtra el collage público dentro de cualquier sub-sección de Revolución Humana)</label>
+                <label for="ac-clasificacion" id="ac-clasificacion-label">Sub-sección</label>
+                <select id="ac-clasificacion" data-opciones='${JSON.stringify(OPCIONES_CLASIFICACION)}'></select>
+                <input type="hidden" id="ac-subseccion">
+                <input type="hidden" id="ac-categoria">
+                <label for="ac-enfoque">Región (filtra el collage público en Noticias, Revolución Humana y Educación)</label>
                 <select id="ac-enfoque">
                   ${optionsHtml(ENFOQUES, { includeEmpty: 'Ninguna' })}
                 </select>
@@ -1075,10 +1093,6 @@ const PAGES = [
                 <label for="ac-subformato">Subformato (opcional)</label>
                 <select id="ac-subformato">
                   ${optionsHtml(SUBFORMATOS, { includeEmpty: 'Ninguno' })}
-                </select>
-                <label for="ac-categoria">Categoría</label>
-                <select id="ac-categoria" required>
-                  ${optionsHtml(CATEGORIAS, { includeEmpty: 'Elige una categoría' })}
                 </select>
               </section>
 
@@ -1418,6 +1432,7 @@ const PAGES = [
     extraScript: `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=Karla:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap">
   <script src="editorial.js"></script>
   <script src="citas.js"></script>
+  <script src="clasificacion.js"></script>
   <script src="admin.js"></script>`,
   },
 

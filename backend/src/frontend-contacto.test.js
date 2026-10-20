@@ -84,9 +84,15 @@ describe('Relleno del correo con la sesión: comportamiento', () => {
     const nombre = elemento('nombre');
     const boletin = elemento('home-email');
     const pista = elemento('email-hint');
+    // Formulario falso: reset() avisa a los oyentes ANTES de vaciar los campos, como el navegador.
+    const oyentesForm = [];
+    const formulario = {
+      addEventListener: (tipo, fn) => { if (tipo === 'reset') oyentesForm.push(fn); },
+      reset() { oyentesForm.forEach((fn) => fn()); email.value = ''; nombre.value = ''; },
+    };
     const documento = {
       querySelectorAll: () => [boletin, email],
-      querySelector: (sel) => (sel.endsWith('#nombre') ? nombre : sel.endsWith('#email') ? email : null),
+      querySelector: (sel) => (sel === '#contact-form' ? formulario : sel.endsWith('#nombre') ? nombre : sel.endsWith('#email') ? email : null),
       getElementById: (id) => (id === 'email-hint' ? pista : null),
     };
     const oyentes = [];
@@ -97,7 +103,7 @@ describe('Relleno del correo con la sesión: comportamiento', () => {
       },
     };
     new Function('document', 'waitForSharedSupabase', codigo)(documento, async () => cliente);
-    return { email, nombre, boletin, pista, oyentes };
+    return { email, nombre, boletin, pista, oyentes, formulario };
   }
 
   const esperar = () => new Promise((r) => setTimeout(r, 10));
@@ -163,5 +169,31 @@ describe('Relleno del correo con la sesión: comportamiento', () => {
     await esperar();
     expect(t.email.value).toBe('sin@nombre.com');
     expect(t.nombre.value).toBe('');
+  });
+
+  test('tras enviar (reset) con sesión, se vuelve a rellenar y la pista reaparece', async () => {
+    const t = montar({ sesion: SESION });
+    await esperar();
+    t.email.escribir('otro@ejemplo.com'); // la persona lo cambió: pista oculta, marca "editado"
+    t.nombre.escribir('Otro Nombre');
+    t.formulario.reset();
+    expect(t.email.value).toBe(''); // el reset ya vació los campos
+    await esperar();
+    expect(t.email.value).toBe('ana@ejemplo.com');
+    expect(t.nombre.value).toBe('Ana Pérez');
+    expect(t.pista.hidden).toBe(false);
+  });
+
+  test('tras enviar (reset) sin sesión, la pista obsoleta se oculta y los campos quedan vacíos', async () => {
+    const t = montar({ sesion: SESION });
+    await esperar();
+    t.oyentes.forEach((fn) => fn('SIGNED_OUT', null)); // cierra sesión; la persona escribe y envía
+    t.email.escribir('x@ejemplo.com');
+    t.pista.hidden = false; // pista que había quedado visible
+    t.formulario.reset();
+    await esperar();
+    expect(t.email.value).toBe('');
+    expect(t.nombre.value).toBe('');
+    expect(t.pista.hidden).toBe(true);
   });
 });

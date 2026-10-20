@@ -32,7 +32,7 @@ describe('Educación: botones por categoría', () => {
     const valores = [...html.matchAll(/data-categoria="([a-z-]+)"/g)].map((m) => m[1]);
     expect(valores).toEqual(['estudiantes-sobresalientes', 'leyes-educativas', 'programas-educativos', 'sistemas-mundiales']);
     expect(html).toMatch(/foro-filter-btn active" aria-pressed="true" data-categoria="estudiantes-sobresalientes"/);
-    expect(html).toMatch(/data-filters="edu-categoria-filter"/);
+    expect(html).toMatch(/data-filters="edu-categoria-filter edu-enfoque-filter"/);
     expect(html).toMatch(/id="edu-categoria-filter" data-filter-param="categoria"/);
   });
 });
@@ -85,12 +85,17 @@ describe('Noticias: categorías como interruptores y sin "General"', () => {
 
 describe('Admin: sin "General" y la categoría hay que elegirla', () => {
   const html = leer('admin.html');
-  test.each(['an-categoria', 'ac-categoria'])('el selector %s no ofrece "general" y exige elegir', (id) => {
-    const i = html.indexOf(`<select id="${id}"`);
+  test('el selector an-categoria no ofrece "general" y exige elegir', () => {
+    const i = html.indexOf('<select id="an-categoria"');
     const sel = html.slice(i, html.indexOf('</select>', i));
     expect(sel).toMatch(/required/);
     expect(sel).toMatch(/Elige una categoría/);
     expect(sel).not.toMatch(/value="general"/);
+  });
+  test('el formulario de Contenidos usa la sub-sección dinámica: nunca ofrece "general" y la exige en Noticias y Educación', () => {
+    expect(html).not.toMatch(/id="ac-clasificacion"[^>]*value="general"/);
+    expect(leer('clasificacion.js')).not.toMatch(/general/);
+    expect(leer('admin.js')).toMatch(/sel\.required = clasif\.esObligatoria\(seccion\)/);
   });
   test('admin.js ya no usa "general" como valor por defecto', () => {
     expect(leer('admin.js')).not.toMatch(/\|\| 'general'/);
@@ -128,5 +133,30 @@ describe('netlify.toml: redirección de la dirección de Netlify al dominio prop
   test('no usa un comodín que alcance a los deploy previews ni branch deploys', () => {
     expect(primera).not.toMatch(/\*\.netlify\.app/);
     expect(primera).not.toMatch(/deploy-preview|main--/);
+  });
+});
+
+describe('Educación: región independiente del tema', () => {
+  const html = leer('educacion.html');
+  test('la grilla tiene dos grupos de filtro: tema y región', () => {
+    expect(html).toContain('data-filters="edu-categoria-filter edu-enfoque-filter"');
+  });
+  test('la fila de región empieza en "Todas" y se filtra en el navegador sin reiniciarse al cambiar de tema', () => {
+    const i = html.indexOf('id="edu-enfoque-filter"');
+    const nav = html.slice(i, html.indexOf('</nav>', i));
+    expect(nav).toContain('data-local');
+    expect(nav).toContain('data-sin-reinicio');
+    expect(nav).toMatch(/foro-filter-btn active" aria-pressed="true" data-enfoque="">Todas</);
+    expect(nav.match(/data-enfoque=/g)).toHaveLength(5);
+  });
+  test('carga regiones.js antes que contenidos.js', () => {
+    expect(html.indexOf('regiones.js')).toBeGreaterThan(-1);
+    expect(html.indexOf('regiones.js')).toBeLessThan(html.indexOf('contenidos.js'));
+  });
+  test('contenidos.js respeta data-local y data-sin-reinicio', () => {
+    const js = leer('contenidos.js');
+    expect(js).toMatch(/hasAttribute\('data-sin-reinicio'\)/);
+    expect(js).toMatch(/hasAttribute\('data-local'\)/);
+    expect(js).toMatch(/filtrarPorRegion/);
   });
 });

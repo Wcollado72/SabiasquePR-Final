@@ -864,13 +864,49 @@
     else box.dataset.tema = tema;
   }
 
+  // "Sub-sección" única del formulario: sus opciones cambian con la Sección (ver clasificacion.js).
+  // Los campos ocultos ac-subseccion / ac-categoria son los que leen el envío y el Nivel 4 (IA).
+  function llenarClasificacion(valorInicial) {
+    const clasif = window.sqprClasificacion;
+    const seccion = document.getElementById('ac-seccion').value;
+    const sel = document.getElementById('ac-clasificacion');
+    const etiquetas = new Map(JSON.parse(sel.dataset.opciones)[seccion]);
+    const vacio = clasif.esObligatoria(seccion) ? 'Elige una sub-sección' : 'Ninguna';
+    sel.innerHTML = '';
+    sel.add(new Option(vacio, ''));
+    for (const clave of clasif.clavesDe(seccion)) sel.add(new Option(etiquetas.get(clave), clave));
+    sel.required = clasif.esObligatoria(seccion);
+    sel.value = valorInicial || '';
+    document.getElementById('ac-clasificacion-label').textContent = seccion === 'revolucion-humana'
+      ? 'Sub-sección de Revolución Humana (opcional)'
+      : (seccion === 'educacion' ? 'Sub-sección de Educación' : 'Sub-sección de Noticias');
+  }
+  function sincronizarClasificacion() {
+    const seccion = document.getElementById('ac-seccion').value;
+    const cat = document.getElementById('ac-categoria');
+    const campos = window.sqprClasificacion.aCampos(
+      seccion, document.getElementById('ac-clasificacion').value, categoriaGuardada
+    );
+    cat.value = campos.categoria;
+    document.getElementById('ac-subseccion').value = campos.subseccion || '';
+    actualizarTemaContenidos();
+  }
+
   function bindContenidos() {
+    document.getElementById('ac-seccion').addEventListener('change', () => {
+      llenarClasificacion('');
+      sincronizarClasificacion();
+    });
+    document.getElementById('ac-clasificacion').addEventListener('change', sincronizarClasificacion);
+    // El idioma del contenido (Nivel 1) y el idioma de redacción del agente (Nivel 4) van siempre juntos.
+    const idiomaContenido = document.getElementById('ac-idioma-original');
+    const idiomaAgente = document.getElementById('ia-idioma');
+    idiomaContenido.addEventListener('change', () => { idiomaAgente.value = idiomaContenido.value; });
+    idiomaAgente.addEventListener('change', () => { idiomaContenido.value = idiomaAgente.value; });
     document.getElementById('admin-contenidos-new').addEventListener('click', () => openContenidoForm());
     document.getElementById('ac-cancel').addEventListener('click', closeContenidoForm);
     document.getElementById('admin-contenidos-search').addEventListener('input', renderContenidosList);
     document.getElementById('admin-contenidos-form').addEventListener('submit', submitContenido);
-    document.getElementById('ac-seccion').addEventListener('change', actualizarTemaContenidos);
-    document.getElementById('ac-subseccion').addEventListener('change', actualizarTemaContenidos);
     document.getElementById('ac-usar-imagen-categoria').addEventListener('click', () => {
       const categoria = document.getElementById('ac-categoria').value;
       const img = window.SQPR && window.SQPR.CATEGORIA_IMAGEN && window.SQPR.CATEGORIA_IMAGEN[categoria];
@@ -1007,6 +1043,8 @@
     [/latam|latino/, 'america-sur'], [/oceania|pacific/, 'oceania'],
   ];
   let origenTocadoPorAdmin = false;
+  // Categoría con la que se guardó la pieza que se está editando (Revolución Humana no la pregunta y la conserva).
+  let categoriaGuardada = '';
 
   function detectarOrigenPorUrl(url) {
     let host;
@@ -1493,9 +1531,10 @@
     document.getElementById('ia-region').value = '';
     origenTocadoPorAdmin = false;
     document.getElementById('ac-idioma-original').value = item?.idioma_original || 'es';
+    document.getElementById('ia-idioma').value = document.getElementById('ac-idioma-original').value;
     document.getElementById('ac-seccion').value = item?.seccion || 'noticias';
     document.getElementById('ac-tipo-formato').value = item?.tipo_formato || 'noticia';
-    document.getElementById('ac-categoria').value = item?.categoria || '';
+    categoriaGuardada = item?.categoria || '';
     document.getElementById('ac-titulo').value = item?.titulo || '';
     document.getElementById('ac-subtitulo').value = item?.subtitulo_resumen || '';
     document.getElementById('ac-cuerpo').value = item?.cuerpo || '';
@@ -1510,7 +1549,10 @@
     document.getElementById('ac-portada-alt').value = item?.portada_alt || '';
     document.getElementById('ac-fecha').value = item?.fecha_publicacion ? String(item.fecha_publicacion).slice(0, 10) : '';
     document.getElementById('ac-destacado').checked = Boolean(item?.destacado);
-    document.getElementById('ac-subseccion').value = item?.subseccion || '';
+    llenarClasificacion(window.sqprClasificacion.aValor(
+      document.getElementById('ac-seccion').value, item?.subseccion, item?.categoria
+    ));
+    sincronizarClasificacion();
     document.getElementById('ac-enfoque').value = item?.enfoque || '';
     document.getElementById('ac-premium').checked = Boolean(item?.es_premium);
     document.getElementById('ac-cita-sin-fuente').checked = Boolean(item?.cita_sin_fuente_externa);
