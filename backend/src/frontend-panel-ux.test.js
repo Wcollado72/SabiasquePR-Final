@@ -156,3 +156,25 @@ describe('Debate: editar y reportar', () => {
     }
   });
 });
+
+describe('2FA del panel: verifica solo al escribir el sexto dígito', () => {
+  const js = leer('admin.js');
+  const { soloDigitos, codigoCompleto } = new Function(`${entre(js, 'codigo-automatico')}\nreturn { soloDigitos, codigoCompleto };`)();
+
+  test('deja solo números (también al pegar) y recorta a 6', () => {
+    expect(soloDigitos('123 456')).toBe('123456');
+    expect(soloDigitos('12a3-4b5c6d7')).toBe('123456');
+    expect(soloDigitos('')).toBe('');
+  });
+
+  test('el código está completo solo con exactamente 6 dígitos', () => {
+    expect(codigoCompleto('123456')).toBe(true);
+    expect(codigoCompleto('12345')).toBe(false);
+    expect(codigoCompleto('1234567')).toBe(false);
+    expect(codigoCompleto('12345a')).toBe(false);
+  });
+
+  test('el campo envía el formulario al completar el código y no si ya se está verificando', () => {
+    expect(js).toMatch(/input\.addEventListener\('input', \(\) => \{\s*input\.value = soloDigitos\(input\.value\);\s*if \(codigoCompleto\(input\.value\) && !boton\.disabled\) form\.requestSubmit\(\);/);
+  });
+});

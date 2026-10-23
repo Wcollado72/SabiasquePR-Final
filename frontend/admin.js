@@ -179,6 +179,17 @@
     ]));
   }
 
+  // INICIO codigo-automatico
+  // El campo del codigo de 6 digitos: deja solo numeros (tambien al pegar) y avisa cuando ya estan los 6,
+  // para verificar sin pulsar el boton, como hace Supabase.
+  function soloDigitos(valor) {
+    return String(valor).replace(/\D/g, '').slice(0, 6);
+  }
+  function codigoCompleto(valor) {
+    return /^\d{6}$/.test(valor);
+  }
+  // FIN codigo-automatico
+
   function formularioCodigo(alEnviar) {
     const estado = elemento('p', { clase: 'form-status', role: 'status', 'aria-live': 'polite' });
     const input = elemento('input', {
@@ -187,6 +198,10 @@
     });
     const boton = elemento('button', { type: 'submit', texto: 'Verificar' });
     const form = elemento('form', { clase: 'mfa-form' }, [input, boton]);
+    input.addEventListener('input', () => {
+      input.value = soloDigitos(input.value);
+      if (codigoCompleto(input.value) && !boton.disabled) form.requestSubmit();
+    });
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const codigo = input.value.replace(/\s+/g, '');
