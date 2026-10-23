@@ -1,23 +1,23 @@
 {
-  "generado": "2026-10-20T19:28:37.902Z",
+  "generado": "2026-10-23T16:23:58.393Z",
   "comando": "cd backend && npx jest --json --outputFile=<tmp> --coverage --coverageReporters=json-summary",
   "node": "v24.13.0",
-  "suites_total": 53,
-  "suites_pasadas": 53,
+  "suites_total": 57,
+  "suites_pasadas": 57,
   "suites_falladas": 0,
-  "pruebas_total": 694,
-  "pruebas_pasadas": 694,
+  "pruebas_total": 774,
+  "pruebas_pasadas": 774,
   "pruebas_falladas": 0,
   "pruebas_omitidas": 0,
   "exito": true,
-  "duracion_seg": 17.9,
+  "duracion_seg": 20.5,
   "cobertura_global": {
-    "lineas": 88,
-    "sentencias": 86.58,
-    "funciones": 87.02,
-    "ramas": 82.04,
-    "lineas_cubiertas": 1210,
-    "lineas_total": 1375
+    "lineas": 88.53,
+    "sentencias": 87.24,
+    "funciones": 87.36,
+    "ramas": 82.65,
+    "lineas_cubiertas": 1274,
+    "lineas_total": 1439
   },
   "cobertura_por_carpeta": [
     {
@@ -47,10 +47,10 @@
     {
       "carpeta": "src/routes",
       "archivos": 13,
-      "lineas": 92,
-      "sentencias": 90.3,
+      "lineas": 92.1,
+      "sentencias": 90.6,
       "funciones": 96.5,
-      "ramas": 88.1
+      "ramas": 88.4
     },
     {
       "carpeta": "src/services",
@@ -70,19 +70,19 @@
     },
     {
       "carpeta": "src/util",
-      "archivos": 5,
+      "archivos": 6,
       "lineas": 100,
       "sentencias": 100,
       "funciones": 100,
-      "ramas": 97.3
+      "ramas": 94.7
     },
     {
       "carpeta": "src/validators",
-      "archivos": 11,
-      "lineas": 99.5,
-      "sentencias": 99.6,
+      "archivos": 12,
+      "lineas": 99.6,
+      "sentencias": 99.7,
       "funciones": 100,
-      "ramas": 99.1
+      "ramas": 99
     }
   ],
   "suites": [
@@ -92,7 +92,7 @@
       "pruebas": 4,
       "pasadas": 4,
       "falladas": 0,
-      "duracion_ms": 273,
+      "duracion_ms": 320,
       "nombres": [
         {
           "titulo": "construirCambios (plantillas de correo -> API de Supabase) usa los nombres de campo de la API para las 6 plantillas de autenticacion",
@@ -118,7 +118,7 @@
       "pruebas": 7,
       "pasadas": 7,
       "falladas": 0,
-      "duracion_ms": 292,
+      "duracion_ms": 316,
       "nombres": [
         {
           "titulo": "calcularDelta detecta faltantes, extras y modificadas",
@@ -156,7 +156,7 @@
       "pruebas": 4,
       "pasadas": 4,
       "falladas": 0,
-      "duracion_ms": 233,
+      "duracion_ms": 231,
       "nombres": [
         {
           "titulo": "env-ensayo cambia solo DATABASE_URL, SUPABASE_URL y FRONTEND_ORIGIN y conserva lo demas",
@@ -182,7 +182,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 327,
+      "duracion_ms": 271,
       "nombres": [
         {
           "titulo": "filtrarToc (restauracion en proyecto nuevo) conserva lo de public (tablas, datos, restricciones, FK, RLS)",
@@ -212,7 +212,7 @@
       "pruebas": 10,
       "pasadas": 10,
       "falladas": 0,
-      "duracion_ms": 10485,
+      "duracion_ms": 11056,
       "nombres": [
         {
           "titulo": "peticiones sin cuerpo (Express 5: req.body undefined) POST /api/comentarios sin cuerpo responde 400 de validacion, no 500",
@@ -262,7 +262,7 @@
       "pruebas": 6,
       "pasadas": 6,
       "falladas": 0,
-      "duracion_ms": 10351,
+      "duracion_ms": 11192,
       "nombres": [
         {
           "titulo": "cabeceras de seguridad del API (#7) no anuncia Express y manda las cabeceras de endurecimiento",
@@ -296,7 +296,7 @@
       "pruebas": 4,
       "pasadas": 4,
       "falladas": 0,
-      "duracion_ms": 10445,
+      "duracion_ms": 11104,
       "nombres": [
         {
           "titulo": "rate limit por cliente real detras del proxy cada cliente tiene su propio contador (no se comparte entre visitantes)",
@@ -322,7 +322,7 @@
       "pruebas": 2,
       "pasadas": 2,
       "falladas": 0,
-      "duracion_ms": 143,
+      "duracion_ms": 181,
       "nombres": [
         {
           "titulo": "fecha de actualización de las páginas legales no se calcula con new Date()",
@@ -340,7 +340,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 524,
+      "duracion_ms": 274,
       "nombres": [
         {
           "titulo": "clasificacion las listas coinciden con las que valida el backend",
@@ -386,7 +386,7 @@
       "pruebas": 39,
       "pasadas": 39,
       "falladas": 0,
-      "duracion_ms": 432,
+      "duracion_ms": 988,
       "nombres": [
         {
           "titulo": "Página \"Apoya el canal\" (premium.html) título, subtítulo y secciones aprobadas",
@@ -552,7 +552,7 @@
       "pruebas": 11,
       "pasadas": 11,
       "falladas": 0,
-      "duracion_ms": 486,
+      "duracion_ms": 369,
       "nombres": [
         {
           "titulo": "errorAuthEnEspanol traduce el codigo same_password",
@@ -606,7 +606,7 @@
       "pruebas": 18,
       "pasadas": 18,
       "falladas": 0,
-      "duracion_ms": 991,
+      "duracion_ms": 575,
       "nombres": [
         {
           "titulo": "El CSP deja que el formulario de contacto se envíe script.js envía el formulario con fetch al \"action\" (Formspree)",
@@ -685,10 +685,10 @@
     {
       "archivo": "src/frontend-filtros.test.js",
       "estado": "passed",
-      "pruebas": 23,
-      "pasadas": 23,
+      "pruebas": 26,
+      "pasadas": 26,
       "falladas": 0,
-      "duracion_ms": 3596,
+      "duracion_ms": 316,
       "nombres": [
         {
           "titulo": "Noticias: botones de región hay una fila de 4 botones de región, con Puerto Rico activo, debajo de las categorías",
@@ -781,6 +781,84 @@
         {
           "titulo": "Educación: región independiente del tema contenidos.js respeta data-local y data-sin-reinicio",
           "estado": "passed"
+        },
+        {
+          "titulo": "Debate y comentarios: el correo del autor no se muestra (privacidad) debate.js muestra autor_nombre, no autor_email",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Debate y comentarios: el correo del autor no se muestra (privacidad) comentarios.js muestra autor_nombre, no autor_email",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Educación: sin etiqueta de edad (política legal, COPPA) el banner de reglas del foro no declara ninguna edad",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/frontend-panel-ux.test.js",
+      "estado": "passed",
+      "pruebas": 14,
+      "pasadas": 14,
+      "falladas": 0,
+      "duracion_ms": 273,
+      "nombres": [
+        {
+          "titulo": "Noticias rápidas: publicar solo desde el último paso «AL AIRE» y «Guardar borrador» están dentro del panel Fuente (último paso), no en una barra fija",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Noticias rápidas: publicar solo desde el último paso los botones no son \"submit\": Enter dentro de un campo no publica por accidente",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Noticias rápidas: publicar solo desde el último paso el botón de Contenidos tampoco envía con Enter",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Noticias rápidas: publicar solo desde el último paso admin.js decide borrador o publicado según el botón y envía con requestSubmit",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Aviso del campo obligatorio que falta (paneles ocultos) abre el panel que contiene el primer campo inválido y dice cuál falta",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Aviso del campo obligatorio que falta (paneles ocultos) si el panel ya está visible no lo vuelve a abrir, pero igual avisa",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Aviso del campo obligatorio que falta (paneles ocultos) con varios campos inválidos en la misma validación solo atiende el primero",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Panel de administración: selección visible y traducción la selección de texto en los campos del panel no usa el color del ::selection global",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Panel de administración: selección visible y traducción la traducción es un bloque colapsable con estado visible",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Debate: editar y reportar la edición reenvía lo que la API reemplaza (sub-sección, región, enlace) y recorta el texto",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Debate: editar y reportar sin región ni enlace no manda esos campos; el administrador conserva destacado y tema",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Debate: editar y reportar Editar llama a PATCH /api/foro/posts/:id y solo lo ve el dueño o el administrador",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Debate: editar y reportar Reportar usa un cuadro propio (no prompt) y no aparece en lo propio",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Debate: editar y reportar los textos nuevos del debate tienen traducción al inglés",
+          "estado": "passed"
         }
       ]
     },
@@ -790,7 +868,7 @@
       "pruebas": 14,
       "pasadas": 14,
       "falladas": 0,
-      "duracion_ms": 479,
+      "duracion_ms": 307,
       "nombres": [
         {
           "titulo": "normalizar colapsa espacios y saltos de linea, y recorta",
@@ -851,12 +929,66 @@
       ]
     },
     {
+      "archivo": "src/ia-herramientas.test.js",
+      "estado": "passed",
+      "pruebas": 11,
+      "pasadas": 11,
+      "falladas": 0,
+      "duracion_ms": 973,
+      "nombres": [
+        {
+          "titulo": "catalogo y limites las claves y los limites coinciden con los que valida el backend",
+          "estado": "passed"
+        },
+        {
+          "titulo": "catalogo y limites cada IA conocida tiene su icono en images/ia/ (SVG con titulo)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "catalogo y limites el nombre visible de las conocidas va con su capitalizacion; las otras se muestran tal cual",
+          "estado": "passed"
+        },
+        {
+          "titulo": "normalizar recorta, pasa las conocidas a minuscula y quita vacias y repetidas",
+          "estado": "passed"
+        },
+        {
+          "titulo": "normalizar ignora lo que no es texto y respeta el maximo y el largo del nombre",
+          "estado": "passed"
+        },
+        {
+          "titulo": "insigniasHtml sin herramientas no pinta nada",
+          "estado": "passed"
+        },
+        {
+          "titulo": "insigniasHtml las conocidas llevan icono y nombre; las escritas a mano solo el nombre",
+          "estado": "passed"
+        },
+        {
+          "titulo": "insigniasHtml escapa el HTML de un nombre escrito a mano",
+          "estado": "passed"
+        },
+        {
+          "titulo": "conexion con el formulario y las paginas los formularios tienen su selector, y las paginas cargan el modulo antes de editorial.js",
+          "estado": "passed"
+        },
+        {
+          "titulo": "conexion con el formulario y las paginas el panel envia iaHerramientas al guardar noticias y contenidos y las carga al editar",
+          "estado": "passed"
+        },
+        {
+          "titulo": "conexion con el formulario y las paginas las tarjetas y paginas de noticias y contenidos muestran la divulgacion con los iconos",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
       "archivo": "src/middleware/auth.jwt.test.js",
       "estado": "passed",
       "pruebas": 8,
       "pasadas": 8,
       "falladas": 0,
-      "duracion_ms": 405,
+      "duracion_ms": 261,
       "nombres": [
         {
           "titulo": "verificacion del JWT con emisor y audiencia requireAuth exige iss = <proyecto>/auth/v1 y aud = authenticated",
@@ -898,7 +1030,7 @@
       "pruebas": 16,
       "pasadas": 16,
       "falladas": 0,
-      "duracion_ms": 10225,
+      "duracion_ms": 11001,
       "nombres": [
         {
           "titulo": "admin con sesion aal1 (solo contrasena) pierde el poder: rol efectivo \"usuario\" y requireAdmin responde 403 mfa_required",
@@ -972,7 +1104,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 626,
+      "duracion_ms": 875,
       "nombres": [
         {
           "titulo": "requireAuth responde 401 si no hay encabezado Authorization",
@@ -999,10 +1131,10 @@
     {
       "archivo": "src/netlify-config.test.js",
       "estado": "passed",
-      "pruebas": 8,
-      "pasadas": 8,
+      "pruebas": 9,
+      "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 145,
+      "duracion_ms": 207,
       "nombres": [
         {
           "titulo": "netlify.toml construye y publica solo la carpeta frontend/",
@@ -1033,6 +1165,10 @@
           "estado": "passed"
         },
         {
+          "titulo": "netlify.toml las vistas previas de PR solo se construyen en ramas preview/* (cada build cuesta creditos)",
+          "estado": "passed"
+        },
+        {
           "titulo": "netlify.toml la redireccion de la direccion de netlify.app a sabiasquepr.com sigue primero",
           "estado": "passed"
         }
@@ -1044,7 +1180,7 @@
       "pruebas": 14,
       "pasadas": 14,
       "falladas": 0,
-      "duracion_ms": 376,
+      "duracion_ms": 311,
       "nombres": [
         {
           "titulo": "filtrarPorRegion sin región elegida devuelve todo",
@@ -1110,7 +1246,7 @@
       "pruebas": 17,
       "pasadas": 17,
       "falladas": 0,
-      "duracion_ms": 10841,
+      "duracion_ms": 11537,
       "nombres": [
         {
           "titulo": "acceso a /api/admin/gastos get /api/admin/gastos: 401 sin sesion",
@@ -1188,7 +1324,7 @@
       "pruebas": 28,
       "pasadas": 28,
       "falladas": 0,
-      "duracion_ms": 10960,
+      "duracion_ms": 11767,
       "nombres": [
         {
           "titulo": "POST /api/admin/autocompletar-ia 401 sin autenticacion",
@@ -1310,7 +1446,7 @@
       "pruebas": 21,
       "pasadas": 21,
       "falladas": 0,
-      "duracion_ms": 11066,
+      "duracion_ms": 11805,
       "nombres": [
         {
           "titulo": "acceso a /api/admin/traducciones y /traducir get /api/admin/traducciones/noticia/a: 401 sin sesion",
@@ -1404,7 +1540,7 @@
       "pruebas": 17,
       "pasadas": 17,
       "falladas": 0,
-      "duracion_ms": 10736,
+      "duracion_ms": 11417,
       "nombres": [
         {
           "titulo": "GET /api/agradecimientos (público) 200 con la lista de nombres, sin pedir sesión",
@@ -1482,7 +1618,7 @@
       "pruebas": 13,
       "pasadas": 13,
       "falladas": 0,
-      "duracion_ms": 10531,
+      "duracion_ms": 11363,
       "nombres": [
         {
           "titulo": "GET /api/comentarios 400 si faltan tipo o itemId",
@@ -1541,13 +1677,17 @@
     {
       "archivo": "src/routes/contenidos.integration.test.js",
       "estado": "passed",
-      "pruebas": 33,
-      "pasadas": 33,
+      "pruebas": 42,
+      "pasadas": 42,
       "falladas": 0,
-      "duracion_ms": 11160,
+      "duracion_ms": 12179,
       "nombres": [
         {
           "titulo": "GET /api/contenidos devuelve la lista",
+          "estado": "passed"
+        },
+        {
+          "titulo": "GET /api/contenidos la lista y el detalle publicos devuelven ia_herramientas (tambien en contenido premium bloqueado)",
           "estado": "passed"
         },
         {
@@ -1635,6 +1775,22 @@
           "estado": "passed"
         },
         {
+          "titulo": "POST /api/contenidos 201 persiste iaHerramientas (claves conocidas y nombre libre) en el INSERT",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/contenidos 201 sin iaHerramientas guarda una lista vacia",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/contenidos 400 con 9 herramientas, <script> o divulgacionIa \"no\" junto a una lista con elementos",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/contenidos 400 al crear con iaHerramientas y sin divulgacionIa (se asume \"no\")",
+          "estado": "passed"
+        },
+        {
           "titulo": "POST /api/contenidos 201 con tipoFormato \"audio\" y urlMedia",
           "estado": "passed"
         },
@@ -1652,6 +1808,22 @@
         },
         {
           "titulo": "PUT /api/contenidos/:id PUT parcial que solo cambia subformato no toca los demas campos nuevos",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PUT /api/contenidos/:id PUT sin iaHerramientas conserva las guardadas",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PUT /api/contenidos/:id PUT con iaHerramientas las normaliza y las guarda",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PUT /api/contenidos/:id 400 si iaHerramientas llega sin divulgacionIa y la pieza tiene divulgacion \"no\"",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PUT /api/contenidos/:id PUT que cambia la divulgacion a \"no\" vacia las herramientas guardadas",
           "estado": "passed"
         },
         {
@@ -1686,7 +1858,7 @@
       "pruebas": 42,
       "pasadas": 42,
       "falladas": 0,
-      "duracion_ms": 11213,
+      "duracion_ms": 12293,
       "nombres": [
         {
           "titulo": "GET /api/foro/posts 400 si falta el parametro subseccion",
@@ -1753,7 +1925,7 @@
           "estado": "passed"
         },
         {
-          "titulo": "POST /api/foro/posts 201 en educacion sin confirmar edad (foro 12+ sin gate)",
+          "titulo": "POST /api/foro/posts 201 en educacion sin confirmar edad (audiencia general, sin gate)",
           "estado": "passed"
         },
         {
@@ -1841,7 +2013,7 @@
           "estado": "passed"
         },
         {
-          "titulo": "POST /api/foro/posts/:postId/comentarios 201 al comentar en educacion sin confirmar edad (foro 12+ sin gate)",
+          "titulo": "POST /api/foro/posts/:postId/comentarios 201 al comentar en educacion sin confirmar edad (audiencia general, sin gate)",
           "estado": "passed"
         },
         {
@@ -1864,7 +2036,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 10315,
+      "duracion_ms": 11664,
       "nombres": [
         {
           "titulo": "POST /api/newsletter/subscribe 400 con correo invalido",
@@ -1891,13 +2063,17 @@
     {
       "archivo": "src/routes/noticias.integration.test.js",
       "estado": "passed",
-      "pruebas": 30,
-      "pasadas": 30,
+      "pruebas": 39,
+      "pasadas": 39,
       "falladas": 0,
-      "duracion_ms": 11260,
+      "duracion_ms": 11930,
       "nombres": [
         {
           "titulo": "GET /api/noticias devuelve la lista de noticias",
+          "estado": "passed"
+        },
+        {
+          "titulo": "GET /api/noticias la lista y el detalle publicos devuelven ia_herramientas",
           "estado": "passed"
         },
         {
@@ -1953,6 +2129,22 @@
           "estado": "passed"
         },
         {
+          "titulo": "POST /api/noticias 201 persiste iaHerramientas (claves conocidas y nombre libre) en el INSERT",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/noticias 201 sin iaHerramientas guarda una lista vacia",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/noticias 400 con 9 herramientas, <script> o divulgacionIa \"no\" junto a una lista con elementos",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/noticias 400 al crear con iaHerramientas y sin divulgacionIa (se asume \"no\")",
+          "estado": "passed"
+        },
+        {
           "titulo": "POST /api/noticias 201 con publicado=false lo persiste como borrador (por defecto es true)",
           "estado": "passed"
         },
@@ -1982,6 +2174,22 @@
         },
         {
           "titulo": "PUT /api/noticias/:id 200 al editar una noticia existente",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PUT /api/noticias/:id PUT sin iaHerramientas conserva las guardadas",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PUT /api/noticias/:id PUT con iaHerramientas las normaliza y las guarda",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PUT /api/noticias/:id 400 si iaHerramientas llega sin divulgacionIa y la noticia tiene divulgacion \"no\"",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PUT /api/noticias/:id PUT que cambia la divulgacion a \"no\" vacia las herramientas guardadas",
           "estado": "passed"
         },
         {
@@ -2024,7 +2232,7 @@
       "pruebas": 2,
       "pasadas": 2,
       "falladas": 0,
-      "duracion_ms": 10090,
+      "duracion_ms": 10765,
       "nombres": [
         {
           "titulo": "GET /api/ordenes 401 sin autenticacion",
@@ -2042,7 +2250,7 @@
       "pruebas": 18,
       "pasadas": 18,
       "falladas": 0,
-      "duracion_ms": 10847,
+      "duracion_ms": 11807,
       "nombres": [
         {
           "titulo": "PUT /api/perfil 401 sin autenticacion",
@@ -2124,7 +2332,7 @@
       "pruebas": 12,
       "pasadas": 12,
       "falladas": 0,
-      "duracion_ms": 10543,
+      "duracion_ms": 11441,
       "nombres": [
         {
           "titulo": "GET /api/productos devuelve la lista de productos",
@@ -2182,7 +2390,7 @@
       "pruebas": 14,
       "pasadas": 14,
       "falladas": 0,
-      "duracion_ms": 10531,
+      "duracion_ms": 11860,
       "nombres": [
         {
           "titulo": "POST /api/reportes 401 sin autenticacion",
@@ -2248,7 +2456,7 @@
       "pruebas": 10,
       "pasadas": 10,
       "falladas": 0,
-      "duracion_ms": 6826,
+      "duracion_ms": 10893,
       "nombres": [
         {
           "titulo": "POST /api/stripe/create-checkout-session 401 sin autenticacion",
@@ -2298,7 +2506,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 10176,
+      "duracion_ms": 10913,
       "nombres": [
         {
           "titulo": "POST /api/stripe/webhook 400 si la firma es invalida",
@@ -2344,7 +2552,7 @@
       "pruebas": 4,
       "pasadas": 4,
       "falladas": 0,
-      "duracion_ms": 729,
+      "duracion_ms": 231,
       "nombres": [
         {
           "titulo": "isPrivateIp detecta direcciones privadas/internas comunes",
@@ -2370,7 +2578,7 @@
       "pruebas": 13,
       "pasadas": 13,
       "falladas": 0,
-      "duracion_ms": 301,
+      "duracion_ms": 246,
       "nombres": [
         {
           "titulo": "aplicarCorrecciones aplica solo los cambios cuyo \"antes\" existe literalmente en el texto",
@@ -2432,7 +2640,7 @@
       "pruebas": 7,
       "pasadas": 7,
       "falladas": 0,
-      "duracion_ms": 200,
+      "duracion_ms": 151,
       "nombres": [
         {
           "titulo": "elegirTono devuelve una instruccion distinta por cada tono valido",
@@ -2470,7 +2678,7 @@
       "pruebas": 11,
       "pasadas": 11,
       "falladas": 0,
-      "duracion_ms": 603,
+      "duracion_ms": 327,
       "nombres": [
         {
           "titulo": "camposPresentes solo campos traducibles con texto",
@@ -2514,6 +2722,24 @@
         },
         {
           "titulo": "calcularCosto usa el usage real",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/util/autorVisible.test.js",
+      "estado": "passed",
+      "pruebas": 2,
+      "pasadas": 2,
+      "falladas": 0,
+      "duracion_ms": 159,
+      "nombres": [
+        {
+          "titulo": "nombreVisibleSql usa el nombre del perfil y, si no hay, un alias generico derivado del id",
+          "estado": "passed"
+        },
+        {
+          "titulo": "nombreVisibleSql nunca incluye el correo y respeta el alias de tabla pedido",
           "estado": "passed"
         }
       ]
@@ -2582,7 +2808,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 148,
+      "duracion_ms": 216,
       "nombres": [
         {
           "titulo": "calcularEdad null si no hay fecha",
@@ -2628,7 +2854,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 167,
+      "duracion_ms": 176,
       "nombres": [
         {
           "titulo": "slugify convierte a minusculas y reemplaza espacios por guiones",
@@ -2658,7 +2884,7 @@
       "pruebas": 8,
       "pasadas": 8,
       "falladas": 0,
-      "duracion_ms": 153,
+      "duracion_ms": 184,
       "nombres": [
         {
           "titulo": "normalizarLang / idiomaOriginalDe solo acepta es/en; el idioma original por defecto es espanol",
@@ -2700,7 +2926,7 @@
       "pruebas": 16,
       "pasadas": 16,
       "falladas": 0,
-      "duracion_ms": 230,
+      "duracion_ms": 228,
       "nombres": [
         {
           "titulo": "validateNombreAgradecimiento acepta \"Ana\"",
@@ -2774,7 +3000,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 123,
+      "duracion_ms": 178,
       "nombres": [
         {
           "titulo": "validateComentario acepta un comentario valido",
@@ -2801,10 +3027,10 @@
     {
       "archivo": "src/validators/contenido.test.js",
       "estado": "passed",
-      "pruebas": 32,
-      "pasadas": 32,
+      "pruebas": 37,
+      "pasadas": 37,
       "falladas": 0,
-      "duracion_ms": 259,
+      "duracion_ms": 275,
       "nombres": [
         {
           "titulo": "validateContenido acepta un contenido completo y valido",
@@ -2931,6 +3157,26 @@
           "estado": "passed"
         },
         {
+          "titulo": "validateContenido iaHerramientas acepta claves conocidas y nombres libres",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validateContenido iaHerramientas es opcional y se puede mandar vacio con cualquier divulgacion",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validateContenido iaHerramientas rechaza 9 elementos, duplicados, <script> y URLs",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validateContenido iaHerramientas rechaza elementos con divulgacionIa \"no\"",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validateContenido iaHerramientas en edicion parcial, omitido no da errores",
+          "estado": "passed"
+        },
+        {
           "titulo": "validateContenido idiomaOriginal (Fase C2) acepta es y en, y rechaza cualquier otro valor",
           "estado": "passed"
         }
@@ -2942,7 +3188,7 @@
       "pruebas": 22,
       "pasadas": 22,
       "falladas": 0,
-      "duracion_ms": 201,
+      "duracion_ms": 242,
       "nombres": [
         {
           "titulo": "validateFechaNacimiento acepta 1990-05-17",
@@ -3040,7 +3286,7 @@
       "pruebas": 19,
       "pasadas": 19,
       "falladas": 0,
-      "duracion_ms": 346,
+      "duracion_ms": 274,
       "nombres": [
         {
           "titulo": "validatePost acepta un post valido sin errores",
@@ -3126,7 +3372,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 148,
+      "duracion_ms": 336,
       "nombres": [
         {
           "titulo": "validateGastoServicio acepta un gasto valido minimo",
@@ -3167,12 +3413,106 @@
       ]
     },
     {
+      "archivo": "src/validators/iaHerramientas.test.js",
+      "estado": "passed",
+      "pruebas": 21,
+      "pasadas": 21,
+      "falladas": 0,
+      "duracion_ms": 187,
+      "nombres": [
+        {
+          "titulo": "esquema SQL schema.sql y la migracion crean la columna con el mismo limite que la validacion",
+          "estado": "passed"
+        },
+        {
+          "titulo": "CLAVES_IA_CONOCIDAS lista las cinco herramientas conocidas en minuscula",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarIaHerramientas omitido es valido",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarIaHerramientas acepta claves conocidas y nombres libres",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarIaHerramientas acepta una lista vacia incluso con divulgacion \"no\"",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarIaHerramientas rechaza lo que no sea una lista",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarIaHerramientas acepta 8 elementos y rechaza 9",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarIaHerramientas rechaza elementos que no son texto, vacios o de mas de 40 caracteres",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarIaHerramientas rechaza <, >, saltos de linea y URLs",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarIaHerramientas rechaza duplicados sin distinguir mayusculas ni espacios",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarIaHerramientas con divulgacion \"no\" y elementos, pide cambiar la divulgacion",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarIaHerramientas sin divulgacion en el cuerpo no cruza (lo resuelve la ruta)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "normalizarIaHerramientas claves conocidas a minuscula, nombres libres conservan capitalizacion",
+          "estado": "passed"
+        },
+        {
+          "titulo": "normalizarIaHerramientas quita duplicados conservando el primero",
+          "estado": "passed"
+        },
+        {
+          "titulo": "resolverIaHerramientas omitido en edicion conserva lo guardado",
+          "estado": "passed"
+        },
+        {
+          "titulo": "resolverIaHerramientas omitido al crear es una lista vacia",
+          "estado": "passed"
+        },
+        {
+          "titulo": "resolverIaHerramientas una fila vieja sin la columna se trata como lista vacia",
+          "estado": "passed"
+        },
+        {
+          "titulo": "resolverIaHerramientas normaliza la lista nueva",
+          "estado": "passed"
+        },
+        {
+          "titulo": "resolverIaHerramientas lista nueva contra una pieza con divulgacion \"no\" (sin cambiarla) da error",
+          "estado": "passed"
+        },
+        {
+          "titulo": "resolverIaHerramientas lista nueva que acompana un cambio de divulgacion a \"parcial\" es valida",
+          "estado": "passed"
+        },
+        {
+          "titulo": "resolverIaHerramientas cambiar la divulgacion a \"no\" sin lista nueva vacia la lista guardada",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
       "archivo": "src/validators/noticia.test.js",
       "estado": "passed",
-      "pruebas": 18,
-      "pasadas": 18,
+      "pruebas": 23,
+      "pasadas": 23,
       "falladas": 0,
-      "duracion_ms": 242,
+      "duracion_ms": 297,
       "nombres": [
         {
           "titulo": "validateNoticia acepta una noticia completa y valida",
@@ -3243,6 +3583,26 @@
           "estado": "passed"
         },
         {
+          "titulo": "validateNoticia iaHerramientas acepta claves conocidas y nombres libres",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validateNoticia iaHerramientas es opcional y se puede mandar vacio con cualquier divulgacion",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validateNoticia iaHerramientas rechaza 9 elementos, duplicados, <script> y URLs",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validateNoticia iaHerramientas rechaza elementos con divulgacionIa \"no\"",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validateNoticia iaHerramientas en edicion parcial, omitido no da errores",
+          "estado": "passed"
+        },
+        {
           "titulo": "validateNoticia idiomaOriginal (Fase C2) acepta es y en, y rechaza cualquier otro valor",
           "estado": "passed"
         }
@@ -3254,7 +3614,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 131,
+      "duracion_ms": 116,
       "nombres": [
         {
           "titulo": "validatePerfil acepta un cuerpo vacio (nombre es opcional)",
@@ -3284,7 +3644,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 154,
+      "duracion_ms": 149,
       "nombres": [
         {
           "titulo": "validateProducto acepta un producto completo y valido",
@@ -3330,7 +3690,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 223,
+      "duracion_ms": 207,
       "nombres": [
         {
           "titulo": "validateReporte acepta un reporte valido",
@@ -3360,7 +3720,7 @@
       "pruebas": 7,
       "pasadas": 7,
       "falladas": 0,
-      "duracion_ms": 174,
+      "duracion_ms": 226,
       "nombres": [
         {
           "titulo": "validateTraduccion acepta una traduccion valida de noticia y la sanea",

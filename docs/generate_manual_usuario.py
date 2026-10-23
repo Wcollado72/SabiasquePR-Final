@@ -445,7 +445,7 @@ def seccion_descripcion(story):
     agregar_tabla(story, [
         ['Tipo de visita', 'Puede'],
         ['Sin cuenta', 'Leer todo el contenido y los debates; ver videos y escuchar audios; filtrar por categoría y región; cambiar idioma y modo claro/oscuro; suscribirse al boletín; enviar un mensaje desde "Quiénes somos". Las secciones 18+ piden confirmar la edad con una casilla.'],
-        ['Con cuenta gratuita', 'Todo lo anterior, más: publicar y comentar en los debates (hasta 200 palabras por publicación), comentar en noticias y piezas, reportar contenido, comprar en la tienda, activar el apoyo mensual, editar su nombre y ver sus pedidos.'],
+        ['Con cuenta gratuita', 'Todo lo anterior, más: publicar y comentar en los debates (hasta 200 palabras por publicación) y editar o eliminar sus propias publicaciones, comentar en noticias y piezas, reportar contenido de otras personas, comprar en la tienda, activar el apoyo mensual, editar su nombre y ver sus pedidos.'],
         ['Con apoyo mensual (Colaborador)', 'Todo lo de la cuenta gratuita, más: insignia "Colaborador", publicaciones de hasta 1000 palabras, enlace multimedia (imagen, audio o video) en sus publicaciones, acceso completo a las piezas marcadas como premium y la opción de aparecer en el muro de agradecimiento.'],
         ['Administrador o moderador', 'El administrador gestiona noticias, contenidos, productos, reportes, agentes de IA y gastos. El moderador solo atiende reportes y ve el estado de las defensas.'],
     ], [125, CONTENT_W - 125])
@@ -534,7 +534,8 @@ def seccion_guia(story, capturas_admin):
          'También puedes abrir la pieza y reproducirlo allí.'),
         ('Al final de cada pieza está la sección <b>Comentarios</b>. Sin cuenta verás "Inicia sesión para comentar". '
          'Con cuenta, escribe tu comentario (mínimo 2 caracteres) y pulsa <b>Comentar</b>.',
-         'tu comentario aparece en la lista con tu correo y la fecha, y un botón <b>Eliminar</b> para quitarlo.'),
+         'tu comentario aparece en la lista con tu nombre de perfil (o un alias genérico como "Participante-a3f9" si no has escrito tu nombre) '
+         'y la fecha, y un botón <b>Eliminar</b> para quitarlo.'),
     ])
     nota(story, 'Qué muestra el collage.',
          'La página Noticias mezcla piezas de todas las secciones, de la más reciente a la más antigua, y procura mostrar '
@@ -652,23 +653,33 @@ def seccion_guia(story, capturas_admin):
     pasos(story, [
         ('<b>Leer sin cuenta.</b> Baja hasta la lista de publicaciones y pulsa el título de una.',
          'la publicación se despliega con su texto y los comentarios. Pulsa el título otra vez para cerrarla. '
-         'Cada publicación muestra el autor, la fecha y cuántos comentarios tiene; la "Tema oficial de la semana" lleva una etiqueta.'),
+         'Cada publicación muestra el autor (nombre de perfil o alias genérico, nunca un correo), la fecha y cuántos comentarios tiene; la "Tema oficial de la semana" lleva una etiqueta.'),
         ('<b>Escribir una publicación.</b> Inicia sesión y, en el formulario "Nueva publicación", escribe el <b>Título</b> '
          '(de 3 a 140 caracteres) y <b>Tu opinión</b> (mínimo 10 caracteres). Espera la verificación de Cloudflare y pulsa <b>Publicar</b>.',
          'un contador de palabras bajo el texto (por ejemplo, "35/200 palabras"). Al publicar aparece "¡Publicado!" '
          'y tu publicación entra a la lista. Sin sesión, en lugar del formulario verás "Inicia sesión para participar en el debate".'),
         ('<b>Comentar.</b> Abre una publicación, escribe en el campo "Comentar..." y pulsa <b>Comentar</b>.',
          'tu comentario al final de la lista de comentarios.'),
-        ('<b>Reportar.</b> Pulsa <b>Reportar</b> en una publicación o comentario. Escribe el motivo (mínimo 5 caracteres) en la ventana que aparece.',
-         '"Gracias, tu reporte fue enviado para revisión."'),
+        ('<b>Modificar lo tuyo (Editar).</b> Abre una publicación tuya: debajo del texto aparecen los botones <b>Editar</b> y <b>Eliminar</b> '
+         '(el administrador los ve en todas las publicaciones). Pulsa <b>Editar</b>.',
+         'el texto se reemplaza por un formulario con el <b>Título</b> y el <b>Mensaje</b> actuales y un contador de palabras (200 con cuenta gratuita, 1000 si apoyas cada mes).'),
+        ('Cambia lo que necesites y pulsa <b>Guardar cambios</b> (o <b>Cancelar</b> para dejar todo como estaba).',
+         'la publicación con el texto nuevo y una etiqueta <b>editada</b> junto a la fecha. Si te pasas del límite de palabras, el sitio no guarda y muestra el aviso.'),
+        ('<b>Reportar.</b> Pulsa <b>Reportar</b> en una publicación o comentario de otra persona. Se abre el cuadro <b>Reportar contenido</b>: '
+         'escribe el motivo (mínimo 5 caracteres) y pulsa <b>Enviar reporte</b> (o <b>Cancelar</b>).',
+         'el botón cambia a "Reporte enviado" y queda desactivado. El reporte llega a la pestaña Reportes del panel de administración (sección 3.10).'),
         ('<b>Eliminar lo tuyo.</b> En tus propias publicaciones y comentarios aparece el botón <b>Eliminar</b>; confirma en la ventana.',
          'la publicación o el comentario desaparece de la lista.'),
     ])
+    nota(story, 'Qué botones ves.',
+         'En lo que escribiste tú aparecen <b>Editar</b> (solo en publicaciones) y <b>Eliminar</b>, pero <b>no</b> Reportar: '
+         'el reporte es para el contenido de otras personas. En lo de los demás solo ves <b>Reportar</b>. '
+         'Así queda completo el ciclo de tus publicaciones: crear (publicar o comentar), leer, modificar (Editar) y eliminar.')
     h3t(story, 'Reglas del debate')
     agregar_tabla(story, [
         ['Regla', 'Cómo funciona'],
         ['Límite de palabras', 'Cuenta gratuita: <b>200 palabras</b> por publicación. Quien apoya cada mes (Colaborador): <b>1000 palabras</b>. '
-                              'Si te pasas, el contador se pone en rojo y el sitio rechaza la publicación con un aviso.'],
+                              'Si te pasas, el contador se pone en rojo y el sitio rechaza la publicación (o la edición) con un aviso.'],
         ['Cuenta nueva', 'Para publicar o comentar, la cuenta debe tener al menos 1 hora de creada.'],
         ['Secciones 18+', 'Corrupción Humana e Ilógica Humana exigen haber confirmado que eres mayor de 18 años.'],
         ['Contra robots', 'Verificación de Cloudflare, un campo oculto que solo los robots llenan y un máximo de 20 envíos '
@@ -677,18 +688,19 @@ def seccion_guia(story, capturas_admin):
     ], [115, CONTENT_W - 115])
     h3(story, 'Cómo funciona la moderación')
     bullets(story, [
-        'Cualquier persona con sesión puede <b>reportar</b> una publicación o un comentario.',
+        'Cualquier persona con sesión puede <b>reportar</b> una publicación o un comentario de otra persona (el botón no aparece en lo que escribiste tú).',
         'Además, el sistema revisa cada publicación y comentario nuevo y, si detecta señales de riesgo, crea por su cuenta un '
         'reporte marcado como "detección automática". Esto <b>no bloquea ni borra</b> nada: solo avisa a quien modera.',
-        'El equipo (administrador o moderador) revisa la cola de reportes y puede <b>marcarlos como revisados</b>, '
+        'Los reportes llegan a la pestaña <b>Reportes</b> del panel. El equipo (administrador o moderador) revisa la cola y puede <b>marcarlos como revisados</b>, '
         '<b>descartarlos</b> o <b>eliminar el contenido</b> reportado.',
         'La base de las secciones 18+ es la libertad de expresión: no se censura una opinión por ser incómoda, pero los '
         'casos extremos, como amenazas de daño o contenido ilegal, se revisan y se eliminan. La Educación admite todo '
         'lo que sea respetuoso: no se toleran el lenguaje ofensivo, el contenido sexual ni los ataques personales.',
     ])
     nota(story, 'Tu publicación es pública.',
-         'Todo lo que escribes en un debate o en un comentario lo puede leer cualquier visitante y se muestra junto al '
-         'correo de tu cuenta como autor. Escribe pensando en eso.', 'aviso')
+         'Todo lo que escribes en un debate o en un comentario lo puede leer cualquier visitante. Como autor se muestra el '
+         '<b>nombre de tu perfil</b> (el campo Nombre de <b>Mi cuenta</b>, sección 3.9) o, si no lo has escrito, un alias genérico '
+         'como "Participante-a3f9". <b>Tu correo no se muestra.</b> Escribe pensando en que el texto es público.', 'aviso')
 
     # 3.7 ────────────────────────────────────────────────────
     h2(story, '3.7', 'Tienda y apoyo voluntario')
@@ -767,7 +779,8 @@ def seccion_guia(story, capturas_admin):
         ('Inicia sesión, pulsa el botón con tu correo y elige <b>Mi cuenta</b>.',
          'tu correo, tu estado (Cuenta gratuita, Colaborador o Administrador) y el campo <b>Nombre</b>. '
          'Si no has iniciado sesión, el sitio muestra "Inicia sesión para ver tu cuenta".'),
-        ('Para cambiar tu nombre, escríbelo y pulsa <b>Guardar cambios</b>.', '"Guardado."'),
+        ('Para cambiar tu nombre, escríbelo y pulsa <b>Guardar cambios</b>. Este es el nombre que se muestra como autor en tus publicaciones y comentarios; '
+         'si lo dejas vacío, el sitio usa un alias genérico como "Participante-a3f9".', '"Guardado."'),
         ('Para cambiar la contraseña, usa el enlace "Restablécela aquí", que lleva a la página de restablecer contraseña (sección 3.5).', None),
         ('<b>Muro de agradecimiento</b> (solo aparece si apoyas cada mes). Escribe el nombre o alias que quieras mostrar, marca la casilla de autorización y pulsa <b>Guardar</b>. '
          'Para quitarlo, pulsa <b>Retirar mi nombre</b>.',
@@ -795,14 +808,15 @@ def seccion_guia(story, capturas_admin):
     agregar_tabla(story, [
         ['Pestaña', 'Para qué sirve'],
         ['Noticias rápidas', 'Crear, buscar, editar y eliminar noticias. El formulario tiene cinco niveles: <b>Clasificación</b> (idioma en que se escribió y categoría), '
-                             '<b>Contenido</b> (título, párrafos —uno por línea— y divulgación de IA), <b>Multimedia</b> (imagen, texto alternativo y pie), '
-                             '<b>Asistente IA</b> (autocompleta un borrador a partir de la URL del artículo original, que queda sin publicar) y <b>Fuente</b> (URL y nombre). '
-                             'Abajo van la fecha, "Publicado" (desmarcado = borrador visible solo en el panel), "Destacada" y el botón <b>AL AIRE</b> para guardar.'],
+                             '<b>Contenido</b> (título, párrafos —uno por línea— y divulgación de IA con sus iconos), <b>Multimedia</b> (imagen, texto alternativo y pie), '
+                             '<b>Asistente IA</b> (autocompleta un borrador a partir de la URL del artículo original, que queda sin publicar) y <b>Fuente</b> (URL y nombre de la fuente). '
+                             'El último nivel, <b>Fuente</b>, también trae la fecha, la casilla "★ Destacada" y los botones <b>Guardar borrador</b> (la noticia queda solo en el panel), '
+                             '<b>AL AIRE</b> (la publica en el sitio) y Cancelar.'],
         ['Contenidos', 'Crear, buscar, editar y eliminar piezas multi-formato (video, audio, foto, ensayo, noticia, lectura corta) para Noticias, Revolución Humana y Educación. '
                        'La lista se agrupa por sub-sección. Ver el ejemplo paso a paso más abajo.'],
         ['Productos', 'Crear, buscar, editar y eliminar los productos de la tienda: nombre, descripción, precio en USD, imagen y texto alternativo, el Price ID de Stripe para el carrito, '
                       'un enlace de pago opcional y la casilla "Disponible en la tienda" (si se desmarca, el producto queda oculto).'],
-        ['Reportes', 'La cola de moderación del debate. Cada reporte indica quién lo hizo (o "detección automática"), el motivo y su estado. '
+        ['Reportes', 'La cola de moderación del debate: aquí llegan los reportes que envían las personas con el botón Reportar y los de detección automática. Cada reporte indica quién lo hizo (o "detección automática"), el motivo y su estado. '
                      'Acciones: <b>Marcar revisado</b>, <b>Descartar</b> y <b>Eliminar contenido</b> (borra la publicación o el comentario reportado).'],
         ['Agentes', 'Estado real de las defensas del sitio (Turnstile, campo oculto, límite de uso, espera de cuentas nuevas y confirmaciones de edad), '
                     'el uso y el costo de los agentes de IA <b>Investigador</b> y <b>Redactor</b> en el mes, y accesos directos a Contenidos y a Reportes.'],
@@ -810,8 +824,27 @@ def seccion_guia(story, capturas_admin):
                                         'con el total mensual estimado y el gasto automático de los agentes de IA. También se puede crear, editar y eliminar cada servicio.'],
     ], [105, CONTENT_W - 105])
     p(story,
-      'Debajo de los formularios de noticias, contenidos y productos hay un recuadro <b>Traducción</b> para guardar la versión en el otro idioma '
-      '(manualmente o con un borrador de IA que se revisa antes de guardar). El botón <b>?</b> abre un manual de ayuda dentro del panel.')
+      'Debajo de los formularios de noticias, contenidos y productos hay un bloque <b>Traducción al inglés</b> (o al español, si la pieza se escribió en inglés). '
+      'Es <b>colapsable y opcional</b>: se abre pulsando su título y muestra un estado a la derecha: <b>Guardada</b> (ya hay traducción), <b>Pendiente</b> '
+      '(la pieza existe pero aún no se traduce) o <b>Guarda primero</b> (la pieza todavía no se ha guardado). La traducción se hace <i>después</i> de guardar la pieza: '
+      'guárdala, vuelve a abrirla con <b>Editar</b>, abre el bloque y escribe la versión en el otro idioma o pulsa <b>Traducir con IA</b> para obtener un borrador '
+      '(que se revisa y no se guarda solo) y luego <b>Guardar traducción</b>. Sin traducción, quien elige el otro idioma ve la pieza con la etiqueta "Solo en español". '
+      'El botón <b>?</b> abre un manual de ayuda dentro del panel.')
+
+    h3(story, 'Divulgación de uso de IA con iconos')
+    p(story,
+      'En los formularios de <b>Noticias rápidas</b> (nivel Contenido) y de <b>Contenidos</b> (nivel Contenido), debajo de la lista <b>Divulgación de uso de IA</b> '
+      '(No se usó IA, Asistencia parcial de IA o Generado principalmente con IA) hay fichas con el icono de cada herramienta: '
+      '<b>Claude, Gemini, Perplexity, ChatGPT y Copilot</b>.')
+    bullets(story, [
+        '<b>Marcar fichas:</b> pulsa una ficha para activarla (puedes marcar varias) y vuelve a pulsarla para quitarla.',
+        '<b>Otra IA:</b> escribe el nombre en el campo <b>Otra IA</b> y pulsa <b>Agregar</b> (o la tecla Enter, que no envía el formulario). '
+        'La IA aparece como una etiqueta con una <b>×</b> para quitarla.',
+        '<b>Vínculo con la divulgación:</b> al marcar una IA, "No se usó IA" cambia solo a "Asistencia parcial de IA". '
+        'Si eliges "No se usó IA", la lista se vacía y las fichas se bloquean.',
+        '<b>Lo que ve el público:</b> la etiqueta de divulgación y los iconos de las IA marcadas, en las tarjetas y en el artículo '
+        '(las IA escritas a mano salen solo con su nombre).',
+    ])
 
     h3t(story, 'Las cuatro operaciones (crear, consultar, modificar y eliminar)')
     agregar_tabla(story, [
@@ -826,6 +859,25 @@ def seccion_guia(story, capturas_admin):
                      'El elemento desaparece de la lista.'],
     ], [62, 235, CONTENT_W - 62 - 235])
 
+    h3(story, 'Ejemplo: crear una noticia rápida')
+    p(story, 'Supongamos que quieres publicar una noticia de la categoría Ciencia.')
+    pasos(story, [
+        ('Abre la pestaña <b>Noticias rápidas</b> y pulsa <b>+ Nueva noticia</b>.',
+         'el formulario "Nueva noticia" con cinco tarjetas de niveles: Clasificación, Contenido, Multimedia, Asistente IA y Fuente.'),
+        ('<b>Clasificación.</b> Deja el idioma en Español y elige la <b>Categoría</b> (por ejemplo, Ciencia).', None),
+        ('<b>Contenido.</b> Escribe el <b>Título</b> y los <b>Párrafos</b> (uno por línea). En <b>Divulgación de uso de IA</b> deja "No se usó IA" '
+         'o, si usaste una herramienta, pulsa su ficha (Claude, Gemini, Perplexity, ChatGPT o Copilot) o escribe otra en "Otra IA" y pulsa <b>Agregar</b>.',
+         'al marcar una IA, la divulgación cambia sola a "Asistencia parcial de IA" y el icono queda resaltado.'),
+        ('<b>Multimedia.</b> Escribe la ruta o URL de la imagen (o usa "Elegir imagen de la galería") y su texto alternativo.',
+         'una vista previa de la imagen.'),
+        ('<i>Opcional.</i> <b>Asistente IA.</b> Pega la URL del artículo original y pulsa <b>Autocompletar con IA</b>: rellena un borrador que revisas antes de publicar.', None),
+        ('<b>Fuente</b> (último paso). Escribe la URL y el nombre de la fuente, elige la <b>Fecha</b> y marca <b>★ Destacada</b> si quieres que ocupe la portada. '
+         'Aquí están los dos botones de guardado: <b>Guardar borrador</b> deja la noticia solo en el panel (con la etiqueta Borrador) y <b>AL AIRE</b> la publica en el sitio.',
+         'el formulario se cierra y la noticia aparece en la lista. Pulsar Enter dentro de un campo ya <b>no</b> guarda la noticia: solo lo hacen esos dos botones.'),
+        ('Si te falta un dato obligatorio de otro paso, el panel abre ese paso por ti.',
+         'el aviso "Falta completar: …" con el nombre del campo, y el paso correspondiente abierto.'),
+    ])
+
     h3(story, 'Ejemplo: crear un contenido nuevo')
     p(story, 'Supongamos que quieres publicar un ensayo en la sub-sección Nuevos Humanos de Revolución Humana.')
     pasos(story, [
@@ -834,11 +886,14 @@ def seccion_guia(story, capturas_admin):
         ('<b>Nivel 1, Clasificación.</b> Deja el idioma en Español. En <b>Sección</b> elige <i>Revolución Humana</i>. '
          'En la lista siguiente, que cambia según la sección, elige <i>Nuevos Humanos</i>. '
          'En <b>Región</b> elige, por ejemplo, <i>Puerto Rico</i> (o "Ninguna" para que se vea en todas las regiones). En <b>Tipo de formato</b> elige <i>Ensayo</i>.',
-         'la lista de sub-sección con el nombre "Sub-sección de Revolución Humana (opcional)". Si eliges Noticias, la lista pasa a ser las categorías de noticias '
-         '(Sub-sección de Noticias); si eliges Educación, los cuatro temas de Educación, y en esos dos casos es obligatoria.'),
+         'una única lista de sub-sección que cambia según la Sección: en Revolución Humana se llama "Sub-sección de Revolución Humana (opcional)"; '
+         'si eliges Noticias, la lista pasa a ser las 11 categorías de noticias (Sub-sección de Noticias); si eliges Educación, los 4 temas de Educación '
+         '(Sub-sección de Educación), y en esos dos casos es obligatoria. La Región aplica a las tres secciones.'),
         ('<b>Nivel 2, Contenido.</b> Escribe el <b>Título</b> (3 a 160 caracteres), el <b>Resumen</b> (2 o 3 oraciones, mínimo 10 caracteres), '
          'el <b>Cuerpo del texto</b> (opcional) y, si quieres, el autor. El botón <b>Revisar texto</b> sugiere correcciones de ortografía. '
-         'En <b>Divulgación de uso de IA</b> indica si se usó inteligencia artificial.', None),
+         'En <b>Divulgación de uso de IA</b> indica si se usó inteligencia artificial y, si quieres, con cuáles herramientas: pulsa las fichas con icono '
+         '(Claude, Gemini, Perplexity, ChatGPT, Copilot) o escribe otra en "Otra IA" y pulsa <b>Agregar</b> (o Enter); las agregadas salen como etiquetas con × para quitarlas. '
+         'Al marcar una IA, "No se usó IA" cambia a "Asistencia parcial de IA".', None),
         ('<b>Nivel 3, Multimedia.</b> Escribe la ruta o URL de la <b>Imagen de portada</b> (obligatoria) y su texto alternativo, o usa "Elegir imagen de la galería" '
          'o "Usar imagen de la categoría seleccionada". Si el tipo es Video o Audio, pega también el enlace del video o audio.',
          'una vista previa de la imagen.'),
@@ -849,7 +904,7 @@ def seccion_guia(story, capturas_admin):
          'una vista previa de la cita.'),
         ('En la barra inferior escribe la <b>Fecha</b> y la <b>Duración</b> en minutos. Marca <b>Destacado</b> (reemplaza al destacado anterior de esa sección) o '
          '<b>Premium</b> (los visitantes sin apoyo mensual ven solo un adelanto) si corresponde. Pulsa <b>GUARDAR</b>.',
-         'el formulario se cierra y la pieza aparece en la lista, dentro del grupo "Nuevos Humanos". Si falta un campo obligatorio, el navegador lo señala.'),
+         'el formulario se cierra y la pieza aparece en la lista, dentro del grupo "Nuevos Humanos". Si falta un campo obligatorio de otro nivel, el panel abre ese nivel y avisa "Falta completar: …".'),
         ('Comprueba el resultado: en el sitio público abre <b>Revolución Humana</b>, Nuevos Humanos, con la región elegida.',
          'la tarjeta de la nueva pieza. Para quitarla, vuelve al panel y usa <b>Eliminar</b>.'),
     ])
@@ -888,7 +943,7 @@ def seccion_faq(story):
         ['"Inicia sesión para participar en el debate"', 'Para escribir hace falta una cuenta: inicia sesión o crea una.'],
         ['"Tu cuenta debe tener al menos 1 hora de creada…"', 'Es una protección contra robots: espera una hora desde que creaste la cuenta.'],
         ['"Debes confirmar que eres mayor de 18 años…"', 'Estás en Corrupción Humana o Ilógica Humana: marca la casilla de confirmación de edad.'],
-        ['"El mensaje no puede superar 200 palabras"', 'Acorta el texto. Quien apoya cada mes puede escribir hasta 1000 palabras.'],
+        ['"El mensaje no puede superar 200 palabras"', 'Acorta el texto (también al usar Editar). Quien apoya cada mes puede escribir hasta 1000 palabras.'],
         ['"Completa la verificación antes de publicar"', 'Espera a que termine la verificación de Cloudflare (pasa a marca de verificado) y vuelve a pulsar Publicar.'],
         ['"Demasiadas publicaciones en poco tiempo"', 'Hay un máximo de 20 envíos cada 15 minutos: espera unos minutos.'],
     ], [190, CONTENT_W - 190])
@@ -937,7 +992,8 @@ def seccion_privacidad(story):
         '<b>Protecciones.</b> Verificación de Cloudflare Turnstile en el inicio de sesión y el debate, límites de uso contra abusos, '
         'cierre de sesión tras 30 minutos de inactividad, rechazo de contraseñas que han aparecido en filtraciones y verificación en dos pasos '
         'obligatoria para el panel de administración.',
-        '<b>Lo que escribes en un debate o comentario es público</b> y se muestra con el correo de tu cuenta.',
+        '<b>Lo que escribes en un debate o comentario es público</b>, pero se muestra con el nombre de tu perfil o un alias genérico '
+        '("Participante-xxxx"): el debate y los comentarios no muestran correos.',
         '<b>Tus derechos.</b> Puedes pedir acceso, corrección o eliminación de tus datos, y darte de baja del boletín en cualquier momento. '
         f'Escribe a <font face="Courier">{CORREO}</font>.',
         '<b>Recomendación.</b> No compartas tu contraseña ni el código de tu app de autenticación con nadie.',
