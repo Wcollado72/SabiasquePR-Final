@@ -1290,6 +1290,38 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .synth-theme .tr-box{ border-top-color:var(--tema-border); }
 .synth-theme .tr-title{ font-family:var(--tema-font-head); color:var(--tema-accent); letter-spacing:.04em; }
 
+/* Panel de administracion: la seleccion (Ctrl+A, arrastrar) debe verse sobre los campos oscuros;
+   el ::selection global (tinta sobre papel) casi no se distingue del fondo morado de los campos. */
+.admin-tab-panel input::selection,
+.admin-tab-panel textarea::selection{ background:#3b82f6; color:#fff; }
+
+/* Traduccion: bloque colapsable y opcional, con su estado a la vista. */
+.tr-details{ border:1px solid var(--line); border-radius:var(--radius); }
+.tr-summary{ display:flex; align-items:center; gap:10px; cursor:pointer; padding:12px 14px; font-weight:600; list-style:none; }
+.tr-summary::-webkit-details-marker{ display:none; }
+.tr-summary::before{ content:'▸'; display:inline-block; transition:transform .15s; }
+.tr-details[open] .tr-summary::before{ transform:rotate(90deg); }
+.tr-summary-title{ flex:1; }
+.tr-body{ padding:0 14px 14px; display:flex; flex-direction:column; gap:6px; }
+.tr-chip{ font-size:.72rem; font-weight:600; padding:2px 10px; border-radius:999px; border:1px solid var(--line); color:var(--ink-soft); }
+.tr-chip-ok{ background:#e1f0e8; color:#1f6b46; border-color:#9cc9b3; }
+.tr-chip-pend{ background:#f5ece1; color:#8a5a10; border-color:#e0c79a; }
+.tr-chip-error{ background:#f7e7e2; color:#b5432e; border-color:#e3b7ac; }
+.tr-enlace-peligro{ background:none; border:0; color:#b5432e; text-decoration:underline; cursor:pointer; padding:6px 4px; font:inherit; }
+.synth-theme .tr-details{ border-color:var(--tema-border); }
+.synth-theme .tr-summary-title{ font-family:var(--tema-font-head); color:var(--tema-accent); letter-spacing:.04em; }
+.consola-nocturna .tr-details{ border-color:#2a3a40; }
+
+/* Debate: cuadro para reportar y edicion de publicaciones propias. */
+.debate-dialog{ border:1px solid var(--line); border-radius:var(--radius); padding:20px 22px; max-width:440px; width:calc(100% - 32px); background:var(--bg); color:var(--ink); }
+.debate-dialog::backdrop{ background:rgba(0,0,0,.45); }
+.debate-dialog h3{ margin:0 0 6px; }
+.debate-dialog textarea{ width:100%; margin:8px 0; }
+.debate-dialog-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:6px; }
+.debate-edit-form{ display:flex; flex-direction:column; gap:8px; margin:6px 0 10px; }
+.debate-edit-form input[type=text], .debate-edit-form textarea{ width:100%; }
+
+
 .admin-tabs{ margin-bottom:14px; }
 .admin-tab-panel{ display:flex; flex-direction:column; gap:14px; }
 .admin-toolbar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }

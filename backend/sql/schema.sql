@@ -539,3 +539,15 @@ ALTER TABLE contenidos ADD CONSTRAINT contenidos_categoria_check
     'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura', 'ciencia',
     'leyes-educativas', 'estudiantes-sobresalientes', 'sistemas-mundiales', 'programas-educativos'
   ));
+
+-- ============================================================
+-- Herramientas de IA usadas (2026-10-23): QUE IA se uso en cada pieza, ademas de la divulgacion
+-- no/parcial/generado. Mismo SQL que backend/sql/migraciones/2026-10-23-ia-herramientas.sql.
+-- ============================================================
+ALTER TABLE noticias ADD COLUMN IF NOT EXISTS ia_herramientas text[] NOT NULL DEFAULT '{}';
+ALTER TABLE noticias DROP CONSTRAINT IF EXISTS noticias_ia_herramientas_max;
+ALTER TABLE noticias ADD CONSTRAINT noticias_ia_herramientas_max CHECK (cardinality(ia_herramientas) <= 8);
+
+ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS ia_herramientas text[] NOT NULL DEFAULT '{}';
+ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_ia_herramientas_max;
+ALTER TABLE contenidos ADD CONSTRAINT contenidos_ia_herramientas_max CHECK (cardinality(ia_herramientas) <= 8);

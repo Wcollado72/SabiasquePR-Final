@@ -1004,20 +1004,23 @@ const PAGES = [
                 <input type="url" id="an-fuente-url" required>
                 <label for="an-fuente-texto">Nombre de la fuente</label>
                 <input type="text" id="an-fuente-texto" required>
+
+                <div class="news-publish-bar">
+                  <div class="news-publish-field">
+                    <label for="an-fecha">📅 Fecha</label>
+                    <input type="date" id="an-fecha" required>
+                  </div>
+                  <label class="admin-checkbox news-publish-check" title="Reemplaza al anterior destacado en la portada"><input type="checkbox" id="an-destacado"> ★ Destacada</label>
+                  <input type="checkbox" id="an-publicado" hidden checked aria-hidden="true">
+                  <div class="news-publish-actions">
+                    <button type="button" class="admin-btn-cancel" id="an-borrador">Guardar borrador</button>
+                    <button type="button" class="news-btn-guardar" id="an-publicar">▶ AL AIRE</button>
+                    <button type="button" class="admin-btn-cancel" id="an-cancel">Cancelar</button>
+                  </div>
+                </div>
+                <p class="admin-hint" id="an-estado">«Guardar borrador» la deja solo en el panel; «AL AIRE» la publica en el sitio.</p>
               </section>
 
-              <footer class="news-publish-bar">
-                <div class="news-publish-field">
-                  <label for="an-fecha">📅 Fecha</label>
-                  <input type="date" id="an-fecha" required>
-                </div>
-                <label class="admin-checkbox news-publish-check" title="Desmárcalo para guardar como borrador, visible solo en el panel"><input type="checkbox" id="an-publicado" checked> Publicado</label>
-                <label class="admin-checkbox news-publish-check" title="Reemplaza al anterior destacado en la portada"><input type="checkbox" id="an-destacado"> ★ Destacada</label>
-                <div class="news-publish-actions">
-                  <button type="submit" class="news-btn-guardar">▶ AL AIRE</button>
-                  <button type="button" class="admin-btn-cancel" id="an-cancel">Cancelar</button>
-                </div>
-              </footer>
               <p id="an-status" class="form-status" aria-live="polite"></p>
             </form>
             <section class="tr-box" id="tr-noticia" data-tipo="noticia" hidden></section>
@@ -1241,7 +1244,7 @@ const PAGES = [
                 <label class="admin-checkbox synth-publish-check" title="Destacado en su sección (reemplaza al anterior de esa sección)"><input type="checkbox" id="ac-destacado"> ★ Destacado</label>
                 <label class="admin-checkbox synth-publish-check" title="Contenido premium (vista previa parcial para quien no sea premium/admin)"><input type="checkbox" id="ac-premium"> 💎 Premium</label>
                 <div class="synth-publish-actions">
-                  <button type="submit" class="synth-btn-guardar">▶ GUARDAR</button>
+                  <button type="button" class="synth-btn-guardar" id="ac-guardar">▶ GUARDAR</button>
                   <button type="button" class="admin-btn-cancel" id="ac-cancel">Cancelar</button>
                 </div>
               </footer>

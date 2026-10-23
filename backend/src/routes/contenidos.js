@@ -4,6 +4,7 @@ const { enviarError500 } = require('../util/errores');
 const { requireAuth, requireAdmin, tryAuth } = require('../middleware/auth');
 const { slugify } = require('../util/slugify');
 const { validateContenido } = require('../validators/contenido');
+const { resolverIaHerramientas } = require('../validators/iaHerramientas');
 const { aplicarTraducciones, normalizarLang } = require('../util/traducciones');
 
 const router = express.Router();
@@ -38,6 +39,7 @@ function toRow(id, body, existing = {}) {
     body.esPremium ?? existing.es_premium ?? false,
     body.enfoque !== undefined ? body.enfoque : (existing.enfoque ?? null),
     body.idiomaOriginal ?? existing.idioma_original ?? 'es',
+    resolverIaHerramientas(body, existing).valor,
   ];
 }
 
@@ -135,6 +137,8 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
   const errors = validateContenido(req.body);
   if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
   try {
+    const ia = resolverIaHerramientas(req.body);
+    if (ia.error) return res.status(400).json({ ok: false, error: ia.error });
     let id = req.body.id ? slugify(req.body.id) : slugify(req.body.titulo);
     const { rows: dupe } = await pool.query('SELECT id FROM contenidos WHERE id = $1', [id]);
     if (dupe.length) id = `${id}-${Date.now().toString(36)}`;
@@ -151,8 +155,8 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
          url_media, fuente_url, fuente_texto, duracion_min, url_portada, portada_alt,
          fecha_publicacion, destacado, subformato, divulgacion_ia, cita_estilo, cita_autor,
          cita_anio, cita_titulo_original, cita_fecha_acceso, cita_sin_fuente_externa,
-         subseccion, es_premium, enfoque, idioma_original
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28)
+         subseccion, es_premium, enfoque, idioma_original, ia_herramientas
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29::text[])
        RETURNING *`
     );
     res.status(201).json({ ok: true, contenido: rows[0] });
@@ -168,6 +172,9 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     if (existingRows.length === 0) return res.status(404).json({ ok: false, error: 'Contenido no encontrado.' });
     const existing = existingRows[0];
 
+    const ia = resolverIaHerramientas(req.body, existing);
+    if (ia.error) return res.status(400).json({ ok: false, error: ia.error });
+
     const values = toRow(req.params.id, req.body, existing);
     const seccion = req.body.seccion ?? existing.seccion;
     const destacado = req.body.destacado ?? existing.destacado ?? false;
@@ -180,7 +187,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
          cuerpo=$7, autor=$8, url_media=$9, fuente_url=$10, fuente_texto=$11, duracion_min=$12,
          url_portada=$13, portada_alt=$14, fecha_publicacion=$15, destacado=$16, subformato=$17,
          divulgacion_ia=$18, cita_estilo=$19, cita_autor=$20, cita_anio=$21, cita_titulo_original=$22,
-         cita_fecha_acceso=$23, cita_sin_fuente_externa=$24, subseccion=$25, es_premium=$26, enfoque=$27, idioma_original=$28
+         cita_fecha_acceso=$23, cita_sin_fuente_externa=$24, subseccion=$25, es_premium=$26, enfoque=$27, idioma_original=$28, ia_herramientas=$29::text[]
        WHERE id=$1 RETURNING *`
     );
     res.json({ ok: true, contenido: rows[0] });

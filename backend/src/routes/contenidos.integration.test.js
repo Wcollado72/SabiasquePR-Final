@@ -47,6 +47,16 @@ describe('GET /api/contenidos', () => {
     expect(res.body.contenidos).toHaveLength(1);
   });
 
+  test('la lista y el detalle publicos devuelven ia_herramientas (tambien en contenido premium bloqueado)', async () => {
+    const fila = { id: 'a', titulo: 'A', es_premium: true, cuerpo: 'Texto', url_media: 'https://x.com/v', divulgacion_ia: 'parcial', ia_herramientas: ['gemini'] };
+    pool.query.mockResolvedValueOnce({ rows: [fila] });
+    const lista = await request(app).get('/api/contenidos');
+    expect(lista.body.contenidos[0].ia_herramientas).toEqual(['gemini']);
+    pool.query.mockResolvedValueOnce({ rows: [fila] });
+    const detalle = await request(app).get('/api/contenidos/a');
+    expect(detalle.body.contenido.ia_herramientas).toEqual(['gemini']);
+  });
+
   test('filtra por seccion, categoria y tipoFormato combinados', async () => {
     pool.query.mockResolvedValueOnce({ rows: [] });
     const res = await request(app).get('/api/contenidos?seccion=educacion&categoria=descubrimientos&tipoFormato=video');
@@ -236,6 +246,44 @@ describe('POST /api/contenidos', () => {
     expect(values[27]).toBe('es'); // idioma_original por defecto
   });
 
+  test('201 persiste iaHerramientas (claves conocidas y nombre libre) en el INSERT', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'un-titulo-cualquiera' }] });
+    const res = await request(app).post('/api/contenidos').set('x-test-user', ADMIN)
+      .send({ ...CONTENIDO_VALIDO, divulgacionIa: 'parcial', iaHerramientas: ['Claude', 'Mi IA local'] });
+    expect(res.status).toBe(201);
+    const [sql, values] = pool.query.mock.calls[1];
+    expect(sql).toMatch(/idioma_original, ia_herramientas/);
+    expect(values[28]).toEqual(['claude', 'Mi IA local']);
+  });
+
+  test('201 sin iaHerramientas guarda una lista vacia', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'un-titulo-cualquiera' }] });
+    await request(app).post('/api/contenidos').set('x-test-user', ADMIN).send(CONTENIDO_VALIDO);
+    expect(pool.query.mock.calls[1][1][28]).toEqual([]);
+  });
+
+  test('400 con 9 herramientas, <script> o divulgacionIa "no" junto a una lista con elementos', async () => {
+    const enviar = (extra) => request(app).post('/api/contenidos').set('x-test-user', ADMIN)
+      .send({ ...CONTENIDO_VALIDO, ...extra });
+    const nueve = Array.from({ length: 9 }, (_, i) => `IA ${i}`);
+    expect((await enviar({ divulgacionIa: 'parcial', iaHerramientas: nueve })).status).toBe(400);
+    expect((await enviar({ divulgacionIa: 'parcial', iaHerramientas: ['<script>'] })).status).toBe(400);
+    const res = await enviar({ divulgacionIa: 'no', iaHerramientas: ['claude'] });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Si indicas qué IA usaste, la divulgación no puede ser “No se usó IA”.');
+  });
+
+  test('400 al crear con iaHerramientas y sin divulgacionIa (se asume "no")', async () => {
+    const res = await request(app).post('/api/contenidos').set('x-test-user', ADMIN)
+      .send({ ...CONTENIDO_VALIDO, iaHerramientas: ['claude'] });
+    expect(res.status).toBe(400);
+    expect(pool.query).not.toHaveBeenCalled();
+  });
+
   test('201 con tipoFormato "audio" y urlMedia', async () => {
     pool.query
       .mockResolvedValueOnce({ rows: [] })
@@ -299,11 +347,55 @@ describe('PUT /api/contenidos/:id', () => {
     const res = await request(app).put('/api/contenidos/a').set('x-test-user', ADMIN).send({ subformato: 'reportaje' });
     expect(res.status).toBe(200);
     const [, values] = pool.query.mock.calls[1];
-    // subformato..citaSinFuenteExterna, subseccion, esPremium, enfoque son las ultimas 11 posiciones de toRow()
-    expect(values.slice(-12, -1)).toEqual([
+    // subformato..citaSinFuenteExterna, subseccion, esPremium, enfoque van antes de idioma_original e ia_herramientas
+    expect(values.slice(-13, -2)).toEqual([
       'reportaje', 'parcial', 'apa', 'Jane Doe', '2026', 'Original', '2026-09-20', false, null, false, null,
     ]);
-    expect(values[values.length - 1]).toBe('es');
+    expect(values[values.length - 2]).toBe('es');
+    expect(values[values.length - 1]).toEqual([]);
+  });
+
+  test('PUT sin iaHerramientas conserva las guardadas', async () => {
+    const existente = { id: 'a', ...CONTENIDO_VALIDO, tipo_formato: 'ensayo', divulgacion_ia: 'parcial', ia_herramientas: ['claude', 'Otra IA'] };
+    pool.query
+      .mockResolvedValueOnce({ rows: [existente] })
+      .mockResolvedValueOnce({ rows: [existente] });
+    const res = await request(app).put('/api/contenidos/a').set('x-test-user', ADMIN).send({ titulo: 'Titulo editado' });
+    expect(res.status).toBe(200);
+    const [sql, values] = pool.query.mock.calls[1];
+    expect(sql).toMatch(/ia_herramientas=\$29::text\[\]/);
+    expect(values[values.length - 1]).toEqual(['claude', 'Otra IA']);
+  });
+
+  test('PUT con iaHerramientas las normaliza y las guarda', async () => {
+    const existente = { id: 'a', ...CONTENIDO_VALIDO, tipo_formato: 'ensayo', divulgacion_ia: 'no', ia_herramientas: [] };
+    pool.query
+      .mockResolvedValueOnce({ rows: [existente] })
+      .mockResolvedValueOnce({ rows: [{ id: 'a', ia_herramientas: ['gemini', 'Mi IA'] }] });
+    const res = await request(app).put('/api/contenidos/a').set('x-test-user', ADMIN)
+      .send({ divulgacionIa: 'generado', iaHerramientas: ['Gemini', ' Mi IA '] });
+    expect(res.status).toBe(200);
+    const [, values] = pool.query.mock.calls[1];
+    expect(values[values.length - 1]).toEqual(['gemini', 'Mi IA']);
+  });
+
+  test('400 si iaHerramientas llega sin divulgacionIa y la pieza tiene divulgacion "no"', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'a', ...CONTENIDO_VALIDO, divulgacion_ia: 'no', ia_herramientas: [] }] });
+    const res = await request(app).put('/api/contenidos/a').set('x-test-user', ADMIN).send({ iaHerramientas: ['claude'] });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/divulgación no puede ser/);
+    expect(pool.query).toHaveBeenCalledTimes(1); // no llego al UPDATE
+  });
+
+  test('PUT que cambia la divulgacion a "no" vacia las herramientas guardadas', async () => {
+    const existente = { id: 'a', ...CONTENIDO_VALIDO, divulgacion_ia: 'parcial', ia_herramientas: ['claude'] };
+    pool.query
+      .mockResolvedValueOnce({ rows: [existente] })
+      .mockResolvedValueOnce({ rows: [existente] });
+    const res = await request(app).put('/api/contenidos/a').set('x-test-user', ADMIN).send({ divulgacionIa: 'no' });
+    expect(res.status).toBe(200);
+    const [, values] = pool.query.mock.calls[1];
+    expect(values[values.length - 1]).toEqual([]);
   });
 });
 

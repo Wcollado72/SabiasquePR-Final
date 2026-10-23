@@ -416,15 +416,24 @@
       return `<label for="${id}">${c.etiqueta}</label>${control}`;
     }).join('');
     box.innerHTML = `
-      <h4 class="tr-title">🌐 Traducción al <span id="tr-${tipo}-destino"></span></h4>
-      <p class="admin-hint" id="tr-${tipo}-estado"></p>
-      <div id="tr-${tipo}-campos">${campos}</div>
-      <div class="tr-acciones" id="tr-${tipo}-acciones">
-        <button type="button" class="admin-btn-cancel" id="tr-${tipo}-ia">Traducir con IA</button>
-        <button type="button" class="admin-btn-new" id="tr-${tipo}-guardar">Guardar traducción</button>
-        <button type="button" class="admin-btn-cancel" id="tr-${tipo}-borrar">Eliminar traducción</button>
-      </div>
-      <p class="form-status" id="tr-${tipo}-status" aria-live="polite"></p>`;
+      <details class="tr-details" id="tr-${tipo}-details">
+        <summary class="tr-summary">
+          <span class="tr-summary-title">Traducción al <span id="tr-${tipo}-destino"></span></span>
+          <span class="tr-chip" id="tr-${tipo}-chip">Opcional</span>
+        </summary>
+        <div class="tr-body">
+          <p class="admin-hint" id="tr-${tipo}-estado"></p>
+          <div class="tr-acciones" id="tr-${tipo}-acciones-ia">
+            <button type="button" class="admin-btn-new" id="tr-${tipo}-ia">Traducir con IA</button>
+          </div>
+          <div id="tr-${tipo}-campos">${campos}</div>
+          <div class="tr-acciones" id="tr-${tipo}-acciones">
+            <button type="button" class="admin-btn-new" id="tr-${tipo}-guardar">Guardar traducción</button>
+            <button type="button" class="tr-enlace-peligro" id="tr-${tipo}-borrar">Eliminar traducción</button>
+          </div>
+          <p class="form-status" id="tr-${tipo}-status" aria-live="polite"></p>
+        </div>
+      </details>`;
     box.hidden = false;
     document.getElementById(`tr-${tipo}-ia`).addEventListener('click', () => traducirConIa(tipo));
     document.getElementById(`tr-${tipo}-guardar`).addEventListener('click', () => guardarTraduccion(tipo));
@@ -440,6 +449,12 @@
 
   // Se llama al abrir cada formulario: muestra la traduccion guardada (si hay)
   // o el aviso de que primero hay que guardar la pieza.
+  function marcarChipTraduccion(tipo, texto, estado) {
+    const chip = document.getElementById(`tr-${tipo}-chip`);
+    chip.textContent = texto;
+    chip.className = `tr-chip tr-chip-${estado}`;
+  }
+
   async function refrescarPanelTraduccion(tipo) {
     if (!document.getElementById(`tr-${tipo}-campos`)) return; // moderador: no se montan
     const cfg = TRADUCCION_CFG[tipo];
@@ -453,7 +468,13 @@
     const usable = Boolean(id);
     document.getElementById(`tr-${tipo}-campos`).hidden = !usable;
     document.getElementById(`tr-${tipo}-acciones`).hidden = !usable;
-    if (!usable) { estado.textContent = 'Guarda primero la pieza; después podrás traducirla aquí.'; return; }
+    document.getElementById(`tr-${tipo}-acciones-ia`).hidden = !usable;
+    if (!usable) {
+      marcarChipTraduccion(tipo, 'Guarda primero', 'off');
+      estado.textContent = 'La traducción es opcional y se hace después de guardar la pieza: guárdala, ábrela con «Editar» y vuelve aquí.';
+      return;
+    }
+    marcarChipTraduccion(tipo, 'Buscando…', 'off');
     estado.textContent = 'Buscando traducción guardada...';
     try {
       const data = await apiFetch(`/api/admin/traducciones/${tipo}/${encodeURIComponent(id)}`);
@@ -461,11 +482,14 @@
       const guardada = data.traducciones && data.traducciones[destino];
       if (guardada) {
         cfg.campos.forEach((c) => escribirCampoTraduccion(tipo, c, guardada.campos[c.nombre]));
+        marcarChipTraduccion(tipo, 'Guardada', 'ok');
         estado.textContent = `Traducción al ${IDIOMA_NOMBRE[destino]} guardada (${String(guardada.actualizadoEn).slice(0, 10)}). Los visitantes que elijan ese idioma la verán.`;
       } else {
+        marcarChipTraduccion(tipo, 'Pendiente', 'pend');
         estado.textContent = `Sin traducción al ${IDIOMA_NOMBRE[destino]} todavía: los visitantes que elijan ese idioma verán la pieza en ${origenNombre} con la etiqueta "solo en ${origenNombre}".`;
       }
     } catch (err) {
+      marcarChipTraduccion(tipo, 'Error', 'error');
       estado.textContent = 'No se pudo consultar la traducción: ' + err.message;
     }
   }
@@ -665,12 +689,37 @@
     document.getElementById('gastos-total-mes').textContent = `$${(fijo + gastosCostoMesIa).toFixed(2)}`;
   }
 
+  // INICIO aviso-campo-faltante
+  // Los formularios largos reparten sus campos obligatorios en paneles (pasos) ocultos: sin esto el navegador
+  // bloquea el envio en silencio porque no puede enfocar un campo oculto. Al primer campo invalido se abre su
+  // panel y se dice cual falta.
+  function avisarCampoFaltante(form, activar, statusEl) {
+    let atendido = false;
+    form.addEventListener('invalid', (e) => {
+      if (atendido) return;
+      atendido = true;
+      setTimeout(() => { atendido = false; }, 0);
+      const panel = e.target.closest('[data-panel]');
+      if (panel && panel.hidden) activar(panel.dataset.panel);
+      const etiqueta = e.target.id ? form.querySelector(`label[for="${e.target.id}"]`) : null;
+      const nombre = etiqueta ? etiqueta.textContent.replace(/\(.*?\)/g, '').trim() : 'un campo obligatorio';
+      setStatus(statusEl, 'error', `Falta completar: ${nombre}.`);
+    }, true);
+  }
+  // FIN aviso-campo-faltante
+
   // ── NOTICIAS ─────────────────────────────────────────────
   function bindNoticias() {
     document.getElementById('admin-noticias-new').addEventListener('click', () => openNoticiaForm());
     document.getElementById('an-cancel').addEventListener('click', closeNoticiaForm);
     document.getElementById('admin-noticias-search').addEventListener('input', renderNoticiasList);
-    document.getElementById('admin-noticias-form').addEventListener('submit', submitNoticia);
+    const formNoticias = document.getElementById('admin-noticias-form');
+    formNoticias.addEventListener('submit', submitNoticia);
+    avisarCampoFaltante(formNoticias, activarNewsPanel, document.getElementById('an-status'));
+    // Publicar o guardar borrador solo ocurre con estos dos botones, en el ultimo paso (Enter no envia el formulario).
+    const enviarNoticia = (publicar) => { document.getElementById('an-publicado').checked = publicar; formNoticias.requestSubmit(); };
+    document.getElementById('an-borrador').addEventListener('click', () => enviarNoticia(false));
+    document.getElementById('an-publicar').addEventListener('click', () => enviarNoticia(true));
     bindImagePicker('an-imagen', 'an-imagen-preview', 'an-elegir-imagen');
     document.getElementById('an-autocompletar-ia').addEventListener('click', autocompletarNoticiaConIA);
     bindNewsPanels();
@@ -773,6 +822,9 @@
     document.getElementById('an-divulgacion-ia').value = item?.divulgacion_ia || 'no';
     document.getElementById('an-destacado').checked = Boolean(item?.destacado);
     document.getElementById('an-publicado').checked = item ? Boolean(item.publicado) : true;
+    document.getElementById('an-estado').textContent = item
+      ? (item.publicado ? 'Estado actual: publicada (se ve en el sitio).' : 'Estado actual: borrador (no se ve en el sitio).')
+      : '«Guardar borrador» la deja solo en el panel; «AL AIRE» la publica en el sitio.';
     document.getElementById('an-autocompletar-url').value = '';
     updateImagePreview('an-imagen', 'an-imagen-preview');
     setStatus(document.getElementById('an-status'), '', '');
@@ -906,7 +958,10 @@
     document.getElementById('admin-contenidos-new').addEventListener('click', () => openContenidoForm());
     document.getElementById('ac-cancel').addEventListener('click', closeContenidoForm);
     document.getElementById('admin-contenidos-search').addEventListener('input', renderContenidosList);
-    document.getElementById('admin-contenidos-form').addEventListener('submit', submitContenido);
+    const formContenidos = document.getElementById('admin-contenidos-form');
+    formContenidos.addEventListener('submit', submitContenido);
+    avisarCampoFaltante(formContenidos, activarSynthPanel, document.getElementById('ac-status'));
+    document.getElementById('ac-guardar').addEventListener('click', () => formContenidos.requestSubmit());
     document.getElementById('ac-usar-imagen-categoria').addEventListener('click', () => {
       const categoria = document.getElementById('ac-categoria').value;
       const img = window.SQPR && window.SQPR.CATEGORIA_IMAGEN && window.SQPR.CATEGORIA_IMAGEN[categoria];

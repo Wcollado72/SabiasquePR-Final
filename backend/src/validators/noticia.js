@@ -1,3 +1,5 @@
+const { validarIaHerramientas } = require('./iaHerramientas');
+
 const CATEGORIAS_VALIDAS = [
   'internacionales', 'crimen', 'salud', 'deportes',
   'finanzas', 'tecnologia', 'descubrimientos', 'politica', 'clima', 'cultura', 'ciencia',
@@ -23,6 +25,7 @@ function validateNoticia(body, { partial = false } = {}) {
   if (body.divulgacionIa !== undefined && !DIVULGACION_IA_VALIDAS.includes(body.divulgacionIa)) {
     errors.push('Divulgacion de IA no valida.');
   }
+  errors.push(...validarIaHerramientas(body.iaHerramientas, body.divulgacionIa));
   if (body.idiomaOriginal !== undefined && !IDIOMAS_ORIGINAL_VALIDOS.includes(body.idiomaOriginal)) {
     errors.push('Idioma original no valido.');
   }

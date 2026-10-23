@@ -102,6 +102,30 @@ describe('validateNoticia', () => {
   });
 });
 
+describe('validateNoticia iaHerramientas', () => {
+  const conIa = (extra) => ({ ...NOTICIA_VALIDA, divulgacionIa: 'parcial', ...extra });
+  test('acepta claves conocidas y nombres libres', () => {
+    expect(validateNoticia(conIa({ iaHerramientas: ['claude', 'Gemini', 'Mi IA'] }))).toEqual([]);
+  });
+  test('es opcional y se puede mandar vacio con cualquier divulgacion', () => {
+    expect(validateNoticia({ ...NOTICIA_VALIDA, divulgacionIa: 'no', iaHerramientas: [] })).toEqual([]);
+    expect(validateNoticia(NOTICIA_VALIDA)).toEqual([]);
+  });
+  test('rechaza 9 elementos, duplicados, <script> y URLs', () => {
+    expect(validateNoticia(conIa({ iaHerramientas: Array.from({ length: 9 }, (_, i) => `IA ${i}`) }))).not.toEqual([]);
+    expect(validateNoticia(conIa({ iaHerramientas: ['claude', 'CLAUDE'] }))).not.toEqual([]);
+    expect(validateNoticia(conIa({ iaHerramientas: ['<script>'] }))).not.toEqual([]);
+    expect(validateNoticia(conIa({ iaHerramientas: ['https://ia.com'] }))).not.toEqual([]);
+  });
+  test('rechaza elementos con divulgacionIa "no"', () => {
+    expect(validateNoticia({ ...NOTICIA_VALIDA, divulgacionIa: 'no', iaHerramientas: ['claude'] }))
+      .toContain('Si indicas qué IA usaste, la divulgación no puede ser “No se usó IA”.');
+  });
+  test('en edicion parcial, omitido no da errores', () => {
+    expect(validateNoticia({ titulo: 'Nuevo titulo' }, { partial: true })).toEqual([]);
+  });
+});
+
 describe('validateNoticia idiomaOriginal (Fase C2)', () => {
   const { validateNoticia: validar } = require('./noticia');
   test('acepta es y en, y rechaza cualquier otro valor', () => {
