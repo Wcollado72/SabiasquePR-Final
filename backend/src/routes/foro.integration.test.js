@@ -434,3 +434,240 @@ describe('POST /api/foro/posts/:postId/comentarios', () => {
     expect(res.status).toBe(201);
   });
 });
+
+// Fila guardada de una publicacion tal como la lee el PATCH
+const POST_GUARDADO = {
+  autor_id: 'user-autor', titulo: 'Un titulo valido', cuerpo: 'Un mensaje suficientemente largo.',
+  subseccion: 'corrupcion-humana', enlace_media: null, enlace_media_tipo: null, destacado: false, tema_contenido_id: null,
+};
+const EDICION = { titulo: 'Titulo editado', cuerpo: 'Mensaje editado y suficientemente largo.', subseccion: 'corrupcion-humana' };
+const FILA_ACTUALIZADA = { rows: [{ id: 'p1', autor_id: 'user-autor', ...EDICION }] };
+
+describe('PATCH /api/foro/posts/:id -- verificaciones de la creacion', () => {
+  test('201 -> reporte automatico: si el texto editado tiene lenguaje de riesgo se crea el reporte (U-3)', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [POST_GUARDADO] }) // fila guardada
+      .mockResolvedValueOnce(FILA_ACTUALIZADA) // UPDATE
+      .mockResolvedValueOnce({ rows: [] }) // no hay reporte automatico pendiente
+      .mockResolvedValueOnce({ rows: [] }); // INSERT del reporte
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', AUTOR)
+      .send({ ...EDICION, cuerpo: 'agregame a whatsapp para seguir hablando' });
+    expect(res.status).toBe(200);
+    expect(pool.query).toHaveBeenCalledTimes(4);
+    const [sql, params] = pool.query.mock.calls[3];
+    expect(sql).toContain('INSERT INTO reportes');
+    expect(params).toEqual(['debate_post', 'p1', 'Detección automática: Solicitud de contacto fuera de la plataforma']);
+  });
+
+  test('no apila un segundo reporte automatico si ya hay uno pendiente (U-3)', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [POST_GUARDADO] })
+      .mockResolvedValueOnce(FILA_ACTUALIZADA)
+      .mockResolvedValueOnce({ rows: [{ id: 'r9' }] });
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', AUTOR)
+      .send({ ...EDICION, cuerpo: 'agregame a whatsapp para seguir hablando' });
+    expect(res.status).toBe(200);
+    expect(pool.query).toHaveBeenCalledTimes(3);
+  });
+
+  test('si el titulo y el cuerpo no cambiaron no se vuelve a analizar el riesgo', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ ...POST_GUARDADO, cuerpo: 'agregame a whatsapp para seguir hablando' }] })
+      .mockResolvedValueOnce(FILA_ACTUALIZADA);
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', AUTOR)
+      .send({ titulo: POST_GUARDADO.titulo, cuerpo: 'agregame a whatsapp para seguir hablando', subseccion: 'corrupcion-humana' });
+    expect(res.status).toBe(200);
+    expect(pool.query).toHaveBeenCalledTimes(2);
+  });
+
+  test('403 si quien edita no confirmo su edad y la sub-seccion es 18+ (U-4)', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ ...POST_GUARDADO, autor_id: 'user-menor' }] });
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', SIN_EDAD_CONFIRMADA).send(EDICION);
+    expect(res.status).toBe(403);
+    expect(res.body.error).toContain('mayor de 18');
+    expect(pool.query).toHaveBeenCalledTimes(1); // no se actualiza nada
+  });
+
+  test('403 si la fecha de nacimiento real dice que es menor, aunque haya marcado el checkbox (U-4)', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ ...POST_GUARDADO, autor_id: 'user-menor-real' }] });
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', MENOR_CON_FECHA_CONOCIDA).send(EDICION);
+    expect(res.status).toBe(403);
+  });
+
+  test('200 en una sub-seccion de audiencia general sin confirmar edad (U-4)', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ ...POST_GUARDADO, autor_id: 'user-menor', subseccion: 'educacion' }] })
+      .mockResolvedValueOnce(FILA_ACTUALIZADA);
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', SIN_EDAD_CONFIRMADA)
+      .send({ ...EDICION, subseccion: 'educacion' });
+    expect(res.status).toBe(200);
+  });
+
+  test('400 si se intenta cambiar la sub-seccion (U-4)', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [POST_GUARDADO] });
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', AUTOR)
+      .send({ ...EDICION, subseccion: 'educacion' });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('No se puede cambiar la sub-sección de una publicación.');
+    expect(pool.query).toHaveBeenCalledTimes(1);
+  });
+
+  test('si no se manda subseccion se conserva la guardada', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ ...POST_GUARDADO, subseccion: 'nuevos-humanos' }] })
+      .mockResolvedValueOnce(FILA_ACTUALIZADA);
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', AUTOR)
+      .send({ titulo: EDICION.titulo, cuerpo: EDICION.cuerpo });
+    expect(res.status).toBe(200);
+    expect(pool.query.mock.calls[1][1][2]).toBe('nuevos-humanos');
+  });
+});
+
+describe('PATCH /api/foro/posts/:id -- destacado y tema solo del admin', () => {
+  const GUARDADO_DESTACADO = { ...POST_GUARDADO, destacado: true, tema_contenido_id: 'tema-x' };
+
+  test.each([['moderador', MODERADOR], ['autor', AUTOR]])('%s conserva destacado y tema guardados aunque los mande', async (_n, quien) => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [GUARDADO_DESTACADO] })
+      .mockResolvedValueOnce(FILA_ACTUALIZADA);
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', quien)
+      .send({ ...EDICION, destacado: false, temaContenidoId: 'otro-tema' });
+    expect(res.status).toBe(200);
+    const params = pool.query.mock.calls[1][1];
+    expect(params[6]).toBe(true);
+    expect(params[7]).toBe('tema-x');
+  });
+
+  test('el admin si puede cambiarlos (y el contenido nuevo debe existir)', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [GUARDADO_DESTACADO] })
+      .mockResolvedValueOnce({ rows: [{ id: 'otro-tema' }] }) // el contenido existe
+      .mockResolvedValueOnce(FILA_ACTUALIZADA);
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', ADMIN)
+      .send({ ...EDICION, destacado: false, temaContenidoId: 'otro-tema' });
+    expect(res.status).toBe(200);
+    const params = pool.query.mock.calls[2][1];
+    expect(params[6]).toBe(false);
+    expect(params[7]).toBe('otro-tema');
+  });
+
+  test('el admin que no manda destacado ni tema no los borra', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [GUARDADO_DESTACADO] })
+      .mockResolvedValueOnce(FILA_ACTUALIZADA);
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', ADMIN).send(EDICION);
+    expect(res.status).toBe(200);
+    const params = pool.query.mock.calls[1][1];
+    expect(params[6]).toBe(true);
+    expect(params[7]).toBe('tema-x');
+  });
+
+  test('400 si el admin enlaza un contenido que no existe al editar (C-2)', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [POST_GUARDADO] })
+      .mockResolvedValueOnce({ rows: [] }); // no existe
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', ADMIN)
+      .send({ ...EDICION, temaContenidoId: 'no-existe' });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('El contenido relacionado no existe.');
+    expect(pool.query).toHaveBeenCalledTimes(2); // sin UPDATE
+  });
+
+  test('400 si el admin crea una publicacion con un contenido relacionado que no existe (C-2)', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] });
+    const res = await request(app).post('/api/foro/posts').set('x-test-user', ADMIN)
+      .send({ ...POST_VALIDO, temaContenidoId: 'no-existe' });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('El contenido relacionado no existe.');
+    expect(pool.query).toHaveBeenCalledTimes(1); // sin INSERT
+  });
+
+  test('201 si el contenido relacionado existe (C-2)', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'tema-x' }] })
+      .mockResolvedValueOnce({ rows: [{ id: 'p1', autor_id: 'admin-1', ...POST_VALIDO, tema_contenido_id: 'tema-x' }] });
+    const res = await request(app).post('/api/foro/posts').set('x-test-user', ADMIN)
+      .send({ ...POST_VALIDO, temaContenidoId: 'tema-x' });
+    expect(res.status).toBe(201);
+    expect(pool.query.mock.calls[0][1]).toEqual(['tema-x']);
+  });
+});
+
+describe('PATCH /api/foro/posts/:id -- corregir un typo sin el rol de antes (U-2)', () => {
+  const CON_ENLACE = { ...POST_GUARDADO, enlace_media: 'https://ejemplo.com/foto.jpg', enlace_media_tipo: 'imagen' };
+
+  test('200 si el enlace no cambio aunque ya no sea premium', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [CON_ENLACE] }).mockResolvedValueOnce(FILA_ACTUALIZADA);
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', AUTOR)
+      .send({ ...EDICION, enlaceMedia: 'https://ejemplo.com/foto.jpg', enlaceMediaTipo: 'imagen' });
+    expect(res.status).toBe(200);
+  });
+
+  test('400 si cambia el enlace y ya no es premium', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [CON_ENLACE] });
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', AUTOR)
+      .send({ ...EDICION, enlaceMedia: 'https://ejemplo.com/otra.jpg', enlaceMediaTipo: 'imagen' });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toContain('premium');
+  });
+
+  test('un moderador puede editar sin tocar el enlace de la persona premium', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [CON_ENLACE] }).mockResolvedValueOnce(FILA_ACTUALIZADA);
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', MODERADOR)
+      .send({ ...EDICION, enlaceMedia: 'https://ejemplo.com/foto.jpg', enlaceMediaTipo: 'imagen' });
+    expect(res.status).toBe(200);
+  });
+
+  test('el limite de palabras no baja de lo ya guardado (typo en un texto largo)', async () => {
+    const largo = Array(300).fill('palabra').join(' ');
+    pool.query.mockResolvedValueOnce({ rows: [{ ...POST_GUARDADO, cuerpo: largo }] }).mockResolvedValueOnce(FILA_ACTUALIZADA);
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', AUTOR)
+      .send({ ...EDICION, cuerpo: largo.replace('palabra', 'palabrA') });
+    expect(res.status).toBe(200);
+  });
+
+  test('400 si el texto editado crece por encima de lo guardado y del limite', async () => {
+    const largo = Array(300).fill('palabra').join(' ');
+    pool.query.mockResolvedValueOnce({ rows: [{ ...POST_GUARDADO, cuerpo: largo }] });
+    const res = await request(app).patch('/api/foro/posts/p1').set('x-test-user', AUTOR)
+      .send({ ...EDICION, cuerpo: `${largo} extra` });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toContain('palabras');
+  });
+});
+
+describe('Reportes al eliminar contenido del debate (R-2) y largo de comentarios (U-7)', () => {
+  test('borrar una publicacion cierra en la misma sentencia los reportes pendientes de ella y de sus comentarios', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ autor_id: 'user-autor' }] }).mockResolvedValueOnce({ rows: [] });
+    const res = await request(app).delete('/api/foro/posts/p1').set('x-test-user', MODERADOR);
+    expect(res.status).toBe(200);
+    expect(pool.query).toHaveBeenCalledTimes(2);
+    const [sql, params] = pool.query.mock.calls[1];
+    expect(sql).toMatch(/^\s*WITH /);
+    expect(sql).toContain('DELETE FROM foro_posts WHERE id = $1');
+    expect(sql).toContain("UPDATE reportes SET estado = 'revisado'");
+    expect(sql).toContain("tipo = 'debate_post' AND item_id = $1");
+    expect(sql).toContain("tipo = 'debate_comentario' AND item_id IN (SELECT id FROM foro_comentarios WHERE post_id = $1)");
+    expect(params).toEqual(['p1']);
+  });
+
+  test('borrar un comentario cierra en la misma sentencia sus reportes pendientes', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ autor_id: 'user-autor' }] }).mockResolvedValueOnce({ rows: [] });
+    const res = await request(app).delete('/api/foro/comentarios/c1').set('x-test-user', AUTOR);
+    expect(res.status).toBe(200);
+    const [sql, params] = pool.query.mock.calls[1];
+    expect(sql).toMatch(/^\s*WITH /);
+    expect(sql).toContain('DELETE FROM foro_comentarios WHERE id = $1');
+    expect(sql).toContain("UPDATE reportes SET estado = 'revisado'");
+    expect(sql).toContain("tipo = 'debate_comentario' AND item_id = $1");
+    expect(params).toEqual(['c1']);
+  });
+
+  test('400 si el comentario del debate supera 2000 caracteres', async () => {
+    const res = await request(app).post('/api/foro/posts/p1/comentarios').set('x-test-user', AUTOR)
+      .send({ cuerpo: 'a'.repeat(2001) });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('El comentario no puede superar 2000 caracteres.');
+    expect(pool.query).not.toHaveBeenCalled();
+  });
+});

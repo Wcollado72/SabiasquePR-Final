@@ -62,7 +62,7 @@ describe('GET /api/contenidos', () => {
     const res = await request(app).get('/api/contenidos?seccion=educacion&categoria=descubrimientos&tipoFormato=video');
     expect(res.status).toBe(200);
     const [sql, params] = pool.query.mock.calls[0];
-    expect(sql).toMatch(/WHERE seccion = \$1 AND categoria = \$2 AND tipo_formato = \$3/);
+    expect(sql).toMatch(/WHERE publicado = true AND seccion = \$1 AND categoria = \$2 AND tipo_formato = \$3/);
     expect(params).toEqual(['educacion', 'descubrimientos', 'video']);
   });
 
@@ -71,7 +71,7 @@ describe('GET /api/contenidos', () => {
     const res = await request(app).get('/api/contenidos?tipoFormato=audio&subformato=podcast');
     expect(res.status).toBe(200);
     const [sql, params] = pool.query.mock.calls[0];
-    expect(sql).toMatch(/WHERE tipo_formato = \$1 AND subformato = \$2/);
+    expect(sql).toMatch(/WHERE publicado = true AND tipo_formato = \$1 AND subformato = \$2/);
     expect(params).toEqual(['audio', 'podcast']);
   });
 
@@ -89,7 +89,7 @@ describe('GET /api/contenidos', () => {
     const res = await request(app).get('/api/contenidos?seccion=revolucion-humana&subseccion=logica-humana');
     expect(res.status).toBe(200);
     const [sql, params] = pool.query.mock.calls[0];
-    expect(sql).toMatch(/WHERE seccion = \$1 AND subseccion = \$2/);
+    expect(sql).toMatch(/WHERE publicado = true AND seccion = \$1 AND subseccion = \$2/);
     expect(params).toEqual(['revolucion-humana', 'logica-humana']);
   });
 });
@@ -348,11 +348,12 @@ describe('PUT /api/contenidos/:id', () => {
     expect(res.status).toBe(200);
     const [, values] = pool.query.mock.calls[1];
     // subformato..citaSinFuenteExterna, subseccion, esPremium, enfoque van antes de idioma_original e ia_herramientas
-    expect(values.slice(-13, -2)).toEqual([
+    expect(values.slice(-14, -3)).toEqual([
       'reportaje', 'parcial', 'apa', 'Jane Doe', '2026', 'Original', '2026-09-20', false, null, false, null,
     ]);
-    expect(values[values.length - 2]).toBe('es');
-    expect(values[values.length - 1]).toEqual([]);
+    expect(values[values.length - 3]).toBe('es');
+    expect(values[values.length - 2]).toEqual([]);
+    expect(values[values.length - 1]).toBe(true); // publicado se conserva
   });
 
   test('PUT sin iaHerramientas conserva las guardadas', async () => {
@@ -364,7 +365,7 @@ describe('PUT /api/contenidos/:id', () => {
     expect(res.status).toBe(200);
     const [sql, values] = pool.query.mock.calls[1];
     expect(sql).toMatch(/ia_herramientas=\$29::text\[\]/);
-    expect(values[values.length - 1]).toEqual(['claude', 'Otra IA']);
+    expect(values[values.length - 2]).toEqual(['claude', 'Otra IA']);
   });
 
   test('PUT con iaHerramientas las normaliza y las guarda', async () => {
@@ -376,7 +377,7 @@ describe('PUT /api/contenidos/:id', () => {
       .send({ divulgacionIa: 'generado', iaHerramientas: ['Gemini', ' Mi IA '] });
     expect(res.status).toBe(200);
     const [, values] = pool.query.mock.calls[1];
-    expect(values[values.length - 1]).toEqual(['gemini', 'Mi IA']);
+    expect(values[values.length - 2]).toEqual(['gemini', 'Mi IA']);
   });
 
   test('400 si iaHerramientas llega sin divulgacionIa y la pieza tiene divulgacion "no"', async () => {
@@ -395,7 +396,7 @@ describe('PUT /api/contenidos/:id', () => {
     const res = await request(app).put('/api/contenidos/a').set('x-test-user', ADMIN).send({ divulgacionIa: 'no' });
     expect(res.status).toBe(200);
     const [, values] = pool.query.mock.calls[1];
-    expect(values[values.length - 1]).toEqual([]);
+    expect(values[values.length - 2]).toEqual([]);
   });
 });
 
@@ -403,6 +404,25 @@ describe('DELETE /api/contenidos/:id', () => {
   test('403 si el usuario no es admin', async () => {
     const res = await request(app).delete('/api/contenidos/a').set('x-test-user', USUARIO);
     expect(res.status).toBe(403);
+  });
+
+  test('404 si el contenido no existe', async () => {
+    pool.query.mockResolvedValueOnce({ rowCount: 0 });
+    const res = await request(app).delete('/api/contenidos/no-existe').set('x-test-user', ADMIN);
+    expect(res.status).toBe(404);
+  });
+
+  test('borra en una sola sentencia el contenido, sus comentarios y sus traducciones (T-4)', async () => {
+    pool.query.mockResolvedValueOnce({ rowCount: 1 });
+    const res = await request(app).delete('/api/contenidos/a').set('x-test-user', ADMIN);
+    expect(res.status).toBe(200);
+    expect(pool.query).toHaveBeenCalledTimes(1);
+    const [sql, params] = pool.query.mock.calls[0];
+    expect(sql).toMatch(/^\s*WITH /);
+    expect(sql).toMatch(/DELETE FROM contenidos WHERE id = \$1/);
+    expect(sql).toMatch(/DELETE FROM comentarios WHERE tipo = 'contenido' AND item_id = \$1/);
+    expect(sql).toMatch(/DELETE FROM traducciones WHERE tipo = 'contenido' AND item_id = \$1/);
+    expect(params).toEqual(['a']);
   });
 
   test('200 al eliminar', async () => {
@@ -449,5 +469,67 @@ describe('GET /api/contenidos?lang= (Fase C2)', () => {
       .mockResolvedValueOnce({ rows: [{ item_id: 'a', campos: { titulo: 'Hello' } }] });
     const res = await request(app).get('/api/contenidos/a?lang=en');
     expect(res.body.contenido.titulo).toBe('Hello');
+  });
+});
+
+describe('borrador / AL AIRE (publicado)', () => {
+  const FILA = { id: 'a', titulo: 'A', es_premium: false, cuerpo: 'x', divulgacion_ia: 'no', ia_herramientas: [] };
+
+  test('el publico solo ve publicados; el admin ve tambien los borradores', async () => {
+    pool.query.mockResolvedValue({ rows: [] });
+    await request(app).get('/api/contenidos');
+    expect(pool.query.mock.calls[0][0]).toMatch(/WHERE publicado = true/);
+    await request(app).get('/api/contenidos').set('x-test-user', USUARIO);
+    expect(pool.query.mock.calls[1][0]).toMatch(/WHERE publicado = true/);
+    await request(app).get('/api/contenidos').set('x-test-user', ADMIN);
+    expect(pool.query.mock.calls[2][0]).not.toMatch(/publicado/);
+  });
+
+  test('el detalle de un borrador es 404 para el publico y 200 para el admin', async () => {
+    pool.query.mockResolvedValue({ rows: [{ ...FILA, publicado: false }] });
+    expect((await request(app).get('/api/contenidos/a')).status).toBe(404);
+    expect((await request(app).get('/api/contenidos/a').set('x-test-user', USUARIO)).status).toBe(404);
+    expect((await request(app).get('/api/contenidos/a').set('x-test-user', ADMIN)).status).toBe(200);
+  });
+
+  test('POST con publicado=false guarda el borrador sin destacar (aunque pidan destacado)', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'un-titulo-cualquiera' }] });
+    const res = await request(app).post('/api/contenidos').set('x-test-user', ADMIN)
+      .send({ ...CONTENIDO_VALIDO, publicado: false, destacado: true });
+    expect(res.status).toBe(201);
+    expect(pool.connect).not.toHaveBeenCalled(); // no abre la transaccion que limpia la destacada
+    const [sql, values] = pool.query.mock.calls[1];
+    expect(sql).toMatch(/ia_herramientas, publicado/);
+    expect(values[15]).toBe(false); // destacado
+    expect(values[29]).toBe(false); // publicado
+  });
+
+  test('POST sin publicado queda publicado (AL AIRE)', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'un-titulo-cualquiera' }] });
+    await request(app).post('/api/contenidos').set('x-test-user', ADMIN).send(CONTENIDO_VALIDO);
+    expect(pool.query.mock.calls[1][1][29]).toBe(true);
+  });
+
+  test('PUT puede pasar un contenido a borrador y le quita el destacado', async () => {
+    const existente = { ...FILA, ...CONTENIDO_VALIDO, tipo_formato: 'ensayo', destacado: true, publicado: true };
+    pool.query
+      .mockResolvedValueOnce({ rows: [existente] })
+      .mockResolvedValueOnce({ rows: [{ ...existente, publicado: false, destacado: false }] });
+    const res = await request(app).put('/api/contenidos/a').set('x-test-user', ADMIN).send({ publicado: false });
+    expect(res.status).toBe(200);
+    const [, values] = pool.query.mock.calls[1];
+    expect(values[15]).toBe(false);
+    expect(values[29]).toBe(false);
+  });
+
+  test('400 si publicado no es booleano', async () => {
+    const res = await request(app).post('/api/contenidos').set('x-test-user', ADMIN)
+      .send({ ...CONTENIDO_VALIDO, publicado: 'si' });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/publicado/);
   });
 });

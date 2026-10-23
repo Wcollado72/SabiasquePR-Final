@@ -4,6 +4,7 @@ jest.mock('../db', () => ({ pool: { query: jest.fn() } }));
 const request = require('supertest');
 const { buildApp } = require('../app');
 const { pool } = require('../db');
+const { cooldownComentarios } = require('./comentarios');
 
 const app = buildApp();
 
@@ -13,6 +14,7 @@ const ADMIN = JSON.stringify({ id: 'admin-1', email: 'admin@ejemplo.com', rol: '
 
 beforeEach(() => {
   pool.query.mockReset();
+  cooldownComentarios.reset();
 });
 
 describe('GET /api/comentarios', () => {
@@ -79,6 +81,61 @@ describe('POST /api/comentarios', () => {
   });
 });
 
+describe('POST /api/comentarios -- deteccion de riesgo (Fase 6)', () => {
+  const FILA = { id: 'c7', cuerpo: 'x', autor_id: 'user-1', creado_en: '2026-01-01', autor_nombre: 'Participante-ab12' };
+
+  test('un comentario con lenguaje de riesgo crea un reporte automatico y sigue publicado', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'un-articulo' }] })
+      .mockResolvedValueOnce({ rows: [FILA] })
+      .mockResolvedValueOnce({ rows: [] });
+    const res = await request(app).post('/api/comentarios').set('x-test-user', USUARIO)
+      .send({ tipo: 'contenido', itemId: 'un-articulo', cuerpo: 'Agrégame a whatsapp y no le digas a tus papás' });
+    expect(res.status).toBe(201);
+    const [sql, params] = pool.query.mock.calls[2];
+    expect(sql).toMatch(/INSERT INTO reportes/);
+    expect(sql).toMatch(/'articulo_comentario'/);
+    expect(sql).toMatch(/ON CONFLICT \(tipo, item_id\) WHERE estado = 'pendiente' AND automatico DO NOTHING/);
+    expect(params[0]).toBe('c7');
+    expect(params[1]).toMatch(/^Detección automática: /);
+  });
+
+  test('un comentario normal no crea reporte', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'un-articulo' }] })
+      .mockResolvedValueOnce({ rows: [FILA] });
+    await request(app).post('/api/comentarios').set('x-test-user', USUARIO)
+      .send({ tipo: 'contenido', itemId: 'un-articulo', cuerpo: 'Muy buen artículo, gracias.' });
+    expect(pool.query).toHaveBeenCalledTimes(2);
+  });
+
+  test('si falla el reporte automatico el comentario se publica igual', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'un-articulo' }] })
+      .mockResolvedValueOnce({ rows: [FILA] })
+      .mockRejectedValueOnce(new Error('db'));
+    const res = await request(app).post('/api/comentarios').set('x-test-user', USUARIO)
+      .send({ tipo: 'noticia', itemId: 'un-articulo', cuerpo: 'Agrégame a whatsapp y no le digas a tus papás' });
+    expect(res.status).toBe(201);
+  });
+});
+
+describe('DELETE /api/comentarios/:id -- cierra sus reportes', () => {
+  test('borra el comentario y pasa sus reportes pendientes a revisado en una sola sentencia', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ autor_id: 'user-1' }] })
+      .mockResolvedValueOnce({ rows: [{ id: 'c1' }] });
+    const res = await request(app).delete('/api/comentarios/c1').set('x-test-user', USUARIO);
+    expect(res.status).toBe(200);
+    const [sql, params] = pool.query.mock.calls[1];
+    expect(sql).toMatch(/WITH borrado AS \(DELETE FROM comentarios/);
+    expect(sql).toMatch(/UPDATE reportes SET estado = 'revisado'/);
+    expect(sql).toMatch(/tipo = 'articulo_comentario'/);
+    expect(params).toEqual(['c1']);
+  });
+});
+
 describe('DELETE /api/comentarios/:id', () => {
   test('401 sin autenticacion', async () => {
     const res = await request(app).delete('/api/comentarios/c1');
@@ -120,5 +177,48 @@ describe('DELETE /api/comentarios/:id', () => {
     const res = await request(app).delete('/api/comentarios/c1')
       .set('x-test-user', JSON.stringify({ id: 'mod-1', rol: 'moderador' }));
     expect(res.status).toBe(200);
+  });
+});
+
+describe('POST /api/comentarios -- largo y espera (U-9)', () => {
+  test('400 en espanol si el comentario supera 2000 caracteres', async () => {
+    const res = await request(app).post('/api/comentarios')
+      .set('x-test-user', USUARIO).send({ tipo: 'contenido', itemId: 'x', cuerpo: 'a'.repeat(2001) });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('El comentario no puede superar 2000 caracteres.');
+    expect(pool.query).not.toHaveBeenCalled();
+  });
+
+  test('429 si la misma persona comenta otra vez antes de 10 segundos', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'x' }] })
+      .mockResolvedValueOnce({ rows: [{ id: 'c1', cuerpo: 'Hola' }] });
+    const primero = await request(app).post('/api/comentarios')
+      .set('x-test-user', USUARIO).send({ tipo: 'contenido', itemId: 'x', cuerpo: 'Hola' });
+    expect(primero.status).toBe(201);
+    pool.query.mockClear();
+    const segundo = await request(app).post('/api/comentarios')
+      .set('x-test-user', USUARIO).send({ tipo: 'contenido', itemId: 'x', cuerpo: 'Hola otra vez' });
+    expect(segundo.status).toBe(429);
+    expect(segundo.body.error).toMatch(/Espera \d+ segundo/);
+    expect(segundo.headers['retry-after']).toBeDefined();
+    expect(pool.query).not.toHaveBeenCalled();
+  });
+
+  test('otra persona no queda bloqueada por la espera de alguien mas', async () => {
+    cooldownComentarios.marcar('user-1');
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'x' }] })
+      .mockResolvedValueOnce({ rows: [{ id: 'c1', cuerpo: 'Hola' }] });
+    const res = await request(app).post('/api/comentarios')
+      .set('x-test-user', OTRO_USUARIO).send({ tipo: 'contenido', itemId: 'x', cuerpo: 'Hola' });
+    expect(res.status).toBe(201);
+  });
+
+  test('un comentario rechazado (404) no inicia la espera', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] });
+    await request(app).post('/api/comentarios')
+      .set('x-test-user', USUARIO).send({ tipo: 'contenido', itemId: 'no', cuerpo: 'Hola' });
+    expect(cooldownComentarios.segundosRestantes('user-1')).toBe(0);
   });
 });

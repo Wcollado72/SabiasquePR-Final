@@ -28,3 +28,15 @@ describe('validateComentario', () => {
     expect(validateComentario({ ...VALIDO, cuerpo: '' })).toContain('El comentario debe tener al menos 2 caracteres.');
   });
 });
+
+describe('validateComentario -- largo maximo', () => {
+  const { validateComentario: validar, MAX_COMENTARIO_CARACTERES } = require('./comentario');
+  test('rechaza mas de 2000 caracteres y acepta exactamente 2000', () => {
+    expect(MAX_COMENTARIO_CARACTERES).toBe(2000);
+    expect(validar({ tipo: 'noticia', itemId: 'a', cuerpo: 'a'.repeat(2000) })).toEqual([]);
+    expect(validar({ tipo: 'noticia', itemId: 'a', cuerpo: 'a'.repeat(2001) })).toEqual(['El comentario no puede superar 2000 caracteres.']);
+  });
+  test('un cuerpo que no es texto da error en vez de romper', () => {
+    expect(validar({ tipo: 'noticia', itemId: 'a', cuerpo: { x: 1 } })).toHaveLength(1);
+  });
+});

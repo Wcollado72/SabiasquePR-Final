@@ -9,7 +9,16 @@ const { aplicarTraducciones, normalizarLang } = require('../util/traducciones');
 
 const router = express.Router();
 
+// Una noticia sin publicar nunca es la destacada de la portada. Se calcula
+// aqui para que `toRow` y el guardado usen exactamente el mismo valor.
+function resolverPublicadoYDestacado(body, existing = {}) {
+  const publicado = body.publicado ?? existing.publicado ?? true;
+  const destacado = publicado ? Boolean(body.destacado ?? existing.destacado ?? false) : false;
+  return { publicado, destacado };
+}
+
 function toRow(id, body, existing = {}) {
+  const { publicado, destacado } = resolverPublicadoYDestacado(body, existing);
   const fecha = body.fecha || existing.fecha;
   const fechaDisplay = body.fechaDisplay || existing.fecha_display ||
     new Date(fecha).toLocaleDateString('es-PR', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -26,9 +35,9 @@ function toRow(id, body, existing = {}) {
     body.fuenteTexto ?? existing.fuente_texto,
     JSON.stringify((body.parrafos ?? existing.parrafos ?? []).filter((p) => p && p.trim())),
     body.categoria ?? existing.categoria,
-    body.destacado ?? existing.destacado ?? false,
+    destacado,
     body.divulgacionIa ?? existing.divulgacion_ia ?? 'no',
-    body.publicado ?? existing.publicado ?? true,
+    publicado,
     body.idiomaOriginal ?? existing.idioma_original ?? 'es',
     resolverIaHerramientas(body, existing).valor,
   ];
@@ -100,7 +109,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
     if (dupe.length) id = `${id}-${Date.now().toString(36)}`;
 
     const values = toRow(id, req.body);
-    const destacado = req.body.destacado ?? false;
+    const { destacado } = resolverPublicadoYDestacado(req.body);
     const { rows } = await saveNoticia(
       id,
       destacado,
@@ -124,7 +133,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     if (ia.error) return res.status(400).json({ ok: false, error: ia.error });
 
     const values = toRow(req.params.id, req.body, existingRows[0]);
-    const destacado = req.body.destacado ?? existingRows[0].destacado ?? false;
+    const { destacado } = resolverPublicadoYDestacado(req.body, existingRows[0]);
     const { rows } = await saveNoticia(
       req.params.id,
       destacado,
@@ -141,7 +150,15 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
 // DELETE /api/noticias/:id -- solo admin
 router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { rowCount } = await pool.query('DELETE FROM noticias WHERE id = $1', [req.params.id]);
+    // Una sola sentencia: borra la noticia y sus comentarios y traducciones (no tienen
+    // clave foranea), para que no queden huerfanos ni los herede otra pieza con el mismo slug.
+    const { rowCount } = await pool.query(
+      `WITH borrada AS (DELETE FROM noticias WHERE id = $1 RETURNING id),
+            comentarios_borrados AS (DELETE FROM comentarios WHERE tipo = 'noticia' AND item_id = $1),
+            traducciones_borradas AS (DELETE FROM traducciones WHERE tipo = 'noticia' AND item_id = $1)
+       SELECT id FROM borrada`,
+      [req.params.id]
+    );
     if (rowCount === 0) return res.status(404).json({ ok: false, error: 'Noticia no encontrada.' });
     res.json({ ok: true });
   } catch (err) { enviarError500(res, err); }

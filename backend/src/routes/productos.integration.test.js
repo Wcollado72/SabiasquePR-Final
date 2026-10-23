@@ -104,6 +104,18 @@ describe('DELETE /api/productos/:id', () => {
     expect(res.status).toBe(404);
   });
 
+  test('borra en una sola sentencia el producto y sus traducciones (T-4)', async () => {
+    pool.query.mockResolvedValueOnce({ rowCount: 1 });
+    const res = await request(app).delete('/api/productos/a').set('x-test-user', ADMIN);
+    expect(res.status).toBe(200);
+    expect(pool.query).toHaveBeenCalledTimes(1);
+    const [sql, params] = pool.query.mock.calls[0];
+    expect(sql).toMatch(/^\s*WITH /);
+    expect(sql).toMatch(/DELETE FROM productos WHERE id = \$1/);
+    expect(sql).toMatch(/DELETE FROM traducciones WHERE tipo = 'producto' AND item_id = \$1/);
+    expect(params).toEqual(['a']);
+  });
+
   test('200 al eliminar un producto existente', async () => {
     pool.query.mockResolvedValueOnce({ rowCount: 1 });
     const res = await request(app).delete('/api/productos/a').set('x-test-user', ADMIN);

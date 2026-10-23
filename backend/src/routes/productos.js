@@ -83,7 +83,13 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
 // DELETE /api/productos/:id -- solo admin
 router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { rowCount } = await pool.query('DELETE FROM productos WHERE id = $1', [req.params.id]);
+    // Una sola sentencia: borra el producto y sus traducciones (sin clave foranea).
+    const { rowCount } = await pool.query(
+      `WITH borrado AS (DELETE FROM productos WHERE id = $1 RETURNING id),
+            traducciones_borradas AS (DELETE FROM traducciones WHERE tipo = 'producto' AND item_id = $1)
+       SELECT id FROM borrado`,
+      [req.params.id]
+    );
     if (rowCount === 0) return res.status(404).json({ ok: false, error: 'Producto no encontrado.' });
     res.json({ ok: true });
   } catch (err) { enviarError500(res, err); }

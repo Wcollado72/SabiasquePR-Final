@@ -17,12 +17,17 @@ function countWords(text) {
   return (text || '').trim().split(/\s+/).filter(Boolean).length;
 }
 
-function validatePost({ titulo, cuerpo, subseccion, enfoque, enlaceMedia, enlaceMediaTipo }, rol = 'usuario') {
+// `existente` (solo al editar) es la fila guardada: permite corregir un typo
+// aunque la persona ya no tenga el rol que le dio mas palabras o el enlace --
+// el limite nunca baja de lo ya guardado y un enlace sin cambios no se vuelve
+// a exigir premium.
+function validatePost({ titulo, cuerpo, subseccion, enfoque, enlaceMedia, enlaceMediaTipo }, rol = 'usuario', existente = null) {
   const errors = [];
   if (!titulo || titulo.trim().length < 3) errors.push('El titulo debe tener al menos 3 caracteres.');
   if (titulo && titulo.length > 140) errors.push('El titulo no puede superar 140 caracteres.');
   if (!cuerpo || cuerpo.trim().length < 10) errors.push('El mensaje debe tener al menos 10 caracteres.');
-  const limit = WORD_LIMITS[rol] || WORD_LIMITS.usuario;
+  let limit = WORD_LIMITS[rol] || WORD_LIMITS.usuario;
+  if (existente && existente.cuerpo) limit = Math.max(limit, countWords(existente.cuerpo));
   if (cuerpo && countWords(cuerpo) > limit) {
     errors.push(`El mensaje no puede superar ${limit} palabras.`);
   }
@@ -30,7 +35,10 @@ function validatePost({ titulo, cuerpo, subseccion, enfoque, enlaceMedia, enlace
   if (enfoque !== undefined && enfoque !== null && enfoque !== '' && !ENFOQUES_VALIDOS.includes(enfoque)) {
     errors.push('Enfoque no valido.');
   }
-  if (enlaceMedia || enlaceMediaTipo) {
+  const enlaceSinCambios = Boolean(existente)
+    && (enlaceMedia || null) === (existente.enlace_media || null)
+    && (enlaceMediaTipo || null) === (existente.enlace_media_tipo || null);
+  if ((enlaceMedia || enlaceMediaTipo) && !enlaceSinCambios) {
     if (rol !== 'premium' && rol !== 'admin') {
       errors.push('Solo las cuentas premium pueden anadir un enlace multimedia.');
     }

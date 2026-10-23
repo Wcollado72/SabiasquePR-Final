@@ -3,6 +3,7 @@ const { pool } = require('../db');
 const { enviarError500 } = require('../util/errores');
 const { requireAuth } = require('../middleware/auth');
 const { validatePost } = require('../validators/foroPost');
+const { MAX_COMENTARIO_CARACTERES } = require('../validators/comentario');
 const { esMenorConocido } = require('../util/edad');
 const { detectarRiesgo } = require('../util/deteccionRiesgo');
 const { nombreVisibleSql } = require('../util/autorVisible');
@@ -44,9 +45,22 @@ async function marcarSiHayRiesgo(tipo, itemId, texto) {
   if (!categoria) return;
   await pool.query(
     `INSERT INTO reportes (tipo, item_id, reportado_por, motivo, automatico)
-     VALUES ($1, $2, NULL, $3, true)`,
+     VALUES ($1, $2, NULL, $3, true)
+     ON CONFLICT (tipo, item_id) WHERE estado = 'pendiente' AND automatico DO NOTHING`,
     [tipo, itemId, `Detección automática: ${categoria}`]
   );
+}
+
+// Al EDITAR una publicacion se repite la deteccion, pero sin apilar reportes:
+// si ya hay uno automatico pendiente para esa publicacion, no se crea otro.
+async function marcarSiHayRiesgoEnEdicion(tipo, itemId, texto) {
+  if (!detectarRiesgo(texto)) return;
+  const { rows } = await pool.query(
+    `SELECT id FROM reportes WHERE tipo = $1 AND item_id = $2 AND automatico = true AND estado = 'pendiente' LIMIT 1`,
+    [tipo, itemId]
+  );
+  if (rows && rows.length) return;
+  await marcarSiHayRiesgo(tipo, itemId, texto);
 }
 
 // Anti-bots gratis para el debate publico (sin CAPTCHA): honeypot + cooldown
@@ -98,6 +112,13 @@ function camposAdmin(body, rol) {
     destacado: Boolean(body.destacado),
     temaContenidoId: body.temaContenidoId || null,
   };
+}
+
+// El contenido relacionado (tema) debe existir: sin esta revision la clave
+// foranea fallaba y el panel recibia un 500 generico.
+async function contenidoExiste(id) {
+  const { rows } = await pool.query('SELECT id FROM contenidos WHERE id = $1', [id]);
+  return rows.length > 0;
 }
 
 // GET /api/foro/posts?subseccion=&enfoque=&limit=&offset=  -- publico
@@ -167,6 +188,9 @@ router.post('/posts', requireAuth, async (req, res) => {
   try {
     const { titulo, cuerpo, subseccion, enfoque, enlaceMedia, enlaceMediaTipo } = req.body;
     const { destacado, temaContenidoId } = camposAdmin(req.body, req.user.rol);
+    if (temaContenidoId && !(await contenidoExiste(temaContenidoId))) {
+      return res.status(400).json({ ok: false, error: 'El contenido relacionado no existe.' });
+    }
     const { rows } = await pool.query(
       `INSERT INTO foro_posts (autor_id, titulo, cuerpo, subseccion, enfoque, enlace_media, enlace_media_tipo, destacado, tema_contenido_id)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
@@ -179,24 +203,50 @@ router.post('/posts', requireAuth, async (req, res) => {
 });
 
 // PATCH /api/foro/posts/:id -- editar -- dueno, admin o moderador
+// Repite las verificaciones de la creacion (edad 18+, lenguaje de riesgo), no
+// deja cambiar la sub-seccion, y solo el admin toca destacado/tema.
 router.patch('/posts/:id', requireAuth, async (req, res) => {
   try {
-    const { rows: existing } = await pool.query('SELECT autor_id FROM foro_posts WHERE id = $1', [req.params.id]);
+    const { rows: existing } = await pool.query(
+      `SELECT autor_id, titulo, cuerpo, subseccion, enlace_media, enlace_media_tipo, destacado, tema_contenido_id
+       FROM foro_posts WHERE id = $1`,
+      [req.params.id]
+    );
     if (existing.length === 0) return res.status(404).json({ ok: false, error: 'Publicacion no encontrada.' });
-    if (existing[0].autor_id !== req.user.id && !esModeracion(req.user.rol)) {
+    const actual = existing[0];
+    if (actual.autor_id !== req.user.id && !esModeracion(req.user.rol)) {
       return res.status(403).json({ ok: false, error: 'No tienes permiso para editar esta publicacion.' });
     }
-    const errors = validatePost(req.body, req.user.rol);
+    if (actual.subseccion && req.body.subseccion !== undefined && req.body.subseccion !== actual.subseccion) {
+      return res.status(400).json({ ok: false, error: 'No se puede cambiar la sub-sección de una publicación.' });
+    }
+    const subseccion = actual.subseccion || req.body.subseccion;
+    if (bloqueadoPorEdad(req.user, subseccion)) {
+      return res.status(403).json({ ok: false, error: 'Debes confirmar que eres mayor de 18 años para participar en esta sección.' });
+    }
+    const errors = validatePost({ ...req.body, subseccion }, req.user.rol, actual);
     if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
 
-    const { titulo, cuerpo, subseccion, enfoque, enlaceMedia, enlaceMediaTipo } = req.body;
-    const { destacado, temaContenidoId } = camposAdmin(req.body, req.user.rol);
+    const { titulo, cuerpo, enfoque, enlaceMedia, enlaceMediaTipo } = req.body;
+    // Solo el admin cambia destacado y tema; si no los manda, se conservan los guardados.
+    let destacado = actual.destacado ?? false;
+    let temaContenidoId = actual.tema_contenido_id ?? null;
+    if (req.user.rol === 'admin') {
+      if (req.body.destacado !== undefined) destacado = Boolean(req.body.destacado);
+      if (req.body.temaContenidoId !== undefined) temaContenidoId = req.body.temaContenidoId || null;
+    }
+    if (temaContenidoId && temaContenidoId !== actual.tema_contenido_id && !(await contenidoExiste(temaContenidoId))) {
+      return res.status(400).json({ ok: false, error: 'El contenido relacionado no existe.' });
+    }
     const { rows } = await pool.query(
       `UPDATE foro_posts SET titulo=$1, cuerpo=$2, subseccion=$3, enfoque=$4, enlace_media=$5,
          enlace_media_tipo=$6, destacado=$7, tema_contenido_id=$8, editado_en=now()
        WHERE id=$9 RETURNING id, titulo, cuerpo, subseccion, enfoque, enlace_media, enlace_media_tipo, destacado, tema_contenido_id, autor_id, creado_en, editado_en`,
       [titulo.trim(), cuerpo.trim(), subseccion, enfoque || null, enlaceMedia || null, enlaceMediaTipo || null, destacado, temaContenidoId, req.params.id]
     );
+    if (titulo.trim() !== actual.titulo || cuerpo.trim() !== actual.cuerpo) {
+      try { await marcarSiHayRiesgoEnEdicion('debate_post', req.params.id, `${titulo} ${cuerpo}`); } catch { /* nunca tumbar la edicion por esto */ }
+    }
     res.json({ ok: true, post: rows[0] });
   } catch (err) { enviarError500(res, err); }
 });
@@ -209,7 +259,19 @@ router.delete('/posts/:id', requireAuth, async (req, res) => {
     if (existing[0].autor_id !== req.user.id && !esModeracion(req.user.rol)) {
       return res.status(403).json({ ok: false, error: 'No tienes permiso para eliminar esta publicacion.' });
     }
-    await pool.query('DELETE FROM foro_posts WHERE id = $1', [req.params.id]);
+    // Una sola sentencia: borra la publicacion y pasa a "revisado" los reportes
+    // pendientes de ella y de sus comentarios (que se borran en cascada).
+    await pool.query(
+      `WITH borrada AS (DELETE FROM foro_posts WHERE id = $1 RETURNING id),
+            cerrados AS (
+              UPDATE reportes SET estado = 'revisado'
+              WHERE estado = 'pendiente'
+                AND ((tipo = 'debate_post' AND item_id = $1)
+                  OR (tipo = 'debate_comentario' AND item_id IN (SELECT id FROM foro_comentarios WHERE post_id = $1)))
+            )
+       SELECT id FROM borrada`,
+      [req.params.id]
+    );
     res.json({ ok: true });
   } catch (err) { enviarError500(res, err); }
 });
@@ -224,8 +286,11 @@ router.post('/posts/:postId/comentarios', requireAuth, async (req, res) => {
     return res.status(400).json({ ok: false, error: 'No se pudo verificar que eres una persona. Intenta de nuevo.' });
   }
   try {
-    const cuerpo = (req.body.cuerpo || '').trim();
+    const cuerpo = String(req.body.cuerpo || '').trim();
     if (cuerpo.length < 2) return res.status(400).json({ ok: false, error: 'El comentario es muy corto.' });
+    if (cuerpo.length > MAX_COMENTARIO_CARACTERES) {
+      return res.status(400).json({ ok: false, error: `El comentario no puede superar ${MAX_COMENTARIO_CARACTERES} caracteres.` });
+    }
     const { rows: postExists } = await pool.query('SELECT id, subseccion FROM foro_posts WHERE id = $1', [req.params.postId]);
     if (postExists.length === 0) return res.status(404).json({ ok: false, error: 'Publicacion no encontrada.' });
     if (bloqueadoPorEdad(req.user, postExists[0].subseccion)) {
@@ -250,7 +315,15 @@ router.delete('/comentarios/:id', requireAuth, async (req, res) => {
     if (existing[0].autor_id !== req.user.id && !esModeracion(req.user.rol)) {
       return res.status(403).json({ ok: false, error: 'No tienes permiso para eliminar este comentario.' });
     }
-    await pool.query('DELETE FROM foro_comentarios WHERE id = $1', [req.params.id]);
+    await pool.query(
+      `WITH borrado AS (DELETE FROM foro_comentarios WHERE id = $1 RETURNING id),
+            cerrados AS (
+              UPDATE reportes SET estado = 'revisado'
+              WHERE estado = 'pendiente' AND tipo = 'debate_comentario' AND item_id = $1
+            )
+       SELECT id FROM borrado`,
+      [req.params.id]
+    );
     res.json({ ok: true });
   } catch (err) { enviarError500(res, err); }
 });
