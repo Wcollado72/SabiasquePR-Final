@@ -253,6 +253,13 @@
    "def": "'{}'::text[]"
   },
   {
+   "t": "contenidos",
+   "col": "publicado",
+   "tipo": "boolean",
+   "nulo": "NO",
+   "def": "true"
+  },
+  {
    "t": "foro_comentarios",
    "col": "id",
    "tipo": "uuid",
@@ -1316,7 +1323,7 @@
    "t": "reportes",
    "tipo": "c",
    "nombre": "reportes_tipo_check",
-   "def": "CHECK ((tipo = ANY (ARRAY['debate_post'::text, 'debate_comentario'::text])))"
+   "def": "CHECK ((tipo = ANY (ARRAY['debate_post'::text, 'debate_comentario'::text, 'articulo_comentario'::text])))"
   },
   {
    "t": "suscriptores",
@@ -1470,6 +1477,16 @@
    "t": "reportes",
    "nombre": "reportes_pkey",
    "def": "CREATE UNIQUE INDEX reportes_pkey ON public.reportes USING btree (id)"
+  },
+  {
+   "t": "reportes",
+   "nombre": "uq_reportes_automatico_pendiente",
+   "def": "CREATE UNIQUE INDEX uq_reportes_automatico_pendiente ON public.reportes USING btree (tipo, item_id) WHERE ((estado = 'pendiente'::text) AND automatico)"
+  },
+  {
+   "t": "reportes",
+   "nombre": "uq_reportes_pendiente_por_persona",
+   "def": "CREATE UNIQUE INDEX uq_reportes_pendiente_por_persona ON public.reportes USING btree (tipo, item_id, reportado_por) WHERE ((estado = 'pendiente'::text) AND (reportado_por IS NOT NULL))"
   },
   {
    "t": "suscriptores",

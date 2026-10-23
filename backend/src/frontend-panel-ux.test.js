@@ -145,7 +145,7 @@ describe('Debate: editar y reportar', () => {
   test('Reportar usa un cuadro propio (no prompt) y no aparece en lo propio', () => {
     expect(js).not.toMatch(/\bprompt\(/);
     expect(js).toContain('pedirMotivoReporte');
-    expect(js).toContain("document.createElement('dialog')");
+    expect(leer('reporte.js')).toContain("document.createElement('dialog')");
     expect(js).toMatch(/\$\{isOwner \? '' : `<button[^`]*debate-reportar" data-tipo="debate_post"/);
     expect(js).toMatch(/currentUser\.id === c\.autor_id \? '' : `<button[^`]*debate-reportar" data-tipo="debate_comentario"/);
   });

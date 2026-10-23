@@ -648,6 +648,7 @@ const PAGES = [
       </section>`,
     extraScript: `<script src="ia-herramientas.js"></script>
   <script src="editorial.js"></script>
+  <script src="reporte.js"></script>
   <script src="comentarios.js"></script>
   <script src="articulo.js"></script>`,
   },
@@ -668,6 +669,7 @@ const PAGES = [
     extraScript: `<script src="ia-herramientas.js"></script>
   <script src="editorial.js"></script>
   <script src="citas.js"></script>
+  <script src="reporte.js"></script>
   <script src="comentarios.js"></script>
   <script src="recurso.js"></script>`,
   },
@@ -717,6 +719,7 @@ const PAGES = [
   <script src="ia-herramientas.js"></script>
   <script src="editorial.js"></script>
   <script src="contenidos.js"></script>
+  <script src="reporte.js"></script>
   <script src="debate.js"></script>
   <script src="logica-humana.js"></script>
   <script src="rh-significado.js"></script>`,
@@ -820,6 +823,7 @@ const PAGES = [
   <script src="editorial.js"></script>
   <script src="regiones.js"></script>
   <script src="contenidos.js"></script>
+  <script src="reporte.js"></script>
   <script src="debate.js"></script>`,
   },
 
@@ -1251,10 +1255,13 @@ const PAGES = [
                 <label class="admin-checkbox synth-publish-check" title="Destacado en su sección (reemplaza al anterior de esa sección)"><input type="checkbox" id="ac-destacado"> ★ Destacado</label>
                 <label class="admin-checkbox synth-publish-check" title="Después de guardar, la IA prepara la traducción para que la revises"><input type="checkbox" id="ac-traducir-al-guardar"> 🌐 Traducir con IA al guardar</label>
                 <label class="admin-checkbox synth-publish-check" title="Contenido premium (vista previa parcial para quien no sea premium/admin)"><input type="checkbox" id="ac-premium"> 💎 Premium</label>
+                <input type="checkbox" id="ac-publicado" hidden checked aria-hidden="true">
                 <div class="synth-publish-actions">
-                  <button type="button" class="synth-btn-guardar" id="ac-guardar">▶ GUARDAR</button>
+                  <button type="button" class="admin-btn-cancel" id="ac-borrador">Guardar borrador</button>
+                  <button type="button" class="synth-btn-guardar" id="ac-guardar">▶ AL AIRE</button>
                   <button type="button" class="admin-btn-cancel" id="ac-cancel">Cancelar</button>
                 </div>
+                <p class="admin-hint" id="ac-estado">«Guardar borrador» lo deja solo en el panel; «AL AIRE» lo publica en el sitio.</p>
               </footer>
               <p id="ac-status" class="form-status" aria-live="polite"></p>
             </form>
@@ -1301,7 +1308,14 @@ const PAGES = [
         </section>
 
         <section class="admin-tab-panel" id="admin-panel-reportes" style="display:none;" data-help="reportes">
-          <p class="admin-hint">Reportes del debate (Corrupción Humana, Nuevos Humanos, Educación). Revisa el contenido reportado antes de decidir.</p>
+          <p class="admin-hint">Reportes del debate y de los comentarios de artículos. Lee el texto reportado antes de decidir; «Eliminar contenido» lo borra para todos.</p>
+          <div class="admin-tabs reportes-filtros" id="admin-reportes-filtros">
+            <button type="button" class="foro-filter-btn active" data-filtro="pendiente">Pendientes <span class="reportes-cuenta">0</span></button>
+            <button type="button" class="foro-filter-btn" data-filtro="revisado">Revisados <span class="reportes-cuenta">0</span></button>
+            <button type="button" class="foro-filter-btn" data-filtro="descartado">Descartados <span class="reportes-cuenta">0</span></button>
+            <button type="button" class="foro-filter-btn" data-filtro="todos">Todos <span class="reportes-cuenta">0</span></button>
+          </div>
+          <p id="admin-reportes-status" class="form-status" aria-live="polite"></p>
           <div id="admin-reportes-list" class="admin-list"></div>
         </section>
 
@@ -1472,6 +1486,7 @@ const PAGES = [
         <form id="cuenta-form">
           <label for="cuenta-nombre">Nombre</label>
           <input type="text" id="cuenta-nombre" maxlength="80" placeholder="Tu nombre" spellcheck="true" lang="es">
+          <p class="admin-hint">Este nombre se muestra públicamente en tus publicaciones y comentarios. Si lo dejas vacío, se usa un nombre genérico como «Participante-a3f9». No uses tu correo.</p>
           <button type="submit">Guardar cambios</button>
         </form>
         <p id="cuenta-status" class="form-status" aria-live="polite"></p>

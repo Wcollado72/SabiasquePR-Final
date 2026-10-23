@@ -103,37 +103,9 @@
   }
   // FIN edicion-debate
 
-  // Cuadro para reportar (reemplaza al cuadro nativo del navegador): resuelve el motivo o null si se cancela.
+  // El cuadro para reportar vive en reporte.js (lo comparten el debate y los comentarios de articulos).
   function pedirMotivoReporte() {
-    return new Promise((resolve) => {
-      const dlg = document.createElement('dialog');
-      dlg.className = 'debate-dialog';
-      dlg.innerHTML = `
-        <form>
-          <h3>Reportar contenido</h3>
-          <p class="admin-hint">Cuéntanos qué está mal. El equipo lo revisa y decide.</p>
-          <label for="debate-reporte-motivo">Motivo del reporte (mínimo 5 caracteres)</label>
-          <textarea id="debate-reporte-motivo" rows="4" maxlength="500" required></textarea>
-          <p class="form-status" aria-live="polite"></p>
-          <div class="debate-dialog-actions">
-            <button type="button" class="btn-alt" data-accion="cancelar">Cancelar</button>
-            <button type="submit">Enviar reporte</button>
-          </div>
-        </form>`;
-      document.body.appendChild(dlg);
-      const ta = dlg.querySelector('textarea');
-      const cerrar = (valor) => { dlg.close(); dlg.remove(); resolve(valor); };
-      dlg.querySelector('form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const motivo = ta.value.trim();
-        if (motivo.length < 5) { setStatus(dlg.querySelector('.form-status'), 'error', tr('Escribe al menos 5 caracteres.')); return; }
-        cerrar(motivo);
-      });
-      dlg.querySelector('[data-accion="cancelar"]').addEventListener('click', () => cerrar(null));
-      dlg.addEventListener('cancel', (e) => { e.preventDefault(); cerrar(null); });
-      dlg.showModal();
-      ta.focus();
-    });
+    return window.SQPR.pedirMotivoReporte();
   }
 
   // Widgets de Cloudflare Turnstile por id de contenedor -- se guarda el
