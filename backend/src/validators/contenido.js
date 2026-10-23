@@ -74,6 +74,9 @@ function validateContenido(body, { partial = false } = {}) {
   if (body.destacado !== undefined && typeof body.destacado !== 'boolean') {
     errors.push('El campo "destacado" debe ser verdadero o falso.');
   }
+  if (body.publicado !== undefined && typeof body.publicado !== 'boolean') {
+    errors.push('El campo "publicado" debe ser verdadero o falso.');
+  }
   if (body.subseccion !== undefined && body.subseccion !== null && !SUBSECCIONES_VALIDAS.includes(body.subseccion)) {
     errors.push('Subseccion no valida.');
   }

@@ -551,3 +551,20 @@ ALTER TABLE noticias ADD CONSTRAINT noticias_ia_herramientas_max CHECK (cardinal
 ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS ia_herramientas text[] NOT NULL DEFAULT '{}';
 ALTER TABLE contenidos DROP CONSTRAINT IF EXISTS contenidos_ia_herramientas_max;
 ALTER TABLE contenidos ADD CONSTRAINT contenidos_ia_herramientas_max CHECK (cardinality(ia_herramientas) <= 8);
+
+-- ============================================================
+-- Fase 6 (2026-10-24): contenidos.publicado, tipo de reporte 'articulo_comentario' e indices unicos de reportes pendientes.
+-- Mismo SQL que backend/sql/migraciones/2026-10-24-fase6.sql.
+-- ============================================================
+ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS publicado boolean NOT NULL DEFAULT true;
+
+ALTER TABLE reportes DROP CONSTRAINT IF EXISTS reportes_tipo_check;
+ALTER TABLE reportes ADD CONSTRAINT reportes_tipo_check
+  CHECK (tipo IN ('debate_post', 'debate_comentario', 'articulo_comentario'));
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_reportes_pendiente_por_persona
+  ON reportes (tipo, item_id, reportado_por)
+  WHERE estado = 'pendiente' AND reportado_por IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS uq_reportes_automatico_pendiente
+  ON reportes (tipo, item_id)
+  WHERE estado = 'pendiente' AND automatico;

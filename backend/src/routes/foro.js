@@ -45,7 +45,8 @@ async function marcarSiHayRiesgo(tipo, itemId, texto) {
   if (!categoria) return;
   await pool.query(
     `INSERT INTO reportes (tipo, item_id, reportado_por, motivo, automatico)
-     VALUES ($1, $2, NULL, $3, true)`,
+     VALUES ($1, $2, NULL, $3, true)
+     ON CONFLICT (tipo, item_id) WHERE estado = 'pendiente' AND automatico DO NOTHING`,
     [tipo, itemId, `Detección automática: ${categoria}`]
   );
 }

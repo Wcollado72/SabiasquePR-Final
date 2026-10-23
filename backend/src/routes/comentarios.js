@@ -5,6 +5,7 @@ const { requireAuth } = require('../middleware/auth');
 const { validateComentario } = require('../validators/comentario');
 const { nombreVisibleSql } = require('../util/autorVisible');
 const { crearCooldown } = require('../util/cooldown');
+const { detectarRiesgo } = require('../util/deteccionRiesgo');
 
 const router = express.Router();
 
@@ -52,9 +53,19 @@ router.post('/', requireAuth, async (req, res) => {
       [req.body.tipo, req.body.itemId, req.user.id, req.body.cuerpo.trim()]
     );
     cooldownComentarios.marcar(req.user.id);
-    // TODO Fase 6: pasar el comentario por detectarRiesgo y generar un reporte
-    // automatico, como en el debate. Requiere un tipo nuevo ('comentario_articulo')
-    // en el CHECK de `reportes` (cambio de BD) y que GET /api/reportes lo resuelva.
+    // Mismo filtro de riesgo que el debate: un comentario que coincide con un patron genera un reporte
+    // automatico para revision; nunca se bloquea ni se borra solo, y un fallo aqui no tumba el comentario.
+    try {
+      const categoria = detectarRiesgo(req.body.cuerpo);
+      if (categoria) {
+        await pool.query(
+          `INSERT INTO reportes (tipo, item_id, reportado_por, motivo, automatico)
+           VALUES ('articulo_comentario', $1, NULL, $2, true)
+           ON CONFLICT (tipo, item_id) WHERE estado = 'pendiente' AND automatico DO NOTHING`,
+          [rows[0].id, `Detección automática: ${categoria}`]
+        );
+      }
+    } catch (err) { console.error('No se pudo registrar el reporte automatico del comentario:', err.message); }
     res.status(201).json({ ok: true, comentario: rows[0] });
   } catch (err) { enviarError500(res, err); }
 });
@@ -68,7 +79,16 @@ router.delete('/:id', requireAuth, async (req, res) => {
     if (existing[0].autor_id !== req.user.id && !esModeracion) {
       return res.status(403).json({ ok: false, error: 'No tienes permiso para borrar este comentario.' });
     }
-    await pool.query('DELETE FROM comentarios WHERE id = $1', [req.params.id]);
+    // Una sola sentencia: borra el comentario y pasa a "revisado" sus reportes pendientes.
+    await pool.query(
+      `WITH borrado AS (DELETE FROM comentarios WHERE id = $1 RETURNING id),
+            cerrados AS (
+              UPDATE reportes SET estado = 'revisado'
+              WHERE estado = 'pendiente' AND tipo = 'articulo_comentario' AND item_id = $1
+            )
+       SELECT id FROM borrado`,
+      [req.params.id]
+    );
     res.json({ ok: true });
   } catch (err) { enviarError500(res, err); }
 });

@@ -59,6 +59,37 @@ describe('POST /api/reportes', () => {
   });
 });
 
+describe('POST /api/reportes -- comentarios de articulos y duplicados (Fase 6)', () => {
+  test('201 al reportar un comentario de noticia o contenido (articulo_comentario)', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'c9' }] })
+      .mockResolvedValueOnce({ rows: [{ id: 'r9', tipo: 'articulo_comentario', item_id: 'c9', estado: 'pendiente' }] });
+    const res = await request(app).post('/api/reportes')
+      .set('x-test-user', USUARIO).send({ tipo: 'articulo_comentario', itemId: 'c9', motivo: 'Insulta a otra persona.' });
+    expect(res.status).toBe(201);
+    expect(pool.query.mock.calls[0][0]).toMatch(/FROM comentarios WHERE id/);
+  });
+
+  test('409 si esa persona ya tiene un reporte pendiente del mismo elemento', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'p1' }] })
+      .mockResolvedValueOnce({ rows: [] }); // ON CONFLICT DO NOTHING no devuelve fila
+    const res = await request(app).post('/api/reportes')
+      .set('x-test-user', USUARIO).send({ tipo: 'debate_post', itemId: 'p1', motivo: 'Otra vez lo mismo.' });
+    expect(res.status).toBe(409);
+    expect(res.body.error).toMatch(/pendiente/);
+    expect(pool.query.mock.calls[1][0]).toMatch(/ON CONFLICT \(tipo, item_id, reportado_por\)/);
+  });
+
+  test('GET une el comentario de articulo con su noticia o contenido', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] });
+    await request(app).get('/api/reportes').set('x-test-user', ADMIN);
+    const [sql] = pool.query.mock.calls[0];
+    expect(sql).toMatch(/LEFT JOIN comentarios ac ON r\.tipo = 'articulo_comentario'/);
+    expect(sql).toMatch(/ac\.item_id AS contenido_articulo_id/);
+  });
+});
+
 describe('GET /api/reportes', () => {
   test('401 sin autenticacion', async () => {
     const res = await request(app).get('/api/reportes');
