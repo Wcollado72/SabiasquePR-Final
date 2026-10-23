@@ -73,6 +73,7 @@
       + '<a class="eyebrow" href="noticias.html?categoria=' + encodeURIComponent(art.categoria || '') + '">' + S.escapeHtml(S.categoriaLabel(art)) + '</a>'
       + '<h1 class="article-title">' + S.escapeHtml(art.titulo) + '</h1>'
       + '<p class="article-meta"><time datetime="' + S.escapeHtml(String(art.fecha).slice(0, 10)) + '">' + S.escapeHtml(art.fecha_display || '') + '</time> · ' + S.readingMinutes(art) + ' min de lectura</p>'
+      + (S.iaBadgesHtml(art) ? '<p class="article-ia">' + S.iaBadgesHtml(art) + '</p>' : '')
       + '</header>'
       + avisoIdioma
       + figure

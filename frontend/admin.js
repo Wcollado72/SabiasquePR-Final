@@ -689,6 +689,24 @@
     document.getElementById('gastos-total-mes').textContent = `$${(fijo + gastosCostoMesIa).toFixed(2)}`;
   }
 
+  // La lista de IA usadas y la divulgacion (No se uso / parcial / generado) se mantienen de acuerdo: marcar una IA pasa
+  // "No se uso IA" a "parcial"; elegir "No se uso IA" vacia la lista y bloquea el selector.
+  function montarSelectorIa(hostId, selectId) {
+    const sel = document.getElementById(selectId);
+    const selector = window.sqprIa.montarSelector(document.getElementById(hostId), {
+      onChange: (lista) => { if (lista.length && sel.value === 'no') sel.value = 'parcial'; },
+    });
+    sel.addEventListener('change', () => {
+      if (sel.value === 'no') selector.escribir([]);
+      selector.habilitar(sel.value !== 'no');
+    });
+    return selector;
+  }
+  function cargarIaEnSelector(selector, selectId, lista) {
+    selector.escribir(lista || []);
+    selector.habilitar(document.getElementById(selectId).value !== 'no');
+  }
+
   // INICIO aviso-campo-faltante
   // Los formularios largos reparten sus campos obligatorios en paneles (pasos) ocultos: sin esto el navegador
   // bloquea el envio en silencio porque no puede enfocar un campo oculto. Al primer campo invalido se abre su
@@ -720,6 +738,7 @@
     const enviarNoticia = (publicar) => { document.getElementById('an-publicado').checked = publicar; formNoticias.requestSubmit(); };
     document.getElementById('an-borrador').addEventListener('click', () => enviarNoticia(false));
     document.getElementById('an-publicar').addEventListener('click', () => enviarNoticia(true));
+    selectorIaNoticia = montarSelectorIa('an-ia-selector', 'an-divulgacion-ia');
     bindImagePicker('an-imagen', 'an-imagen-preview', 'an-elegir-imagen');
     document.getElementById('an-autocompletar-ia').addEventListener('click', autocompletarNoticiaConIA);
     bindNewsPanels();
@@ -758,6 +777,7 @@
       document.getElementById('an-fuente-url').value = url;
       document.getElementById('an-fuente-texto').value = data.fuenteTexto || '';
       document.getElementById('an-divulgacion-ia').value = 'parcial';
+      selectorIaNoticia.habilitar(true);
       document.getElementById('an-publicado').checked = false;
       statusEl.textContent = 'Listo — se guardó como borrador (sin publicar). Revisa el texto, elige categoría, fecha e imagen, y marca "Publicado" cuando esté listo.';
     } catch (err) {
@@ -820,6 +840,7 @@
     document.getElementById('an-fuente-texto').value = item?.fuente_texto || '';
     document.getElementById('an-parrafos').value = (item?.parrafos || []).join('\n');
     document.getElementById('an-divulgacion-ia').value = item?.divulgacion_ia || 'no';
+    cargarIaEnSelector(selectorIaNoticia, 'an-divulgacion-ia', item?.ia_herramientas);
     document.getElementById('an-destacado').checked = Boolean(item?.destacado);
     document.getElementById('an-publicado').checked = item ? Boolean(item.publicado) : true;
     document.getElementById('an-estado').textContent = item
@@ -856,6 +877,7 @@
       fuenteTexto: document.getElementById('an-fuente-texto').value.trim(),
       parrafos: document.getElementById('an-parrafos').value.split('\n').map((p) => p.trim()).filter(Boolean),
       divulgacionIa: document.getElementById('an-divulgacion-ia').value,
+      iaHerramientas: selectorIaNoticia.leer(),
       destacado: document.getElementById('an-destacado').checked,
       publicado: document.getElementById('an-publicado').checked,
     };
@@ -962,6 +984,7 @@
     formContenidos.addEventListener('submit', submitContenido);
     avisarCampoFaltante(formContenidos, activarSynthPanel, document.getElementById('ac-status'));
     document.getElementById('ac-guardar').addEventListener('click', () => formContenidos.requestSubmit());
+    selectorIaContenido = montarSelectorIa('ac-ia-selector', 'ac-divulgacion-ia');
     document.getElementById('ac-usar-imagen-categoria').addEventListener('click', () => {
       const categoria = document.getElementById('ac-categoria').value;
       const img = window.SQPR && window.SQPR.CATEGORIA_IMAGEN && window.SQPR.CATEGORIA_IMAGEN[categoria];
@@ -1098,6 +1121,9 @@
     [/latam|latino/, 'america-sur'], [/oceania|pacific/, 'oceania'],
   ];
   let origenTocadoPorAdmin = false;
+  // Selectores de herramientas de IA (iconos) de los formularios de Noticias rapidas y Contenidos (ia-herramientas.js).
+  let selectorIaNoticia = null;
+  let selectorIaContenido = null;
   // Categoría con la que se guardó la pieza que se está editando (Revolución Humana no la pregunta y la conserva).
   let categoriaGuardada = '';
 
@@ -1596,6 +1622,7 @@
     document.getElementById('ac-autor').value = item?.autor || '';
     document.getElementById('ac-subformato').value = item?.subformato || '';
     document.getElementById('ac-divulgacion-ia').value = item?.divulgacion_ia || 'no';
+    cargarIaEnSelector(selectorIaContenido, 'ac-divulgacion-ia', item?.ia_herramientas);
     document.getElementById('ac-url-media').value = item?.url_media || '';
     document.getElementById('ac-fuente-url').value = item?.fuente_url || '';
     document.getElementById('ac-fuente-texto').value = item?.fuente_texto || '';
@@ -1650,6 +1677,7 @@
       autor: document.getElementById('ac-autor').value.trim() || null,
       subformato: document.getElementById('ac-subformato').value || null,
       divulgacionIa: document.getElementById('ac-divulgacion-ia').value,
+      iaHerramientas: selectorIaContenido.leer(),
       urlMedia: document.getElementById('ac-url-media').value.trim() || null,
       fuenteUrl: document.getElementById('ac-fuente-url').value.trim() || null,
       fuenteTexto: document.getElementById('ac-fuente-texto').value.trim() || null,

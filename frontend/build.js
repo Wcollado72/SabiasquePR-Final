@@ -600,7 +600,8 @@ const PAGES = [
         <a href="contacto.html#manifiesto">Leer el manifiesto</a>
       </div>
       <p class="home-about">Un proyecto para entender, cuestionar y mejorar la sociedad en la que vivimos.</p>`,
-    extraScript: `<script src="editorial.js"></script>
+    extraScript: `<script src="ia-herramientas.js"></script>
+  <script src="editorial.js"></script>
   <script src="home.js"></script>`,
   },
 
@@ -618,7 +619,8 @@ const PAGES = [
       <p class="home-hint" id="noticias-hint" aria-live="polite"></p>
       <div class="card-grid" id="noticias-list" aria-live="polite" aria-busy="true"></div>
       <noscript><p class="empty-state">Activa JavaScript para ver las noticias.</p></noscript>`,
-    extraScript: `<script src="editorial.js"></script>
+    extraScript: `<script src="ia-herramientas.js"></script>
+  <script src="editorial.js"></script>
   <script src="regiones.js"></script>
   <script src="noticias.js"></script>`,
   },
@@ -644,7 +646,8 @@ const PAGES = [
         </div>
         <div class="card-grid" id="article-more-grid"></div>
       </section>`,
-    extraScript: `<script src="editorial.js"></script>
+    extraScript: `<script src="ia-herramientas.js"></script>
+  <script src="editorial.js"></script>
   <script src="comentarios.js"></script>
   <script src="articulo.js"></script>`,
   },
@@ -662,7 +665,8 @@ const PAGES = [
         <div class="article-state" id="recurso-state">Cargando…</div>
         <noscript><div class="article-state">Activa JavaScript para ver este contenido.</div></noscript>
       </article>`,
-    extraScript: `<script src="editorial.js"></script>
+    extraScript: `<script src="ia-herramientas.js"></script>
+  <script src="editorial.js"></script>
   <script src="citas.js"></script>
   <script src="comentarios.js"></script>
   <script src="recurso.js"></script>`,
@@ -710,6 +714,7 @@ const PAGES = [
       <noscript><p class="empty-state">Activa JavaScript para ver este contenido.</p></noscript>
       <section class="debate-seccion" id="rh-debate" hidden></section>`,
     extraScript: `<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script src="ia-herramientas.js"></script>
   <script src="editorial.js"></script>
   <script src="contenidos.js"></script>
   <script src="debate.js"></script>
@@ -811,6 +816,7 @@ const PAGES = [
         <p>Escríbenos: <a href="mailto:${SITE.email}">${SITE.email}</a></p>
       </section>`,
     extraScript: `<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script src="ia-herramientas.js"></script>
   <script src="editorial.js"></script>
   <script src="regiones.js"></script>
   <script src="contenidos.js"></script>
@@ -970,7 +976,8 @@ const PAGES = [
                 <select id="an-divulgacion-ia">
                   ${optionsHtml(DIVULGACION_IA)}
                 </select>
-                <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir esta noticia. Se muestra públicamente.</p>
+                <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir esta noticia y, si quieres, con cuáles herramientas (puedes marcar varias). Se muestra públicamente con sus iconos.</p>
+                <div id="an-ia-selector"></div>
               </section>
 
               <section class="news-panel" data-panel="multimedia" hidden>
@@ -1116,7 +1123,8 @@ const PAGES = [
                 <select id="ac-divulgacion-ia">
                   ${optionsHtml(DIVULGACION_IA)}
                 </select>
-                <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir este contenido. Se muestra públicamente en la tarjeta y el artículo.</p>
+                <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir este contenido. Puedes marcar con cuáles herramientas (varias a la vez); se muestra públicamente con sus iconos en la tarjeta y el artículo.</p>
+                <div id="ac-ia-selector"></div>
               </section>
 
               <section class="synth-panel" data-panel="multimedia" hidden>
@@ -1432,6 +1440,7 @@ const PAGES = [
         </div>
       </div>`,
     extraScript: `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=Karla:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap">
+  <script src="ia-herramientas.js"></script>
   <script src="editorial.js"></script>
   <script src="citas.js"></script>
   <script src="clasificacion.js"></script>

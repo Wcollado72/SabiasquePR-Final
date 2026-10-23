@@ -32,7 +32,7 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon-96.png" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=df1466d7">
+  <link rel="stylesheet" href="styles.css?v=8c14d866">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Panel de administración","description":"Panel de administración de Sabías que PR: gestión de noticias y productos.","url":"https://sabiasquepr.com/admin.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -200,7 +200,8 @@
 <option value="generado">Generado principalmente con IA</option>
 <option value="no">No se usó IA</option>
                 </select>
-                <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir esta noticia. Se muestra públicamente.</p>
+                <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir esta noticia y, si quieres, con cuáles herramientas (puedes marcar varias). Se muestra públicamente con sus iconos.</p>
+                <div id="an-ia-selector"></div>
               </section>
 
               <section class="news-panel" data-panel="multimedia" hidden>
@@ -368,7 +369,8 @@
 <option value="generado">Generado principalmente con IA</option>
 <option value="no">No se usó IA</option>
                 </select>
-                <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir este contenido. Se muestra públicamente en la tarjeta y el artículo.</p>
+                <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir este contenido. Puedes marcar con cuáles herramientas (varias a la vez); se muestra públicamente con sus iconos en la tarjeta y el artículo.</p>
+                <div id="ac-ia-selector"></div>
               </section>
 
               <section class="synth-panel" data-panel="multimedia" hidden>
@@ -849,6 +851,7 @@
   <script src="auth.js" type="module"></script>
   <script src="script.js"></script>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=Karla:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap">
+  <script src="ia-herramientas.js"></script>
   <script src="editorial.js"></script>
   <script src="citas.js"></script>
   <script src="clasificacion.js"></script>

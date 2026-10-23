@@ -154,6 +154,15 @@
   // negativa en cada post.
   const DIVULGACION_IA_LABEL = { parcial: 'Asistencia parcial de IA', generado: 'Generado con IA' };
   const DIVULGACION_IA_CLASS = { parcial: 'badge-ia-parcial', generado: 'badge-ia-generado' };
+  // Divulgacion de uso de IA: la etiqueta (parcial / generado) y los iconos de las herramientas usadas.
+  function iaBadgesHtml(item) {
+    const etiqueta = item.divulgacion_ia && DIVULGACION_IA_LABEL[item.divulgacion_ia];
+    const insignia = etiqueta
+      ? '<span class="badge-ia ' + DIVULGACION_IA_CLASS[item.divulgacion_ia] + '">' + escapeHtml(etiqueta) + '</span>'
+      : '';
+    const herramientas = window.sqprIa ? window.sqprIa.insigniasHtml(item.ia_herramientas) : '';
+    return insignia + herramientas;
+  }
   const PLAY_ICON = '<span class="card-play-icon" aria-hidden="true">'
     + '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>';
 
@@ -180,10 +189,7 @@
     // superpuesta y en imagenes con su propio diseño/texto tapaba parte de
     // la portada, sobre todo al hacer zoom en hover).
     const badge = '<span class="card-format">' + escapeHtml(catLabel) + ' · ' + escapeHtml(formatoTexto) + '</span>';
-    const iaLabel = item.divulgacion_ia && DIVULGACION_IA_LABEL[item.divulgacion_ia];
-    const iaBadge = iaLabel
-      ? '<span class="badge-ia ' + DIVULGACION_IA_CLASS[item.divulgacion_ia] + '">' + escapeHtml(iaLabel) + '</span>'
-      : '';
+    const iaBadge = iaBadgesHtml(item);
     const premiumBadge = item.es_premium
       ? '<span class="badge-premium">🔒 Premium</span>'
       : '';
@@ -262,6 +268,8 @@
       url_media: null,
       _hrefBase: 'articulo.html',
       sin_traduccion: row.sin_traduccion,
+      divulgacion_ia: row.divulgacion_ia,
+      ia_herramientas: row.ia_herramientas,
     };
   }
 
@@ -298,6 +306,7 @@
       + '<' + tag + ' class="card-title">' + escapeHtml(art.titulo) + '</' + tag + '>'
       + '<p class="card-dek">' + escapeHtml(dek(art, o.featured ? 260 : 170)) + '</p>'
       + '<p class="card-meta">' + metaLine(art) + '</p>'
+      + iaBadgesHtml(art)
       + badgeIdioma(art)
       + '</div>';
     return '<article class="card"><a class="card-link" href="' + articleUrl(art) + '">' + inner + '</a></article>';
@@ -318,6 +327,7 @@
     SUBFORMATO_LABEL: SUBFORMATO_LABEL,
     DIVULGACION_IA_LABEL: DIVULGACION_IA_LABEL,
     DIVULGACION_IA_CLASS: DIVULGACION_IA_CLASS,
+    iaBadgesHtml: iaBadgesHtml,
     contenidoCardHtml: contenidoCardHtml,
     bindCardPlayDelegation: bindCardPlayDelegation,
     noticiaComoContenido: noticiaComoContenido,
