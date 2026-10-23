@@ -56,7 +56,10 @@ En cada cambio, GitHub Actions corre el lint, las pruebas y la auditoría de dep
 ```
 /frontend   sitio estático: páginas HTML (generadas por build.js), scripts JS, CSS, imágenes, i18n y service worker
 /backend    API REST: src/routes, src/middleware, src/validators, src/services, sql/ (schema.sql) y scripts/
-/docs       documentación de la entrega, planificación, registros de decisiones y generadores de PDF
+/docs       documentación del proyecto
+  /docs/entrega   LA ENTREGA: documento PDF final, manual de usuario, documentación técnica,
+                  planificación y diseño de la BD, evidencia de pruebas, capturas y guiones
+  /docs/interno   material de trabajo del proyecto (planes, accesos, auditorías); no es parte de la entrega
 /tools      empaquetado local del cliente de Supabase (vendor)
 /.github    flujos de CI (pruebas, auditoría de seguridad, respaldo diario cifrado, mantenimiento)
 README.md
@@ -73,3 +76,5 @@ Supabase Auth emite un JWT (ES256). El backend lo verifica en cada ruta protegid
 
 ## Documentación
 La documentación técnica (estructura, rutas y endpoints, entorno, autenticación y dependencias) está en `docs/entrega/documentacion-tecnica.md`, generada desde el código con `node backend/scripts/generar-doc-tecnica.js`.
+
+Todo lo que corresponde a la entrega de COMP2053 (documento PDF final, manual de usuario, documentación técnica, planificación y diseño de la base de datos, evidencia de pruebas y capturas) está en `docs/entrega/`; el punto de partida es **`docs/entrega/INDICE-ENTREGA.md`**, que dice qué pide la rúbrica y dónde está cada cosa. La carpeta `docs/interno/` contiene material de trabajo del proyecto (planes del corte, auditorías, hojas de trabajo) y no forma parte de la entrega.

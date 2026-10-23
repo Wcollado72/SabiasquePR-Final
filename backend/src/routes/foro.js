@@ -25,7 +25,7 @@ function esModeracion(rol) {
 
 // Bloquea si la subseccion es 18+ y, o bien el usuario nunca lo autoafirmo
 // (edad_confirmada), o bien -- mas fuerte -- su fecha de nacimiento REAL
-// (cuando se conoce, ver AUDITORIA-LEGAL-MENORES.md) dice que es menor de 18.
+// (cuando se conoce, ver docs/interno/AUDITORIA-LEGAL-MENORES.md) dice que es menor de 18.
 // El dato conocido siempre gana sobre el checkbox: nadie puede "mentir" por
 // encima de una fecha de nacimiento ya registrada.
 function bloqueadoPorEdad(user, subseccion) {
@@ -35,7 +35,7 @@ function bloqueadoPorEdad(user, subseccion) {
 }
 
 // Si `texto` coincide con un patron de riesgo, crea un reporte automatico
-// (pendiente, sin reportado_por -- ver AUDITORIA-LEGAL-MENORES.md) para que
+// (pendiente, sin reportado_por -- ver docs/interno/AUDITORIA-LEGAL-MENORES.md) para que
 // un moderador lo revise con prioridad. Nunca bloquea ni borra el contenido
 // por si sola; un error aqui tampoco debe tumbar la publicacion del post/
 // comentario, por eso se llama envuelta en su propio try/catch desde fuera.

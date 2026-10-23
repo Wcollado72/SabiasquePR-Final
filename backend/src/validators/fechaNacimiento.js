@@ -1,7 +1,7 @@
 // Validacion de la fecha de nacimiento que se pide en "Completa tu perfil"
 // (cuentas creadas con Google, o anteriores al campo). Solo verifica que sea una
 // fecha REAL y plausible; no rechaza a nadie por su edad -- la politica del
-// sitio es no bloquear a menores del sitio en general (ver AUDITORIA-LEGAL-MENORES.md);
+// sitio es no bloquear a menores del sitio en general (ver docs/interno/AUDITORIA-LEGAL-MENORES.md);
 // la edad solo refuerza el gate de las secciones 18+ (util/edad.js).
 const EDAD_MAXIMA = 120;
 

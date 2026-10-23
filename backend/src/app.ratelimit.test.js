@@ -2,7 +2,7 @@ const request = require('supertest');
 
 // El rate limit se desactiva con NODE_ENV=test (ver app.js), asi que aqui se
 // construye la app como en produccion. Simula la cadena real de Render
-// (AUDITORIA-SEGURIDAD.md, debilidad #1): supertest aporta el "socket local" y
+// (docs/interno/AUDITORIA-SEGURIDAD.md, debilidad #1): supertest aporta el "socket local" y
 // el X-Forwarded-For lleva "cliente, borde Cloudflare, balanceador interno".
 const CF = '104.22.160.61';
 const LB = '10.194.23.59';
