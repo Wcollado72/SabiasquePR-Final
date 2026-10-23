@@ -1,5 +1,5 @@
 // Deteccion automatica de lenguaje de riesgo en posts/comentarios publicos
-// del foro (2026-09-27, ver AUDITORIA-LEGAL-MENORES.md). Capa gratis,
+// del foro (2026-09-27, ver docs/interno/AUDITORIA-LEGAL-MENORES.md). Capa gratis,
 // deliberadamente simple: una lista de frases/patrones de alta senal, no un
 // clasificador de IA -- el objetivo es que un moderador humano revise mas
 // rapido, NUNCA borrar o bloquear contenido automaticamente. Un falso

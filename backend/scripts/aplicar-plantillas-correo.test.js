@@ -3,7 +3,7 @@ const path = require('path');
 const { construirCambios } = require('./aplicar-plantillas-correo');
 
 const plantillas = JSON.parse(fs.readFileSync(
-  path.join(__dirname, '..', '..', 'docs', 'correos-supabase', 'plantillas.json'), 'utf8'
+  path.join(__dirname, '..', '..', 'docs', 'interno', 'correos-supabase', 'plantillas.json'), 'utf8'
 ));
 
 describe('construirCambios (plantillas de correo -> API de Supabase)', () => {

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Genera docs/planificacion-y-diseno-bd.pdf para Sabias Que PR:
+Genera docs/entrega/planificacion-y-diseno-bd.pdf para Sabias Que PR:
 Fase 1 (Planificacion y Diseno) + Fase 2 (Diseno de la Base de Datos)
 de la rubrica del curso Full-Stack.
 """
@@ -41,7 +41,7 @@ CONTENT_W = PAGE_W - 2 * MARGIN
 
 DOCS_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(DOCS_DIR)
-OUT_PATH = os.path.join(DOCS_DIR, 'planificacion-y-diseno-bd.pdf')
+OUT_PATH = os.path.join(DOCS_DIR, 'entrega', 'planificacion-y-diseno-bd.pdf')
 SCHEMA_SQL_PATH = os.path.join(REPO_ROOT, 'backend', 'sql', 'schema.sql')
 ESTRUCTURA_PATH = os.path.join(DOCS_DIR, 'entrega', 'estructura-bd.json')
 DATOS_ESTUDIANTE_PATH = os.path.join(DOCS_DIR, 'privado', 'datos-estudiante.json')

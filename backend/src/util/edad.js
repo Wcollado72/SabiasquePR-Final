@@ -1,6 +1,6 @@
 // Calculo de edad real a partir de fecha_nacimiento (perfiles). Se usa para
 // reforzar el gate de secciones 18+ con un hecho conocido en vez de depender
-// solo de la autoafirmacion (edad_confirmada) -- ver AUDITORIA-LEGAL-MENORES.md.
+// solo de la autoafirmacion (edad_confirmada) -- ver docs/interno/AUDITORIA-LEGAL-MENORES.md.
 // Cuentas creadas antes de que existiera este campo tienen fecha_nacimiento
 // NULL y siguen dependiendo del checkbox de autoafirmacion unicamente.
 function calcularEdad(fechaNacimiento) {

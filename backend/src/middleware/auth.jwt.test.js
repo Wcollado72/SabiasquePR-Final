@@ -1,4 +1,4 @@
-// Emisor/audiencia del JWT y cuentas suspendidas (AUDITORIA-SEGURIDAD.md, #8).
+// Emisor/audiencia del JWT y cuentas suspendidas (docs/interno/AUDITORIA-SEGURIDAD.md, #8).
 jest.mock('jose', () => ({
   createRemoteJWKSet: jest.fn(() => 'jwks'),
   jwtVerify: jest.fn(),

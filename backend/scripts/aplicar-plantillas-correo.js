@@ -1,5 +1,5 @@
-// Aplica las plantillas de correo en español (docs/correos-supabase/plantillas.json,
-// generadas con docs/generate_correos_supabase.py) al proyecto de Supabase usando la
+// Aplica las plantillas de correo en español (docs/interno/correos-supabase/plantillas.json,
+// generadas con docs/interno/generate_correos_supabase.py) al proyecto de Supabase usando la
 // API de gestion, en vez de pegar 12 plantillas a mano en el panel.
 //
 // SEGURIDAD: el token de acceso personal lo pones TU en tu propia terminal
@@ -20,7 +20,7 @@ const path = require('path');
 
 const PROJECT_REF = process.env.PROJECT_REF || 'qmlhjacduuvptxglqxqn';
 const API = `https://api.supabase.com/v1/projects/${PROJECT_REF}/config/auth`;
-const PLANTILLAS = path.join(__dirname, '..', '..', 'docs', 'correos-supabase', 'plantillas.json');
+const PLANTILLAS = path.join(__dirname, '..', '..', 'docs', 'interno', 'correos-supabase', 'plantillas.json');
 
 // Convierte plantillas.json en el cuerpo del PATCH. Nombres de campo segun la
 // documentacion de Supabase (Management API, "Email Templates").

@@ -1,6 +1,6 @@
 name: Auditoria de seguridad (dependencias y secretos)
 
-# AUDITORIA-SEGURIDAD.md, debilidad #5. Corre en cada push a main, en cada PR
+# docs/interno/AUDITORIA-SEGURIDAD.md, debilidad #5. Corre en cada push a main, en cada PR
 # y una vez por semana (por si aparece una vulnerabilidad nueva en una
 # dependencia que no cambio). Si algo falla, GitHub te manda un correo.
 #

@@ -20,7 +20,7 @@ const SUBSECCIONES_VALIDAS = ['nuevos-humanos', 'revolucion-mundial', 'logica-hu
 // `enfoque` es la region dentro de cualquier sub-seccion de Revolucion
 // Humana -- el eje "institucional/individual" (Corrupcion Humana) se
 // elimino 2026-09-27: las 4 sub-secciones usan el mismo modelo de 2 niveles,
-// Seccion -> Region (ver AUDITORIA-LEGAL-MENORES.md / plan de "pocos clics").
+// Seccion -> Region (ver docs/interno/AUDITORIA-LEGAL-MENORES.md / plan de "pocos clics").
 const ENFOQUES_VALIDOS = [
   'puerto-rico', 'estados-unidos', 'hispanoamerica', 'internacionales',
 ];

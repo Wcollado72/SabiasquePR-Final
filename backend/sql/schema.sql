@@ -402,7 +402,7 @@ ALTER TABLE foro_posts ADD CONSTRAINT foro_posts_enlace_media_tipo_check
 ALTER TABLE perfiles ADD COLUMN IF NOT EXISTS edad_confirmada boolean NOT NULL DEFAULT false;
 
 -- Fecha de nacimiento real, capturada en el registro (2026-09-27, ver
--- AUDITORIA-LEGAL-MENORES.md). NULL para cuentas creadas antes de este campo
+-- docs/interno/AUDITORIA-LEGAL-MENORES.md). NULL para cuentas creadas antes de este campo
 -- -- esas siguen dependiendo de la autoafirmacion edad_confirmada. Cuando SI
 -- se conoce, el backend calcula la edad real y la usa para bloquear acceso a
 -- secciones 18+ sin depender solo del honor del checkbox -- un dato conocido
@@ -427,7 +427,7 @@ CREATE TABLE IF NOT EXISTS reportes (
 );
 
 -- Deteccion automatica de lenguaje de riesgo (2026-09-27, ver
--- AUDITORIA-LEGAL-MENORES.md): un post/comentario que coincide con un patron
+-- docs/interno/AUDITORIA-LEGAL-MENORES.md): un post/comentario que coincide con un patron
 -- de riesgo (solicitar contacto fuera de la plataforma, lenguaje de
 -- grooming, etc.) genera un reporte automatico para revision prioritaria de
 -- un moderador -- nunca borra ni bloquea el contenido por si solo, un humano
