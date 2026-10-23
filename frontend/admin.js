@@ -1948,6 +1948,18 @@
   }
   // FIN reportes-panel
 
+  async function loadReportes() {
+    const el = document.getElementById('admin-reportes-list');
+    el.innerHTML = '<p class="foro-loading">Cargando...</p>';
+    try {
+      const data = await apiFetch('/api/reportes');
+      reportesCache = data.reportes;
+      renderReportesList();
+    } catch (err) {
+      el.innerHTML = `<p class="foro-error">${escapeHtml(err.message)}</p>`;
+    }
+  }
+
   function setReportesStatus(tipo, msg) {
     setStatus(document.getElementById('admin-reportes-status'), tipo, msg);
   }
