@@ -32,7 +32,7 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon-96.png" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=109535ec">
+  <link rel="stylesheet" href="styles.css?v=63157f64">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Panel de administración","description":"Panel de administración de Sabías que PR: gestión de noticias y productos.","url":"https://sabiasquepr.com/admin.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -523,10 +523,13 @@
                 <label class="admin-checkbox synth-publish-check" title="Destacado en su sección (reemplaza al anterior de esa sección)"><input type="checkbox" id="ac-destacado"> ★ Destacado</label>
                 <label class="admin-checkbox synth-publish-check" title="Después de guardar, la IA prepara la traducción para que la revises"><input type="checkbox" id="ac-traducir-al-guardar"> 🌐 Traducir con IA al guardar</label>
                 <label class="admin-checkbox synth-publish-check" title="Contenido premium (vista previa parcial para quien no sea premium/admin)"><input type="checkbox" id="ac-premium"> 💎 Premium</label>
+                <input type="checkbox" id="ac-publicado" hidden checked aria-hidden="true">
                 <div class="synth-publish-actions">
-                  <button type="button" class="synth-btn-guardar" id="ac-guardar">▶ GUARDAR</button>
+                  <button type="button" class="admin-btn-cancel" id="ac-borrador">Guardar borrador</button>
+                  <button type="button" class="synth-btn-guardar" id="ac-guardar">▶ AL AIRE</button>
                   <button type="button" class="admin-btn-cancel" id="ac-cancel">Cancelar</button>
                 </div>
+                <p class="admin-hint" id="ac-estado">«Guardar borrador» lo deja solo en el panel; «AL AIRE» lo publica en el sitio.</p>
               </footer>
               <p id="ac-status" class="form-status" aria-live="polite"></p>
             </form>
@@ -573,7 +576,14 @@
         </section>
 
         <section class="admin-tab-panel" id="admin-panel-reportes" style="display:none;" data-help="reportes">
-          <p class="admin-hint">Reportes del debate (Corrupción Humana, Nuevos Humanos, Educación). Revisa el contenido reportado antes de decidir.</p>
+          <p class="admin-hint">Reportes del debate y de los comentarios de artículos. Lee el texto reportado antes de decidir; «Eliminar contenido» lo borra para todos.</p>
+          <div class="admin-tabs reportes-filtros" id="admin-reportes-filtros">
+            <button type="button" class="foro-filter-btn active" data-filtro="pendiente">Pendientes <span class="reportes-cuenta">0</span></button>
+            <button type="button" class="foro-filter-btn" data-filtro="revisado">Revisados <span class="reportes-cuenta">0</span></button>
+            <button type="button" class="foro-filter-btn" data-filtro="descartado">Descartados <span class="reportes-cuenta">0</span></button>
+            <button type="button" class="foro-filter-btn" data-filtro="todos">Todos <span class="reportes-cuenta">0</span></button>
+          </div>
+          <p id="admin-reportes-status" class="form-status" aria-live="polite"></p>
           <div id="admin-reportes-list" class="admin-list"></div>
         </section>
 
@@ -844,7 +854,7 @@
       apiUrl:      'http://localhost:3000',
       youtubeApiKey: '',
       turnstileSiteKey: '0x4AAAAAAFD1ChRrVsC9PVWd',
-      i18nVersion: '4bbbb8d5'
+      i18nVersion: 'ed010587'
     };
   </script>
   <script src="i18n.js"></script>

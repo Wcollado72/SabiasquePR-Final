@@ -57,6 +57,11 @@
     el.className = 'form-status ' + type;
   }
 
+  // Traduce un texto armado en JS (lo estatico del HTML ya lo traduce i18n.js solo).
+  function tr(texto) {
+    return window.SQPR && window.SQPR.t ? window.SQPR.t(texto) : texto;
+  }
+
   async function initComentarios({ tipo, itemId, containerId }) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -103,7 +108,8 @@
         <div class="foro-comment">
           <p class="foro-meta">${escapeHtml(c.autor_nombre || 'anónimo')} · ${formatDate(c.creado_en)}</p>
           <p>${escapeHtml(c.cuerpo)}</p>
-          ${(currentUser && (currentUser.id === c.autor_id || currentUserRol === 'admin'))
+          ${(currentUser && currentUser.id === c.autor_id) ? '' : `<button type="button" class="btn-alt foro-danger comentario-reportar" data-id="${c.id}">${tr('Reportar')}</button>`}
+          ${(currentUser && (currentUser.id === c.autor_id || currentUserRol === 'admin' || currentUserRol === 'moderador'))
             ? `<button type="button" class="foro-comment-delete btn-alt foro-danger" data-id="${c.id}">Eliminar</button>` : ''}
         </div>`).join('')
         : '<p class="foro-empty">Sé el primero en comentar.</p>'}</div>`;
@@ -118,6 +124,17 @@
         render(container, tipo, itemId);
       } catch (err) { setStatus(statusEl, 'error', '' + err.message); }
     });
+
+    container.querySelectorAll('.comentario-reportar').forEach((btn) => btn.addEventListener('click', async () => {
+      if (!currentUser) { alert(tr('Inicia sesión para reportar.')); return; }
+      const motivo = await window.SQPR.pedirMotivoReporte();
+      if (!motivo) return;
+      try {
+        await apiFetch('/api/reportes', { method: 'POST', body: JSON.stringify({ tipo: 'articulo_comentario', itemId: btn.dataset.id, motivo }) });
+        btn.textContent = tr('Reporte enviado');
+        btn.disabled = true;
+      } catch (err) { alert('' + err.message); }
+    }));
 
     container.querySelectorAll('.foro-comment-delete').forEach((btn) => {
       btn.addEventListener('click', async () => {

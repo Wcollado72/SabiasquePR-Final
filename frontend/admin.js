@@ -95,6 +95,7 @@
     bindTabs();
     bindAgentes();
     bindAyuda();
+    bindReportes();
     loadReportes();
     loadEstadoSeguridad();
     loadUsoIa();
@@ -1084,7 +1085,18 @@
     const formContenidos = document.getElementById('admin-contenidos-form');
     formContenidos.addEventListener('submit', submitContenido);
     avisarCampoFaltante(formContenidos, activarSynthPanel, document.getElementById('ac-status'));
-    document.getElementById('ac-guardar').addEventListener('click', () => formContenidos.requestSubmit());
+    // Publicar o guardar borrador solo ocurre con estos dos botones (Enter no envia el formulario).
+    const enviarContenido = (publicar) => {
+      document.getElementById('ac-publicado').checked = publicar;
+      const destacado = document.getElementById('ac-destacado');
+      if (destacado.checked && !destacadoPermitido(true, publicar)) {
+        destacado.checked = false;
+        setStatus(document.getElementById('ac-status'), 'info', 'Se quitó «Destacado»: un borrador no puede ser el destacado de su sección.');
+      }
+      formContenidos.requestSubmit();
+    };
+    document.getElementById('ac-borrador').addEventListener('click', () => enviarContenido(false));
+    document.getElementById('ac-guardar').addEventListener('click', () => enviarContenido(true));
     selectorIaContenido = montarSelectorIa('ac-ia-selector', 'ac-divulgacion-ia');
     document.getElementById('ac-usar-imagen-categoria').addEventListener('click', () => {
       const categoria = document.getElementById('ac-categoria').value;
@@ -1632,6 +1644,7 @@
         <div class="synth-item-info">
           <strong>${escapeHtml(c.titulo)}</strong>
           <div class="synth-item-badges">
+            ${c.publicado === false ? '<span class="synth-badge synth-badge-borrador">Borrador</span>' : ''}
             ${c.destacado ? '<span class="synth-badge synth-badge-destacado">★ Destacado</span>' : ''}
             ${c.es_premium ? '<span class="synth-badge synth-badge-premium">💎 Premium</span>' : ''}
             <span class="synth-badge synth-badge-seccion">${SECCION_LABEL[c.seccion] || c.seccion}${c.subseccion ? ' · ' + (SUBSECCION_LABEL[c.subseccion] || c.subseccion) : ''}</span>
@@ -1692,6 +1705,10 @@
     document.getElementById('ac-portada-alt').value = item?.portada_alt || '';
     document.getElementById('ac-fecha').value = item?.fecha_publicacion ? String(item.fecha_publicacion).slice(0, 10) : '';
     document.getElementById('ac-destacado').checked = Boolean(item?.destacado);
+    document.getElementById('ac-publicado').checked = item ? item.publicado !== false : true;
+    document.getElementById('ac-estado').textContent = item
+      ? (item.publicado === false ? 'Estado actual: borrador (no se ve en el sitio).' : 'Estado actual: publicado (se ve en el sitio).')
+      : '«Guardar borrador» lo deja solo en el panel; «AL AIRE» lo publica en el sitio.';
     llenarClasificacion(window.sqprClasificacion.aValor(
       document.getElementById('ac-seccion').value, item?.subseccion, item?.categoria
     ));
@@ -1746,7 +1763,8 @@
       urlPortada: document.getElementById('ac-url-portada').value.trim(),
       portadaAlt: textoAlternativo(document.getElementById('ac-portada-alt').value, document.getElementById('ac-titulo').value),
       fechaPublicacion: document.getElementById('ac-fecha').value,
-      destacado: document.getElementById('ac-destacado').checked,
+      destacado: destacadoPermitido(document.getElementById('ac-destacado').checked, document.getElementById('ac-publicado').checked),
+      publicado: document.getElementById('ac-publicado').checked,
       subseccion: document.getElementById('ac-subseccion').value || null,
       enfoque: document.getElementById('ac-enfoque').value || null,
       idiomaOriginal: document.getElementById('ac-idioma-original').value,
@@ -1763,10 +1781,13 @@
       const res = id
         ? await apiFetch(`/api/contenidos/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body) })
         : await apiFetch('/api/contenidos', { method: 'POST', body: JSON.stringify(body) });
+      document.getElementById('ac-estado').textContent = body.publicado
+        ? 'Estado actual: publicado (se ve en el sitio).' : 'Estado actual: borrador (no se ve en el sitio).';
       await despuesDeGuardar({
         tipo: 'contenido', pieza: res.contenido, idInput: 'ac-id', tituloForm: 'admin-contenidos-form-title', tituloNuevo: 'Editar contenido',
         botonCerrar: 'ac-cancel', casillaTraducir: 'ac-traducir-al-guardar', statusEl,
-        recargarLista: loadContenidos, mensaje: 'Guardado ✔ (ya se ve en el sitio).',
+        recargarLista: loadContenidos,
+        mensaje: body.publicado ? 'Publicado ✔ (ya se ve en el sitio).' : 'Guardado como borrador ✔ (no se ve en el sitio).',
       });
     } catch (err) {
       setStatus(statusEl, 'error tr-status-grande', '' + err.message);
@@ -1893,73 +1914,148 @@
   }
 
   // ── REPORTES (debate de Corrupción Humana) ────────────────
-  const REPORTE_TIPO_LABEL = { debate_post: 'Publicación', debate_comentario: 'Comentario' };
+  const REPORTE_TIPO_LABEL = { debate_post: 'Publicación del debate', debate_comentario: 'Comentario del debate', articulo_comentario: 'Comentario de un artículo' };
   const REPORTE_ESTADO_LABEL = { pendiente: 'Pendiente', revisado: 'Revisado', descartado: 'Descartado' };
+  let reportesFiltro = 'pendiente';
 
-  async function loadReportes() {
-    const el = document.getElementById('admin-reportes-list');
-    el.innerHTML = '<p class="foro-loading">Cargando...</p>';
-    try {
-      const data = await apiFetch('/api/reportes');
-      reportesCache = data.reportes;
-      renderReportesList();
-    } catch (err) {
-      el.innerHTML = `<p class="foro-error">${escapeHtml(err.message)}</p>`;
+  // INICIO reportes-panel
+  // Funciones puras de la pestaña Reportes (se prueban con Jest).
+  function filtrarReportes(lista, filtro) {
+    return filtro === 'todos' ? lista.slice() : lista.filter((r) => r.estado === filtro);
+  }
+  function contarReportes(lista) {
+    const c = { pendiente: 0, revisado: 0, descartado: 0, todos: lista.length };
+    lista.forEach((r) => { if (c[r.estado] !== undefined) c[r.estado] += 1; });
+    return c;
+  }
+  function recortarTexto(texto, max) {
+    const t = String(texto || '');
+    return t.length <= max ? t : t.slice(0, max).replace(/\s+\S*$/, '') + '…';
+  }
+  // Ruta de la API que borra el contenido reportado, segun el tipo de reporte.
+  function rutaEliminarReportado(tipo, itemId) {
+    const id = encodeURIComponent(itemId);
+    if (tipo === 'debate_post') return `/api/foro/posts/${id}`;
+    if (tipo === 'debate_comentario') return `/api/foro/comentarios/${id}`;
+    if (tipo === 'articulo_comentario') return `/api/comentarios/${id}`;
+    return null;
+  }
+  // Enlace publico al contenido donde ocurrio el reporte (solo comentarios de articulos).
+  function enlaceReportado(r) {
+    if (r.tipo !== 'articulo_comentario' || !r.contenido_articulo_id) return null;
+    const base = r.contenido_articulo_tipo === 'contenido' ? 'recurso.html' : 'articulo.html';
+    return `${base}?id=${encodeURIComponent(r.contenido_articulo_id)}`;
+  }
+  // FIN reportes-panel
+
+  function setReportesStatus(tipo, msg) {
+    setStatus(document.getElementById('admin-reportes-status'), tipo, msg);
+  }
+
+  function reporteHtml(r) {
+    const abierto = r.estado === 'pendiente';
+    const enlace = enlaceReportado(r);
+    let contenido;
+    if (r.contenido_existe) {
+      const autor = r.contenido_autor_nombre ? ` — por ${escapeHtml(r.contenido_autor_nombre)}` : '';
+      const fecha = r.contenido_creado_en ? `, ${escapeHtml(String(r.contenido_creado_en).slice(0, 10))}` : '';
+      const cuerpo = String(r.contenido_cuerpo || '');
+      const largo = cuerpo.length > 400;
+      contenido = `
+          <div class="reporte-contenido">
+            <span class="reporte-contenido-etiqueta">Texto reportado${autor}${fecha}</span>
+            ${r.contenido_titulo ? `<strong>${escapeHtml(r.contenido_titulo)}</strong>` : ''}
+            <p>${escapeHtml(recortarTexto(cuerpo, 400))}</p>
+            ${largo ? `<details><summary>Ver el texto completo</summary><p>${escapeHtml(cuerpo)}</p></details>` : ''}
+            ${enlace ? `<a href="${enlace}" target="_blank" rel="noopener">Abrir el artículo →</a>` : ''}
+          </div>`;
+    } else {
+      contenido = '<div class="reporte-contenido reporte-contenido-borrado">El contenido reportado ya no existe (se eliminó).</div>';
     }
+    return `
+      <div class="synth-item reporte-item" data-reporte="${r.id}">
+        <div class="synth-item-info">
+          <strong>${REPORTE_TIPO_LABEL[r.tipo] || r.tipo} ${r.automatico ? '— detección automática' : `— reportada por ${escapeHtml(r.reportado_por_email || 'una persona')}`}</strong>
+          <div class="synth-item-badges">
+            <span class="synth-badge ${abierto ? 'synth-badge-destacado' : 'synth-badge-seccion'}">${REPORTE_ESTADO_LABEL[r.estado] || r.estado}</span>
+            ${r.automatico ? '<span class="synth-badge synth-badge-destacado">🤖 automático</span>' : ''}
+          </div>
+          <span class="synth-item-meta">Motivo: ${escapeHtml(r.motivo)} · ${escapeHtml(String(r.creado_en).slice(0, 10))}</span>
+          ${contenido}
+        </div>
+        <div class="synth-item-actions">
+          ${abierto
+    ? `<button type="button" class="admin-btn-edit" data-accion="revisado" data-id="${r.id}">Marcar revisado</button>
+          <button type="button" class="admin-btn-edit" data-accion="descartado" data-id="${r.id}">Descartar</button>`
+    : `<button type="button" class="admin-btn-edit" data-accion="pendiente" data-id="${r.id}">Reabrir</button>`}
+          ${r.contenido_existe ? `<button type="button" class="admin-btn-delete foro-danger" data-tipo="${r.tipo}" data-item="${r.item_id}" data-reporte="${r.id}">Eliminar contenido</button>` : ''}
+        </div>
+      </div>`;
   }
 
   function renderReportesList() {
     const el = document.getElementById('admin-reportes-list');
     const resumen = document.getElementById('ag-reportes-resumen');
-    if (resumen) {
-      const pendientes = reportesCache.filter((r) => r.estado === 'pendiente').length;
-      resumen.textContent = pendientes === 0 ? 'Sin pendientes' : `${pendientes} pendiente${pendientes === 1 ? '' : 's'}`;
-    }
-    el.innerHTML = reportesCache.length ? reportesCache.map((r) => `
-      <div class="synth-item">
-        <div class="synth-item-info">
-          <strong>${REPORTE_TIPO_LABEL[r.tipo] || r.tipo} ${r.automatico ? '— detección automática' : `reportada por ${escapeHtml(r.reportado_por_email)}`}</strong>
-          <div class="synth-item-badges">
-            <span class="synth-badge ${r.estado === 'pendiente' ? 'synth-badge-destacado' : 'synth-badge-seccion'}">${REPORTE_ESTADO_LABEL[r.estado] || r.estado}</span>
-            ${r.automatico ? '<span class="synth-badge synth-badge-destacado">🤖 automático</span>' : ''}
-          </div>
-          <span class="synth-item-meta">${escapeHtml(r.motivo)}</span>
-        </div>
-        <div class="synth-item-actions">
-          <button type="button" class="admin-btn-edit" data-accion="revisado" data-id="${r.id}">Marcar revisado</button>
-          <button type="button" class="admin-btn-edit" data-accion="descartado" data-id="${r.id}">Descartar</button>
-          <button type="button" class="admin-btn-delete foro-danger" data-tipo="${r.tipo}" data-item="${r.item_id}" data-reporte="${r.id}">Eliminar contenido</button>
-        </div>
-      </div>`).join('') : '<p class="foro-empty">Sin reportes.</p>';
+    const cuentas = contarReportes(reportesCache);
+    if (resumen) resumen.textContent = cuentas.pendiente === 0 ? 'Sin pendientes' : `${cuentas.pendiente} pendiente${cuentas.pendiente === 1 ? '' : 's'}`;
+    document.querySelectorAll('#admin-reportes-filtros [data-filtro]').forEach((b) => {
+      b.classList.toggle('active', b.dataset.filtro === reportesFiltro);
+      b.querySelector('.reportes-cuenta').textContent = cuentas[b.dataset.filtro];
+    });
+    const visibles = filtrarReportes(reportesCache, reportesFiltro);
+    el.innerHTML = visibles.length
+      ? visibles.map(reporteHtml).join('')
+      : `<p class="foro-empty">${reportesFiltro === 'pendiente' ? 'No hay reportes pendientes. 🎉' : 'Sin reportes en esta vista.'}</p>`;
 
     el.querySelectorAll('[data-accion]').forEach((btn) => btn.addEventListener('click', () => {
-      actualizarEstadoReporte(btn.dataset.id, btn.dataset.accion);
+      actualizarEstadoReporte(btn.dataset.id, btn.dataset.accion, btn);
     }));
     el.querySelectorAll('.admin-btn-delete[data-tipo]').forEach((btn) => btn.addEventListener('click', () => {
-      eliminarContenidoReportado(btn.dataset.tipo, btn.dataset.item, btn.dataset.reporte);
+      eliminarContenidoReportado(btn.dataset.tipo, btn.dataset.item, btn.dataset.reporte, btn);
     }));
   }
 
-  async function actualizarEstadoReporte(id, estado) {
+  function bindReportes() {
+    document.querySelectorAll('#admin-reportes-filtros [data-filtro]').forEach((b) => b.addEventListener('click', () => {
+      reportesFiltro = b.dataset.filtro;
+      renderReportesList();
+    }));
+  }
+
+  // Bloquea los botones de la tarjeta mientras se guarda, para que un doble clic no repita la accion.
+  function bloquearTarjeta(btn, bloquear) {
+    const tarjeta = btn && btn.closest('.reporte-item');
+    if (tarjeta) tarjeta.querySelectorAll('button').forEach((b) => { b.disabled = bloquear; });
+  }
+
+  async function actualizarEstadoReporte(id, estado, btn) {
+    bloquearTarjeta(btn, true);
+    setReportesStatus('info', 'Guardando...');
     try {
       await apiFetch(`/api/reportes/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ estado }) });
-      loadReportes();
+      setReportesStatus('ok', estado === 'pendiente' ? 'Reporte reabierto ✔' : `Reporte marcado como ${REPORTE_ESTADO_LABEL[estado].toLowerCase()} ✔`);
+      await loadReportes();
     } catch (err) {
-      alert('' + err.message);
+      bloquearTarjeta(btn, false);
+      setReportesStatus('error', 'No se pudo actualizar el reporte: ' + err.message);
     }
   }
 
-  async function eliminarContenidoReportado(tipo, itemId, reporteId) {
-    if (!confirm('¿Eliminar esta publicación/comentario del debate? Esta acción no se puede deshacer.')) return;
-    const endpoint = tipo === 'debate_post'
-      ? `/api/foro/posts/${encodeURIComponent(itemId)}`
-      : `/api/foro/comentarios/${encodeURIComponent(itemId)}`;
+  async function eliminarContenidoReportado(tipo, itemId, reporteId, btn) {
+    const que = tipo === 'debate_post' ? 'esta publicación del debate y todos sus comentarios' : 'este comentario';
+    if (!confirm(`¿Eliminar ${que}? Se borra para todos, no se puede deshacer, y los reportes pendientes sobre ese contenido pasan a «revisado».`)) return;
+    const ruta = rutaEliminarReportado(tipo, itemId);
+    if (!ruta) return;
+    bloquearTarjeta(btn, true);
+    setReportesStatus('info', 'Eliminando...');
     try {
-      await apiFetch(endpoint, { method: 'DELETE' });
+      await apiFetch(ruta, { method: 'DELETE' });
       await apiFetch(`/api/reportes/${encodeURIComponent(reporteId)}`, { method: 'PATCH', body: JSON.stringify({ estado: 'revisado' }) });
-      loadReportes();
+      setReportesStatus('ok', 'Contenido eliminado ✔ y reporte marcado como revisado.');
+      await loadReportes();
     } catch (err) {
-      alert('' + err.message);
+      bloquearTarjeta(btn, false);
+      setReportesStatus('error', 'No se pudo eliminar: ' + err.message);
     }
   }
 

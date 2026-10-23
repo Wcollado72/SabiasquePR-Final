@@ -146,8 +146,8 @@
     return data;
   }
 
-  const ESTADO_LABEL = { admin: 'Administrador', premium: 'Colaborador', usuario: 'Cuenta gratuita' };
-  const ESTADO_CLASE = { admin: 'foro-badge-admin', premium: 'foro-badge-premium', usuario: '' };
+  const ESTADO_LABEL = { admin: 'Administrador', moderador: 'Moderador', premium: 'Colaborador', usuario: 'Cuenta gratuita' };
+  const ESTADO_CLASE = { admin: 'foro-badge-admin', moderador: 'foro-badge-admin', premium: 'foro-badge-premium', usuario: '' };
 
   function renderPerfil(user) {
     document.getElementById('cuenta-gate').style.display = 'none';
@@ -159,7 +159,7 @@
     badge.textContent = ESTADO_LABEL[user.rol] || ESTADO_LABEL.usuario;
     badge.className = 'foro-badge ' + (ESTADO_CLASE[user.rol] || '');
 
-    document.getElementById('cuenta-link-admin').style.display = user.rol === 'admin' ? '' : 'none';
+    document.getElementById('cuenta-link-admin').style.display = (user.rol === 'admin' || user.rol === 'moderador') ? '' : 'none';
   }
 
   function bindForm() {

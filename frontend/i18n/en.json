@@ -570,5 +570,8 @@
   "Escribe al menos 5 caracteres.": "Write at least 5 characters.",
   "palabras": "words",
   "Reporte enviado": "Report sent",
-  "editada": "edited"
+  "editada": "edited",
+  "Moderador": "Moderator",
+  "Este nombre se muestra públicamente en tus publicaciones y comentarios. Si lo dejas vacío, se usa un nombre genérico como «Participante-a3f9». No uses tu correo.": "This name is shown publicly on your posts and comments. If you leave it empty, a generic name like \"Participante-a3f9\" is used. Do not use your email.",
+  "Ya reportaste esto y sigue pendiente de revisión.": "You already reported this and it is still pending review."
 }
