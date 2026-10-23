@@ -1321,6 +1321,26 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .debate-edit-form{ display:flex; flex-direction:column; gap:8px; margin:6px 0 10px; }
 .debate-edit-form input[type=text], .debate-edit-form textarea{ width:100%; }
 
+/* Herramientas de IA usadas: iconos publicos (tarjetas, articulos) y selector del panel de administracion. */
+.ia-usadas{ display:inline-flex; flex-wrap:wrap; align-items:center; gap:6px; margin:4px 0 0 6px; vertical-align:middle; }
+.article-ia{ margin:6px 0 0; }
+.article-ia .ia-usadas{ margin-left:0; }
+.ia-chip{ display:inline-flex; align-items:center; gap:5px; font-size:.72rem; font-weight:600; line-height:1; padding:4px 9px 4px 7px;
+  border:1px solid color-mix(in srgb, currentColor 25%, transparent); border-radius:999px; }
+.ia-chip img{ width:14px; height:14px; display:block; }
+.ia-chip-otra{ padding-left:9px; }
+.ia-selector{ display:flex; flex-direction:column; gap:10px; margin:8px 0 4px; }
+.ia-selector-fichas{ display:flex; flex-wrap:wrap; gap:8px; }
+.ia-ficha{ display:inline-flex; align-items:center; gap:7px; cursor:pointer; font:inherit; font-size:.82rem; padding:7px 12px; border-radius:999px;
+  background:transparent; color:inherit; border:1px solid color-mix(in srgb, currentColor 30%, transparent); }
+.ia-ficha:hover:not(:disabled){ border-color:currentColor; }
+.ia-ficha.activa{ border-color:#3b82f6; background:color-mix(in srgb, #3b82f6 22%, transparent); font-weight:700; }
+.ia-ficha:disabled{ opacity:.45; cursor:not-allowed; }
+.ia-selector-fila{ display:flex; gap:8px; }
+.ia-selector-fila input{ flex:1; }
+.ia-selector-extras{ display:flex; flex-wrap:wrap; gap:6px; }
+.ia-chip-quitar{ background:none; border:0; color:inherit; cursor:pointer; font-size:1rem; line-height:1; padding:0 0 0 2px; }
+
 
 .admin-tabs{ margin-bottom:14px; }
 .admin-tab-panel{ display:flex; flex-direction:column; gap:14px; }

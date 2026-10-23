@@ -1,0 +1,4 @@
+Iconos de las herramientas de IA que se muestran en las piezas (divulgacion de uso de IA).
+claude, gemini y perplexity: Simple Icons v16.35.0; chatgpt (logo de OpenAI): Simple Icons v15.22.0 (https://simpleicons.org). Licencia CC0 1.0; se anadio el color de marca.
+copilot: insignia propia (Simple Icons no incluye el logo de Microsoft Copilot).
+Las marcas pertenecen a sus duenos; se usan solo para indicar que herramienta se uso (uso nominativo), siempre junto al nombre.

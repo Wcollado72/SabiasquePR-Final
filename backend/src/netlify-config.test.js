@@ -30,6 +30,11 @@ describe('netlify.toml', () => {
     expect(toml).toMatch(/ignore = "git diff --quiet \$CACHED_COMMIT_REF \$COMMIT_REF -- \. \.\.\/netlify\.toml"/);
   });
 
+  test('las vistas previas de PR solo se construyen en ramas preview/* (cada build cuesta creditos)', () => {
+    const bloque = toml.slice(toml.indexOf('[context.deploy-preview]'));
+    expect(bloque).toMatch(/\[context\.deploy-preview\]\s+ignore = 'case "\$HEAD" in preview\/\*\) exit 1 ;; \*\) exit 0 ;; esac'/);
+  });
+
   test('la redireccion de la direccion de netlify.app a sabiasquepr.com sigue primero', () => {
     const primero = toml.indexOf('[[redirects]]');
     expect(toml.slice(primero, primero + 200)).toMatch(/fabulous-tartufo-fcb839\.netlify\.app/);
