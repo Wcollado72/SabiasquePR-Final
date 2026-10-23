@@ -48,6 +48,16 @@ describe('GET /api/noticias', () => {
     expect(res.body.noticias).toHaveLength(1);
   });
 
+  test('la lista y el detalle publicos devuelven ia_herramientas', async () => {
+    const fila = { id: 'a', titulo: 'A', publicado: true, divulgacion_ia: 'parcial', ia_herramientas: ['claude', 'Otra IA'] };
+    pool.query.mockResolvedValueOnce({ rows: [fila] });
+    const lista = await request(app).get('/api/noticias');
+    expect(lista.body.noticias[0].ia_herramientas).toEqual(['claude', 'Otra IA']);
+    pool.query.mockResolvedValueOnce({ rows: [fila] });
+    const detalle = await request(app).get('/api/noticias/a');
+    expect(detalle.body.noticia.ia_herramientas).toEqual(['claude', 'Otra IA']);
+  });
+
   test('filtra por categoria cuando se pasa ?categoria=', async () => {
     pool.query.mockResolvedValueOnce({ rows: [{ id: 'a', categoria: 'salud' }] });
     const res = await request(app).get('/api/noticias?categoria=salud');
@@ -156,6 +166,46 @@ describe('POST /api/noticias', () => {
     expect(values[15]).toBe('es'); // idioma_original por defecto
   });
 
+  test('201 persiste iaHerramientas (claves conocidas y nombre libre) en el INSERT', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'un-titulo-cualquiera' }] });
+    const res = await request(app)
+      .post('/api/noticias')
+      .set('x-test-user', ADMIN)
+      .send({ ...NOTICIA_VALIDA, divulgacionIa: 'parcial', iaHerramientas: ['Claude', 'Perplexity', 'Mi IA local'] });
+    expect(res.status).toBe(201);
+    const [sql, values] = pool.query.mock.calls[1];
+    expect(sql).toMatch(/idioma_original, ia_herramientas/);
+    expect(values[16]).toEqual(['claude', 'perplexity', 'Mi IA local']);
+  });
+
+  test('201 sin iaHerramientas guarda una lista vacia', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'un-titulo-cualquiera' }] });
+    await request(app).post('/api/noticias').set('x-test-user', ADMIN).send(NOTICIA_VALIDA);
+    expect(pool.query.mock.calls[1][1][16]).toEqual([]);
+  });
+
+  test('400 con 9 herramientas, <script> o divulgacionIa "no" junto a una lista con elementos', async () => {
+    const enviar = (extra) => request(app).post('/api/noticias').set('x-test-user', ADMIN)
+      .send({ ...NOTICIA_VALIDA, ...extra });
+    const nueve = Array.from({ length: 9 }, (_, i) => `IA ${i}`);
+    expect((await enviar({ divulgacionIa: 'parcial', iaHerramientas: nueve })).status).toBe(400);
+    expect((await enviar({ divulgacionIa: 'parcial', iaHerramientas: ['<script>'] })).status).toBe(400);
+    const res = await enviar({ divulgacionIa: 'no', iaHerramientas: ['claude'] });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Si indicas qué IA usaste, la divulgación no puede ser “No se usó IA”.');
+  });
+
+  test('400 al crear con iaHerramientas y sin divulgacionIa (se asume "no")', async () => {
+    const res = await request(app).post('/api/noticias').set('x-test-user', ADMIN)
+      .send({ ...NOTICIA_VALIDA, iaHerramientas: ['claude'] });
+    expect(res.status).toBe(400);
+    expect(pool.query).not.toHaveBeenCalled();
+  });
+
   test('201 con publicado=false lo persiste como borrador (por defecto es true)', async () => {
     pool.query
       .mockResolvedValueOnce({ rows: [] })
@@ -246,6 +296,47 @@ describe('PUT /api/noticias/:id', () => {
       .send({ titulo: 'Titulo editado' });
     expect(res.status).toBe(200);
     expect(res.body.noticia.titulo).toBe('Titulo editado');
+  });
+
+  test('PUT sin iaHerramientas conserva las guardadas', async () => {
+    const existente = { id: 'a', ...NOTICIA_VALIDA, divulgacion_ia: 'parcial', ia_herramientas: ['claude', 'Otra IA'] };
+    pool.query
+      .mockResolvedValueOnce({ rows: [existente] })
+      .mockResolvedValueOnce({ rows: [existente] });
+    const res = await request(app).put('/api/noticias/a').set('x-test-user', ADMIN).send({ titulo: 'Titulo editado' });
+    expect(res.status).toBe(200);
+    const [sql, values] = pool.query.mock.calls[1];
+    expect(sql).toMatch(/ia_herramientas=\$17::text\[\]/);
+    expect(values[16]).toEqual(['claude', 'Otra IA']);
+  });
+
+  test('PUT con iaHerramientas las normaliza y las guarda', async () => {
+    const existente = { id: 'a', ...NOTICIA_VALIDA, divulgacion_ia: 'no', ia_herramientas: [] };
+    pool.query
+      .mockResolvedValueOnce({ rows: [existente] })
+      .mockResolvedValueOnce({ rows: [{ id: 'a', ia_herramientas: ['gemini', 'Mi IA'] }] });
+    const res = await request(app).put('/api/noticias/a').set('x-test-user', ADMIN)
+      .send({ divulgacionIa: 'generado', iaHerramientas: ['Gemini', ' Mi IA '] });
+    expect(res.status).toBe(200);
+    expect(pool.query.mock.calls[1][1][16]).toEqual(['gemini', 'Mi IA']);
+  });
+
+  test('400 si iaHerramientas llega sin divulgacionIa y la noticia tiene divulgacion "no"', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'a', ...NOTICIA_VALIDA, divulgacion_ia: 'no', ia_herramientas: [] }] });
+    const res = await request(app).put('/api/noticias/a').set('x-test-user', ADMIN).send({ iaHerramientas: ['claude'] });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/divulgación no puede ser/);
+    expect(pool.query).toHaveBeenCalledTimes(1); // no llego al UPDATE
+  });
+
+  test('PUT que cambia la divulgacion a "no" vacia las herramientas guardadas', async () => {
+    const existente = { id: 'a', ...NOTICIA_VALIDA, divulgacion_ia: 'parcial', ia_herramientas: ['claude'] };
+    pool.query
+      .mockResolvedValueOnce({ rows: [existente] })
+      .mockResolvedValueOnce({ rows: [existente] });
+    const res = await request(app).put('/api/noticias/a').set('x-test-user', ADMIN).send({ divulgacionIa: 'no' });
+    expect(res.status).toBe(200);
+    expect(pool.query.mock.calls[1][1][16]).toEqual([]);
   });
 });
 

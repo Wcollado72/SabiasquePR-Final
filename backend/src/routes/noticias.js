@@ -4,6 +4,7 @@ const { enviarError500 } = require('../util/errores');
 const { requireAuth, requireAdmin, tryAuth } = require('../middleware/auth');
 const { slugify } = require('../util/slugify');
 const { validateNoticia } = require('../validators/noticia');
+const { resolverIaHerramientas } = require('../validators/iaHerramientas');
 const { aplicarTraducciones, normalizarLang } = require('../util/traducciones');
 
 const router = express.Router();
@@ -29,6 +30,7 @@ function toRow(id, body, existing = {}) {
     body.divulgacionIa ?? existing.divulgacion_ia ?? 'no',
     body.publicado ?? existing.publicado ?? true,
     body.idiomaOriginal ?? existing.idioma_original ?? 'es',
+    resolverIaHerramientas(body, existing).valor,
   ];
 }
 
@@ -91,6 +93,8 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
   const errors = validateNoticia(req.body);
   if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
   try {
+    const ia = resolverIaHerramientas(req.body);
+    if (ia.error) return res.status(400).json({ ok: false, error: ia.error });
     let id = req.body.id ? slugify(req.body.id) : slugify(req.body.titulo);
     const { rows: dupe } = await pool.query('SELECT id FROM noticias WHERE id = $1', [id]);
     if (dupe.length) id = `${id}-${Date.now().toString(36)}`;
@@ -101,8 +105,8 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
       id,
       destacado,
       values,
-      `INSERT INTO noticias (id, titulo, fecha, fecha_display, imagen, imagen_alt, imagen_caption, clase, fuente_url, fuente_texto, parrafos, categoria, destacado, divulgacion_ia, publicado, idioma_original)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12,$13,$14,$15,$16) RETURNING *`
+      `INSERT INTO noticias (id, titulo, fecha, fecha_display, imagen, imagen_alt, imagen_caption, clase, fuente_url, fuente_texto, parrafos, categoria, destacado, divulgacion_ia, publicado, idioma_original, ia_herramientas)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12,$13,$14,$15,$16,$17::text[]) RETURNING *`
     );
     res.status(201).json({ ok: true, noticia: rows[0] });
   } catch (err) { enviarError500(res, err); }
@@ -116,6 +120,9 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     const { rows: existingRows } = await pool.query('SELECT * FROM noticias WHERE id = $1', [req.params.id]);
     if (existingRows.length === 0) return res.status(404).json({ ok: false, error: 'Noticia no encontrada.' });
 
+    const ia = resolverIaHerramientas(req.body, existingRows[0]);
+    if (ia.error) return res.status(400).json({ ok: false, error: ia.error });
+
     const values = toRow(req.params.id, req.body, existingRows[0]);
     const destacado = req.body.destacado ?? existingRows[0].destacado ?? false;
     const { rows } = await saveNoticia(
@@ -124,7 +131,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
       values,
       `UPDATE noticias SET titulo=$2, fecha=$3, fecha_display=$4, imagen=$5, imagen_alt=$6,
          imagen_caption=$7, clase=$8, fuente_url=$9, fuente_texto=$10, parrafos=$11::jsonb, categoria=$12,
-         destacado=$13, divulgacion_ia=$14, publicado=$15, idioma_original=$16
+         destacado=$13, divulgacion_ia=$14, publicado=$15, idioma_original=$16, ia_herramientas=$17::text[]
        WHERE id=$1 RETURNING *`
     );
     res.json({ ok: true, noticia: rows[0] });
