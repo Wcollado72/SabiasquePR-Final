@@ -35,6 +35,8 @@ w.fetch = async (url) => {
   const u = String(url);
   const json = (o) => ({ ok: true, status: 200, json: async () => o });
   if (u.endsWith('/api/me')) return json({ ok: true, user: { id: 'u1', rol: 'admin' } });
+  if (u.endsWith('/contenido-ia/resumir')) return json({ ok: true, resumen: 'Resumen escrito por la IA.' });
+  if (u.endsWith('/contenido-ia/metadatos-fuente')) return json({ ok: true, autorFuente: 'Ana Pérez', anio: '2025', tituloOriginal: '', nombreFuente: 'BBC' });
   return json({ ok: true, ...DATOS });
 };
 
@@ -55,8 +57,21 @@ setTimeout(() => {
     ['los filtros de Reportes llevan contador', d.querySelector('#admin-reportes-filtros [data-filtro="todos"] .reportes-cuenta').textContent === '2'],
     ['los campos llevan la barra de correctores', d.querySelectorAll('.corr-barra').length >= 10],
   ];
-  const fallos = comprobaciones.filter(([, ok]) => !ok).map(([n]) => `FALLA: ${n}`);
-  const todo = fallos.concat(errores);
-  console.log(todo.length ? todo.join('\n') : 'OK: el panel arranca sin errores');
-  process.exit(todo.length ? 1 : 0);
+  // Botones de IA del formulario de Contenidos: «Resumir con IA» y «Rellenar desde la URL».
+  d.getElementById('ac-cuerpo').value = 'Un texto largo para resumir.';
+  d.getElementById('ac-resumir-ia').click();
+  d.getElementById('ac-fuente-url').value = 'https://medio.com/nota';
+  d.getElementById('ac-leer-url').click();
+  setTimeout(() => {
+    comprobaciones.push(
+      ['Resumir con IA escribe el resumen', d.getElementById('ac-subtitulo').value === 'Resumen escrito por la IA.'],
+      ['Rellenar desde la URL llena autor, año y medio, y deja vacío lo que la página no declara',
+        d.getElementById('ac-cita-autor').value === 'Ana Pérez' && d.getElementById('ac-cita-anio').value === '2025'
+        && d.getElementById('ac-fuente-texto').value === 'BBC' && d.getElementById('ac-cita-titulo-original').value === ''],
+    );
+    const fallos = comprobaciones.filter(([, ok]) => !ok).map(([n]) => `FALLA: ${n}`);
+    const todo = fallos.concat(errores);
+    console.log(todo.length ? todo.join('\n') : 'OK: el panel arranca sin errores');
+    process.exit(todo.length ? 1 : 0);
+  }, 400);
 }, 1500);

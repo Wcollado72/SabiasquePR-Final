@@ -1613,6 +1613,10 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .suggestion-item del{ background:color-mix(in srgb, var(--err) 18%, transparent); text-decoration:line-through; }
 .suggestion-item ins{ background:color-mix(in srgb, var(--ok, #2e7d32) 20%, transparent); text-decoration:none; }
 .corr-motivo{ color:var(--ink-mute); }
+.corr-resultados .foro-empty, .corr-resultados .foro-loading{ color:inherit; opacity:.9; padding:6px 0; }
+.ia-fila{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:2px 0 8px; }
+.ia-fila .admin-btn-cancel{ padding:3px 12px; font-size:.82rem; }
+.ia-fila .admin-hint{ margin:0; }
 .corr-acciones button:first-child{ margin-left:0; }
 
 /* Tab "Agentes" del admin: isla visual oscura/mono-espaciada ("Grid Mision"),

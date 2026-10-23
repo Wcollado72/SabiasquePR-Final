@@ -2,10 +2,9 @@
 // (espanol de Puerto Rico, Mexico, Espana o neutro; ingles de EE. UU. o Reino Unido) SIN cambiar el sentido, los
 // hechos ni el estilo. Devuelve el texto corregido y la lista de cambios; el admin siempre decide si los aplica.
 // Mismo patron de fetch crudo (sin SDK) que traductor.js; usa Haiku porque es una tarea corta y barata.
+const { llamarHerramienta, calcularCosto } = require('./claudeHerramienta');
+
 const MODEL = 'claude-haiku-5-5';
-const API_URL = 'https://api.anthropic.com/v1/messages';
-const PRECIO_ENTRADA_POR_MTOK = 1; // estimado (Haiku)
-const PRECIO_SALIDA_POR_MTOK = 5; // estimado (Haiku)
 const MAX_CAMBIOS = 60;
 
 const NOMBRES_VARIANTE = {
@@ -42,10 +41,6 @@ const HERRAMIENTA = {
   },
 };
 
-function calcularCosto(usage) {
-  return ((usage?.input_tokens || 0) * PRECIO_ENTRADA_POR_MTOK + (usage?.output_tokens || 0) * PRECIO_SALIDA_POR_MTOK) / 1_000_000;
-}
-
 function construirPrompt(texto, variante) {
   return `Eres corrector de estilo de "Sabías que PR", un sitio de noticias y educación. Corrige el texto en ${NOMBRES_VARIANTE[variante]}.
 
@@ -81,34 +76,10 @@ function limpiarSalida(entrada) {
 
 async function corregirTexto({ texto, variante }) {
   if (!NOMBRES_VARIANTE[variante]) throw new Error('Elige una variante de idioma válida.');
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error('ANTHROPIC_API_KEY no esta configurada en el servidor.');
-
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 8000,
-      tools: [HERRAMIENTA],
-      tool_choice: { type: 'tool', name: 'entregar_correccion' },
-      messages: [{ role: 'user', content: construirPrompt(texto, variante) }],
-    }),
+  const { entrada, usage } = await llamarHerramienta({
+    modelo: MODEL, maxTokens: 8000, herramienta: HERRAMIENTA, prompt: construirPrompt(texto, variante),
   });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error?.message || `Error de la API de Claude (HTTP ${res.status}).`);
-  if (data.stop_reason === 'max_tokens') throw new Error('El texto es demasiado largo para corregir de una vez.');
-  const toolUse = (data.content || []).find((b) => b.type === 'tool_use' && b.name === 'entregar_correccion');
-  if (!toolUse) throw new Error('Claude no devolvió la corrección. Intenta de nuevo.');
-
-  return {
-    ...limpiarSalida(toolUse.input),
-    usage: {
-      tokensEntrada: data.usage?.input_tokens || 0,
-      tokensSalida: data.usage?.output_tokens || 0,
-      costoEstimadoUsd: calcularCosto(data.usage),
-    },
-  };
+  return { ...limpiarSalida(entrada), usage };
 }
 
 module.exports = { corregirTexto, construirPrompt, limpiarSalida, calcularCosto, NOMBRES_VARIANTE };

@@ -1124,6 +1124,14 @@
     ['ac-cita-estilo', 'ac-cita-autor', 'ac-cita-anio', 'ac-cita-titulo-original', 'ac-cita-fecha-acceso', 'ac-fuente-texto', 'ac-fuente-url']
       .forEach((id) => document.getElementById(id).addEventListener('input', updateCitationPreview));
 
+    document.getElementById('ac-resumir-ia').addEventListener('click', resumirConIa);
+    document.getElementById('ac-leer-url').addEventListener('click', () => rellenarDesdeUrl(false));
+    // Al salir del campo URL con una URL nueva se lee sola (despues de que el limpiador de URL la ajuste).
+    document.getElementById('ac-fuente-url').addEventListener('blur', () => setTimeout(() => {
+      const url = document.getElementById('ac-fuente-url').value.trim();
+      if (url && url !== ultimaUrlLeida) rellenarDesdeUrl(true);
+    }, 0));
+
     bindInvestigadorRedactor();
     bindSynthPanels();
   }
@@ -1397,6 +1405,93 @@
     const sinFuente = document.getElementById('ac-cita-sin-fuente').checked;
     ['ac-cita-estilo', 'ac-cita-autor', 'ac-cita-anio', 'ac-cita-titulo-original', 'ac-cita-fecha-acceso']
       .forEach((id) => { document.getElementById(id).disabled = sinFuente; });
+  }
+
+  // INICIO metadatos-fuente
+  // Casillas de la citacion que el boton «Rellenar desde la URL» puede llenar con lo que la pagina declara.
+  const CAMPOS_METADATOS = [
+    { dato: 'autorFuente', id: 'ac-cita-autor', nombre: 'Autor de la fuente' },
+    { dato: 'anio', id: 'ac-cita-anio', nombre: 'Año' },
+    { dato: 'tituloOriginal', id: 'ac-cita-titulo-original', nombre: 'Título del artículo original' },
+    { dato: 'nombreFuente', id: 'ac-fuente-texto', nombre: 'Nombre de la fuente' },
+  ];
+  // Decide que se escribe: solo donde la pagina trajo dato Y la casilla esta vacia o todavia tiene lo que puso
+  // este mismo boton antes (asi, si cambias la URL, se actualiza; si ya lo escribiste tu, no se pisa).
+  function planRellenado(encontrado, actuales, autoPrevio) {
+    const plan = { rellenar: [], sinDato: [], respetadas: [] };
+    CAMPOS_METADATOS.forEach((c) => {
+      const valor = String(encontrado[c.dato] || '').trim();
+      const actual = String(actuales[c.id] || '').trim();
+      if (!valor) { plan.sinDato.push(c.nombre); return; }
+      if (actual && actual !== (autoPrevio || {})[c.id]) { plan.respetadas.push(c.nombre); return; }
+      plan.rellenar.push({ id: c.id, valor, nombre: c.nombre });
+    });
+    return plan;
+  }
+  function mensajeRellenado(plan) {
+    const partes = [];
+    if (plan.rellenar.length) partes.push('Rellené: ' + plan.rellenar.map((r) => r.nombre).join(', ') + '.');
+    if (plan.respetadas.length) partes.push('Ya tenías escrito (no lo cambié): ' + plan.respetadas.join(', ') + '.');
+    if (plan.sinDato.length) partes.push('La página no lo declara (queda vacío): ' + plan.sinDato.join(', ') + '.');
+    return partes.join(' ');
+  }
+  // FIN metadatos-fuente
+
+  const metadatosAuto = {}; // id de casilla -> ultimo valor que escribio el boton
+  let ultimaUrlLeida = '';
+
+  async function rellenarDesdeUrl(automatico) {
+    const estado = document.getElementById('ac-leer-url-estado');
+    const url = document.getElementById('ac-fuente-url').value.trim();
+    if (!url) { if (!automatico) estado.textContent = 'Escribe primero la URL de la fuente.'; return; }
+    if (document.getElementById('ac-cita-sin-fuente').checked) {
+      if (!automatico) estado.textContent = 'Está marcado «Sin fuente externa»: desmárcalo para rellenar la cita.';
+      return;
+    }
+    ultimaUrlLeida = url;
+    const boton = document.getElementById('ac-leer-url');
+    boton.disabled = true;
+    estado.textContent = 'Leyendo la página...';
+    try {
+      const data = await apiFetch('/api/admin/contenido-ia/metadatos-fuente', { method: 'POST', body: JSON.stringify({ url }) });
+      const actuales = {};
+      CAMPOS_METADATOS.forEach((c) => { actuales[c.id] = document.getElementById(c.id).value; });
+      const plan = planRellenado(data, actuales, metadatosAuto);
+      plan.rellenar.forEach((r) => {
+        const el = document.getElementById(r.id);
+        el.value = r.valor;
+        metadatosAuto[r.id] = r.valor;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+      const acceso = document.getElementById('ac-cita-fecha-acceso');
+      if (plan.rellenar.length && !acceso.value) { acceso.value = new Date().toISOString().slice(0, 10); acceso.dispatchEvent(new Event('input', { bubbles: true })); }
+      estado.textContent = mensajeRellenado(plan);
+    } catch (err) {
+      estado.textContent = 'No se pudo leer la página: ' + err.message;
+    } finally {
+      boton.disabled = false;
+    }
+  }
+
+  async function resumirConIa() {
+    const estado = document.getElementById('ac-resumir-estado');
+    const cuerpo = document.getElementById('ac-cuerpo').value.trim();
+    const resumen = document.getElementById('ac-subtitulo');
+    if (!cuerpo) { estado.textContent = 'Escribe primero el «Cuerpo del texto» para poder resumirlo.'; return; }
+    if (resumen.value.trim() && !confirm('Ya hay un resumen escrito. ¿Reemplazarlo por el que escriba la IA?')) return;
+    const boton = document.getElementById('ac-resumir-ia');
+    boton.disabled = true;
+    estado.textContent = 'Resumiendo con IA...';
+    try {
+      const data = await apiFetch('/api/admin/contenido-ia/resumir', { method: 'POST', body: JSON.stringify({ texto: cuerpo }) });
+      resumen.value = data.resumen;
+      resumen.dispatchEvent(new Event('input', { bubbles: true }));
+      estado.textContent = 'Resumen listo: revísalo y edítalo si hace falta. Todavía no está guardado.';
+    } catch (err) {
+      estado.textContent = 'No se pudo resumir: ' + err.message;
+    } finally {
+      boton.disabled = false;
+    }
   }
 
   function updateCitationPreview() {
@@ -1705,6 +1800,10 @@
     document.getElementById('ac-portada-alt').value = item?.portada_alt || '';
     document.getElementById('ac-fecha').value = item?.fecha_publicacion ? String(item.fecha_publicacion).slice(0, 10) : '';
     document.getElementById('ac-destacado').checked = Boolean(item?.destacado);
+    document.getElementById('ac-resumir-estado').textContent = '';
+    document.getElementById('ac-leer-url-estado').textContent = '';
+    Object.keys(metadatosAuto).forEach((k) => delete metadatosAuto[k]);
+    ultimaUrlLeida = item?.fuente_url || '';
     document.getElementById('ac-publicado').checked = item ? item.publicado !== false : true;
     document.getElementById('ac-estado').textContent = item
       ? (item.publicado === false ? 'Estado actual: borrador (no se ve en el sitio).' : 'Estado actual: publicado (se ve en el sitio).')

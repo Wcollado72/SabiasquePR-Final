@@ -43,11 +43,9 @@ async function assertUrlEsSegura(urlStr) {
   return url;
 }
 
-// Descarga la URL y extrae el texto legible del articulo (igual tecnologia
-// que el "modo lectura" de Firefox) -- gratis, sin costo de API.
-async function extraerArticulo(urlStr) {
-  const { JSDOM } = require('jsdom');
-  const { Readability } = require('@mozilla/readability');
+// Descarga una pagina de forma segura (solo http/https, sin direcciones internas, con tiempo y tamano maximos)
+// y devuelve su HTML. Lo comparten la extraccion del articulo y la lectura de metadatos de la fuente.
+async function descargarHtml(urlStr) {
   const url = await assertUrlEsSegura(urlStr);
 
   const controller = new AbortController();
@@ -69,6 +67,15 @@ async function extraerArticulo(urlStr) {
 
   const html = await res.text();
   if (html.length > MAX_BYTES) throw new Error('El articulo es demasiado grande.');
+  return { html, url };
+}
+
+// Descarga la URL y extrae el texto legible del articulo (igual tecnologia
+// que el "modo lectura" de Firefox) -- gratis, sin costo de API.
+async function extraerArticulo(urlStr) {
+  const { JSDOM } = require('jsdom');
+  const { Readability } = require('@mozilla/readability');
+  const { html, url } = await descargarHtml(urlStr);
 
   const dom = new JSDOM(html, { url: url.toString() }); // runScripts NO se activa: nunca ejecuta el JS de la pagina
   const reader = new Readability(dom.window.document);
@@ -86,4 +93,4 @@ async function extraerArticulo(urlStr) {
   };
 }
 
-module.exports = { extraerArticulo, isPrivateIp, assertUrlEsSegura };
+module.exports = { extraerArticulo, descargarHtml, isPrivateIp, assertUrlEsSegura };

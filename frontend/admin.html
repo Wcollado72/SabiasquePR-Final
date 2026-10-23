@@ -32,7 +32,7 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon-96.png" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=63157f64">
+  <link rel="stylesheet" href="styles.css?v=f69f5748">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Panel de administración","description":"Panel de administración de Sabías que PR: gestión de noticias y productos.","url":"https://sabiasquepr.com/admin.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -355,11 +355,15 @@
                 <h4 class="synth-panel-title">📜 NIVEL 2 — CONTENIDO</h4>
                 <label for="ac-titulo">Título</label>
                 <input type="text" id="ac-titulo" required minlength="3" maxlength="160" spellcheck="true" lang="es">
-                <label for="ac-subtitulo">Resumen (2-3 oraciones, redacción propia)</label>
-                <textarea id="ac-subtitulo" rows="3" required minlength="10" spellcheck="true" lang="es"></textarea>
-                <label for="ac-cuerpo">Cuerpo del texto (opcional — solo ensayo/lectura corta con texto propio)</label>
+                <label for="ac-subtitulo">Resumen</label>
+                <textarea id="ac-subtitulo" rows="4" required minlength="10" spellcheck="true" lang="es"></textarea>
+                <div class="ia-fila">
+                  <button type="button" class="admin-btn-cancel" id="ac-resumir-ia" title="Escribe el resumen a partir del Cuerpo del texto; tú lo revisas y lo editas">Resumir con IA</button>
+                  <span class="admin-hint" id="ac-resumir-estado" aria-live="polite"></span>
+                </div>
+                <label for="ac-cuerpo">Cuerpo del texto</label>
                 <textarea id="ac-cuerpo" rows="6" spellcheck="true" lang="es"></textarea>
-                <label for="ac-autor">Autor (opcional)</label>
+                <label for="ac-autor">Autor</label>
                 <input type="text" id="ac-autor">
                 <label for="ac-divulgacion-ia">Divulgación de uso de IA</label>
                 <select id="ac-divulgacion-ia">
@@ -474,9 +478,13 @@
 
               <section class="synth-panel" data-panel="citacion" hidden>
                 <h4 class="synth-panel-title">📚 NIVEL 5 — CITACIÓN</h4>
-                <label for="ac-fuente-url">URL de la fuente (opcional)</label>
+                <label for="ac-fuente-url">URL de la fuente</label>
                 <input type="url" id="ac-fuente-url">
-                <label for="ac-fuente-texto">Nombre de la fuente (opcional)</label>
+                <div class="ia-fila">
+                  <button type="button" class="admin-btn-cancel" id="ac-leer-url" title="Lee lo que la página declara (autor, año, título, medio); lo que no encuentre queda vacío">Rellenar desde la URL</button>
+                  <span class="admin-hint" id="ac-leer-url-estado" aria-live="polite"></span>
+                </div>
+                <label for="ac-fuente-texto">Nombre de la fuente</label>
                 <input type="text" id="ac-fuente-texto">
                 <fieldset class="citation-group" id="ac-citation-group">
                   <legend>Citación de la fuente</legend>
