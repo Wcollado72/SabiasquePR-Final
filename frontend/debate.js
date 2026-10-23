@@ -83,6 +83,59 @@
     el.className = 'form-status ' + type;
   }
 
+  // Traduce un texto armado en JS (lo estatico del HTML ya lo traduce i18n.js solo).
+  function tr(texto) {
+    return window.SQPR && window.SQPR.t ? window.SQPR.t(texto) : texto;
+  }
+
+  // INICIO edicion-debate
+  // Datos que se reenvian al editar una publicacion: la API (PATCH) reemplaza todos los campos, asi que se
+  // devuelven los que no se editan; el administrador conserva ademas "destacado" y el tema.
+  function datosEdicionPost(post, titulo, cuerpo, esAdmin) {
+    const datos = { titulo: titulo.trim(), cuerpo: cuerpo.trim(), subseccion: post.subseccion };
+    if (post.enfoque) datos.enfoque = post.enfoque;
+    if (post.enlace_media) { datos.enlaceMedia = post.enlace_media; datos.enlaceMediaTipo = post.enlace_media_tipo; }
+    if (esAdmin) {
+      datos.destacado = Boolean(post.destacado);
+      if (post.tema_contenido_id) datos.temaContenidoId = post.tema_contenido_id;
+    }
+    return datos;
+  }
+  // FIN edicion-debate
+
+  // Cuadro para reportar (reemplaza al cuadro nativo del navegador): resuelve el motivo o null si se cancela.
+  function pedirMotivoReporte() {
+    return new Promise((resolve) => {
+      const dlg = document.createElement('dialog');
+      dlg.className = 'debate-dialog';
+      dlg.innerHTML = `
+        <form>
+          <h3>Reportar contenido</h3>
+          <p class="admin-hint">Cuéntanos qué está mal. El equipo lo revisa y decide.</p>
+          <label for="debate-reporte-motivo">Motivo del reporte (mínimo 5 caracteres)</label>
+          <textarea id="debate-reporte-motivo" rows="4" maxlength="500" required></textarea>
+          <p class="form-status" aria-live="polite"></p>
+          <div class="debate-dialog-actions">
+            <button type="button" class="btn-alt" data-accion="cancelar">Cancelar</button>
+            <button type="submit">Enviar reporte</button>
+          </div>
+        </form>`;
+      document.body.appendChild(dlg);
+      const ta = dlg.querySelector('textarea');
+      const cerrar = (valor) => { dlg.close(); dlg.remove(); resolve(valor); };
+      dlg.querySelector('form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const motivo = ta.value.trim();
+        if (motivo.length < 5) { setStatus(dlg.querySelector('.form-status'), 'error', tr('Escribe al menos 5 caracteres.')); return; }
+        cerrar(motivo);
+      });
+      dlg.querySelector('[data-accion="cancelar"]').addEventListener('click', () => cerrar(null));
+      dlg.addEventListener('cancel', (e) => { e.preventDefault(); cerrar(null); });
+      dlg.showModal();
+      ta.focus();
+    });
+  }
+
   // Widgets de Cloudflare Turnstile por id de contenedor -- se guarda el
   // widgetId que devuelve turnstile.render() para poder leer el token y
   // reiniciarlo despues de cada envio (un token solo sirve una vez).
@@ -309,6 +362,7 @@
         ${p.enfoque ? `<span class="foro-badge">${escapeHtml(ENFOQUE_LABEL[p.enfoque] || p.enfoque)}</span>` : ''}
         <h3 class="debate-post-toggle" data-id="${p.id}">${escapeHtml(p.titulo)}</h3>
         <p class="foro-meta">Por ${escapeHtml(p.autor_nombre || 'anónimo')} · ${formatDate(p.creado_en)} · ${p.comentarios_count} ${p.comentarios_count === 1 ? 'comentario' : 'comentarios'}</p>
+        ${p.editado_en ? '<span class="foro-badge foro-editada">editada</span>' : ''}
         ${media}
         <div class="debate-post-body" id="debate-post-body-${p.id}" hidden></div>
       </article>`;
@@ -340,7 +394,8 @@
     body.innerHTML = `
       <p class="foro-body">${escapeHtml(post.cuerpo)}</p>
       <div class="foro-actions">
-        <button type="button" class="btn-alt foro-danger debate-reportar" data-tipo="debate_post" data-id="${post.id}">Reportar</button>
+        ${isOwner || isAdmin ? '<button type="button" class="btn-alt debate-editar-post">Editar</button>' : ''}
+        ${isOwner ? '' : `<button type="button" class="btn-alt foro-danger debate-reportar" data-tipo="debate_post" data-id="${post.id}">Reportar</button>`}
         ${isOwner || isAdmin ? `<button type="button" class="btn-alt foro-danger debate-borrar-post" data-id="${post.id}">Eliminar</button>` : ''}
       </div>
       ${currentUser ? `
@@ -360,7 +415,7 @@
           <p class="foro-meta">${escapeHtml(c.autor_nombre || 'anónimo')} · ${formatDate(c.creado_en)}</p>
           <p>${escapeHtml(c.cuerpo)}</p>
           <div class="foro-actions">
-            <button type="button" class="foro-comment-delete btn-alt foro-danger debate-reportar" data-tipo="debate_comentario" data-id="${c.id}">Reportar</button>
+            ${currentUser && currentUser.id === c.autor_id ? '' : `<button type="button" class="foro-comment-delete btn-alt foro-danger debate-reportar" data-tipo="debate_comentario" data-id="${c.id}">Reportar</button>`}
             ${currentUser && (currentUser.id === c.autor_id || isAdmin) ? `<button type="button" class="foro-comment-delete btn-alt foro-danger debate-borrar-comentario" data-id="${c.id}">Eliminar</button>` : ''}
           </div>
         </div>`).join('')
@@ -400,6 +455,64 @@
       } catch (err) { alert('' + err.message); }
     }));
 
+    body.querySelector('.debate-editar-post')?.addEventListener('click', (ev) => {
+      const card = root.querySelector(`.foro-post-card[data-post-id="${post.id}"]`);
+      const h3 = card && card.querySelector('.debate-post-toggle');
+      const form = document.createElement('form');
+      form.className = 'debate-edit-form';
+      form.innerHTML = `
+        <label for="debate-edit-titulo-${post.id}">Título</label>
+        <input type="text" id="debate-edit-titulo-${post.id}" maxlength="140" required>
+        <label for="debate-edit-cuerpo-${post.id}">Mensaje</label>
+        <textarea id="debate-edit-cuerpo-${post.id}" rows="6" required></textarea>
+        <p class="foro-meta debate-edit-contador"></p>
+        <div class="foro-actions">
+          <button type="submit">Guardar cambios</button>
+          <button type="button" class="btn-alt" data-accion="cancelar">Cancelar</button>
+        </div>
+        <p class="form-status" aria-live="polite"></p>`;
+      const inputTitulo = form.querySelector('input');
+      const ta = form.querySelector('textarea');
+      inputTitulo.value = h3 ? h3.textContent : '';
+      ta.value = post.cuerpo;
+      const limite = WORD_LIMITS[currentUserRol] || WORD_LIMITS.usuario;
+      const contador = form.querySelector('.debate-edit-contador');
+      const actualizar = () => {
+        const n = countWords(ta.value);
+        contador.textContent = `${n}/${limite} ${tr('palabras')}`;
+        contador.classList.toggle('over-limit', n > limite);
+      };
+      ta.addEventListener('input', actualizar);
+      actualizar();
+      const textoOriginal = body.querySelector('.foro-body');
+      const acciones = ev.currentTarget.closest('.foro-actions');
+      textoOriginal.hidden = true;
+      acciones.hidden = true;
+      textoOriginal.after(form);
+      const volver = () => { form.remove(); textoOriginal.hidden = false; acciones.hidden = false; };
+      form.querySelector('[data-accion="cancelar"]').addEventListener('click', volver);
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const statusEl = form.querySelector('.form-status');
+        setStatus(statusEl, 'info', tr('Guardando...'));
+        try {
+          await apiFetch(`/api/foro/posts/${post.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(datosEdicionPost(post, inputTitulo.value, ta.value, currentUserRol === 'admin')),
+          });
+          const data = await apiFetch(`/api/foro/posts/${encodeURIComponent(post.id)}`);
+          if (h3) h3.textContent = data.post.titulo;
+          if (card && !card.querySelector('.foro-editada')) {
+            card.querySelector('.foro-meta').insertAdjacentHTML('afterend', '<span class="foro-badge foro-editada">editada</span>');
+          }
+          renderPostDetail(body, data.post, data.comentarios, root, subseccion);
+        } catch (err) {
+          setStatus(statusEl, 'error', '' + err.message);
+        }
+      });
+      inputTitulo.focus();
+    });
+
     body.querySelector('.debate-borrar-post')?.addEventListener('click', async () => {
       if (!confirm('¿Eliminar esta publicación? Esta acción no se puede deshacer.')) return;
       try {
@@ -410,14 +523,15 @@
 
     body.querySelectorAll('.debate-reportar').forEach((btn) => btn.addEventListener('click', async () => {
       if (!currentUser) { alert('Inicia sesión para reportar.'); return; }
-      const motivo = prompt('¿Por qué reportas esto? (mínimo 5 caracteres)');
-      if (!motivo || motivo.trim().length < 5) return;
+      const motivo = await pedirMotivoReporte();
+      if (!motivo) return;
       try {
         await apiFetch('/api/reportes', {
           method: 'POST',
-          body: JSON.stringify({ tipo: btn.dataset.tipo, itemId: btn.dataset.id, motivo: motivo.trim() }),
+          body: JSON.stringify({ tipo: btn.dataset.tipo, itemId: btn.dataset.id, motivo }),
         });
-        alert('Gracias, tu reporte fue enviado para revisión.');
+        btn.textContent = tr('Reporte enviado');
+        btn.disabled = true;
       } catch (err) { alert('' + err.message); }
     }));
   }
