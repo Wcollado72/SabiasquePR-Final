@@ -246,6 +246,13 @@
    "def": "'es'::text"
   },
   {
+   "t": "contenidos",
+   "col": "ia_herramientas",
+   "tipo": "ARRAY",
+   "nulo": "NO",
+   "def": "'{}'::text[]"
+  },
+  {
    "t": "foro_comentarios",
    "col": "id",
    "tipo": "uuid",
@@ -666,6 +673,13 @@
    "def": "'es'::text"
   },
   {
+   "t": "noticias",
+   "col": "ia_herramientas",
+   "tipo": "ARRAY",
+   "nulo": "NO",
+   "def": "'{}'::text[]"
+  },
+  {
    "t": "ordenes",
    "col": "id",
    "tipo": "uuid",
@@ -802,6 +816,20 @@
    "t": "perfiles",
    "col": "fecha_nacimiento",
    "tipo": "date",
+   "nulo": "YES",
+   "def": null
+  },
+  {
+   "t": "perfiles",
+   "col": "agradecimiento_nombre",
+   "tipo": "text",
+   "nulo": "YES",
+   "def": null
+  },
+  {
+   "t": "perfiles",
+   "col": "agradecimiento_autorizado_en",
+   "tipo": "timestamptz",
    "nulo": "YES",
    "def": null
   },
@@ -1024,7 +1052,7 @@
    "t": "contenidos",
    "tipo": "c",
    "nombre": "contenidos_categoria_check",
-   "def": "CHECK ((categoria = ANY (ARRAY['general'::text, 'internacionales'::text, 'crimen'::text, 'salud'::text, 'deportes'::text, 'finanzas'::text, 'tecnologia'::text, 'descubrimientos'::text, 'politica'::text, 'clima'::text, 'cultura'::text, 'ciencia'::text, 'leyes-educativas'::text, 'estudiantes-sobresalientes'::text, 'sistemas-mundiales'::text, 'programas-educativos'::text])))"
+   "def": "CHECK ((categoria = ANY (ARRAY['internacionales'::text, 'crimen'::text, 'salud'::text, 'deportes'::text, 'finanzas'::text, 'tecnologia'::text, 'descubrimientos'::text, 'politica'::text, 'clima'::text, 'cultura'::text, 'ciencia'::text, 'leyes-educativas'::text, 'estudiantes-sobresalientes'::text, 'sistemas-mundiales'::text, 'programas-educativos'::text])))"
   },
   {
    "t": "contenidos",
@@ -1049,6 +1077,12 @@
    "tipo": "c",
    "nombre": "contenidos_enfoque_check",
    "def": "CHECK (((enfoque IS NULL) OR (enfoque = ANY (ARRAY['puerto-rico'::text, 'estados-unidos'::text, 'hispanoamerica'::text, 'internacionales'::text]))))"
+  },
+  {
+   "t": "contenidos",
+   "tipo": "c",
+   "nombre": "contenidos_ia_herramientas_max",
+   "def": "CHECK ((cardinality(ia_herramientas) <= 8))"
   },
   {
    "t": "contenidos",
@@ -1192,13 +1226,19 @@
    "t": "noticias",
    "tipo": "c",
    "nombre": "noticias_categoria_check",
-   "def": "CHECK ((categoria = ANY (ARRAY['general'::text, 'internacionales'::text, 'crimen'::text, 'salud'::text, 'deportes'::text, 'finanzas'::text, 'tecnologia'::text, 'descubrimientos'::text, 'politica'::text, 'clima'::text, 'cultura'::text, 'ciencia'::text])))"
+   "def": "CHECK ((categoria = ANY (ARRAY['internacionales'::text, 'crimen'::text, 'salud'::text, 'deportes'::text, 'finanzas'::text, 'tecnologia'::text, 'descubrimientos'::text, 'politica'::text, 'clima'::text, 'cultura'::text, 'ciencia'::text])))"
   },
   {
    "t": "noticias",
    "tipo": "c",
    "nombre": "noticias_divulgacion_ia_check",
    "def": "CHECK ((divulgacion_ia = ANY (ARRAY['no'::text, 'parcial'::text, 'generado'::text])))"
+  },
+  {
+   "t": "noticias",
+   "tipo": "c",
+   "nombre": "noticias_ia_herramientas_max",
+   "def": "CHECK ((cardinality(ia_herramientas) <= 8))"
   },
   {
    "t": "noticias",
@@ -1235,6 +1275,12 @@
    "tipo": "f",
    "nombre": "perfiles_id_fkey",
    "def": "FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE"
+  },
+  {
+   "t": "perfiles",
+   "tipo": "c",
+   "nombre": "perfiles_agradecimiento_nombre_check",
+   "def": "CHECK (((agradecimiento_nombre IS NULL) OR ((char_length(agradecimiento_nombre) >= 2) AND (char_length(agradecimiento_nombre) <= 40))))"
   },
   {
    "t": "perfiles",

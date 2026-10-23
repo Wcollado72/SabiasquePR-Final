@@ -547,7 +547,17 @@ def tabla_simple(filas, anchos):
     return t
 
 
+def total_pruebas():
+    """Pruebas automaticas medidas por generate_evidencia_pruebas.py (docs/entrega/evidencia-pruebas.json)."""
+    try:
+        with open(os.path.join(DOCS_DIR, 'entrega', 'evidencia-pruebas.json'), encoding='utf-8') as f:
+            return json.load(f)['pruebas_total']
+    except (FileNotFoundError, KeyError):
+        return 'cientos de'
+
+
 def build():
+    n_pruebas = total_pruebas()
     estructura = cargar_estructura()
     por_tabla = tablas_del_diccionario(estructura)
     n_tablas = len(por_tabla)
@@ -617,9 +627,10 @@ def build():
         '<b>Debate comunitario</b> en cada sub-sección, con moderación, reportes y filtro automático; límite de palabras según el rol (200 para cuentas gratuitas y 1000 para quienes apoyan).',
         '<b>Panel de administración</b> protegido: formularios CRUD de noticias y contenidos, productos, moderación, métricas de uso de IA y control de gastos de servicios.',
         '<b>Agentes de IA</b> (Investigador, Redactor y Traductor, sobre la API de Claude) para preparar contenido, con registro de costo por uso.',
+        '<b>Transparencia sobre la IA:</b> cada noticia o contenido declara si se usó IA y con cuáles herramientas (Claude, Gemini, Perplexity, ChatGPT, Copilot u otras); el público lo ve con iconos.',
         '<b>Tienda y apoyo voluntario</b> con Stripe (checkout y webhook firmado) en modo de prueba.',
         '<b>Sitio bilingüe</b> (español e inglés), diseño responsivo, accesible y con modo claro y oscuro.',
-        f'<b>Calidad:</b> 694 pruebas automáticas (Jest y Supertest), ESLint, auditoría de dependencias y de secretos en cada cambio (GitHub Actions) y respaldo diario cifrado de la base de datos.',
+        f'<b>Calidad:</b> {n_pruebas} pruebas automáticas (Jest y Supertest), ESLint, auditoría de dependencias y de secretos en cada cambio (GitHub Actions) y respaldo diario cifrado de la base de datos.',
     ])
     story.append(Paragraph('<b>Fuera de alcance de esta entrega</b> (roadmap de producto, no criterio de evaluación):', styles['H2']))
     bullets(story, [
@@ -637,7 +648,7 @@ def build():
         ['Autenticación', 'Supabase Auth + jose (JWKS, ES256)', 'Registro, inicio de sesión, Google y 2FA en el cliente; verificación del JWT en cada ruta protegida del servidor'],
         ['Pagos', 'Stripe', 'Checkout de tienda y apoyo voluntario, con webhook firmado (modo de prueba)'],
         ['Servicios', 'Resend, Cloudflare Turnstile, Beehiiv, Formspree, API de Claude', 'Correos de autenticación, anti-robots, boletín, formulario de contacto y agentes de IA'],
-        ['Calidad', 'Jest + Supertest, ESLint', '694 pruebas automáticas y revisión de estilo en cada cambio'],
+        ['Calidad', 'Jest + Supertest, ESLint', f'{n_pruebas} pruebas automáticas y revisión de estilo en cada cambio'],
         ['Control de versiones', 'Git + GitHub + GitHub Actions', 'Historial de commits, ramas y pull requests; flujos de pruebas, auditoría, respaldo y mantenimiento'],
         ['Despliegue', 'Netlify + Render + Supabase', 'Frontend estático (Netlify, dominio propio), API (Render) y base de datos (Supabase)'],
     ], [88, 150, CONTENT_W - 88 - 150]))

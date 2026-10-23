@@ -274,12 +274,13 @@ AREAS = [
     ('CRUD: noticias, contenidos, productos y debate', [
         'src/routes/noticias.', 'src/routes/contenidos.', 'src/routes/productos.', 'src/routes/foro.',
         'src/routes/comentarios.', 'src/routes/reportes.', 'src/routes/ordenes.', 'src/routes/agradecimientos.',
-        'src/routes/newsletter.', 'src/clasificacion.test', 'src/regiones.test']),
+        'src/routes/newsletter.', 'src/clasificacion.test', 'src/regiones.test', 'src/util/autorVisible.test']),
     ('Validadores de datos y utilidades', ['src/validators/', 'src/util/deteccionRiesgo', 'src/util/slugify']),
     ('Pagos Stripe y webhook', ['src/routes/stripe']),
     ('Seguridad y cabeceras', ['src/app.']),
     ('Panel de administración, agentes de IA y traducciones', [
-        'src/routes/admin.', 'src/services/', 'src/util/traducciones.test']),
+        'src/routes/admin.', 'src/services/', 'src/util/traducciones.test', 'src/ia-herramientas.test',
+        'src/validators/iaHerramientas']),
     ('Frontend, i18n y build', ['src/frontend-', 'src/i18n/', 'src/build.']),
     ('Scripts de base de datos, respaldo y migración', ['scripts/']),
     ('Configuración de despliegue', ['src/netlify-config']),
@@ -330,7 +331,13 @@ CORRECCIONES = [
     ('50b90a2', 'Endurecimiento: el API anunciaba Express, el JWT no exigía emisor/audiencia, las cuentas suspendidas seguían válidas y /api/health devolvía el mensaje interno de error.',
      'helmet, jwtVerify con issuer y audience, banned_until, JSON malformado → 400 y cuerpo grande → 413; 14 pruebas nuevas (app.hardening.test.js y auth.jwt.test.js).'),
     ('6a435c2', 'Contacto: la nota del correo se comportaba mal tras enviar el formulario; además había 5 textos sin traducir (nombres propios).',
-     'Corregido junto con la clasificación de contenidos; el commit reporta 694 pruebas en verde, cifra que coincide con la de este documento.'),
+     'Corregido junto con la clasificación de contenidos; el commit solo reporta pruebas en verde (694 en ese momento; la cifra actual está en la sección 1).'),
+    ('a72918f', 'Educación: el banner de reglas del foro mostraba la etiqueta de edad «12+», que una política sin etiqueta de edad (COPPA) evita porque puede leerse como «dirigido a menores».',
+     'Las reglas del foro pasan a ser para todo público, sin etiqueta de edad (se quitó el badge «12+» de las páginas), con prueba nueva en frontend-filtros.test.js.'),
+    ('ddcd338', 'Privacidad: las publicaciones y comentarios del debate devolvían y mostraban el correo del autor (autor_email).',
+     'La API devuelve autor_nombre (nombre del perfil o un alias genérico «Participante-xxxx» derivado del id, util/autorVisible.js); pruebas de que la API pública no selecciona el correo.'),
+    ('1de54a9', 'Panel de administración y debate: la selección de texto no era visible en los campos oscuros del panel, no había aviso del campo obligatorio que faltaba y la tecla Enter enviaba el formulario; en el debate no existía el botón Editar.',
+     'Selección de texto visible, aviso con apertura del panel del primer campo obligatorio que falta, Enter ya no envía, botón Editar (PATCH) en el debate (además, cuadro propio para Reportar); el commit reporta 713 pruebas en verde en ese momento.'),
 ]
 
 

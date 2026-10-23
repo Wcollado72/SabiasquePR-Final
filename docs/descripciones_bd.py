@@ -35,6 +35,8 @@ DESC = {
         'edad_confirmada': 'El usuario confirmó ser mayor de 18 años (acceso a secciones 18+)',
         'logica_humana_terminos_ok': 'Aceptó los términos de la sub-sección Lógica Humana',
         'fecha_nacimiento': 'Fecha de nacimiento para verificar la edad (opcional)',
+        'agradecimiento_nombre': 'Nombre (2 a 40 caracteres) que la persona que apoya autoriza mostrar en el muro de agradecimiento',
+        'agradecimiento_autorizado_en': 'Fecha en que autorizó por primera vez aparecer en el muro de agradecimiento',
     },
     'noticias': {
         'id': 'Identificador (slug generado del título)',

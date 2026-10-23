@@ -313,7 +313,8 @@ def build():
         f'propia de {len(endpoints)} endpoints, una base de datos relacional de {n_tablas} tablas, autenticación con JWT '
         'verificado en el servidor, rutas protegidas, CRUD completo y una aplicación desplegada y accesible en '
         'línea. Además de lo exigido, incorpora verificación en dos pasos, moderación del debate, pagos de '
-        'prueba con Stripe, bilingüismo, integración continua y respaldos cifrados.', styles['Body']))
+        'prueba con Stripe, bilingüismo, transparencia sobre el uso de IA (con los iconos de las herramientas usadas), '
+        'integración continua y respaldos cifrados.', styles['Body']))
     story.append(Paragraph('Aprendizajes', styles['H2']))
     bullets(story, [
         'Separar responsabilidades en tres capas permite probar cada una por separado y cambiar un servicio sin reescribir el resto.',

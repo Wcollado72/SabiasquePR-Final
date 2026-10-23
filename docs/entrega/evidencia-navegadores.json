@@ -1,5 +1,5 @@
 {
-  "generado": "2026-10-20T19:34:59.712Z",
+  "generado": "2026-10-23T16:24:10.552Z",
   "base": "https://sabiasquepr.com",
   "noInstalados": [
     "Mozilla Firefox"
@@ -26,7 +26,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-klHda066LI",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Noticias, Educación e Información",
@@ -49,7 +49,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-klHda066LI",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Noticias",
@@ -72,7 +72,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-klHda066LI",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Revolución Humana",
@@ -95,7 +95,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-klHda066LI",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Educación",
@@ -118,7 +118,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-klHda066LI",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Tienda",
@@ -141,7 +141,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-klHda066LI",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Apoya el canal",
@@ -164,7 +164,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-klHda066LI",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Quiénes somos",
@@ -187,7 +187,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-P6e8y7sE/+",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Noticias, Educación e Información",
@@ -210,7 +210,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-P6e8y7sE/+",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Noticias",
@@ -233,7 +233,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-P6e8y7sE/+",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Revolución Humana",
@@ -256,7 +256,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-P6e8y7sE/+",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Educación",
@@ -279,7 +279,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-P6e8y7sE/+",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Tienda",
@@ -302,7 +302,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-P6e8y7sE/+",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Apoya el canal",
@@ -325,7 +325,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-P6e8y7sE/+",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Quiénes somos",
@@ -348,7 +348,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-3y5TlF5zG6",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Noticias, Educación e Información",
@@ -371,7 +371,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-3y5TlF5zG6",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Noticias",
@@ -394,7 +394,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-3y5TlF5zG6",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Revolución Humana",
@@ -417,7 +417,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-3y5TlF5zG6",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Educación",
@@ -440,7 +440,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-3y5TlF5zG6",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Tienda",
@@ -463,7 +463,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-3y5TlF5zG6",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Apoya el canal",
@@ -486,7 +486,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-3y5TlF5zG6",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Quiénes somos",
@@ -497,8 +497,8 @@
     },
     {
       "navegador": "Microsoft Edge",
-      "version": "Edg/155.0.4283.62",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+      "version": "Edg/156.0.4314.42",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
       "filas": [
         {
           "navegador": "Microsoft Edge",
@@ -516,7 +516,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-klHda066LI",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Noticias, Educación e Información",
@@ -539,7 +539,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-klHda066LI",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Noticias",
@@ -562,7 +562,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-klHda066LI",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Revolución Humana",
@@ -585,7 +585,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-klHda066LI",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Educación",
@@ -608,7 +608,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-klHda066LI",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Tienda",
@@ -631,7 +631,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-klHda066LI",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Apoya el canal",
@@ -654,7 +654,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-klHda066LI",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Quiénes somos",
@@ -677,7 +677,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-P6e8y7sE/+",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Noticias, Educación e Información",
@@ -700,7 +700,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-P6e8y7sE/+",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Noticias",
@@ -723,7 +723,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-P6e8y7sE/+",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Revolución Humana",
@@ -746,7 +746,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-P6e8y7sE/+",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Educación",
@@ -769,7 +769,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-P6e8y7sE/+",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Tienda",
@@ -792,7 +792,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-P6e8y7sE/+",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Apoya el canal",
@@ -815,7 +815,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-P6e8y7sE/+",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Quiénes somos",
@@ -838,7 +838,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-3y5TlF5zG6",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Noticias, Educación e Información",
@@ -861,7 +861,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-3y5TlF5zG6",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Noticias",
@@ -884,7 +884,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-3y5TlF5zG6",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Revolución Humana",
@@ -907,7 +907,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-3y5TlF5zG6",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Educación",
@@ -930,7 +930,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-3y5TlF5zG6",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Tienda",
@@ -953,7 +953,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-3y5TlF5zG6",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Apoya el canal",
@@ -976,7 +976,7 @@
           "errores": [],
           "erroresBadgeNetlify": [
             "security: Applying inline style violates the following Content Security Policy directive 'style-src 'self' https://fonts.googleapis.com'. Either the 'unsafe-inline' keyword, a hash ('sha256-3y5TlF5zG6",
-            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7Tl76ce1KQoSs29g=' 'sha256-TZVouuC1jTzA/YBnDvp62RWlwAAK"
+            "security: Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-3p7jc9d8vbXBu3+8eymhHMbZPu6Tk63sSlp1u1pwCI4=' 'sha256-MfSipPWpHRRfpUtYkfE+dcFrhFT7"
           ],
           "avisosRed": [],
           "titulo": "Sabías que PR — Quiénes somos",

@@ -45,7 +45,7 @@ npx http-server -p 5500 -c-1 .
 ## Pruebas y calidad
 ```bash
 cd backend
-npm test                    # 671 pruebas automáticas (Jest + Supertest)
+npm test                    # 774 pruebas automáticas (Jest + Supertest)
 npm run test:coverage       # informe de cobertura (~87 % de sentencias)
 npm run lint                # revisión de estilo (ESLint)
 npm run db:probar-schema    # comprueba que sql/schema.sql reproduce la base de datos real
