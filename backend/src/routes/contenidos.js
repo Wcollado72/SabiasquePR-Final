@@ -197,7 +197,15 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
 // DELETE /api/contenidos/:id -- solo admin
 router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { rowCount } = await pool.query('DELETE FROM contenidos WHERE id = $1', [req.params.id]);
+    // Una sola sentencia: borra el contenido y sus comentarios y traducciones (sin clave
+    // foranea), para que no queden huerfanos ni los herede otra pieza con el mismo slug.
+    const { rowCount } = await pool.query(
+      `WITH borrado AS (DELETE FROM contenidos WHERE id = $1 RETURNING id),
+            comentarios_borrados AS (DELETE FROM comentarios WHERE tipo = 'contenido' AND item_id = $1),
+            traducciones_borradas AS (DELETE FROM traducciones WHERE tipo = 'contenido' AND item_id = $1)
+       SELECT id FROM borrado`,
+      [req.params.id]
+    );
     if (rowCount === 0) return res.status(404).json({ ok: false, error: 'Contenido no encontrado.' });
     res.json({ ok: true });
   } catch (err) { enviarError500(res, err); }
