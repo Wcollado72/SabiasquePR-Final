@@ -190,6 +190,30 @@ describe('validateContenido', () => {
   });
 });
 
+describe('validateContenido iaHerramientas', () => {
+  const conIa = (extra) => ({ ...BASE, divulgacionIa: 'parcial', ...extra });
+  test('acepta claves conocidas y nombres libres', () => {
+    expect(validateContenido(conIa({ iaHerramientas: ['claude', 'Gemini', 'Mi IA'] }))).toEqual([]);
+  });
+  test('es opcional y se puede mandar vacio con cualquier divulgacion', () => {
+    expect(validateContenido({ ...BASE, divulgacionIa: 'no', iaHerramientas: [] })).toEqual([]);
+    expect(validateContenido(BASE)).toEqual([]);
+  });
+  test('rechaza 9 elementos, duplicados, <script> y URLs', () => {
+    expect(validateContenido(conIa({ iaHerramientas: Array.from({ length: 9 }, (_, i) => `IA ${i}`) }))).not.toEqual([]);
+    expect(validateContenido(conIa({ iaHerramientas: ['claude', 'CLAUDE'] }))).not.toEqual([]);
+    expect(validateContenido(conIa({ iaHerramientas: ['<script>'] }))).not.toEqual([]);
+    expect(validateContenido(conIa({ iaHerramientas: ['www.ia.com'] }))).not.toEqual([]);
+  });
+  test('rechaza elementos con divulgacionIa "no"', () => {
+    expect(validateContenido({ ...BASE, divulgacionIa: 'no', iaHerramientas: ['claude'] }))
+      .toContain('Si indicas qué IA usaste, la divulgación no puede ser “No se usó IA”.');
+  });
+  test('en edicion parcial, omitido no da errores', () => {
+    expect(validateContenido({ titulo: 'Nuevo titulo' }, { partial: true })).toEqual([]);
+  });
+});
+
 describe('validateContenido idiomaOriginal (Fase C2)', () => {
   const { validateContenido: validar } = require('./contenido');
   test('acepta es y en, y rechaza cualquier otro valor', () => {

@@ -1,4 +1,6 @@
-const SECCIONES_VALIDAS = ['revolucion-humana', 'educacion', 'noticias'];
+const { validarIaHerramientas } = require('./iaHerramientas');
+
+const SECCIONES_VALIDAS =['revolucion-humana', 'educacion', 'noticias'];
 const TIPOS_VALIDOS = ['video', 'ensayo', 'noticia', 'lectura_corta', 'audio', 'foto'];
 const CATEGORIAS_VALIDAS = [
   'internacionales', 'crimen', 'salud', 'deportes',
@@ -44,6 +46,7 @@ function validateContenido(body, { partial = false } = {}) {
   if (body.divulgacionIa !== undefined && !DIVULGACION_IA_VALIDAS.includes(body.divulgacionIa)) {
     errors.push('Divulgacion de IA no valida.');
   }
+  errors.push(...validarIaHerramientas(body.iaHerramientas, body.divulgacionIa));
   if (body.idiomaOriginal !== undefined && !IDIOMAS_ORIGINAL_VALIDOS.includes(body.idiomaOriginal)) {
     errors.push('Idioma original no valido.');
   }
