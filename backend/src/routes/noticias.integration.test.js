@@ -352,6 +352,19 @@ describe('DELETE /api/noticias/:id', () => {
     expect(res.status).toBe(404);
   });
 
+  test('borra en una sola sentencia la noticia, sus comentarios y sus traducciones (T-4)', async () => {
+    pool.query.mockResolvedValueOnce({ rowCount: 1 });
+    const res = await request(app).delete('/api/noticias/a').set('x-test-user', ADMIN);
+    expect(res.status).toBe(200);
+    expect(pool.query).toHaveBeenCalledTimes(1);
+    const [sql, params] = pool.query.mock.calls[0];
+    expect(sql).toMatch(/^\s*WITH /);
+    expect(sql).toMatch(/DELETE FROM noticias WHERE id = \$1/);
+    expect(sql).toMatch(/DELETE FROM comentarios WHERE tipo = 'noticia' AND item_id = \$1/);
+    expect(sql).toMatch(/DELETE FROM traducciones WHERE tipo = 'noticia' AND item_id = \$1/);
+    expect(params).toEqual(['a']);
+  });
+
   test('200 al eliminar una noticia existente', async () => {
     pool.query.mockResolvedValueOnce({ rowCount: 1 });
     const res = await request(app).delete('/api/noticias/a').set('x-test-user', ADMIN);
@@ -402,5 +415,60 @@ describe('GET /api/noticias?lang= (Fase C2)', () => {
     const res = await request(app).post('/api/noticias').set('x-test-user', ADMIN).send({ ...NOTICIA_VALIDA, idiomaOriginal: 'fr' });
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/Idioma original/);
+  });
+});
+
+describe('Una noticia sin publicar nunca es la destacada (N-1)', () => {
+  test('POST con publicado=false y destacado=true se guarda sin destacar y sin tocar la destacada actual', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [] }) // id duplicado
+      .mockResolvedValueOnce({ rows: [{ id: 'un-titulo-cualquiera', destacado: false, publicado: false }] });
+    const res = await request(app).post('/api/noticias').set('x-test-user', ADMIN)
+      .send({ ...NOTICIA_VALIDA, publicado: false, destacado: true });
+    expect(res.status).toBe(201);
+    expect(res.body.noticia.destacado).toBe(false);
+    expect(pool.connect).not.toHaveBeenCalled(); // no hubo transaccion que limpie la destacada publica
+    const values = pool.query.mock.calls[1][1];
+    expect(values[12]).toBe(false); // destacado
+    expect(values[14]).toBe(false); // publicado
+  });
+
+  test('PUT guardar un borrador con destacado=true no le quita el destacado a la noticia publica', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'b', ...NOTICIA_VALIDA, publicado: true, destacado: false }] })
+      .mockResolvedValueOnce({ rows: [{ id: 'b', destacado: false, publicado: false }] });
+    const res = await request(app).put('/api/noticias/b').set('x-test-user', ADMIN)
+      .send({ publicado: false, destacado: true });
+    expect(res.status).toBe(200);
+    expect(pool.connect).not.toHaveBeenCalled();
+    expect(pool.query.mock.calls[1][1][12]).toBe(false);
+  });
+
+  test('PUT despublicar una noticia destacada le quita el destacado', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'a', ...NOTICIA_VALIDA, publicado: true, destacado: true }] })
+      .mockResolvedValueOnce({ rows: [{ id: 'a', destacado: false, publicado: false }] });
+    const res = await request(app).put('/api/noticias/a').set('x-test-user', ADMIN).send({ publicado: false });
+    expect(res.status).toBe(200);
+    expect(pool.query.mock.calls[1][1][12]).toBe(false);
+    expect(pool.query.mock.calls[1][1][14]).toBe(false);
+  });
+
+  test('PUT destacar un borrador existente no abre transaccion ni destaca', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'b', ...NOTICIA_VALIDA, publicado: false, destacado: false }] })
+      .mockResolvedValueOnce({ rows: [{ id: 'b', destacado: false }] });
+    const res = await request(app).put('/api/noticias/b').set('x-test-user', ADMIN).send({ destacado: true });
+    expect(res.status).toBe(200);
+    expect(pool.connect).not.toHaveBeenCalled();
+    expect(pool.query.mock.calls[1][1][12]).toBe(false);
+  });
+
+  test('PUT destacar una noticia publicada sigue limpiando la anterior en una transaccion', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'a', ...NOTICIA_VALIDA, publicado: true, destacado: false }] });
+    const client = mockClient(async () => ({ rows: [{ id: 'a', destacado: true }] }));
+    const res = await request(app).put('/api/noticias/a').set('x-test-user', ADMIN).send({ destacado: true });
+    expect(res.status).toBe(200);
+    expect(client.query.mock.calls[1][0]).toMatch(/SET destacado = false/);
   });
 });

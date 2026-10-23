@@ -109,3 +109,24 @@ describe('validatePost', () => {
       .toContain('El enlace multimedia debe ser una URL http:// o https:// valida.');
   });
 });
+
+describe('validatePost al editar (publicacion existente)', () => {
+  const existente = { cuerpo: Array(300).fill('palabra').join(' '), enlace_media: 'https://ejemplo.com/a.jpg', enlace_media_tipo: 'imagen' };
+
+  test('el limite de palabras no baja de lo ya guardado', () => {
+    const errors = validatePost({ ...BASE, cuerpo: existente.cuerpo }, 'usuario', existente);
+    expect(errors).toEqual([]);
+    expect(validatePost({ ...BASE, cuerpo: existente.cuerpo }, 'usuario')).toContain('El mensaje no puede superar 200 palabras.');
+  });
+
+  test('un enlace sin cambios no vuelve a exigir premium', () => {
+    const body = { ...BASE, enlaceMedia: existente.enlace_media, enlaceMediaTipo: 'imagen' };
+    expect(validatePost(body, 'usuario', existente)).toEqual([]);
+    expect(validatePost(body, 'usuario')).toContain('Solo las cuentas premium pueden anadir un enlace multimedia.');
+  });
+
+  test('un enlace distinto si lo exige', () => {
+    const errors = validatePost({ ...BASE, enlaceMedia: 'https://ejemplo.com/b.jpg', enlaceMediaTipo: 'imagen' }, 'usuario', existente);
+    expect(errors).toContain('Solo las cuentas premium pueden anadir un enlace multimedia.');
+  });
+});

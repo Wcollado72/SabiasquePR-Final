@@ -4,8 +4,13 @@ const { enviarError500 } = require('../util/errores');
 const { requireAuth } = require('../middleware/auth');
 const { validateComentario } = require('../validators/comentario');
 const { nombreVisibleSql } = require('../util/autorVisible');
+const { crearCooldown } = require('../util/cooldown');
 
 const router = express.Router();
+
+// Espera entre comentarios de la misma persona (exportado para que las pruebas lo reinicien).
+const COOLDOWN_COMENTARIO_MS = 10_000;
+const cooldownComentarios = crearCooldown(COOLDOWN_COMENTARIO_MS);
 
 const TABLA_POR_TIPO = { noticia: 'noticias', contenido: 'contenidos' };
 
@@ -29,6 +34,11 @@ router.get('/', async (req, res) => {
 router.post('/', requireAuth, async (req, res) => {
   const errors = validateComentario(req.body);
   if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
+  const falta = cooldownComentarios.segundosRestantes(req.user.id);
+  if (falta > 0) {
+    res.set('Retry-After', String(falta));
+    return res.status(429).json({ ok: false, error: `Espera ${falta} segundo(s) antes de comentar de nuevo.` });
+  }
   try {
     const tabla = TABLA_POR_TIPO[req.body.tipo];
     const { rows: item } = await pool.query(`SELECT id FROM ${tabla} WHERE id = $1`, [req.body.itemId]);
@@ -41,6 +51,10 @@ router.post('/', requireAuth, async (req, res) => {
                  (SELECT ${nombreVisibleSql('pf')} FROM perfiles pf WHERE pf.id = $3) AS autor_nombre`,
       [req.body.tipo, req.body.itemId, req.user.id, req.body.cuerpo.trim()]
     );
+    cooldownComentarios.marcar(req.user.id);
+    // TODO Fase 6: pasar el comentario por detectarRiesgo y generar un reporte
+    // automatico, como en el debate. Requiere un tipo nuevo ('comentario_articulo')
+    // en el CHECK de `reportes` (cambio de BD) y que GET /api/reportes lo resuelva.
     res.status(201).json({ ok: true, comentario: rows[0] });
   } catch (err) { enviarError500(res, err); }
 });
@@ -60,3 +74,4 @@ router.delete('/:id', requireAuth, async (req, res) => {
 });
 
 module.exports = router;
+module.exports.cooldownComentarios = cooldownComentarios;

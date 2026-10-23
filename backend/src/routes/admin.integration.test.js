@@ -290,3 +290,82 @@ describe('GET /api/admin/uso-ia', () => {
     expect(res.status).toBe(200);
   });
 });
+
+describe('POST /api/admin/autocompletar-ia -- bitacora de uso (A-1)', () => {
+  const ARTICULO = { titulo: 't', texto: 'x', sitio: 'El Ejemplo', autor: '', url: 'https://ejemplo.com/a' };
+  const REDACTADO = { titulo: 'T', resumen: 'R', parrafos: ['P'], fuenteTexto: 'El Ejemplo' };
+
+  test('registra la llamada en ia_generaciones como redactor (con 0 si el servicio no devuelve tokens)', async () => {
+    extraerArticulo.mockResolvedValueOnce(ARTICULO);
+    redactarDesdeArticulo.mockResolvedValueOnce(REDACTADO);
+    pool.query.mockResolvedValueOnce({ rows: [] });
+    const res = await request(app).post('/api/admin/autocompletar-ia').set('x-test-user', ADMIN).send({ url: 'https://ejemplo.com/a' });
+    expect(res.status).toBe(200);
+    const [sql, params] = pool.query.mock.calls[0];
+    expect(sql).toContain('INSERT INTO ia_generaciones');
+    expect(params).toEqual(['redactor', 'url', false, 0, 0, 0, 0, 'admin-1']);
+    expect(res.body.usage).toBeUndefined();
+  });
+
+  test('registra los tokens y el costo cuando el servicio los devuelve', async () => {
+    extraerArticulo.mockResolvedValueOnce(ARTICULO);
+    redactarDesdeArticulo.mockResolvedValueOnce({ ...REDACTADO, usage: { tokensEntrada: 1000, tokensSalida: 500, costoEstimadoUsd: 0.0123 } });
+    pool.query.mockResolvedValueOnce({ rows: [] });
+    await request(app).post('/api/admin/autocompletar-ia').set('x-test-user', ADMIN).send({ url: 'https://ejemplo.com/a' });
+    expect(pool.query.mock.calls[0][1]).toEqual(['redactor', 'url', false, 0, 1000, 500, 0.0123, 'admin-1']);
+  });
+
+  test('si falla el registro, igual responde 200 al admin', async () => {
+    extraerArticulo.mockResolvedValueOnce(ARTICULO);
+    redactarDesdeArticulo.mockResolvedValueOnce(REDACTADO);
+    pool.query.mockRejectedValueOnce(new Error('db caida'));
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const res = await request(app).post('/api/admin/autocompletar-ia').set('x-test-user', ADMIN).send({ url: 'https://ejemplo.com/a' });
+    spy.mockRestore();
+    expect(res.status).toBe(200);
+  });
+
+  test('no registra nada si la redaccion falla', async () => {
+    extraerArticulo.mockResolvedValueOnce(ARTICULO);
+    redactarDesdeArticulo.mockRejectedValueOnce(new Error('fallo'));
+    const res = await request(app).post('/api/admin/autocompletar-ia').set('x-test-user', ADMIN).send({ url: 'https://ejemplo.com/a' });
+    expect(res.status).toBe(400);
+    expect(pool.query).not.toHaveBeenCalled();
+  });
+});
+
+describe('GET /api/admin/ordenes (P-3)', () => {
+  test('401 sin autenticacion', async () => {
+    const res = await request(app).get('/api/admin/ordenes');
+    expect(res.status).toBe(401);
+  });
+
+  test('403 si el usuario no es admin (ni siquiera moderador)', async () => {
+    expect((await request(app).get('/api/admin/ordenes').set('x-test-user', USUARIO)).status).toBe(403);
+    expect((await request(app).get('/api/admin/ordenes').set('x-test-user', MODERADOR)).status).toBe(403);
+  });
+
+  test('200 con los pedidos, direccion y valores por defecto de paginacion', async () => {
+    const fila = { id: 'o1', estado: 'pagada', total: '25.00', items: [{ nombre: 'Taza', cantidad: 1 }], envio_nombre: 'Ana', envio_direccion: { city: 'Fajardo' }, comprador_email: 'a@ejemplo.com' };
+    pool.query.mockResolvedValueOnce({ rows: [fila] });
+    const res = await request(app).get('/api/admin/ordenes').set('x-test-user', ADMIN);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ ok: true, limit: 50, offset: 0 });
+    expect(res.body.ordenes).toEqual([fila]);
+    const [sql, params] = pool.query.mock.calls[0];
+    expect(sql).toMatch(/FROM ordenes o LEFT JOIN perfiles pf/);
+    expect(sql).toMatch(/envio_direccion/);
+    expect(sql).toMatch(/facturacion_direccion/);
+    expect(sql).toMatch(/ORDER BY o\.creado_en DESC/);
+    expect(params).toEqual([50, 0]);
+  });
+
+  test('limit tiene tope de 100 y offset nunca es negativo', async () => {
+    pool.query.mockResolvedValue({ rows: [] });
+    const res = await request(app).get('/api/admin/ordenes?limit=5000&offset=-3').set('x-test-user', ADMIN);
+    expect(res.body).toMatchObject({ limit: 100, offset: 0 });
+    expect(pool.query.mock.calls[0][1]).toEqual([100, 0]);
+    await request(app).get('/api/admin/ordenes?limit=10&offset=20').set('x-test-user', ADMIN);
+    expect(pool.query.mock.calls[1][1]).toEqual([10, 20]);
+  });
+});

@@ -85,7 +85,41 @@ describe('GET /api/reportes', () => {
   });
 });
 
+describe('GET /api/reportes -- contenido reportado (R-1)', () => {
+  test('la consulta une el texto reportado y usa el nombre visible, nunca el correo del autor', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{
+      id: 'r1', tipo: 'debate_post', estado: 'pendiente', contenido_existe: true,
+      contenido_titulo: 'Titulo', contenido_cuerpo: 'Texto reportado', contenido_autor_nombre: 'Participante-ab12',
+    }] });
+    const res = await request(app).get('/api/reportes').set('x-test-user', MODERADOR);
+    expect(res.status).toBe(200);
+    expect(res.body.reportes[0]).toMatchObject({ contenido_existe: true, contenido_titulo: 'Titulo', contenido_cuerpo: 'Texto reportado' });
+    const [sql] = pool.query.mock.calls[0];
+    expect(sql).toMatch(/LEFT JOIN foro_posts fp/);
+    expect(sql).toMatch(/LEFT JOIN foro_comentarios fc/);
+    expect(sql).toMatch(/AS contenido_autor_nombre/);
+    expect(sql).toMatch(/AS contenido_existe/);
+    expect(sql).toMatch(/r\.automatico/); // los reportes automaticos tambien traen el texto (mismos joins)
+    expect(sql).not.toMatch(/au\.email/); // el correo del autor reportado nunca sale
+  });
+
+  test('filtra por estado con parametro', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] });
+    await request(app).get('/api/reportes?estado=pendiente').set('x-test-user', ADMIN);
+    const [sql, params] = pool.query.mock.calls[0];
+    expect(sql).toMatch(/WHERE r\.estado = \$1/);
+    expect(params).toEqual(['pendiente']);
+  });
+});
+
 describe('PATCH /api/reportes/:id', () => {
+  test('200 al reabrir un reporte (volver a pendiente)', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'r1', estado: 'pendiente' }] });
+    const res = await request(app).patch('/api/reportes/r1').set('x-test-user', MODERADOR).send({ estado: 'pendiente' });
+    expect(res.status).toBe(200);
+    expect(pool.query.mock.calls[0][1]).toEqual(['pendiente', 'r1']);
+  });
+
   test('403 si no es admin', async () => {
     const res = await request(app).patch('/api/reportes/r1').set('x-test-user', USUARIO).send({ estado: 'revisado' });
     expect(res.status).toBe(403);

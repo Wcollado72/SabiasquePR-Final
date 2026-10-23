@@ -405,6 +405,25 @@ describe('DELETE /api/contenidos/:id', () => {
     expect(res.status).toBe(403);
   });
 
+  test('404 si el contenido no existe', async () => {
+    pool.query.mockResolvedValueOnce({ rowCount: 0 });
+    const res = await request(app).delete('/api/contenidos/no-existe').set('x-test-user', ADMIN);
+    expect(res.status).toBe(404);
+  });
+
+  test('borra en una sola sentencia el contenido, sus comentarios y sus traducciones (T-4)', async () => {
+    pool.query.mockResolvedValueOnce({ rowCount: 1 });
+    const res = await request(app).delete('/api/contenidos/a').set('x-test-user', ADMIN);
+    expect(res.status).toBe(200);
+    expect(pool.query).toHaveBeenCalledTimes(1);
+    const [sql, params] = pool.query.mock.calls[0];
+    expect(sql).toMatch(/^\s*WITH /);
+    expect(sql).toMatch(/DELETE FROM contenidos WHERE id = \$1/);
+    expect(sql).toMatch(/DELETE FROM comentarios WHERE tipo = 'contenido' AND item_id = \$1/);
+    expect(sql).toMatch(/DELETE FROM traducciones WHERE tipo = 'contenido' AND item_id = \$1/);
+    expect(params).toEqual(['a']);
+  });
+
   test('200 al eliminar', async () => {
     pool.query.mockResolvedValueOnce({ rowCount: 1 });
     const res = await request(app).delete('/api/contenidos/a').set('x-test-user', ADMIN);

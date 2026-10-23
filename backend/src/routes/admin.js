@@ -51,6 +51,15 @@ router.post('/autocompletar-ia', requireAuth, requireAdmin, async (req, res) => 
   try {
     const articulo = await extraerArticulo(url);
     const redactado = await redactarDesdeArticulo(articulo);
+    // Queda en la bitacora de costo como "redactor". El servicio hoy no devuelve
+    // tokens: se guarda lo que haya (0 si nada) para al menos contar la llamada.
+    await registrarUsoIa({
+      agente: 'redactor',
+      fuenteTipo: 'url',
+      usarBusquedaWeb: false,
+      usage: redactado.usage || {},
+      creadoPor: req.user.id,
+    });
     res.json({
       ok: true,
       titulo: redactado.titulo,
@@ -154,6 +163,25 @@ router.post('/redactar', requireAuth, requireAdmin, async (req, res) => {
   } catch (err) {
     res.status(400).json({ ok: false, error: err.message });
   }
+});
+
+// GET /api/admin/ordenes -- solo admin. Pedidos de la tienda, los mas recientes
+// primero, con la direccion de envio/facturacion para poder despacharlos.
+// Incluye el correo del comprador (dato de contacto, solo visible aqui).
+router.get('/ordenes', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 50, 1), 100);
+    const offset = Math.max(parseInt(req.query.offset, 10) || 0, 0);
+    const { rows } = await pool.query(
+      `SELECT o.id, o.estado, o.total, o.items, o.envio_nombre, o.envio_direccion, o.facturacion_direccion,
+              o.creado_en, o.usuario_id, pf.email AS comprador_email
+       FROM ordenes o LEFT JOIN perfiles pf ON pf.id = o.usuario_id
+       ORDER BY o.creado_en DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
+    res.json({ ok: true, ordenes: rows, limit, offset });
+  } catch (err) { enviarError500(res, err); }
 });
 
 // GET /api/admin/uso-ia -- admin o moderador (es solo lectura de gasto, no
