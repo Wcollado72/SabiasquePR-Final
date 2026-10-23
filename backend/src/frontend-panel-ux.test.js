@@ -178,3 +178,47 @@ describe('2FA del panel: verifica solo al escribir el sexto dígito', () => {
     expect(js).toMatch(/input\.addEventListener\('input', \(\) => \{\s*input\.value = soloDigitos\(input\.value\);\s*if \(codigoCompleto\(input\.value\) && !boton\.disabled\) form\.requestSubmit\(\);/);
   });
 });
+
+describe('Guardado continuo: texto alternativo opcional y formulario que sigue abierto', () => {
+  const js = leer('admin.js');
+  const html = leer('admin.html');
+  const { textoAlternativo, destacadoPermitido } = new Function(`${entre(js, 'guardado-continuo')}\nreturn { textoAlternativo, destacadoPermitido };`)();
+
+  test('el texto alternativo es opcional: vacío se reemplaza por el título', () => {
+    expect(textoAlternativo('', 'Mi título')).toBe('Mi título');
+    expect(textoAlternativo('   ', '  Otro  ')).toBe('Otro');
+    expect(textoAlternativo(' Una foto ', 'Mi título')).toBe('Una foto');
+    expect(textoAlternativo('', 'x'.repeat(300))).toHaveLength(160);
+  });
+
+  test.each(['an-imagen-alt', 'ac-portada-alt', 'ap-imagen-alt'])('%s ya no es obligatorio y dice que es opcional', (id) => {
+    expect(html).toMatch(new RegExp(`<input type="text" id="${id}">`));
+    expect(html).toContain(`<label for="${id}">Texto alternativo de la imagen (opcional)</label>`);
+  });
+
+  test('un borrador no puede ser la noticia destacada', () => {
+    expect(destacadoPermitido(true, true)).toBe(true);
+    expect(destacadoPermitido(true, false)).toBe(false);
+    expect(destacadoPermitido(false, true)).toBe(false);
+  });
+
+  test('guardar noticia, contenido o producto deja el formulario abierto y usa despuesDeGuardar', () => {
+    for (const tipo of ['noticia', 'contenido', 'producto']) expect(js).toContain(`tipo: '${tipo}', pieza: res.${tipo}`);
+    expect(js).not.toMatch(/closeNoticiaForm\(\);\s*loadNoticias\(\);/);
+    expect(js).not.toMatch(/closeContenidoForm\(\);\s*loadContenidos\(\);/);
+    expect(js).not.toMatch(/closeProductoForm\(\);\s*loadProductos\(\);/);
+    expect(js).toMatch(/botonCerrar\)\.textContent = 'Cerrar'/);
+  });
+
+  test('una traducción sin guardar se guarda junto con la pieza y puede pedirse al guardar', () => {
+    expect(js).toMatch(/if \(traduccionSinGuardar\[o\.tipo\]\) \{\s*await guardarTraduccion\(o\.tipo\);/);
+    expect(js).toMatch(/traduccionSinGuardar\[tipo\] = true;\s*marcarChipTraduccion\(tipo, 'Borrador sin guardar'/);
+    expect(html).toContain('id="an-traducir-al-guardar"');
+    expect(html).toContain('id="ac-traducir-al-guardar"');
+  });
+
+  test('el mensaje del autocompletar ya no habla del casillero «Publicado» ni dice que se guardó', () => {
+    expect(js).not.toMatch(/marca "Publicado"/);
+    expect(js).toContain('todavía NO se ha guardado');
+  });
+});

@@ -988,8 +988,9 @@ const PAGES = [
                   <button type="button" id="an-elegir-imagen" class="admin-btn-cancel">Elegir imagen de la galería</button>
                 </div>
                 <img id="an-imagen-preview" class="admin-image-preview" alt="" hidden>
-                <label for="an-imagen-alt">Texto alternativo de la imagen</label>
-                <input type="text" id="an-imagen-alt" required>
+                <label for="an-imagen-alt">Texto alternativo de la imagen (opcional)</label>
+                <input type="text" id="an-imagen-alt">
+                <p class="admin-hint">Describe lo que se ve para quienes usan lector de pantalla. Si lo dejas vacío, se usa el título.</p>
                 <label for="an-imagen-caption">Pie de imagen (opcional)</label>
                 <input type="text" id="an-imagen-caption">
               </section>
@@ -1018,6 +1019,7 @@ const PAGES = [
                     <input type="date" id="an-fecha" required>
                   </div>
                   <label class="admin-checkbox news-publish-check" title="Reemplaza al anterior destacado en la portada"><input type="checkbox" id="an-destacado"> ★ Destacada</label>
+                  <label class="admin-checkbox news-publish-check" title="Después de guardar, la IA prepara la traducción para que la revises"><input type="checkbox" id="an-traducir-al-guardar"> 🌐 Traducir con IA al guardar</label>
                   <input type="checkbox" id="an-publicado" hidden checked aria-hidden="true">
                   <div class="news-publish-actions">
                     <button type="button" class="admin-btn-cancel" id="an-borrador">Guardar borrador</button>
@@ -1143,8 +1145,9 @@ const PAGES = [
                   <button type="button" id="ac-elegir-imagen" class="admin-btn-cancel">Elegir imagen de la galería</button>
                 </div>
                 <img id="ac-url-portada-preview" class="admin-image-preview" alt="" hidden>
-                <label for="ac-portada-alt">Texto alternativo de la imagen</label>
-                <input type="text" id="ac-portada-alt" required>
+                <label for="ac-portada-alt">Texto alternativo de la imagen (opcional)</label>
+                <input type="text" id="ac-portada-alt">
+                <p class="admin-hint">Describe lo que se ve para quienes usan lector de pantalla. Si lo dejas vacío, se usa el título.</p>
               </section>
 
               <section class="synth-panel" data-panel="ia" hidden>
@@ -1250,6 +1253,7 @@ const PAGES = [
                   </datalist>
                 </div>
                 <label class="admin-checkbox synth-publish-check" title="Destacado en su sección (reemplaza al anterior de esa sección)"><input type="checkbox" id="ac-destacado"> ★ Destacado</label>
+                <label class="admin-checkbox synth-publish-check" title="Después de guardar, la IA prepara la traducción para que la revises"><input type="checkbox" id="ac-traducir-al-guardar"> 🌐 Traducir con IA al guardar</label>
                 <label class="admin-checkbox synth-publish-check" title="Contenido premium (vista previa parcial para quien no sea premium/admin)"><input type="checkbox" id="ac-premium"> 💎 Premium</label>
                 <div class="synth-publish-actions">
                   <button type="button" class="synth-btn-guardar" id="ac-guardar">▶ GUARDAR</button>
@@ -1281,8 +1285,9 @@ const PAGES = [
               <input type="number" id="ap-precio" required min="0.01" step="0.01">
               <label for="ap-imagen">Imagen (ruta o URL)</label>
               <input type="text" id="ap-imagen" required placeholder="images/mi-producto.webp">
-              <label for="ap-imagen-alt">Texto alternativo de la imagen</label>
-              <input type="text" id="ap-imagen-alt" required>
+              <label for="ap-imagen-alt">Texto alternativo de la imagen (opcional)</label>
+              <input type="text" id="ap-imagen-alt">
+              <p class="admin-hint">Describe lo que se ve para quienes usan lector de pantalla. Si lo dejas vacío, se usa el título.</p>
               <label for="ap-stripe-price-id">Price ID de Stripe (para el checkout del carrito)</label>
               <input type="text" id="ap-stripe-price-id" placeholder="price_...">
               <p class="admin-hint">Créalo en Stripe → Product catalog → Add product (tipo "One time"), y pega aquí el Price ID (no el Product ID).</p>
