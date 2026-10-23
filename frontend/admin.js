@@ -179,6 +179,17 @@
     ]));
   }
 
+  // INICIO codigo-automatico
+  // El campo del codigo de 6 digitos: deja solo numeros (tambien al pegar) y avisa cuando ya estan los 6,
+  // para verificar sin pulsar el boton, como hace Supabase.
+  function soloDigitos(valor) {
+    return String(valor).replace(/\D/g, '').slice(0, 6);
+  }
+  function codigoCompleto(valor) {
+    return /^\d{6}$/.test(valor);
+  }
+  // FIN codigo-automatico
+
   function formularioCodigo(alEnviar) {
     const estado = elemento('p', { clase: 'form-status', role: 'status', 'aria-live': 'polite' });
     const input = elemento('input', {
@@ -187,6 +198,10 @@
     });
     const boton = elemento('button', { type: 'submit', texto: 'Verificar' });
     const form = elemento('form', { clase: 'mfa-form' }, [input, boton]);
+    input.addEventListener('input', () => {
+      input.value = soloDigitos(input.value);
+      if (codigoCompleto(input.value) && !boton.disabled) form.requestSubmit();
+    });
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const codigo = input.value.replace(/\s+/g, '');
@@ -434,6 +449,10 @@
           <p class="form-status" id="tr-${tipo}-status" aria-live="polite"></p>
         </div>
       </details>`;
+    document.getElementById(`tr-${tipo}-campos`).addEventListener('input', () => {
+      traduccionSinGuardar[tipo] = true;
+      marcarChipTraduccion(tipo, 'Sin guardar', 'pend');
+    });
     box.hidden = false;
     document.getElementById(`tr-${tipo}-ia`).addEventListener('click', () => traducirConIa(tipo));
     document.getElementById(`tr-${tipo}-guardar`).addEventListener('click', () => guardarTraduccion(tipo));
@@ -463,6 +482,7 @@
     const origenNombre = IDIOMA_NOMBRE[idiomaOrigenDe(tipo)];
     const estado = document.getElementById(`tr-${tipo}-estado`);
     document.getElementById(`tr-${tipo}-destino`).textContent = IDIOMA_NOMBRE[destino];
+    traduccionSinGuardar[tipo] = false;
     setStatus(document.getElementById(`tr-${tipo}-status`), '', '');
     cfg.campos.forEach((c) => escribirCampoTraduccion(tipo, c, ''));
     const usable = Boolean(id);
@@ -506,6 +526,9 @@
         body: JSON.stringify({ tipo, idiomaOrigen: idiomaOrigenDe(tipo), idiomaDestino: idiomaDestinoDe(tipo), campos }),
       });
       cfg.campos.forEach((c) => escribirCampoTraduccion(tipo, c, data.campos[c.nombre]));
+      traduccionSinGuardar[tipo] = true;
+      marcarChipTraduccion(tipo, 'Borrador sin guardar', 'pend');
+      document.getElementById(`tr-${tipo}-details`).open = true;
       setStatus(statusEl, 'ok', 'Borrador listo — revísalo, ajústalo si hace falta y pulsa "Guardar traducción". Todavía no está guardado.');
     } catch (err) {
       setStatus(statusEl, 'error', '' + err.message);
@@ -707,6 +730,44 @@
     selector.habilitar(document.getElementById(selectId).value !== 'no');
   }
 
+  // Traducciones con cambios que todavia no se guardaron (por tipo de pieza): al guardar la pieza se guardan tambien.
+  const traduccionSinGuardar = {};
+
+  // INICIO guardado-continuo
+  // Texto alternativo de una imagen: opcional; si queda vacio se usa el titulo para que la imagen nunca quede sin descripcion.
+  function textoAlternativo(alt, titulo) {
+    const limpio = String(alt || '').trim();
+    return limpio || String(titulo || '').trim().slice(0, 160);
+  }
+  // Un borrador no puede ser la noticia "Destacada": destacar a un borrador le quitaba el destacado a la publicada.
+  function destacadoPermitido(destacado, publicar) {
+    return Boolean(destacado) && Boolean(publicar);
+  }
+  // FIN guardado-continuo
+
+  // Despues de guardar una pieza el formulario SIGUE abierto con su id: asi la traduccion (que necesita el id) se puede
+  // hacer enseguida, guardar de nuevo edita en vez de duplicar, y una traduccion sin guardar no se pierde. "Cancelar" pasa a "Cerrar".
+  async function despuesDeGuardar(o) {
+    document.getElementById(o.idInput).value = o.pieza.id;
+    document.getElementById(o.tituloForm).textContent = o.tituloNuevo;
+    document.getElementById(o.botonCerrar).textContent = 'Cerrar';
+    o.recargarLista();
+    let aviso = o.mensaje;
+    if (traduccionSinGuardar[o.tipo]) {
+      await guardarTraduccion(o.tipo);
+      aviso += ' La traducción pendiente también se guardó.';
+    } else {
+      await refrescarPanelTraduccion(o.tipo);
+      const casilla = o.casillaTraducir && document.getElementById(o.casillaTraducir);
+      const yaGuardada = document.getElementById(`tr-${o.tipo}-chip`).textContent === 'Guardada';
+      if (casilla && casilla.checked && !yaGuardada) {
+        await traducirConIa(o.tipo);
+        aviso += ' Abajo está el borrador de la traducción: revísalo y pulsa «Guardar traducción».';
+      }
+    }
+    setStatus(o.statusEl, 'ok', aviso);
+  }
+
   // INICIO aviso-campo-faltante
   // Los formularios largos reparten sus campos obligatorios en paneles (pasos) ocultos: sin esto el navegador
   // bloquea el envio en silencio porque no puede enfocar un campo oculto. Al primer campo invalido se abre su
@@ -735,7 +796,15 @@
     formNoticias.addEventListener('submit', submitNoticia);
     avisarCampoFaltante(formNoticias, activarNewsPanel, document.getElementById('an-status'));
     // Publicar o guardar borrador solo ocurre con estos dos botones, en el ultimo paso (Enter no envia el formulario).
-    const enviarNoticia = (publicar) => { document.getElementById('an-publicado').checked = publicar; formNoticias.requestSubmit(); };
+    const enviarNoticia = (publicar) => {
+      document.getElementById('an-publicado').checked = publicar;
+      const destacada = document.getElementById('an-destacado');
+      if (destacada.checked && !destacadoPermitido(true, publicar)) {
+        destacada.checked = false;
+        setStatus(document.getElementById('an-status'), 'info', 'Se quitó «Destacada»: un borrador no puede ser la noticia destacada de la portada.');
+      }
+      formNoticias.requestSubmit();
+    };
     document.getElementById('an-borrador').addEventListener('click', () => enviarNoticia(false));
     document.getElementById('an-publicar').addEventListener('click', () => enviarNoticia(true));
     selectorIaNoticia = montarSelectorIa('an-ia-selector', 'an-divulgacion-ia');
@@ -779,7 +848,7 @@
       document.getElementById('an-divulgacion-ia').value = 'parcial';
       selectorIaNoticia.habilitar(true);
       document.getElementById('an-publicado').checked = false;
-      statusEl.textContent = 'Listo — se guardó como borrador (sin publicar). Revisa el texto, elige categoría, fecha e imagen, y marca "Publicado" cuando esté listo.';
+      statusEl.textContent = 'Listo — el formulario se llenó con el borrador de la IA (todavía NO se ha guardado). Revisa el texto, elige categoría, fecha e imagen, y usa «Guardar borrador» o «▶ AL AIRE» en el último paso.';
     } catch (err) {
       statusEl.textContent = 'No se pudo autocompletar: ' + err.message;
     }
@@ -827,6 +896,7 @@
   }
 
   function openNoticiaForm(item) {
+    if (document.getElementById('an-cancel')) document.getElementById('an-cancel').textContent = 'Cancelar';
     document.getElementById('admin-noticias-form-title').textContent = item ? 'Editar noticia' : 'Nueva noticia';
     document.getElementById('an-id').value = item?.id || '';
     document.getElementById('an-titulo').value = item?.titulo || '';
@@ -871,25 +941,29 @@
       categoria: document.getElementById('an-categoria').value,
       fecha: document.getElementById('an-fecha').value,
       imagen: document.getElementById('an-imagen').value.trim(),
-      imagenAlt: document.getElementById('an-imagen-alt').value.trim(),
+      imagenAlt: textoAlternativo(document.getElementById('an-imagen-alt').value, document.getElementById('an-titulo').value),
       imagenCaption: document.getElementById('an-imagen-caption').value.trim() || undefined,
       fuenteUrl: document.getElementById('an-fuente-url').value.trim(),
       fuenteTexto: document.getElementById('an-fuente-texto').value.trim(),
       parrafos: document.getElementById('an-parrafos').value.split('\n').map((p) => p.trim()).filter(Boolean),
       divulgacionIa: document.getElementById('an-divulgacion-ia').value,
       iaHerramientas: selectorIaNoticia.leer(),
-      destacado: document.getElementById('an-destacado').checked,
+      destacado: destacadoPermitido(document.getElementById('an-destacado').checked, document.getElementById('an-publicado').checked),
       publicado: document.getElementById('an-publicado').checked,
     };
     setStatus(statusEl, 'info', 'Guardando...');
     try {
-      if (id) {
-        await apiFetch(`/api/noticias/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body) });
-      } else {
-        await apiFetch('/api/noticias', { method: 'POST', body: JSON.stringify(body) });
-      }
-      closeNoticiaForm();
-      loadNoticias();
+      const res = id
+        ? await apiFetch(`/api/noticias/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body) })
+        : await apiFetch('/api/noticias', { method: 'POST', body: JSON.stringify(body) });
+      document.getElementById('an-estado').textContent = body.publicado
+        ? 'Estado actual: publicada (se ve en el sitio).' : 'Estado actual: borrador (no se ve en el sitio).';
+      await despuesDeGuardar({
+        tipo: 'noticia', pieza: res.noticia, idInput: 'an-id', tituloForm: 'admin-noticias-form-title', tituloNuevo: 'Editar noticia',
+        botonCerrar: 'an-cancel', casillaTraducir: 'an-traducir-al-guardar', statusEl,
+        recargarLista: loadNoticias,
+        mensaje: body.publicado ? 'Publicada ✔ (ya se ve en el sitio).' : 'Guardada como borrador ✔ (no se ve en el sitio).',
+      });
     } catch (err) {
       setStatus(statusEl, 'error', '' + err.message);
     }
@@ -1606,6 +1680,7 @@
   }
 
   function openContenidoForm(item) {
+    if (document.getElementById('ac-cancel')) document.getElementById('ac-cancel').textContent = 'Cancelar';
     document.getElementById('admin-contenidos-form-title').textContent = item ? 'Editar contenido' : 'Nuevo contenido';
     document.getElementById('ac-id').value = item?.id || '';
     document.getElementById('ia-continente').value = '';
@@ -1683,7 +1758,7 @@
       fuenteTexto: document.getElementById('ac-fuente-texto').value.trim() || null,
       duracionMin: Number(document.getElementById('ac-duracion').value),
       urlPortada: document.getElementById('ac-url-portada').value.trim(),
-      portadaAlt: document.getElementById('ac-portada-alt').value.trim(),
+      portadaAlt: textoAlternativo(document.getElementById('ac-portada-alt').value, document.getElementById('ac-titulo').value),
       fechaPublicacion: document.getElementById('ac-fecha').value,
       destacado: document.getElementById('ac-destacado').checked,
       subseccion: document.getElementById('ac-subseccion').value || null,
@@ -1699,13 +1774,14 @@
     };
     setStatus(statusEl, 'info', 'Guardando...');
     try {
-      if (id) {
-        await apiFetch(`/api/contenidos/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body) });
-      } else {
-        await apiFetch('/api/contenidos', { method: 'POST', body: JSON.stringify(body) });
-      }
-      closeContenidoForm();
-      loadContenidos();
+      const res = id
+        ? await apiFetch(`/api/contenidos/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body) })
+        : await apiFetch('/api/contenidos', { method: 'POST', body: JSON.stringify(body) });
+      await despuesDeGuardar({
+        tipo: 'contenido', pieza: res.contenido, idInput: 'ac-id', tituloForm: 'admin-contenidos-form-title', tituloNuevo: 'Editar contenido',
+        botonCerrar: 'ac-cancel', casillaTraducir: 'ac-traducir-al-guardar', statusEl,
+        recargarLista: loadContenidos, mensaje: 'Guardado ✔ (ya se ve en el sitio).',
+      });
     } catch (err) {
       setStatus(statusEl, 'error', '' + err.message);
     }
@@ -1769,6 +1845,7 @@
   }
 
   function openProductoForm(item) {
+    if (document.getElementById('ap-cancel')) document.getElementById('ap-cancel').textContent = 'Cancelar';
     document.getElementById('admin-productos-form-title').textContent = item ? 'Editar producto' : 'Nuevo producto';
     document.getElementById('ap-id').value = item?.id || '';
     document.getElementById('ap-nombre').value = item?.nombre || '';
@@ -1799,20 +1876,21 @@
       descripcion: document.getElementById('ap-descripcion').value.trim(),
       precio: Number(document.getElementById('ap-precio').value),
       imagen: document.getElementById('ap-imagen').value.trim(),
-      imagenAlt: document.getElementById('ap-imagen-alt').value.trim(),
+      imagenAlt: textoAlternativo(document.getElementById('ap-imagen-alt').value, document.getElementById('ap-nombre').value),
       stripeLink: document.getElementById('ap-stripe-link').value.trim() || null,
       stripePriceId: document.getElementById('ap-stripe-price-id').value.trim() || null,
       disponible: document.getElementById('ap-disponible').checked,
     };
     setStatus(statusEl, 'info', 'Guardando...');
     try {
-      if (id) {
-        await apiFetch(`/api/productos/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body) });
-      } else {
-        await apiFetch('/api/productos', { method: 'POST', body: JSON.stringify(body) });
-      }
-      closeProductoForm();
-      loadProductos();
+      const res = id
+        ? await apiFetch(`/api/productos/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body) })
+        : await apiFetch('/api/productos', { method: 'POST', body: JSON.stringify(body) });
+      await despuesDeGuardar({
+        tipo: 'producto', pieza: res.producto, idInput: 'ap-id', tituloForm: 'admin-productos-form-title', tituloNuevo: 'Editar producto',
+        botonCerrar: 'ap-cancel', casillaTraducir: null, statusEl,
+        recargarLista: loadProductos, mensaje: 'Guardado ✔.',
+      });
     } catch (err) {
       setStatus(statusEl, 'error', '' + err.message);
     }
