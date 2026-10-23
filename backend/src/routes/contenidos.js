@@ -9,6 +9,13 @@ const { aplicarTraducciones, normalizarLang } = require('../util/traducciones');
 
 const router = express.Router();
 
+// Un contenido sin publicar (borrador) nunca es el destacado de su seccion; igual que en noticias.
+function resolverPublicadoYDestacado(body, existing = {}) {
+  const publicado = body.publicado ?? existing.publicado ?? true;
+  const destacado = publicado ? Boolean(body.destacado ?? existing.destacado ?? false) : false;
+  return { publicado, destacado };
+}
+
 function toRow(id, body, existing = {}) {
   return [
     id,
@@ -26,7 +33,7 @@ function toRow(id, body, existing = {}) {
     body.urlPortada ?? existing.url_portada,
     body.portadaAlt ?? existing.portada_alt,
     body.fechaPublicacion ?? existing.fecha_publicacion,
-    body.destacado ?? existing.destacado ?? false,
+    resolverPublicadoYDestacado(body, existing).destacado,
     body.subformato !== undefined ? body.subformato : (existing.subformato ?? null),
     body.divulgacionIa ?? existing.divulgacion_ia ?? 'no',
     body.citaEstilo !== undefined ? body.citaEstilo : (existing.cita_estilo ?? null),
@@ -40,6 +47,7 @@ function toRow(id, body, existing = {}) {
     body.enfoque !== undefined ? body.enfoque : (existing.enfoque ?? null),
     body.idiomaOriginal ?? existing.idioma_original ?? 'es',
     resolverIaHerramientas(body, existing).valor,
+    resolverPublicadoYDestacado(body, existing).publicado,
   ];
 }
 
@@ -104,8 +112,10 @@ async function saveContenido(id, seccion, destacado, values, sql) {
 router.get('/', tryAuth, async (req, res) => {
   try {
     const { seccion, categoria, tipoFormato, subformato, subseccion, enfoque } = req.query;
+    const esAdmin = req.user?.rol === 'admin';
     const params = [];
     const where = [];
+    if (!esAdmin) where.push('publicado = true');
     if (seccion) { params.push(seccion); where.push(`seccion = $${params.length}`); }
     if (categoria) { params.push(categoria); where.push(`categoria = $${params.length}`); }
     if (tipoFormato) { params.push(tipoFormato); where.push(`tipo_formato = $${params.length}`); }
@@ -126,7 +136,10 @@ router.get('/', tryAuth, async (req, res) => {
 router.get('/:id', tryAuth, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM contenidos WHERE id = $1', [req.params.id]);
-    if (rows.length === 0) return res.status(404).json({ ok: false, error: 'Contenido no encontrado.' });
+    // Un borrador se trata como inexistente para quien no sea admin (no revela que existe).
+    if (rows.length === 0 || (rows[0].publicado === false && req.user?.rol !== 'admin')) {
+      return res.status(404).json({ ok: false, error: 'Contenido no encontrado.' });
+    }
     const [traducido] = await aplicarTraducciones('contenido', [rows[0]], normalizarLang(req.query.lang));
     res.json({ ok: true, contenido: aplicarMuroDePago(traducido, req.user) });
   } catch (err) { enviarError500(res, err); }
@@ -144,7 +157,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
     if (dupe.length) id = `${id}-${Date.now().toString(36)}`;
 
     const values = toRow(id, req.body);
-    const destacado = req.body.destacado ?? false;
+    const destacado = resolverPublicadoYDestacado(req.body).destacado;
     const { rows } = await saveContenido(
       id,
       req.body.seccion,
@@ -155,8 +168,8 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
          url_media, fuente_url, fuente_texto, duracion_min, url_portada, portada_alt,
          fecha_publicacion, destacado, subformato, divulgacion_ia, cita_estilo, cita_autor,
          cita_anio, cita_titulo_original, cita_fecha_acceso, cita_sin_fuente_externa,
-         subseccion, es_premium, enfoque, idioma_original, ia_herramientas
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29::text[])
+         subseccion, es_premium, enfoque, idioma_original, ia_herramientas, publicado
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29::text[],$30)
        RETURNING *`
     );
     res.status(201).json({ ok: true, contenido: rows[0] });
@@ -177,7 +190,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
 
     const values = toRow(req.params.id, req.body, existing);
     const seccion = req.body.seccion ?? existing.seccion;
-    const destacado = req.body.destacado ?? existing.destacado ?? false;
+    const destacado = resolverPublicadoYDestacado(req.body, existing).destacado;
     const { rows } = await saveContenido(
       req.params.id,
       seccion,
@@ -187,7 +200,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
          cuerpo=$7, autor=$8, url_media=$9, fuente_url=$10, fuente_texto=$11, duracion_min=$12,
          url_portada=$13, portada_alt=$14, fecha_publicacion=$15, destacado=$16, subformato=$17,
          divulgacion_ia=$18, cita_estilo=$19, cita_autor=$20, cita_anio=$21, cita_titulo_original=$22,
-         cita_fecha_acceso=$23, cita_sin_fuente_externa=$24, subseccion=$25, es_premium=$26, enfoque=$27, idioma_original=$28, ia_herramientas=$29::text[]
+         cita_fecha_acceso=$23, cita_sin_fuente_externa=$24, subseccion=$25, es_premium=$26, enfoque=$27, idioma_original=$28, ia_herramientas=$29::text[], publicado=$30
        WHERE id=$1 RETURNING *`
     );
     res.json({ ok: true, contenido: rows[0] });

@@ -7,7 +7,7 @@ const { nombreVisibleSql } = require('../util/autorVisible');
 
 const router = express.Router();
 
-const TABLA_POR_TIPO = { debate_post: 'foro_posts', debate_comentario: 'foro_comentarios' };
+const TABLA_POR_TIPO = { debate_post: 'foro_posts', debate_comentario: 'foro_comentarios', articulo_comentario: 'comentarios' };
 
 // POST /api/reportes -- cualquier usuario con sesion puede reportar (no
 // exige edad_confirmada: reportar es una accion de seguridad, no de
@@ -21,11 +21,16 @@ router.post('/', requireAuth, async (req, res) => {
     const { rows: existe } = await pool.query(`SELECT id FROM ${tabla} WHERE id = $1`, [itemId]);
     if (existe.length === 0) return res.status(404).json({ ok: false, error: 'El elemento reportado no existe.' });
 
+    // El indice unico parcial impide dos reportes pendientes de la misma persona sobre el mismo elemento.
     const { rows } = await pool.query(
       `INSERT INTO reportes (tipo, item_id, reportado_por, motivo) VALUES ($1,$2,$3,$4)
+       ON CONFLICT (tipo, item_id, reportado_por) WHERE estado = 'pendiente' AND reportado_por IS NOT NULL DO NOTHING
        RETURNING id, tipo, item_id, reportado_por, motivo, estado, creado_en`,
       [tipo, itemId, req.user.id, motivo.trim()]
     );
+    if (rows.length === 0) {
+      return res.status(409).json({ ok: false, error: 'Ya reportaste esto y sigue pendiente de revisión.' });
+    }
     res.status(201).json({ ok: true, reporte: rows[0] });
   } catch (err) { enviarError500(res, err); }
 });
@@ -42,17 +47,20 @@ router.get('/', requireAuth, requireModerador, async (req, res) => {
     if (estado) { params.push(estado); where = `WHERE r.estado = $${params.length}`; }
     const { rows } = await pool.query(
       `SELECT r.id, r.tipo, r.item_id, r.motivo, r.estado, r.automatico, r.creado_en, pf.email AS reportado_por_email,
-              (fp.id IS NOT NULL OR fc.id IS NOT NULL) AS contenido_existe,
+              (fp.id IS NOT NULL OR fc.id IS NOT NULL OR ac.id IS NOT NULL) AS contenido_existe,
               fp.titulo AS contenido_titulo,
-              COALESCE(fp.cuerpo, fc.cuerpo) AS contenido_cuerpo,
-              COALESCE(fp.creado_en, fc.creado_en) AS contenido_creado_en,
+              COALESCE(fp.cuerpo, fc.cuerpo, ac.cuerpo) AS contenido_cuerpo,
+              COALESCE(fp.creado_en, fc.creado_en, ac.creado_en) AS contenido_creado_en,
               fc.post_id AS contenido_post_id,
+              ac.tipo AS contenido_articulo_tipo,
+              ac.item_id AS contenido_articulo_id,
               ${nombreVisibleSql('au')} AS contenido_autor_nombre
        FROM reportes r
        LEFT JOIN perfiles pf ON pf.id = r.reportado_por
        LEFT JOIN foro_posts fp ON r.tipo = 'debate_post' AND fp.id = r.item_id
        LEFT JOIN foro_comentarios fc ON r.tipo = 'debate_comentario' AND fc.id = r.item_id
-       LEFT JOIN perfiles au ON au.id = COALESCE(fp.autor_id, fc.autor_id)
+       LEFT JOIN comentarios ac ON r.tipo = 'articulo_comentario' AND ac.id = r.item_id
+       LEFT JOIN perfiles au ON au.id = COALESCE(fp.autor_id, fc.autor_id, ac.autor_id)
        ${where}
        ORDER BY (r.estado = 'pendiente') DESC, r.creado_en DESC`,
       params

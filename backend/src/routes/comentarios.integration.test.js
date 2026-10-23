@@ -81,6 +81,61 @@ describe('POST /api/comentarios', () => {
   });
 });
 
+describe('POST /api/comentarios -- deteccion de riesgo (Fase 6)', () => {
+  const FILA = { id: 'c7', cuerpo: 'x', autor_id: 'user-1', creado_en: '2026-01-01', autor_nombre: 'Participante-ab12' };
+
+  test('un comentario con lenguaje de riesgo crea un reporte automatico y sigue publicado', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'un-articulo' }] })
+      .mockResolvedValueOnce({ rows: [FILA] })
+      .mockResolvedValueOnce({ rows: [] });
+    const res = await request(app).post('/api/comentarios').set('x-test-user', USUARIO)
+      .send({ tipo: 'contenido', itemId: 'un-articulo', cuerpo: 'Agrégame a whatsapp y no le digas a tus papás' });
+    expect(res.status).toBe(201);
+    const [sql, params] = pool.query.mock.calls[2];
+    expect(sql).toMatch(/INSERT INTO reportes/);
+    expect(sql).toMatch(/'articulo_comentario'/);
+    expect(sql).toMatch(/ON CONFLICT \(tipo, item_id\) WHERE estado = 'pendiente' AND automatico DO NOTHING/);
+    expect(params[0]).toBe('c7');
+    expect(params[1]).toMatch(/^Detección automática: /);
+  });
+
+  test('un comentario normal no crea reporte', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'un-articulo' }] })
+      .mockResolvedValueOnce({ rows: [FILA] });
+    await request(app).post('/api/comentarios').set('x-test-user', USUARIO)
+      .send({ tipo: 'contenido', itemId: 'un-articulo', cuerpo: 'Muy buen artículo, gracias.' });
+    expect(pool.query).toHaveBeenCalledTimes(2);
+  });
+
+  test('si falla el reporte automatico el comentario se publica igual', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ id: 'un-articulo' }] })
+      .mockResolvedValueOnce({ rows: [FILA] })
+      .mockRejectedValueOnce(new Error('db'));
+    const res = await request(app).post('/api/comentarios').set('x-test-user', USUARIO)
+      .send({ tipo: 'noticia', itemId: 'un-articulo', cuerpo: 'Agrégame a whatsapp y no le digas a tus papás' });
+    expect(res.status).toBe(201);
+  });
+});
+
+describe('DELETE /api/comentarios/:id -- cierra sus reportes', () => {
+  test('borra el comentario y pasa sus reportes pendientes a revisado en una sola sentencia', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ autor_id: 'user-1' }] })
+      .mockResolvedValueOnce({ rows: [{ id: 'c1' }] });
+    const res = await request(app).delete('/api/comentarios/c1').set('x-test-user', USUARIO);
+    expect(res.status).toBe(200);
+    const [sql, params] = pool.query.mock.calls[1];
+    expect(sql).toMatch(/WITH borrado AS \(DELETE FROM comentarios/);
+    expect(sql).toMatch(/UPDATE reportes SET estado = 'revisado'/);
+    expect(sql).toMatch(/tipo = 'articulo_comentario'/);
+    expect(params).toEqual(['c1']);
+  });
+});
+
 describe('DELETE /api/comentarios/:id', () => {
   test('401 sin autenticacion', async () => {
     const res = await request(app).delete('/api/comentarios/c1');

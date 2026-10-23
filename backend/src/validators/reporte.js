@@ -1,4 +1,4 @@
-const TIPOS_VALIDOS = ['debate_post', 'debate_comentario'];
+const TIPOS_VALIDOS = ['debate_post', 'debate_comentario', 'articulo_comentario'];
 const ESTADOS_VALIDOS = ['pendiente', 'revisado', 'descartado'];
 
 function validateReporte({ tipo, itemId, motivo }) {
