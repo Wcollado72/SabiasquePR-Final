@@ -10,6 +10,12 @@
   # un cambio en la configuracion, como las reglas de redireccion, tambien debe publicarse.)
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ../netlify.toml"
 
+# Vistas previas de PR (2026-10-23): cada una es otro build de 15 creditos, y ademas no pueden hablar con la API (CORS solo
+# deja entrar a sabiasquepr.com), asi que solo sirven para revisar el aspecto. Ahora se construyen SOLO si la rama se llama
+# "preview/algo"; en cualquier otra rama se saltan. Codigo 1 = construir, 0 = saltar.
+[context.deploy-preview]
+  ignore = 'case "$HEAD" in preview/*) exit 1 ;; *) exit 0 ;; esac'
+
 # Quien entre por la direccion de Netlify (fabulous-tartufo-fcb839.netlify.app) pasa a
 # sabiasquepr.com. Motivo (2026-10-04): Stripe devolvia a los compradores a la direccion de
 # Netlify, donde no tenian sesion iniciada (cada dominio guarda su propia sesion) y parecia que
