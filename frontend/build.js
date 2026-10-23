@@ -1113,12 +1113,8 @@ const PAGES = [
                 <input type="text" id="ac-titulo" required minlength="3" maxlength="160" spellcheck="true" lang="es">
                 <label for="ac-subtitulo">Resumen (2-3 oraciones, redacción propia)</label>
                 <textarea id="ac-subtitulo" rows="3" required minlength="10" spellcheck="true" lang="es"></textarea>
-                <div class="spellcheck-actions"><button type="button" class="admin-btn-cancel" data-revisar="ac-subtitulo">Revisar texto</button></div>
-                <ul class="suggestion-list" id="ac-subtitulo-suggestions"></ul>
                 <label for="ac-cuerpo">Cuerpo del texto (opcional — solo ensayo/lectura corta con texto propio)</label>
                 <textarea id="ac-cuerpo" rows="6" spellcheck="true" lang="es"></textarea>
-                <div class="spellcheck-actions"><button type="button" class="admin-btn-cancel" data-revisar="ac-cuerpo">Revisar texto</button></div>
-                <ul class="suggestion-list" id="ac-cuerpo-suggestions"></ul>
                 <label for="ac-autor">Autor (opcional)</label>
                 <input type="text" id="ac-autor">
                 <label for="ac-divulgacion-ia">Divulgación de uso de IA</label>
@@ -1449,6 +1445,7 @@ const PAGES = [
   <script src="editorial.js"></script>
   <script src="citas.js"></script>
   <script src="clasificacion.js"></script>
+  <script src="correccion.js"></script>
   <script src="admin.js"></script>`,
   },
 

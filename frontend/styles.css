@@ -1307,6 +1307,20 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .tr-chip-ok{ background:#e1f0e8; color:#1f6b46; border-color:#9cc9b3; }
 .tr-chip-pend{ background:#f5ece1; color:#8a5a10; border-color:#e0c79a; }
 .tr-chip-error{ background:#f7e7e2; color:#b5432e; border-color:#e3b7ac; }
+.tr-par{ display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start; margin-top:8px; }
+.tr-orig{ display:flex; flex-direction:column; gap:4px; }
+.tr-orig-etiqueta{ font-size:.78rem; font-weight:600; opacity:.75; }
+.tr-orig-texto{ white-space:pre-wrap; font-size:.9rem; line-height:1.45; padding:8px 10px; border:1px dashed var(--line); border-radius:var(--radius); background:rgba(127,127,127,.08); max-height:16em; overflow:auto; }
+.tr-dest-idioma{ font-weight:400; opacity:.75; }
+@media (max-width:720px){ .tr-par{ grid-template-columns:1fr; } }
+.tr-estado{ padding:8px 12px; border-radius:var(--radius); border-left:4px solid #888; background:#eceff1; color:#1c2428; font-size:.86rem; margin:0; }
+.tr-estado-ok{ background:#e1f0e8; color:#12432c; border-left-color:#1f6b46; }
+.tr-estado-pend{ background:#f9efdc; color:#5a3a05; border-left-color:#c58a1e; }
+.tr-estado-error{ background:#f7e7e2; color:#7a2414; border-left-color:#b5432e; }
+.form-status.tr-status-grande{ padding:10px 12px; border-radius:var(--radius); font-weight:600; font-size:.9rem; background:#eceff1; color:#1c2428; border-left:4px solid #888; }
+.form-status.ok.tr-status-grande{ background:#e1f0e8; color:#12432c; border-left-color:#1f6b46; }
+.form-status.info.tr-status-grande{ background:#f9efdc; color:#5a3a05; border-left-color:#c58a1e; }
+.form-status.error.tr-status-grande{ background:#f7e7e2; color:#7a2414; border-left-color:#b5432e; }
 .tr-enlace-peligro{ background:none; border:0; color:#b5432e; text-decoration:underline; cursor:pointer; padding:6px 4px; font:inherit; }
 .synth-theme .tr-details{ border-color:var(--tema-border); }
 .synth-theme .tr-summary-title{ font-family:var(--tema-font-head); color:var(--tema-accent); letter-spacing:.04em; }
@@ -1588,6 +1602,18 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   cursor:pointer;
 }
 .suggestion-item button:hover{ background:var(--ink); color:var(--bg); }
+
+/* Barra de correctores (idioma + Revisar + Corregir con IA) bajo cada campo del panel */
+.corr-barra{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:2px 0 4px; font-size:.82rem; }
+.corr-idioma{ display:inline-flex; align-items:center; gap:6px; margin:0; font-weight:500; }
+.corr-select{ width:auto; margin:0; padding:3px 6px; font-size:.82rem; }
+.corr-barra .admin-btn-cancel{ padding:3px 12px; font-size:.82rem; }
+.corr-estado{ color:var(--ink-mute); }
+.corr-resultados:empty{ display:none; }
+.suggestion-item del{ background:color-mix(in srgb, var(--err) 18%, transparent); text-decoration:line-through; }
+.suggestion-item ins{ background:color-mix(in srgb, var(--ok, #2e7d32) 20%, transparent); text-decoration:none; }
+.corr-motivo{ color:var(--ink-mute); }
+.corr-acciones button:first-child{ margin-left:0; }
 
 /* Tab "Agentes" del admin: isla visual oscura/mono-espaciada ("Grid Mision"),
    contenida solo dentro de #admin-panel-agentes -- el resto de admin.html

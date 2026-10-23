@@ -104,6 +104,7 @@
       bindContenidos();
       bindProductos();
       bindTraducciones();
+      if (window.sqprCorreccionUI) window.sqprCorreccionUI.iniciar({ apiFetch });
       bindUrlNormalizer();
       bindGastos();
       loadNoticias();
@@ -428,7 +429,10 @@
       const control = filas
         ? `<textarea id="${id}" rows="${filas}" spellcheck="true"></textarea>`
         : `<input type="text" id="${id}" spellcheck="true">`;
-      return `<label for="${id}">${c.etiqueta}</label>${control}`;
+      return `<div class="tr-par">
+        <div class="tr-orig"><span class="tr-orig-etiqueta">Original (<span id="tr-${tipo}-${c.nombre}-idioma">español</span>) — ${c.etiqueta}</span><div class="tr-orig-texto" id="tr-${tipo}-${c.nombre}-orig"></div></div>
+        <div class="tr-dest"><label for="${id}">${c.etiqueta} <span class="tr-dest-idioma"></span></label>${control}</div>
+      </div>`;
     }).join('');
     box.innerHTML = `
       <details class="tr-details" id="tr-${tipo}-details">
@@ -454,12 +458,30 @@
       marcarChipTraduccion(tipo, 'Sin guardar', 'pend');
     });
     box.hidden = false;
+    document.getElementById(`tr-${tipo}-details`).addEventListener('toggle', () => mostrarOriginales(tipo));
     document.getElementById(`tr-${tipo}-ia`).addEventListener('click', () => traducirConIa(tipo));
     document.getElementById(`tr-${tipo}-guardar`).addEventListener('click', () => guardarTraduccion(tipo));
     document.getElementById(`tr-${tipo}-borrar`).addEventListener('click', () => borrarTraduccion(tipo));
     if (cfg.origenSelect) {
       document.getElementById(cfg.origenSelect).addEventListener('change', () => refrescarPanelTraduccion(tipo));
     }
+  }
+
+  // Muestra, junto a cada campo traducido, el texto original del formulario para poder compararlos.
+  function mostrarOriginales(tipo) {
+    const cfg = TRADUCCION_CFG[tipo];
+    const origen = IDIOMA_NOMBRE[idiomaOrigenDe(tipo)];
+    const destino = IDIOMA_NOMBRE[idiomaDestinoDe(tipo)];
+    cfg.campos.forEach((c) => {
+      const caja = document.getElementById(`tr-${tipo}-${c.nombre}-orig`);
+      if (!caja) return;
+      const v = leerCampoOrigen(c);
+      caja.textContent = Array.isArray(v) ? v.join('\n') : v;
+      if (!caja.textContent) caja.textContent = '(vacío)';
+      document.getElementById(`tr-${tipo}-${c.nombre}-idioma`).textContent = origen;
+      const lab = document.querySelector(`label[for="tr-${tipo}-${c.nombre}"] .tr-dest-idioma`);
+      if (lab) lab.textContent = `(${destino})`;
+    });
   }
 
   function bindTraducciones() {
@@ -472,6 +494,8 @@
     const chip = document.getElementById(`tr-${tipo}-chip`);
     chip.textContent = texto;
     chip.className = `tr-chip tr-chip-${estado}`;
+    const caja = document.getElementById(`tr-${tipo}-estado`);
+    if (caja) caja.className = `admin-hint tr-estado tr-estado-${estado}`;
   }
 
   async function refrescarPanelTraduccion(tipo) {
@@ -485,6 +509,7 @@
     traduccionSinGuardar[tipo] = false;
     setStatus(document.getElementById(`tr-${tipo}-status`), '', '');
     cfg.campos.forEach((c) => escribirCampoTraduccion(tipo, c, ''));
+    mostrarOriginales(tipo);
     const usable = Boolean(id);
     document.getElementById(`tr-${tipo}-campos`).hidden = !usable;
     document.getElementById(`tr-${tipo}-acciones`).hidden = !usable;
@@ -529,9 +554,10 @@
       traduccionSinGuardar[tipo] = true;
       marcarChipTraduccion(tipo, 'Borrador sin guardar', 'pend');
       document.getElementById(`tr-${tipo}-details`).open = true;
-      setStatus(statusEl, 'ok', 'Borrador listo — revísalo, ajústalo si hace falta y pulsa "Guardar traducción". Todavía no está guardado.');
+      mostrarOriginales(tipo);
+      setStatus(statusEl, 'info tr-status-grande', 'Borrador listo — NO está guardado todavía. Revísalo, ajústalo si hace falta y pulsa «Guardar traducción».');
     } catch (err) {
-      setStatus(statusEl, 'error', '' + err.message);
+      setStatus(statusEl, 'error tr-status-grande', '' + err.message);
     }
   }
 
@@ -549,9 +575,10 @@
     try {
       await apiFetch(`/api/admin/traducciones/${tipo}/${encodeURIComponent(id)}/${destino}`, { method: 'PUT', body: JSON.stringify({ campos }) });
       await refrescarPanelTraduccion(tipo);
-      setStatus(statusEl, 'ok', 'Traducción guardada.');
+      const hora = new Date().toLocaleTimeString('es-PR', { hour: '2-digit', minute: '2-digit' });
+      setStatus(statusEl, 'ok tr-status-grande', `✓ Traducción al ${IDIOMA_NOMBRE[destino]} guardada a las ${hora}. Ya la ven los visitantes que elijan ese idioma.`);
     } catch (err) {
-      setStatus(statusEl, 'error', '' + err.message);
+      setStatus(statusEl, 'error tr-status-grande', '' + err.message);
     }
   }
 
@@ -562,9 +589,9 @@
     try {
       await apiFetch(`/api/admin/traducciones/${tipo}/${encodeURIComponent(idPiezaDe(tipo))}/${destino}`, { method: 'DELETE' });
       await refrescarPanelTraduccion(tipo);
-      setStatus(statusEl, 'ok', 'Traducción eliminada.');
+      setStatus(statusEl, 'ok tr-status-grande', '✓ Traducción eliminada. La pieza vuelve a mostrarse solo en su idioma original.');
     } catch (err) {
-      setStatus(statusEl, 'error', '' + err.message);
+      setStatus(statusEl, 'error tr-status-grande', '' + err.message);
     }
   }
 
@@ -665,7 +692,7 @@
       closeGastoForm();
       loadGastos();
     } catch (err) {
-      setStatus(statusEl, 'error', '' + err.message);
+      setStatus(statusEl, 'error tr-status-grande', '' + err.message);
     }
   }
 
@@ -965,7 +992,7 @@
         mensaje: body.publicado ? 'Publicada ✔ (ya se ve en el sitio).' : 'Guardada como borrador ✔ (no se ve en el sitio).',
       });
     } catch (err) {
-      setStatus(statusEl, 'error', '' + err.message);
+      setStatus(statusEl, 'error tr-status-grande', '' + err.message);
     }
   }
 
@@ -1084,10 +1111,6 @@
     document.getElementById('ac-cita-sin-fuente').addEventListener('change', () => { toggleCitationFields(); updateCitationPreview(); });
     ['ac-cita-estilo', 'ac-cita-autor', 'ac-cita-anio', 'ac-cita-titulo-original', 'ac-cita-fecha-acceso', 'ac-fuente-texto', 'ac-fuente-url']
       .forEach((id) => document.getElementById(id).addEventListener('input', updateCitationPreview));
-
-    document.querySelectorAll('[data-revisar]').forEach((btn) => btn.addEventListener('click', () => {
-      revisarTexto(btn.dataset.revisar, btn.dataset.revisar + '-suggestions');
-    }));
 
     bindInvestigadorRedactor();
     bindSynthPanels();
@@ -1355,43 +1378,6 @@
       statusEl.textContent = 'Listo — revisa el título, el resumen y el cuerpo antes de guardar.';
     } catch (err) {
       statusEl.textContent = 'No se pudo redactar: ' + err.message;
-    }
-  }
-
-  // Revisión ortográfica/gramatical con LanguageTool (API pública gratuita,
-  // detecta idioma automáticamente). El corrector nativo del navegador
-  // (spellcheck="true") queda siempre activo aparte, sin necesidad de JS.
-  async function revisarTexto(textareaId, resultsId) {
-    const ta = document.getElementById(textareaId);
-    const ul = document.getElementById(resultsId);
-    ul.innerHTML = '<li class="foro-loading">Revisando...</li>';
-    try {
-      const res = await fetch('https://api.languagetool.org/v2/check', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ text: ta.value, language: 'auto' }),
-      });
-      const data = await res.json();
-      const matches = data.matches || [];
-      if (!matches.length) { ul.innerHTML = '<li class="foro-empty">Sin sugerencias.</li>'; return; }
-      ul.innerHTML = matches.map((m) => {
-        const snippet = ta.value.slice(m.offset, m.offset + m.length);
-        const repl = (m.replacements || [])[0] && m.replacements[0].value;
-        const btn = repl
-          ? `<button type="button" data-offset="${m.offset}" data-length="${m.length}" data-replacement="${escapeHtml(repl)}" data-target="${textareaId}" data-results="${resultsId}">Usar "${escapeHtml(repl)}"</button>`
-          : '';
-        return `<li class="suggestion-item">"<mark>${escapeHtml(snippet)}</mark>" — ${escapeHtml(m.message)}${btn}</li>`;
-      }).join('');
-      ul.querySelectorAll('button[data-offset]').forEach((b) => b.addEventListener('click', () => {
-        const input = document.getElementById(b.dataset.target);
-        const offset = Number(b.dataset.offset);
-        const length = Number(b.dataset.length);
-        input.value = input.value.slice(0, offset) + b.dataset.replacement + input.value.slice(offset + length);
-        // Los demas offsets de esta lista quedan invalidos tras editar el texto.
-        document.getElementById(b.dataset.results).innerHTML = '<li class="foro-empty">Texto actualizado — vuelve a revisar si quieres seguir corrigiendo.</li>';
-      }));
-    } catch (err) {
-      ul.innerHTML = `<li class="foro-error">No se pudo revisar: ${escapeHtml(err.message)}</li>`;
     }
   }
 
@@ -1783,7 +1769,7 @@
         recargarLista: loadContenidos, mensaje: 'Guardado ✔ (ya se ve en el sitio).',
       });
     } catch (err) {
-      setStatus(statusEl, 'error', '' + err.message);
+      setStatus(statusEl, 'error tr-status-grande', '' + err.message);
     }
   }
 
@@ -1892,7 +1878,7 @@
         recargarLista: loadProductos, mensaje: 'Guardado ✔.',
       });
     } catch (err) {
-      setStatus(statusEl, 'error', '' + err.message);
+      setStatus(statusEl, 'error tr-status-grande', '' + err.message);
     }
   }
 
