@@ -153,6 +153,18 @@
     return 'sqpr_edad_confirmada_18mas';
   }
 
+  // La confirmacion de edad sin cuenta vive en sessionStorage; si el navegador no deja usarlo (Safari con todas las
+  // cookies bloqueadas lanza error), se recuerda en memoria mientras la pagina siga abierta.
+  const edadEnMemoria = new Set();
+  function edadDeSesionConfirmada() {
+    try { if (sessionStorage.getItem(sessionEdadKey()) === '1') return true; } catch { /* sin almacenamiento */ }
+    return edadEnMemoria.has(sessionEdadKey());
+  }
+  function confirmarEdadDeSesion() {
+    edadEnMemoria.add(sessionEdadKey());
+    try { sessionStorage.setItem(sessionEdadKey(), '1'); } catch { /* sin almacenamiento: queda en memoria */ }
+  }
+
   // API pública: se llama desde revolucion-humana.html cuando la pestaña de
   // una sub-seccion con debate habilitado esta activa.
   async function initDebate({ subseccion, containerId }) {
@@ -183,7 +195,7 @@
     const requiereEdad = SUBSECCIONES_18_MAS.includes(subseccion);
     const edadConfirmada = !requiereEdad || (currentUser
       ? currentUserEdadConfirmada
-      : sessionStorage.getItem(sessionEdadKey()) === '1');
+      : edadDeSesionConfirmada());
 
     if (!edadConfirmada) {
       renderDisclaimer(root, subseccion, containerId);
@@ -205,7 +217,7 @@
           currentUserEdadConfirmada = true;
         } catch (err) { alert('' + err.message); return; }
       } else {
-        sessionStorage.setItem(sessionEdadKey(), '1');
+        confirmarEdadDeSesion();
       }
       renderDebate(root, subseccion);
     });

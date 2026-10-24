@@ -14,14 +14,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const themeLabel  = themeToggle?.querySelector('.theme-label');
 
   // Claro por defecto; solo se usa oscuro si la persona lo eligió
-  const initTheme = localStorage.getItem('sqpr-theme') === 'dark' ? 'dark' : 'light';
+  // (Safari con «Bloquear todas las cookies» lanza error al tocar localStorage: sin almacenamiento, claro.)
+  let temaGuardado = null;
+  try { temaGuardado = localStorage.getItem('sqpr-theme'); } catch { /* sin almacenamiento */ }
+  const initTheme = temaGuardado === 'dark' ? 'dark' : 'light';
 
   applyTheme(initTheme);
 
   themeToggle?.addEventListener('click', () => {
     const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
     applyTheme(next);
-    localStorage.setItem('sqpr-theme', next);
+    try { localStorage.setItem('sqpr-theme', next); } catch { /* sin almacenamiento: vale solo en esta visita */ }
   });
 
   function applyTheme(theme) {
