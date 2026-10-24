@@ -5,7 +5,7 @@ name: Respaldo de la base de datos (Supabase)
 # project backups"). Este workflow es el reemplazo gratis: un pg_dump
 # diario de la base real, guardado como artefacto de GitHub Actions.
 #
-# CIFRADO (docs/interno/AUDITORIA-SEGURIDAD.md, debilidad #4, 2026-10-02): el dump trae
+# CIFRADO (auditoría de seguridad del proyecto, debilidad #4, 2026-10-02): el dump trae
 # correos y fechas de nacimiento (datos personales, posiblemente de menores),
 # asi que se cifra con `age` ANTES de subirlo. Aqui solo vive la llave PUBLICA
 # (publica por diseno: sirve para cifrar, no para abrir). La llave PRIVADA esta

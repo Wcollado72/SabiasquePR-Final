@@ -1,4 +1,4 @@
-// MFA del admin (docs/interno/AUDITORIA-SEGURIDAD.md, debilidad #2). Se prueba el middleware
+// MFA del admin (auditoría de seguridad del proyecto, debilidad #2). Se prueba el middleware
 // REAL (no el authMock) con jose y la base simulados: lo unico que cambia entre
 // casos es el rol del perfil y el claim `aal` del JWT.
 jest.mock('jose', () => ({

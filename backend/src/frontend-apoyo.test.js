@@ -1,4 +1,4 @@
-// Fase 1 del modelo de apoyo voluntario (docs/interno/PLAN-APOYO-DONACIONES.md, docs/interno/TEXTOS-APOYO.md):
+// Fase 1 del modelo de apoyo voluntario:
 // textos aprobados, nombres nuevos, secciones legales y protección contra dejar el enlace de PRUEBA en producción.
 const fs = require('fs');
 const path = require('path');
@@ -22,7 +22,6 @@ describe('Página "Apoya el canal" (premium.html)', () => {
 
   test('la frase de costos que el usuario pidió eliminar no aparece', () => {
     expect(html).not.toMatch(/costos reales/i);
-    expect(leer('docs/interno/TEXTOS-APOYO.md')).not.toMatch(/costos reales|real costs/i);
   });
 
   test('avisos legales: voluntario, 18+, no deducible, Stripe, cancelación y reembolso', () => {

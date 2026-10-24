@@ -1,4 +1,4 @@
-// Compatibilidad con Express 5 (docs/interno/AUDITORIA-SEGURIDAD.md, saltos mayores).
+// Compatibilidad con Express 5 (auditoría de seguridad del proyecto, saltos mayores).
 // En Express 5 `req.body` es `undefined` (no `{}`) cuando la peticion no trae
 // cuerpo o no es JSON; varias rutas leen `req.body.campo` directamente, asi que
 // app.js lo normaliza a `{}` como en Express 4. Sin eso, una peticion vacia

@@ -16,7 +16,7 @@ function getJWKS() {
   return jwks;
 }
 
-// ── MFA del admin (docs/interno/AUDITORIA-SEGURIDAD.md, debilidad #2) ─────────────────
+// ── MFA del admin (auditoría de seguridad del proyecto, debilidad #2) ─────────────────
 // Los roles con poder (admin y moderador) solo pueden usar ese poder si la
 // sesion paso la verificacion en dos pasos: el JWT de Supabase trae `aal`
 // ("aal1" = solo contrasena, "aal2" = contrasena + codigo TOTP). Mientras
@@ -47,7 +47,7 @@ function rechazarPorMfa(res) {
   });
 }
 
-// Verificacion del JWT con emisor y audiencia (docs/interno/AUDITORIA-SEGURIDAD.md,
+// Verificacion del JWT con emisor y audiencia (auditoría de seguridad del proyecto,
 // debilidad #8). Segun la documentacion oficial de Supabase, los tokens de
 // usuario traen `iss` = <URL del proyecto>/auth/v1 y `aud` = "authenticated";
 // los de la llave anon/service_role traen iss "supabase" y quedan rechazados.

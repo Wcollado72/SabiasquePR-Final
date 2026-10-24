@@ -26,7 +26,7 @@ const agradecimientosRoutes = require('./routes/agradecimientos');
 function buildApp() {
   const app = express();
 
-  // Saltos de proxy delante de Express (docs/interno/AUDITORIA-SEGURIDAD.md, debilidad #1).
+  // Saltos de proxy delante de Express (auditoría de seguridad del proyecto, debilidad #1).
   // Sin esto, `req.ip` es siempre el proxy local de Render (::1) y TODOS los
   // visitantes comparten un solo contador del rate limit: una persona podia
   // agotar los 300 pedidos por 15 min de todos. Medido en produccion el
@@ -36,11 +36,11 @@ function buildApp() {
   // X-Forwarded-For falso que mande un atacante queda a la IZQUIERDA del
   // cliente real y se ignora. En local/pruebas (sin proxies) el default es 0.
   // Si Render cambia de infraestructura: TRUST_PROXY_HOPS lo ajusta sin tocar
-  // codigo (como volver a medirlo: ver docs/interno/AUDITORIA-SEGURIDAD.md).
+  // codigo (cómo volver a medirlo: ver la auditoría de seguridad del proyecto).
   const hops = Number.parseInt(process.env.TRUST_PROXY_HOPS, 10);
   app.set('trust proxy', Number.isInteger(hops) && hops >= 0 ? hops : (process.env.RENDER ? 3 : 0));
 
-  // Cabeceras de endurecimiento del API (docs/interno/AUDITORIA-SEGURIDAD.md, debilidad #7):
+  // Cabeceras de endurecimiento del API (auditoría de seguridad del proyecto, debilidad #7):
   // quita `x-powered-by: Express` (anunciaba el framework) y agrega nosniff,
   // HSTS, X-Frame-Options, etc. El API solo devuelve JSON, asi que el CSP es el
   // mas cerrado posible. `Cross-Origin-Resource-Policy: cross-origin` es
@@ -152,7 +152,7 @@ function buildApp() {
   app.use('/api/newsletter', newsletterRoutes);
 
   // Manejador de errores. Nunca se devuelve err.message tal cual en un error
-  // inesperado (docs/interno/AUDITORIA-SEGURIDAD.md, debilidad #9): solo los casos conocidos
+  // inesperado (auditoría de seguridad del proyecto, debilidad #9): solo los casos conocidos
   // tienen mensaje propio; el resto se registra en el log y sale generico.
   app.use((err, _req, res, _next) => {
     if (err.message && err.message.includes('CORS')) {

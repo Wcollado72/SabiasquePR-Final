@@ -1,4 +1,4 @@
-// Endurecimiento del API (docs/interno/AUDITORIA-SEGURIDAD.md, debilidades #7 y #9).
+// Endurecimiento del API (auditoría de seguridad del proyecto, debilidades #7 y #9).
 jest.mock('./db', () => ({ pool: { query: jest.fn() } }));
 
 const request = require('supertest');

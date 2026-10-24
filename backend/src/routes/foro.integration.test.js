@@ -13,7 +13,7 @@ const ADMIN = JSON.stringify({ id: 'admin-1', rol: 'admin', edad_confirmada: tru
 const SIN_EDAD_CONFIRMADA = JSON.stringify({ id: 'user-menor', rol: 'usuario', edad_confirmada: false });
 const CUENTA_NUEVA = JSON.stringify({ id: 'user-nuevo', rol: 'usuario', edad_confirmada: true, creado_en: new Date().toISOString() });
 const MODERADOR = JSON.stringify({ id: 'mod-1', rol: 'moderador', edad_confirmada: true });
-// Fecha de nacimiento REAL conocida -- ver docs/interno/AUDITORIA-LEGAL-MENORES.md: el
+// Fecha de nacimiento REAL conocida -- ver la auditoría legal de protección de menores del proyecto: el
 // dato conocido siempre gana sobre el checkbox de autoafirmacion.
 const MENOR_CON_FECHA_CONOCIDA = JSON.stringify({
   id: 'user-menor-real', rol: 'usuario', edad_confirmada: true,
