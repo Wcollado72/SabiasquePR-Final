@@ -274,13 +274,15 @@ AREAS = [
     ('CRUD: noticias, contenidos, productos y debate', [
         'src/routes/noticias.', 'src/routes/contenidos.', 'src/routes/productos.', 'src/routes/foro.',
         'src/routes/comentarios.', 'src/routes/reportes.', 'src/routes/ordenes.', 'src/routes/agradecimientos.',
-        'src/routes/newsletter.', 'src/clasificacion.test', 'src/regiones.test', 'src/util/autorVisible.test']),
+        'src/routes/newsletter.', 'src/clasificacion.test', 'src/regiones.test', 'src/util/autorVisible.test',
+        'src/routes/fuentes.']),
     ('Validadores de datos y utilidades', ['src/validators/', 'src/util/deteccionRiesgo', 'src/util/slugify']),
     ('Pagos Stripe y webhook', ['src/routes/stripe']),
     ('Seguridad y cabeceras', ['src/app.']),
     ('Panel de administración, agentes de IA y traducciones', [
         'src/routes/admin.', 'src/services/', 'src/util/traducciones.test', 'src/ia-herramientas.test',
-        'src/validators/iaHerramientas']),
+        'src/validators/iaHerramientas', 'src/routes/brigada.', 'src/routes/contenidoIa.', 'src/routes/correccion.',
+        'src/routes/semillas.', 'src/correccion.test', 'src/taller.test', 'src/util/semillaAContenido', 'src/util/usoIa']),
     ('Frontend, i18n y build', ['src/frontend-', 'src/i18n/', 'src/build.']),
     ('Scripts de base de datos, respaldo y migración', ['scripts/']),
     ('Configuración de despliegue', ['src/netlify-config']),
