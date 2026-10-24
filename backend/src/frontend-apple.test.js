@@ -26,6 +26,28 @@ describe('cajón del carrito: no queda tapado por la barra de Safari del iPhone'
   });
 });
 
+describe('la página no se arrastra de lado en el iPhone', () => {
+  const bloque = css.slice(css.indexOf('.cart-drawer{'), css.indexOf('}', css.indexOf('.cart-drawer{')));
+
+  test('el cajón del carrito cerrado no queda fuera de la pantalla: right:0, recortado y oculto', () => {
+    expect(bloque).toMatch(/right:0;/);
+    expect(bloque).not.toMatch(/right:\s*-\d+px/);
+    expect(bloque).toMatch(/clip-path:inset\(0 0 0 100%\);/);
+    expect(bloque).toMatch(/visibility:hidden;/);
+    expect(css).toMatch(/\.cart-drawer\.open\{ clip-path:inset\(0 0 0 -40px\); visibility:visible;/);
+  });
+
+  test('html y body recortan el desborde horizontal (overflow-x:clip, que no rompe position:sticky)', () => {
+    expect(css).toMatch(/html\{[^}]*overflow-x:clip;/);
+    expect(css).toMatch(/body\{\n\s*overflow-x:clip;/);
+  });
+
+  test('ningún elemento del CSS se estaciona fuera de la pantalla con right o left negativos en un position:fixed', () => {
+    const fijos = [...css.matchAll(/([^{}]+)\{([^{}]*position:\s*fixed[^{}]*)\}/g)].filter((m) => /(^|[;\s])(right|left):\s*-\d/.test(m[2]));
+    expect(fijos.map((m) => m[1].trim())).toEqual([]);
+  });
+});
+
 describe('sin almacenamiento (Safari con «Bloquear todas las cookies» lanza SecurityError)', () => {
   test('script.js lee y guarda el tema dentro de try/catch', () => {
     const js = leer('script.js');
