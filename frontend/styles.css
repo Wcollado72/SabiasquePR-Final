@@ -2632,6 +2632,15 @@ html[data-theme="dark"] .social-links img{ filter:invert(1) hue-rotate(180deg); 
 .taller-informe-cols > div{ break-inside:avoid; margin-bottom:8px; }
 .taller-informe ul{ margin:4px 0 0; padding-left:18px; }
 .taller-informe li{ margin-bottom:6px; }
+.brigada-agente-card select, .brigada-agente-card input[type="text"]{ width:100%; margin-top:2px; }
+.brigada-agente-card label{ font-size:.78rem; margin:4px 0 0; }
+#taller-agentes{ align-items:start; }
+.taller-desarrollos{ display:flex; flex-direction:column; gap:12px; margin-top:12px; }
+.taller-desarrollo h5{ margin:0 0 4px; font-size:1.05rem; }
+.taller-borrador{ max-width:75ch; font-size:1rem; line-height:1.6; }
+.taller-borrador p{ margin:0 0 .9em; }
+.taller-leyenda{ margin-left:8px; white-space:nowrap; }
+.taller-de-farolera{ background:rgba(255,178,56,.25); color:inherit; text-decoration:underline dotted rgba(255,178,56,.9); text-underline-offset:3px; padding:0 1px; border-radius:2px; }
 .taller-eco{ break-inside:avoid; margin-bottom:10px; padding:8px 12px; border-left:3px solid rgba(127,127,127,.6); background:rgba(127,127,127,.06); border-radius:var(--radius); }
 .taller-eco-coincide{ border-left-color:#4fd671; }
 .taller-eco-matiza{ border-left-color:#ffb238; }

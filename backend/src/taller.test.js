@@ -144,6 +144,50 @@ describe('htmlInformes', () => {
   });
 });
 
+describe('borradores de La Farolera', () => {
+  const desarrollo = (extra = {}) => ({
+    id: 'd1', formato: 'columna', titulo: 'La vergüenza <que> mueve', resumen: 'Un resumen.',
+    parrafos: [[{ texto: 'La gente cambia.', origen: 'autor' }, { texto: ' Imagina <b>que</b> sí.', origen: 'farolera' }], [{ texto: 'Segundo.', origen: 'autor' }]],
+    palabras: { autor: 4, farolera: 3, porcentaje_autor: 57 }, datos_a_verificar: [], notas: [], ...extra,
+  });
+
+  test('el texto corrido junta los tramos y separa los párrafos, sin marcas', () => {
+    expect(T.textoDeDesarrollo(desarrollo())).toBe('La gente cambia. Imagina <b>que</b> sí.\n\nSegundo.');
+  });
+
+  test('lo del autor va normal y lo de La Farolera marcado, con el porcentaje, la leyenda y los botones', () => {
+    const h = T.htmlDesarrollo(desarrollo(), { desactualizado: false, hecho: false }, esc);
+    expect(h).toContain('<span class="taller-del-autor">La gente cambia.</span><mark class="taller-de-farolera"> Imagina &lt;b>que&lt;/b> sí.</mark>');
+    expect(h).toContain('57% de las palabras son tuyas (4)');
+    expect(h).toContain('Columna: La vergüenza &lt;que> mueve');
+    ['data-accion="pasar"', 'data-accion="copiar"', 'data-accion="descartar"', 'Lo que agregó La Farolera'].forEach((t) => expect(h).toContain(t));
+    expect(h).not.toContain('Cambiaste la idea');
+  });
+
+  test('avisa los datos a verificar, las notas y si la idea cambió; y si ya pasó no ofrece pasarla otra vez', () => {
+    const h = T.htmlDesarrollo(desarrollo({ datos_a_verificar: ['2031'], notas: ['Falta una fuente'] }), { desactualizado: true, hecho: true }, esc);
+    expect(h).toContain('Verifica estos datos');
+    expect(h).toContain('«2031»');
+    expect(h).toContain('Falta una fuente');
+    expect(h).toContain('Cambiaste la idea después de este análisis');
+    expect(h).not.toContain('data-accion="pasar"');
+  });
+
+  test('la lista muestra el borrador más nuevo primero y marca solo los desactualizados', () => {
+    const h = T.htmlDesarrollos({ desarrollos: [desarrollo({ id: 'viejo' }), desarrollo({ id: 'nuevo' })], desarrollos_desactualizados: ['viejo'], contenido_id: null }, esc);
+    expect(h.indexOf('data-did="nuevo"')).toBeLessThan(h.indexOf('data-did="viejo"'));
+    expect((h.match(/Cambiaste la idea/g) || []).length).toBe(1);
+  });
+
+  test('si la semilla ya pasó a Contenidos, lo dice con el botón para abrir esa pieza', () => {
+    const h = T.htmlDesarrollos({ desarrollos: [desarrollo()], desarrollos_desactualizados: [], contenido_id: 'la-pieza' }, esc);
+    expect(h).toContain('ya pasó a Contenidos');
+    expect(h).toContain('data-accion="abrir-contenido" data-id="la-pieza"');
+    expect(T.htmlDesarrollos({ desarrollos: [], contenido_id: null }, esc)).toBe('');
+    expect(T.htmlDesarrollos(null, esc)).toBe('');
+  });
+});
+
 describe('el Taller en el panel', () => {
   test('hay una pestaña y un panel solo para el administrador, con su editor, su lista y sus agentes', () => {
     expect(html).toContain('data-tab="taller">🏮 Taller de Aliado</button>');
@@ -154,9 +198,10 @@ describe('el Taller en el panel', () => {
     expect(js).toContain("document.getElementById('admin-panel-taller').style.display = tab === 'taller'");
   });
 
-  test('La Grieta, La Cazadora y El Contrapunto trabajan; La Farolera está a la vista pero todavía deshabilitada', () => {
-    ['grieta', 'cazadora', 'contrapunto'].forEach((a) => expect(html).toMatch(new RegExp(`id="taller-${a}"><span`)));
-    expect(html).toMatch(/id="taller-farolera" disabled/);
+  test('Las cuatro agentes del Taller trabajan (La Farolera con su formato e indicaciones)', () => {
+    ['grieta', 'cazadora', 'contrapunto', 'farolera'].forEach((a) => expect(html).toMatch(new RegExp(`id="taller-${a}"><span`)));
+    ['taller-formato', 'taller-indicaciones', 'taller-desarrollos'].forEach((id) => expect(html).toContain(`id="${id}"`));
+    expect(html).not.toMatch(/id="taller-\w+" disabled/);
     expect((html.match(/data-desc="(grieta|cazadora|contrapunto|farolera)"/g) || []).length).toBe(4);
   });
 
@@ -165,6 +210,11 @@ describe('el Taller en el panel', () => {
     expect(taller).toContain("/api/semillas/${encodeURIComponent(guardada.id)}/agentes/${agente.id}");
     expect(taller).toContain('const guardada = await guardar();');
     expect(taller).toContain("if (!confirm('¿Borrar esta semilla");
+    expect(taller).toContain('/desarrollar`');
+    expect(taller).toContain('/pasar-a-contenidos`');
+    expect(taller).toContain("if (!confirm('Se creará un BORRADOR en Contenidos");
+    expect(taller).toContain("/desarrollos/${encodeURIComponent(did)}`, { method: 'DELETE' }");
+    expect(js).toContain('abrirContenido: abrirContenidoPorId');
     expect(taller).toContain("method: 'PUT'");
     expect(taller).toContain("method: 'DELETE'");
   });

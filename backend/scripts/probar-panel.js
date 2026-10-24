@@ -36,6 +36,15 @@ const SEMILLA = { id: '11111111-1111-4111-8111-111111111111', titulo: 'Vergüenz
 w.confirm = () => true; // la Cazadora pide confirmar antes de gastar en busquedas
 const fetchBase = async (url, opts = {}) => {
   const u = String(url);
+  if (/\/api\/semillas\/[^/]+\/desarrollar$/.test(u)) {
+    const d = { id: '33333333-3333-4333-8333-333333333333', formato: 'columna', titulo: 'La verguenza que mueve', resumen: 'Un resumen.', idioma: 'es', texto_hash: 'h', parrafos: [[{ texto: 'La gente cambia por verguenza.', origen: 'autor' }, { texto: ' Imagina que si.', origen: 'farolera' }]], notas: ['Falta una fuente.'], datos_a_verificar: [], palabras: { autor: 5, farolera: 3, porcentaje_autor: 63 } };
+    DESARROLLOS.push(d);
+    return { ok: true, status: 200, json: async () => ({ ok: true, estado: 'en_desarrollo', desarrollo: d }) };
+  }
+  if (/\/api\/semillas\/[^/]+\/pasar-a-contenidos$/.test(u)) {
+    CONTENIDO_DE_LA_SEMILLA.id = 'la-verguenza-que-mueve';
+    return { ok: true, status: 201, json: async () => ({ ok: true, estado: 'pasada', contenido: { id: 'la-verguenza-que-mueve', titulo: 'La verguenza que mueve', publicado: false } }) };
+  }
   if (/\/api\/semillas\/[^/]+\/agentes\/cazadora$/.test(u)) {
     return { ok: true, status: 200, json: async () => ({ ok: true, agente: 'cazadora', estado: 'explorada', analisis: { texto_hash: 'h', creado_en: '2026-10-24', resultado: { consultas: ['verguenza'], busquedas: 1, descartadas: 1, ecos: [{ autor: 'Autora Real', titulo: 'Sobre la verguenza', anio: '2010', url: 'https://editorial.com/obra', cita: 'La verguenza es un sentimiento revolucionario', relacion: 'coincide', porque: 'Comparte la tesis.', verificada: true }] } } }) };
   }
@@ -96,12 +105,14 @@ const fetchBase = async (url, opts = {}) => {
 // El servidor simulado recuerda los analisis de las agentes del Taller, como la base de datos real: los siguientes
 // GET/PUT de la semilla los devuelven.
 const GUARDADO = {};
+const DESARROLLOS = [];
+const CONTENIDO_DE_LA_SEMILLA = { id: null };
 w.fetch = async (url, opts = {}) => {
   const r = await fetchBase(url, opts);
   const cuerpo = await r.json();
   const agente = /\/api\/semillas\/[^/]+\/agentes\/(\w+)$/.exec(String(url));
   if (agente) GUARDADO[agente[1]] = cuerpo.analisis;
-  if (cuerpo.semilla) cuerpo.semilla = { ...cuerpo.semilla, analisis: { ...GUARDADO } };
+  if (cuerpo.semilla) cuerpo.semilla = { ...cuerpo.semilla, analisis: { ...GUARDADO }, desarrollos: [...DESARROLLOS], desarrollos_desactualizados: [], contenido_id: CONTENIDO_DE_LA_SEMILLA.id };
   return { ok: r.ok, status: r.status, json: async () => cuerpo };
 };
 
@@ -203,7 +214,7 @@ setTimeout(() => {
     const todo = fallos.concat(errores);
     console.log(todo.length ? todo.join('\n') : 'OK: el panel arranca sin errores');
     process.exit(todo.length ? 1 : 0);
-  }, 900);
+  }, 1400);
   // Las otras dos agentes del Taller, una despues de otra (comparten la semilla abierta).
   setTimeout(() => d.getElementById('taller-contrapunto').click(), 650);
   setTimeout(() => d.getElementById('taller-cazadora').click(), 750);
@@ -216,4 +227,22 @@ setTimeout(() => {
       ['hay un cuadro de informe por agente', d.querySelectorAll('#taller-resultados .taller-informe').length === 3],
     );
   }, 880);
+  // La Farolera desarrolla la idea (borrador con lo suyo marcado) y el borrador se pasa a Contenidos.
+  setTimeout(() => d.getElementById('taller-farolera').click(), 900);
+  setTimeout(() => {
+    const b = d.getElementById('taller-desarrollos');
+    comprobaciones.push(
+      ['La Farolera deja su borrador con lo del autor y lo suyo marcado, y avisa que falta una fuente',
+        b.textContent.includes('La gente cambia por verguenza.') && b.querySelectorAll('.taller-del-autor').length >= 1 && b.querySelectorAll('.taller-borrador mark.taller-de-farolera').length === 1 && b.textContent.includes('Falta una fuente.')],
+    );
+    const pasar = b.querySelector('[data-accion=pasar]');
+    if (pasar) pasar.click();
+  }, 1100);
+  setTimeout(() => {
+    const b = d.getElementById('taller-desarrollos');
+    comprobaciones.push(
+      ['«Pasar a Contenidos» crea el borrador y la semilla queda como pasada, sin botón para pasarla otra vez',
+        b.textContent.includes('ya pasó a Contenidos') && !b.querySelector('[data-accion=pasar]') && d.getElementById('ts-estado').value === 'pasada' && texto('taller-estado').includes('quedó como borrador')],
+    );
+  }, 1300);
 }, 1500);

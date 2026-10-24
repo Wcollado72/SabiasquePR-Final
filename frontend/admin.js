@@ -106,7 +106,7 @@
       bindProductos();
       bindTraducciones();
       if (window.sqprCorreccionUI) window.sqprCorreccionUI.iniciar({ apiFetch });
-      if (window.sqprTaller) window.sqprTaller.iniciar({ apiFetch, descripcion: (id) => (ELENCO_BRIGADA.find((a) => a.id === id) || {}).descripcion || '' });
+      if (window.sqprTaller) window.sqprTaller.iniciar({ apiFetch, descripcion: (id) => (ELENCO_BRIGADA.find((a) => a.id === id) || {}).descripcion || '', abrirContenido: abrirContenidoPorId });
       bindUrlNormalizer();
       bindGastos();
       loadNoticias();
@@ -2303,6 +2303,15 @@
     }
   }
 
+  // Desde el Taller: abre en edición la pieza que salió de una semilla (recarga la lista, porque es nueva).
+  async function abrirContenidoPorId(id) {
+    await loadContenidos();
+    const item = contenidosCache.find((c) => c.id === id);
+    if (!item) { alert('No encontré esa pieza en Contenidos. Búscala en la pestaña Contenidos.'); return; }
+    activarTab('contenidos');
+    openContenidoForm(item);
+  }
+
   function renderContenidosList() {
     const el = document.getElementById('admin-contenidos-list');
     const q = (document.getElementById('admin-contenidos-search').value || '').toLowerCase();
@@ -2861,7 +2870,7 @@
       noHace: 'No decide por ti ni te quita la idea.',
     },
     {
-      id: 'farolera', emoji: '🏮', nombre: 'Farolera', apodo: 'La Farolera', estado: 'proxima', lugar: 'taller', uso: 'farolera',
+      id: 'farolera', emoji: '🏮', nombre: 'Farolera', apodo: 'La Farolera', estado: 'activa', lugar: 'taller', uso: 'farolera',
       descripcion: 'Desarrolla tu idea en ensayo, reflexión, columna o lectura corta, marcando lo que ella agregó.',
       trabajo: ['Convierte la idea en el formato que elijas, cuando tú pulses «Desarrollar»', 'Conserva tus frases y marca en otro color lo que agregó'],
       noHace: 'No publica ni escribe nada sin que lo pidas.',

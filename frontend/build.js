@@ -1516,13 +1516,23 @@ const PAGES = [
                 <p class="brigada-agente-desc" data-desc="contrapunto"></p>
               </div>
               <div class="brigada-agente-card">
-                <button type="button" class="brigada-agente" id="taller-farolera" disabled><span aria-hidden="true">🏮</span> La Farolera <small>Desarrollar</small></button> <span class="ag-agente-etiqueta">próximamente</span>
+                <button type="button" class="brigada-agente" id="taller-farolera"><span aria-hidden="true">🏮</span> La Farolera <small>Desarrollar</small></button>
                 <p class="brigada-agente-desc" data-desc="farolera"></p>
+                <label for="taller-formato">Formato del borrador</label>
+                <select id="taller-formato">
+                  <option value="ensayo">Ensayo</option>
+                  <option value="reflexion">Reflexión</option>
+                  <option value="columna">Columna</option>
+                  <option value="lectura_corta">Lectura corta</option>
+                </select>
+                <label for="taller-indicaciones">Indicaciones (opcional)</label>
+                <input type="text" id="taller-indicaciones" maxlength="500" placeholder="Ej.: tono más cálido, empezar con una pregunta">
               </div>
               </div>
               <p class="admin-hint brigada-estado" id="taller-estado" aria-live="polite"></p>
             </section>
             <div class="taller-informes" id="taller-resultados" hidden></div>
+            <div class="taller-desarrollos" id="taller-desarrollos" hidden></div>
           </div>
         </section>
 
