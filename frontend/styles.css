@@ -1613,6 +1613,10 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
 .suggestion-item del{ background:color-mix(in srgb, var(--err) 18%, transparent); text-decoration:line-through; }
 .suggestion-item ins{ background:color-mix(in srgb, var(--ok, #2e7d32) 20%, transparent); text-decoration:none; }
 .corr-motivo{ color:var(--ink-mute); }
+.corr-resultados .foro-empty, .corr-resultados .foro-loading{ color:inherit; opacity:.9; padding:6px 0; }
+.ia-fila{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:2px 0 8px; }
+.ia-fila .admin-btn-cancel{ padding:3px 12px; font-size:.82rem; }
+.ia-fila .admin-hint{ margin:0; }
 .corr-acciones button:first-child{ margin-left:0; }
 
 /* Tab "Agentes" del admin: isla visual oscura/mono-espaciada ("Grid Mision"),
@@ -2529,3 +2533,21 @@ html[data-theme="dark"] .social-links img{ filter:invert(1) hue-rotate(180deg); 
 .agradecimientos-lista{ list-style:none; margin:12px 0; padding:0; display:flex; flex-wrap:wrap; gap:8px 18px; }
 .agradecimientos-lista li{ font-family:var(--font-display, Georgia, serif); font-size:1.05rem; padding:0; }
 .agradecimientos-lista li::before{ content:"\2665\00a0"; color:var(--accent); font-size:.8em; }
+
+/* La Brigada Coquí: mesa de agentes arriba de cada formulario y marcas 🤖 en los campos sugeridos */
+.brigada-mesa{ margin:0 0 14px; padding:12px 14px; border:2px dashed #4fd671; border-radius:var(--radius); background:rgba(79,214,113,.08); display:flex; flex-direction:column; gap:6px; }
+.brigada-mesa-head{ display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 12px; }
+.brigada-mesa, .brigada-mesa strong, .brigada-mesa label{ color:#e6f4ea; }
+.brigada-mesa-head strong{ color:#4fd671; font-size:1.02rem; }
+.brigada-mesa .admin-hint{ color:#b9c9bf; font-family:inherit; }
+.brigada-mesa-head .admin-hint{ margin:0; }
+.brigada-agentes{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.brigada-agente{ display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border:1px solid #4fd671; border-radius:999px; background:transparent; color:inherit; font:inherit; font-weight:600; cursor:pointer; }
+.brigada-agente small{ font-weight:400; opacity:.8; }
+.brigada-agente:hover:not(:disabled){ background:#4fd671; color:#06210f; }
+.brigada-agente:disabled{ opacity:.55; cursor:wait; }
+.brigada-estado{ margin:0; min-height:1.2em; font-size:.85rem; color:#e6f4ea !important; }
+.brigada-marca{ display:block; margin:2px 0 8px; padding:4px 8px; border-radius:4px; font-size:.8rem; line-height:1.35; }
+.brigada-marca-sugerido{ background:#e1f0e8; color:#12432c; border-left:3px solid #1f6b46; }
+.brigada-marca-no_encontrado, .brigada-marca-duda{ background:#f9efdc; color:#5a3a05; border-left:3px solid #c58a1e; }
+.brigada-marca-respetado{ background:#eceff1; color:#1c2428; border-left:3px solid #888; }

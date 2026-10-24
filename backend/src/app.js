@@ -13,6 +13,8 @@ const stripeRoutes = require('./routes/stripe');
 const stripeWebhookRoutes = require('./routes/stripeWebhook');
 const adminRoutes = require('./routes/admin');
 const correccionRoutes = require('./routes/correccion');
+const contenidoIaRoutes = require('./routes/contenidoIa');
+const brigadaRoutes = require('./routes/brigada');
 const perfilRoutes = require('./routes/perfil');
 const ordenesRoutes = require('./routes/ordenes');
 const comentariosRoutes = require('./routes/comentarios');
@@ -137,6 +139,8 @@ function buildApp() {
   app.use('/api/productos', productosRoutes);
   app.use('/api/stripe', stripeRoutes);
   app.use('/api/admin/corregir', correccionRoutes);
+  app.use('/api/admin/contenido-ia', contenidoIaRoutes);
+  app.use('/api/admin/brigada', brigadaRoutes);
   app.use('/api/admin', adminRoutes);
   app.use('/api/perfil', perfilRoutes);
   app.use('/api/agradecimientos', agradecimientosRoutes);

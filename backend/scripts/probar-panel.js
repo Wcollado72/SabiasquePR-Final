@@ -16,6 +16,7 @@ w.addEventListener('unhandledrejection', (e) => errores.push('rechazo: ' + ((e.r
 w.console.error = (...a) => errores.push('console.error: ' + a.join(' '));
 w.alert = (m) => errores.push('alert: ' + m);
 w.confirm = () => true;
+w.HTMLElement.prototype.scrollIntoView = () => {};
 w.SITE_CONFIG = { apiUrl: 'http://api.test', supabaseUrl: 'https://x.supabase.co', supabaseKey: 'k' };
 w.supabase = {
   auth: { getSession: async () => ({ data: { session: { access_token: 't', user: { id: 'u1' } } } }), onAuthStateChange: () => {} },
@@ -35,13 +36,28 @@ w.fetch = async (url) => {
   const u = String(url);
   const json = (o) => ({ ok: true, status: 200, json: async () => o });
   if (u.endsWith('/api/me')) return json({ ok: true, user: { id: 'u1', rol: 'admin' } });
+  if (u.endsWith('/contenido-ia/resumir')) return json({ ok: true, resumen: 'Resumen escrito por la IA.' });
+  if (u.endsWith('/brigada/clasificar')) {
+    return json({
+      ok: true, url: 'https://medio.com/nota', formatoOriginal: 'video',
+      sugerencias: {
+        idioma: { valor: 'en', motivo: 'La página declara el idioma «en».', confianza: 'alta' },
+        seccion: { valor: 'educacion', motivo: 'Trata de leyes escolares.', confianza: 'alta' },
+        clasificacion: { valor: 'leyes-educativas', motivo: 'Habla de una ley.', confianza: 'media' },
+        region: { valor: null, motivo: 'No se encontró en la fuente.', confianza: 'baja' },
+        formato: { valor: 'ensayo', motivo: 'Versión propia.', confianza: 'media' },
+        subformato: { valor: null, duda: 'opinion', motivo: 'Quizá.', confianza: 'baja' },
+      },
+    });
+  }
+  if (u.endsWith('/contenido-ia/metadatos-fuente')) return json({ ok: true, autorFuente: 'Ana Pérez', anio: '2025', tituloOriginal: '', nombreFuente: 'BBC' });
   return json({ ok: true, ...DATOS });
 };
 
 for (const f of ['ia-herramientas.js', 'editorial.js', 'citas.js', 'clasificacion.js', 'correccion.js', 'admin.js']) {
   try { w.eval(fs.readFileSync(path.join(F, f), 'utf8')); } catch (e) { errores.push(`carga ${f}: ${e.message}`); }
 }
-w.document.dispatchEvent(new w.Event('DOMContentLoaded'));
+// jsdom dispara DOMContentLoaded por si solo al terminar de leer el documento: no se dispara a mano (se iniciaria dos veces).
 
 setTimeout(() => {
   const d = w.document;
@@ -55,8 +71,44 @@ setTimeout(() => {
     ['los filtros de Reportes llevan contador', d.querySelector('#admin-reportes-filtros [data-filtro="todos"] .reportes-cuenta').textContent === '2'],
     ['los campos llevan la barra de correctores', d.querySelectorAll('.corr-barra').length >= 10],
   ];
-  const fallos = comprobaciones.filter(([, ok]) => !ok).map(([n]) => `FALLA: ${n}`);
-  const todo = fallos.concat(errores);
-  console.log(todo.length ? todo.join('\n') : 'OK: el panel arranca sin errores');
-  process.exit(todo.length ? 1 : 0);
+  // Botones de IA del formulario de Contenidos: «Resumir con IA» y «Rellenar desde la URL».
+  d.getElementById('ac-cuerpo').value = 'Un texto largo para resumir.';
+  d.getElementById('ac-resumir-ia').click();
+  d.getElementById('ac-fuente-url').value = 'https://medio.com/nota';
+  d.getElementById('ac-leer-url').click();
+  // Doña Fichas (Brigada Coquí): abre el formulario, la persona elige el formato a mano y luego pide clasificar.
+  d.getElementById('admin-contenidos-new').click();
+  const formato = d.getElementById('ac-tipo-formato');
+  formato.value = 'audio';
+  formato.dispatchEvent(new w.Event('change', { bubbles: true }));
+  d.getElementById('brigada-url-contenido').value = 'https://medio.com/nota';
+  d.getElementById('brigada-clasificar-contenido').click();
+  setTimeout(() => {
+    const marcaDe = (id) => { const m = d.getElementById(id).parentElement.querySelector(`.brigada-marca[data-campo="${id}"]`); return m ? m.textContent : ''; };
+    comprobaciones.push(
+      ['Doña Fichas rellena idioma, sección y sub-sección con su marca 🤖',
+        d.getElementById('ac-idioma-original').value === 'en' && d.getElementById('ac-seccion').value === 'educacion'
+        && d.getElementById('ac-clasificacion').value === 'leyes-educativas' && marcaDe('ac-seccion').includes('🤖 Doña Fichas sugirió')],
+      ['no pisa lo que la persona eligió a mano', formato.value === 'audio' && marcaDe('ac-tipo-formato').includes('lo elegiste tú')],
+      ['avisa «no encontrado» en lo que no sabe y la duda en lo inseguro', marcaDe('ac-enfoque').includes('⚠️') && marcaDe('ac-subformato').includes('hay duda')],
+      ['ofrece deshacer y lo muestra', d.getElementById('brigada-deshacer-contenido').hidden === false],
+    );
+    d.getElementById('brigada-deshacer-contenido').click();
+    comprobaciones.push(
+      ['Deshacer devuelve los campos y quita las marcas',
+        d.getElementById('ac-seccion').value === 'noticias' && d.getElementById('ac-idioma-original').value === 'es' && marcaDe('ac-seccion') === ''],
+    );
+  }, 300);
+  setTimeout(() => {
+    comprobaciones.push(
+      ['Resumir con IA escribe el resumen', d.getElementById('ac-subtitulo').value === 'Resumen escrito por la IA.'],
+      ['Rellenar desde la URL llena autor, año y medio, y deja vacío lo que la página no declara',
+        d.getElementById('ac-cita-autor').value === 'Ana Pérez' && d.getElementById('ac-cita-anio').value === '2025'
+        && d.getElementById('ac-fuente-texto').value === 'BBC' && d.getElementById('ac-cita-titulo-original').value === ''],
+    );
+    const fallos = comprobaciones.filter(([, ok]) => !ok).map(([n]) => `FALLA: ${n}`);
+    const todo = fallos.concat(errores);
+    console.log(todo.length ? todo.join('\n') : 'OK: el panel arranca sin errores');
+    process.exit(todo.length ? 1 : 0);
+  }, 700);
 }, 1500);

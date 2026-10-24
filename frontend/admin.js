@@ -836,6 +836,7 @@
     document.getElementById('an-borrador').addEventListener('click', () => enviarNoticia(false));
     document.getElementById('an-publicar').addEventListener('click', () => enviarNoticia(true));
     selectorIaNoticia = montarSelectorIa('an-ia-selector', 'an-divulgacion-ia');
+    bindMesaBrigada('noticia');
     bindImagePicker('an-imagen', 'an-imagen-preview', 'an-elegir-imagen');
     document.getElementById('an-autocompletar-ia').addEventListener('click', autocompletarNoticiaConIA);
     bindNewsPanels();
@@ -856,6 +857,185 @@
   function bindNewsPanels() {
     document.querySelectorAll('#news-levels .news-level-card').forEach((card) => {
       card.addEventListener('click', () => activarNewsPanel(card.dataset.panel));
+    });
+  }
+
+  // ── LA BRIGADA COQUÍ · Doña Fichas (la Clasificadora) ────
+  // La mesa vive arriba de cada formulario: se pega la URL una vez y la agente SUGIERE los campos de la pestaña
+  // Clasificación. Nunca guarda nada; marca cada campo con 🤖 y el motivo, y no pisa lo que la persona ya eligió.
+  // INICIO brigada-clasificadora
+  const ORDEN_CLASIFICACION = ['idioma', 'seccion', 'clasificacion', 'region', 'formato', 'subformato'];
+  const ETIQUETA_CLASIFICACION = {
+    idioma: 'Idioma original', seccion: 'Sección', clasificacion: 'Sub-sección', region: 'Región', formato: 'Tipo de formato', subformato: 'Subformato',
+  };
+  // Decide que se aplica y que solo se avisa. `manuales` = campos que la persona ya cambio a mano.
+  function planClasificacion(sugerencias, manuales) {
+    const plan = { aplicar: [], avisos: [] };
+    ORDEN_CLASIFICACION.forEach((campo) => {
+      const s = sugerencias[campo];
+      if (!s) return;
+      const nombre = ETIQUETA_CLASIFICACION[campo];
+      if (manuales.includes(campo)) {
+        plan.avisos.push({ campo, tipo: 'respetado', texto: `${nombre}: lo elegiste tú, no lo cambié.` });
+      } else if (s.valor) {
+        plan.aplicar.push({ campo, valor: s.valor, motivo: s.motivo || '', confianza: s.confianza });
+      } else if (s.duda) {
+        plan.avisos.push({ campo, tipo: 'duda', texto: `${nombre}: hay duda (podría ser «${s.duda}»), no lo apliqué. ${s.motivo || ''}`.trim() });
+      } else {
+        plan.avisos.push({ campo, tipo: 'no_encontrado', texto: `${nombre}: ${s.motivo || 'no se encontró en la fuente.'}` });
+      }
+    });
+    return plan;
+  }
+  function resumenClasificacion(plan, formatoOriginal) {
+    const partes = [];
+    if (plan.aplicar.length) partes.push(`Doña Fichas sugirió ${plan.aplicar.length} campo${plan.aplicar.length === 1 ? '' : 's'}: ${plan.aplicar.map((a) => ETIQUETA_CLASIFICACION[a.campo]).join(', ')}.`);
+    else partes.push('Doña Fichas no pudo sugerir ningún campo con seguridad.');
+    if (formatoOriginal) partes.push(`Formato de la fuente: ${formatoOriginal}.`);
+    const pend = plan.avisos.filter((a) => a.tipo !== 'respetado');
+    if (pend.length) partes.push(`Sin sugerencia: ${pend.map((a) => ETIQUETA_CLASIFICACION[a.campo]).join(', ')}.`);
+    return partes.join(' ');
+  }
+  // FIN brigada-clasificadora
+
+  const MESAS = {
+    contenido: {
+      destino: 'contenido', fuenteUrlId: 'ac-fuente-url',
+      campos: { idioma: 'ac-idioma-original', seccion: 'ac-seccion', clasificacion: 'ac-clasificacion', region: 'ac-enfoque', formato: 'ac-tipo-formato', subformato: 'ac-subformato' },
+      mostrarNivel: (n) => activarSynthPanel(n), estadoNivel: '#synth-levels [data-status="clasificacion"]',
+    },
+    noticia: {
+      destino: 'noticia', fuenteUrlId: 'an-fuente-url',
+      campos: { idioma: 'an-idioma-original', clasificacion: 'an-categoria' },
+      mostrarNivel: (n) => activarNewsPanel(n), estadoNivel: '#news-levels [data-status="clasificacion"]',
+    },
+  };
+  const mesaPrevios = { contenido: null, noticia: null };
+
+  function quitarMarcas(clave) {
+    Object.values(MESAS[clave].campos).forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      delete el.dataset.manual;
+      const marca = el.parentElement.querySelector(`.brigada-marca[data-campo="${id}"]`);
+      if (marca) marca.remove();
+    });
+  }
+  function ponerMarca(id, tipo, texto) {
+    const el = document.getElementById(id);
+    let marca = el.parentElement.querySelector(`.brigada-marca[data-campo="${id}"]`);
+    if (!marca) {
+      marca = document.createElement('small');
+      marca.dataset.campo = id;
+      el.insertAdjacentElement('afterend', marca);
+    }
+    marca.className = `brigada-marca brigada-marca-${tipo}`;
+    marca.textContent = texto;
+  }
+  function estadoNivelClasificacion(clave, texto) {
+    const nivel = document.querySelector(MESAS[clave].estadoNivel);
+    if (!nivel) return;
+    if (nivel.dataset.original === undefined) nivel.dataset.original = nivel.textContent;
+    nivel.textContent = texto === null ? nivel.dataset.original : texto;
+  }
+  function reiniciarMesa(clave) {
+    quitarMarcas(clave);
+    mesaPrevios[clave] = null;
+    document.getElementById(`brigada-deshacer-${clave}`).hidden = true;
+    document.getElementById(`brigada-estado-${clave}`).textContent = '';
+    document.getElementById(`brigada-url-${clave}`).value = '';
+    estadoNivelClasificacion(clave, null);
+  }
+
+  function aplicarClasificacion(clave, data) {
+    const cfg = MESAS[clave];
+    const sel = (campo) => document.getElementById(cfg.campos[campo]);
+    const manuales = Object.keys(cfg.campos).filter((c) => sel(c).dataset.manual === '1');
+    const plan = planClasificacion(data.sugerencias || {}, manuales);
+    const previos = {};
+    quitarMarcas(clave);
+    manuales.forEach((c) => { sel(c).dataset.manual = '1'; });
+
+    plan.aplicar.forEach((a) => {
+      const el = sel(a.campo);
+      if (a.campo === 'seccion') {
+        previos.clasificacion = previos.clasificacion === undefined ? sel('clasificacion').value : previos.clasificacion;
+      }
+      if (a.campo === 'clasificacion' && ![...el.options].some((o) => o.value === a.valor)) {
+        plan.avisos.push({ campo: 'clasificacion', tipo: 'no_encontrado', texto: 'Sub-sección: la sugerida no existe en la sección que quedó elegida.' });
+        return;
+      }
+      if (previos[a.campo] === undefined) previos[a.campo] = el.value;
+      el.value = a.valor;
+      if (a.campo === 'seccion') { llenarClasificacion(''); sincronizarClasificacion(); }
+      if (a.campo === 'clasificacion' && clave === 'contenido') sincronizarClasificacion();
+      const opcion = el.selectedOptions[0];
+      const extra = a.campo === 'formato' && data.formatoOriginal ? ` (la fuente es: ${data.formatoOriginal}; esta es la versión del sitio, con palabras propias)` : '';
+      ponerMarca(cfg.campos[a.campo], 'sugerido', `🤖 Doña Fichas sugirió «${opcion ? opcion.text : a.valor}»${a.motivo ? ': ' + a.motivo : ''}${extra}`);
+    });
+    plan.avisos.forEach((av) => {
+      if (!cfg.campos[av.campo]) return;
+      ponerMarca(cfg.campos[av.campo], av.tipo, (av.tipo === 'respetado' ? '' : '⚠️ ') + av.texto);
+    });
+
+    mesaPrevios[clave] = previos;
+    document.getElementById(`brigada-deshacer-${clave}`).hidden = !Object.keys(previos).length;
+    estadoNivelClasificacion(clave, plan.aplicar.length ? '🤖 SUGERIDO — REVISA' : '⚠ SIN SUGERENCIA');
+    document.getElementById(`brigada-estado-${clave}`).textContent = resumenClasificacion(plan, data.formatoOriginal);
+    cfg.mostrarNivel('clasificacion');
+  }
+
+  function deshacerClasificacion(clave) {
+    const previos = mesaPrevios[clave];
+    if (!previos) return;
+    const cfg = MESAS[clave];
+    // Primero la seccion (reconstruye la lista de sub-secciones) y despues lo demas.
+    ['seccion', 'idioma', 'region', 'formato', 'subformato'].forEach((campo) => {
+      if (previos[campo] === undefined || !cfg.campos[campo]) return;
+      document.getElementById(cfg.campos[campo]).value = previos[campo];
+    });
+    if (clave === 'contenido' && previos.seccion !== undefined) llenarClasificacion(previos.clasificacion || '');
+    else if (previos.clasificacion !== undefined) document.getElementById(cfg.campos.clasificacion).value = previos.clasificacion;
+    if (clave === 'contenido') sincronizarClasificacion();
+    quitarMarcas(clave);
+    mesaPrevios[clave] = null;
+    document.getElementById(`brigada-deshacer-${clave}`).hidden = true;
+    document.getElementById(`brigada-estado-${clave}`).textContent = 'Sugerencias deshechas.';
+    estadoNivelClasificacion(clave, null);
+  }
+
+  async function clasificarConBrigada(clave) {
+    const cfg = MESAS[clave];
+    const estado = document.getElementById(`brigada-estado-${clave}`);
+    const urlEl = document.getElementById(`brigada-url-${clave}`);
+    const url = urlEl.value.trim();
+    if (!url) { estado.textContent = 'Pega primero la URL de la fuente.'; return; }
+    const boton = document.getElementById(`brigada-clasificar-${clave}`);
+    boton.disabled = true;
+    estado.textContent = '🐸 Doña Fichas está leyendo la fuente...';
+    try {
+      const data = await apiFetch('/api/admin/brigada/clasificar', { method: 'POST', body: JSON.stringify({ url, destino: cfg.destino }) });
+      const fuente = document.getElementById(cfg.fuenteUrlId);
+      if (fuente && !fuente.value.trim()) fuente.value = data.url || url; // la URL pegada aqui tambien es la fuente de la pieza
+      aplicarClasificacion(clave, data);
+    } catch (err) {
+      estado.textContent = 'Doña Fichas no pudo leer la fuente: ' + err.message;
+    } finally {
+      boton.disabled = false;
+    }
+  }
+
+  function bindMesaBrigada(clave) {
+    const cfg = MESAS[clave];
+    document.getElementById(`brigada-clasificar-${clave}`).addEventListener('click', () => clasificarConBrigada(clave));
+    document.getElementById(`brigada-deshacer-${clave}`).addEventListener('click', () => deshacerClasificacion(clave));
+    // Si la persona cambia un campo a mano, deja de ser una sugerencia: se quita la marca y no se vuelve a pisar.
+    Object.values(cfg.campos).forEach((id) => {
+      document.getElementById(id).addEventListener('change', (e) => {
+        e.target.dataset.manual = '1';
+        const marca = e.target.parentElement.querySelector(`.brigada-marca[data-campo="${id}"]`);
+        if (marca) marca.remove();
+      });
     });
   }
 
@@ -947,7 +1127,8 @@
     document.getElementById('an-autocompletar-url').value = '';
     updateImagePreview('an-imagen', 'an-imagen-preview');
     setStatus(document.getElementById('an-status'), '', '');
-    activarNewsPanel('clasificacion');
+    activarNewsPanel(item ? 'clasificacion' : 'ia');
+    reiniciarMesa('noticia');
     refrescarPanelTraduccion('noticia');
     document.getElementById('admin-noticias-form-box').style.display = 'block';
     document.getElementById('admin-noticias-form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1098,6 +1279,7 @@
     document.getElementById('ac-borrador').addEventListener('click', () => enviarContenido(false));
     document.getElementById('ac-guardar').addEventListener('click', () => enviarContenido(true));
     selectorIaContenido = montarSelectorIa('ac-ia-selector', 'ac-divulgacion-ia');
+    bindMesaBrigada('contenido');
     document.getElementById('ac-usar-imagen-categoria').addEventListener('click', () => {
       const categoria = document.getElementById('ac-categoria').value;
       const img = window.SQPR && window.SQPR.CATEGORIA_IMAGEN && window.SQPR.CATEGORIA_IMAGEN[categoria];
@@ -1123,6 +1305,14 @@
     document.getElementById('ac-cita-sin-fuente').addEventListener('change', () => { toggleCitationFields(); updateCitationPreview(); });
     ['ac-cita-estilo', 'ac-cita-autor', 'ac-cita-anio', 'ac-cita-titulo-original', 'ac-cita-fecha-acceso', 'ac-fuente-texto', 'ac-fuente-url']
       .forEach((id) => document.getElementById(id).addEventListener('input', updateCitationPreview));
+
+    document.getElementById('ac-resumir-ia').addEventListener('click', resumirConIa);
+    document.getElementById('ac-leer-url').addEventListener('click', () => rellenarDesdeUrl(false));
+    // Al salir del campo URL con una URL nueva se lee sola (despues de que el limpiador de URL la ajuste).
+    document.getElementById('ac-fuente-url').addEventListener('blur', () => setTimeout(() => {
+      const url = document.getElementById('ac-fuente-url').value.trim();
+      if (url && url !== ultimaUrlLeida) rellenarDesdeUrl(true);
+    }, 0));
 
     bindInvestigadorRedactor();
     bindSynthPanels();
@@ -1397,6 +1587,93 @@
     const sinFuente = document.getElementById('ac-cita-sin-fuente').checked;
     ['ac-cita-estilo', 'ac-cita-autor', 'ac-cita-anio', 'ac-cita-titulo-original', 'ac-cita-fecha-acceso']
       .forEach((id) => { document.getElementById(id).disabled = sinFuente; });
+  }
+
+  // INICIO metadatos-fuente
+  // Casillas de la citacion que el boton «Rellenar desde la URL» puede llenar con lo que la pagina declara.
+  const CAMPOS_METADATOS = [
+    { dato: 'autorFuente', id: 'ac-cita-autor', nombre: 'Autor de la fuente' },
+    { dato: 'anio', id: 'ac-cita-anio', nombre: 'Año' },
+    { dato: 'tituloOriginal', id: 'ac-cita-titulo-original', nombre: 'Título del artículo original' },
+    { dato: 'nombreFuente', id: 'ac-fuente-texto', nombre: 'Nombre de la fuente' },
+  ];
+  // Decide que se escribe: solo donde la pagina trajo dato Y la casilla esta vacia o todavia tiene lo que puso
+  // este mismo boton antes (asi, si cambias la URL, se actualiza; si ya lo escribiste tu, no se pisa).
+  function planRellenado(encontrado, actuales, autoPrevio) {
+    const plan = { rellenar: [], sinDato: [], respetadas: [] };
+    CAMPOS_METADATOS.forEach((c) => {
+      const valor = String(encontrado[c.dato] || '').trim();
+      const actual = String(actuales[c.id] || '').trim();
+      if (!valor) { plan.sinDato.push(c.nombre); return; }
+      if (actual && actual !== (autoPrevio || {})[c.id]) { plan.respetadas.push(c.nombre); return; }
+      plan.rellenar.push({ id: c.id, valor, nombre: c.nombre });
+    });
+    return plan;
+  }
+  function mensajeRellenado(plan) {
+    const partes = [];
+    if (plan.rellenar.length) partes.push('Rellené: ' + plan.rellenar.map((r) => r.nombre).join(', ') + '.');
+    if (plan.respetadas.length) partes.push('Ya tenías escrito (no lo cambié): ' + plan.respetadas.join(', ') + '.');
+    if (plan.sinDato.length) partes.push('La página no lo declara (queda vacío): ' + plan.sinDato.join(', ') + '.');
+    return partes.join(' ');
+  }
+  // FIN metadatos-fuente
+
+  const metadatosAuto = {}; // id de casilla -> ultimo valor que escribio el boton
+  let ultimaUrlLeida = '';
+
+  async function rellenarDesdeUrl(automatico) {
+    const estado = document.getElementById('ac-leer-url-estado');
+    const url = document.getElementById('ac-fuente-url').value.trim();
+    if (!url) { if (!automatico) estado.textContent = 'Escribe primero la URL de la fuente.'; return; }
+    if (document.getElementById('ac-cita-sin-fuente').checked) {
+      if (!automatico) estado.textContent = 'Está marcado «Sin fuente externa»: desmárcalo para rellenar la cita.';
+      return;
+    }
+    ultimaUrlLeida = url;
+    const boton = document.getElementById('ac-leer-url');
+    boton.disabled = true;
+    estado.textContent = 'Leyendo la página...';
+    try {
+      const data = await apiFetch('/api/admin/contenido-ia/metadatos-fuente', { method: 'POST', body: JSON.stringify({ url }) });
+      const actuales = {};
+      CAMPOS_METADATOS.forEach((c) => { actuales[c.id] = document.getElementById(c.id).value; });
+      const plan = planRellenado(data, actuales, metadatosAuto);
+      plan.rellenar.forEach((r) => {
+        const el = document.getElementById(r.id);
+        el.value = r.valor;
+        metadatosAuto[r.id] = r.valor;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+      const acceso = document.getElementById('ac-cita-fecha-acceso');
+      if (plan.rellenar.length && !acceso.value) { acceso.value = new Date().toISOString().slice(0, 10); acceso.dispatchEvent(new Event('input', { bubbles: true })); }
+      estado.textContent = mensajeRellenado(plan);
+    } catch (err) {
+      estado.textContent = 'No se pudo leer la página: ' + err.message;
+    } finally {
+      boton.disabled = false;
+    }
+  }
+
+  async function resumirConIa() {
+    const estado = document.getElementById('ac-resumir-estado');
+    const cuerpo = document.getElementById('ac-cuerpo').value.trim();
+    const resumen = document.getElementById('ac-subtitulo');
+    if (!cuerpo) { estado.textContent = 'Escribe primero el «Cuerpo del texto» para poder resumirlo.'; return; }
+    if (resumen.value.trim() && !confirm('Ya hay un resumen escrito. ¿Reemplazarlo por el que escriba la IA?')) return;
+    const boton = document.getElementById('ac-resumir-ia');
+    boton.disabled = true;
+    estado.textContent = 'Resumiendo con IA...';
+    try {
+      const data = await apiFetch('/api/admin/contenido-ia/resumir', { method: 'POST', body: JSON.stringify({ texto: cuerpo }) });
+      resumen.value = data.resumen;
+      resumen.dispatchEvent(new Event('input', { bubbles: true }));
+      estado.textContent = 'Resumen listo: revísalo y edítalo si hace falta. Todavía no está guardado.';
+    } catch (err) {
+      estado.textContent = 'No se pudo resumir: ' + err.message;
+    } finally {
+      boton.disabled = false;
+    }
   }
 
   function updateCitationPreview() {
@@ -1705,6 +1982,10 @@
     document.getElementById('ac-portada-alt').value = item?.portada_alt || '';
     document.getElementById('ac-fecha').value = item?.fecha_publicacion ? String(item.fecha_publicacion).slice(0, 10) : '';
     document.getElementById('ac-destacado').checked = Boolean(item?.destacado);
+    document.getElementById('ac-resumir-estado').textContent = '';
+    document.getElementById('ac-leer-url-estado').textContent = '';
+    Object.keys(metadatosAuto).forEach((k) => delete metadatosAuto[k]);
+    ultimaUrlLeida = item?.fuente_url || '';
     document.getElementById('ac-publicado').checked = item ? item.publicado !== false : true;
     document.getElementById('ac-estado').textContent = item
       ? (item.publicado === false ? 'Estado actual: borrador (no se ve en el sitio).' : 'Estado actual: publicado (se ve en el sitio).')
@@ -1728,7 +2009,8 @@
     updateImagePreview('ac-url-portada', 'ac-url-portada-preview');
     setStatus(document.getElementById('ac-status'), '', '');
     actualizarTemaContenidos();
-    activarSynthPanel('clasificacion');
+    activarSynthPanel(item ? 'clasificacion' : 'ia');
+    reiniciarMesa('contenido');
     refrescarPanelTraduccion('contenido');
     document.getElementById('admin-contenidos-form-box').style.display = 'block';
     document.getElementById('admin-contenidos-form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
