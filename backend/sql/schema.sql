@@ -568,3 +568,11 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_reportes_pendiente_por_persona
 CREATE UNIQUE INDEX IF NOT EXISTS uq_reportes_automatico_pendiente
   ON reportes (tipo, item_id)
   WHERE estado = 'pendiente' AND automatico;
+
+-- ============================================================
+-- Costos por agente (2026-10-25): nombres de las agentes de la Brigada Coqui en la bitacora de uso de IA.
+-- Mismo SQL que backend/sql/migraciones/2026-10-25-costos-por-agente.sql.
+-- ============================================================
+ALTER TABLE ia_generaciones DROP CONSTRAINT IF EXISTS ia_generaciones_agente_check;
+ALTER TABLE ia_generaciones ADD CONSTRAINT ia_generaciones_agente_check
+  CHECK (agente IN ('investigador', 'redactor', 'traductor', 'clasificadora', 'resumidora', 'correctora', 'guardiana', 'pintora'));

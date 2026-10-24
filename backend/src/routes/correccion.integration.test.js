@@ -41,7 +41,7 @@ describe('POST /api/admin/corregir', () => {
     expect(corregirTexto).not.toHaveBeenCalled();
   });
 
-  test('200 devuelve el texto corregido y los cambios, y registra el costo (agente redactor)', async () => {
+  test('200 devuelve el texto corregido y los cambios, y registra el costo (agente correctora)', async () => {
     corregirTexto.mockResolvedValue({ textoCorregido: 'La guagua llegó.', cambios: [{ antes: 'llego', despues: 'llegó', motivo: 'tilde' }], usage: USAGE });
     const res = await request(app).post('/api/admin/corregir').set('x-test-user', ADMIN).send({ texto: 'La guagua llego.', variante: 'es-PR' });
     expect(res.status).toBe(200);
@@ -49,8 +49,7 @@ describe('POST /api/admin/corregir', () => {
     expect(corregirTexto).toHaveBeenCalledWith({ texto: 'La guagua llego.', variante: 'es-PR' });
     const [sql, params] = pool.query.mock.calls[0];
     expect(sql).toMatch(/INSERT INTO ia_generaciones/);
-    expect(sql).toMatch(/'redactor'/);
-    expect(params).toEqual([100, 50, 0.0005, 'admin-1']);
+    expect(params).toEqual(['correctora', 'texto', 100, 50, 0.0005, 'admin-1']);
   });
 
   test('si la IA falla, 400 con el mensaje y sin registrar costo', async () => {
@@ -111,7 +110,7 @@ describe('POST /api/admin/corregir/varios («Corregir todo», Doña Tilde)', () 
     expect(corregirTexto).toHaveBeenNthCalledWith(1, { texto: 'La guagua llego', variante: 'es-PR' });
     expect(corregirTexto).toHaveBeenNthCalledWith(2, { texto: 'The bus arived late.', variante: 'en-US' });
     expect(pool.query).toHaveBeenCalledTimes(1);
-    expect(pool.query.mock.calls[0][1]).toEqual([200, 100, 0.001, 'admin-1']);
+    expect(pool.query.mock.calls[0][1]).toEqual(['correctora', 'texto', 200, 100, 0.001, 'admin-1']);
   });
 
   test('si un campo falla, los demás siguen y el fallo se informa en su campo', async () => {
@@ -122,7 +121,7 @@ describe('POST /api/admin/corregir/varios («Corregir todo», Doña Tilde)', () 
     expect(res.status).toBe(200);
     expect(res.body.resultados[0]).toMatchObject({ id: 'ac-titulo', textoCorregido: 'ok' });
     expect(res.body.resultados[1]).toEqual({ id: 'ac-cuerpo', error: 'El texto es demasiado largo para procesar de una vez.' });
-    expect(pool.query.mock.calls[0][1]).toEqual([100, 50, 0.0005, 'admin-1']);
+    expect(pool.query.mock.calls[0][1]).toEqual(['correctora', 'texto', 100, 50, 0.0005, 'admin-1']);
   });
 
   test('si TODOS fallan (p. ej. falta la llave de la IA), 400 con el motivo y sin costo', async () => {

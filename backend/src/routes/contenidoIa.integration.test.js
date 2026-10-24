@@ -44,7 +44,7 @@ describe('POST /api/admin/contenido-ia/resumir', () => {
     expect(resumirTexto).not.toHaveBeenCalled();
   });
 
-  test('200 devuelve el resumen y registra el costo (agente redactor)', async () => {
+  test('200 devuelve el resumen y registra el costo (agente resumidora)', async () => {
     resumirTexto.mockResolvedValue({ resumen: 'Un resumen.', usage: USAGE });
     const res = await request(app).post(url).set('x-test-user', ADMIN).send({ texto: 'Texto del cuerpo.' });
     expect(res.status).toBe(200);
@@ -52,7 +52,7 @@ describe('POST /api/admin/contenido-ia/resumir', () => {
     expect(resumirTexto).toHaveBeenCalledWith({ texto: 'Texto del cuerpo.' });
     const [sql, params] = pool.query.mock.calls[0];
     expect(sql).toMatch(/INSERT INTO ia_generaciones/);
-    expect(params).toEqual([100, 50, 0.0005, 'admin-1']);
+    expect(params).toEqual(['resumidora', 'texto', 100, 50, 0.0005, 'admin-1']);
   });
 
   test('si la IA falla, 400 con el mensaje y sin registrar costo', async () => {

@@ -715,7 +715,10 @@
   async function loadGastosIa() {
     const grid = document.getElementById('gastos-ia-grid');
     const resumen = document.getElementById('gastos-ia-resumen');
-    const AGENTE_LABEL = { investigador: 'Investigador', redactor: 'Redactor', traductor: 'Traductor' };
+    const AGENTE_LABEL = {
+      investigador: 'Investigadora', redactor: 'Redactora (incluye usos anteriores de otras agentes)', traductor: 'Traductora', clasificadora: 'Clasificadora',
+      resumidora: 'Resumidora', correctora: 'Correctora', guardiana: 'Guardiana', pintora: 'Pintora',
+    };
     try {
       const data = await apiFetch('/api/admin/uso-ia');
       gastosCostoMesIa = data.costoMesActual || 0;
@@ -2772,27 +2775,27 @@
   // función ya es de una agente, las demás no la hacen. `nivel` es la pestaña del formulario de Contenidos donde deja su trabajo.
   const ELENCO_BRIGADA = [
     {
-      id: 'investigadora', emoji: '🔎', nombre: 'Investigadora', apodo: 'Doña Pesquisa', estado: 'activa', nivel: 'ia', usoId: 'ag-ia-investigador-uso',
+      id: 'investigadora', emoji: '🔎', nombre: 'Investigadora', apodo: 'Doña Pesquisa', estado: 'activa', nivel: 'ia', uso: 'investigador',
       descripcion: 'Lee la fuente en cualquier idioma, detecta su idioma y prepara las notas de investigación.',
       trabajo: ['Lee la fuente (URL o texto pegado) en cualquier idioma, lengua o dialecto', 'Detecta el idioma de la fuente', 'Prepara las notas de investigación, con búsqueda web opcional', 'Corrige el texto pegado mostrando cada cambio', 'Pregunta cuando algo de la fuente no está claro'],
       noHace: 'No clasifica, no redacta y no llena la cita.',
     },
     {
-      id: 'clasificadora', emoji: '🗂️', nombre: 'Clasificadora', apodo: 'Doña Fichas', estado: 'activa', nivel: 'clasificacion',
+      id: 'clasificadora', emoji: '🗂️', nombre: 'Clasificadora', apodo: 'Doña Fichas', estado: 'activa', uso: 'clasificadora', nivel: 'clasificacion',
       descripcion: 'Sugiere la sección, la sub-sección, la región, el formato y el subformato.',
       descripcionNoticia: 'Sugiere la categoría de la noticia.',
       trabajo: ['Sugiere la sección y la sub-sección o categoría', 'Sugiere la región', 'Sugiere el formato de la pieza y anota el formato de la fuente', 'Sugiere el subformato'],
       noHace: 'No decide el idioma: el de la fuente es de la Investigadora y el de la pieza lo eliges tú.',
     },
     {
-      id: 'redactora', emoji: '✍️', nombre: 'Redactora', apodo: 'La Pluma', estado: 'activa', nivel: 'ia', usoId: 'ag-ia-redactor-uso',
+      id: 'redactora', emoji: '✍️', nombre: 'Redactora', apodo: 'La Pluma', estado: 'activa', nivel: 'ia', uso: 'redactor',
       descripcion: 'Escribe el título y el cuerpo con palabras propias, en el idioma de la pieza.',
       descripcionNoticia: 'Lee la URL y redacta un primer borrador completo: título, párrafos y medio.',
       trabajo: ['Escribe el título y el cuerpo con palabras propias, en el idioma de la pieza que le pides', 'Sigue el tono y el estilo elegidos', 'Estima la duración de lectura'],
       noHace: 'No hace el resumen ni la cita.',
     },
     {
-      id: 'resumidora', emoji: '✂️', nombre: 'Resumidora', apodo: 'Doña Breve', estado: 'activa', nivel: 'contenido',
+      id: 'resumidora', emoji: '✂️', nombre: 'Resumidora', apodo: 'Doña Breve', estado: 'activa', uso: 'resumidora', nivel: 'contenido',
       descripcion: 'Resume el cuerpo del texto en su mismo idioma; corre sola después de La Pluma.',
       trabajo: ['Escribe el resumen a partir del cuerpo del texto, en el mismo idioma', 'Corre sola después de La Pluma, o cuando se lo pides'],
       noHace: 'No escribe el cuerpo.',
@@ -2804,20 +2807,20 @@
       noHace: 'No usa IA ni deduce datos que la página no diga. El formato de la cita lo arma el código (citas.js), no la IA.',
     },
     {
-      id: 'correctora', emoji: '🧐', nombre: 'Correctora', apodo: 'Doña Tilde', estado: 'activa', nivel: 'contenido',
+      id: 'correctora', emoji: '🧐', nombre: 'Correctora', apodo: 'Doña Tilde', estado: 'activa', uso: 'correctora', nivel: 'contenido',
       descripcion: 'Corrige la ortografía y la gramática de todos los campos de una vez, sin cambiar el sentido.',
       descripcionNoticia: 'Corrige el título, los párrafos y el texto alternativo de una vez.',
       trabajo: ['Revisa ortografía, tildes y gramática en cada campo según la variante del idioma de la pieza', 'Respeta el diccionario de Puerto Rico y del proyecto', 'Corrige con IA mostrando cada cambio, sin aplicarlo sola', 'Corregir todo: revisa de una vez el título, el resumen, el cuerpo y el texto alternativo'],
       noHace: 'No cambia el sentido ni reescribe el estilo.',
     },
     {
-      id: 'traductora', emoji: '🗣️', nombre: 'Traductora', apodo: 'La Intérprete', estado: 'activa', nivel: 'contenido',
+      id: 'traductora', emoji: '🗣️', nombre: 'Traductora', apodo: 'La Intérprete', estado: 'activa', uso: 'traductor', nivel: 'contenido',
       descripcion: 'Traduce la pieza ya guardada al otro idioma, desde su caja de traducción.',
       trabajo: ['Traduce la pieza ya guardada al otro idioma del sitio', 'Deja la traducción como borrador para tu revisión'],
       noHace: 'No escribe la pieza original.',
     },
     {
-      id: 'guardiana', emoji: '🛡️', nombre: 'Guardiana', apodo: 'La Guardiana', estado: 'activa', nivel: 'contenido',
+      id: 'guardiana', emoji: '🛡️', nombre: 'Guardiana', apodo: 'La Guardiana', estado: 'activa', uso: 'guardiana', nivel: 'contenido',
       descripcion: 'Avisa si la pieza se parece demasiado a la fuente o si tiene contenido sensible.',
       descripcionNoticia: 'Avisa si la noticia se parece demasiado a la fuente o si tiene contenido sensible.',
       trabajo: ['Marca contenido sensible: menores, violencia gráfica, acusaciones, personas reales, contenido sexual y si pediría 18+', 'Compara tu texto con la fuente y avisa si se parece demasiado (derechos de autor)'],
@@ -2831,7 +2834,7 @@
       noHace: 'No usa IA y no borra ni fusiona nada por su cuenta.',
     },
     {
-      id: 'pintora', emoji: '🎨', nombre: 'Pintora', apodo: 'La Pintora', estado: 'activa', nivel: 'multimedia',
+      id: 'pintora', emoji: '🎨', nombre: 'Pintora', apodo: 'La Pintora', estado: 'activa', uso: 'pintora', nivel: 'multimedia',
       descripcion: 'Propone el texto alternativo de la imagen y un prompt de imagen en el estilo fijo.',
       trabajo: ['Sugiere el texto alternativo de las imágenes', 'Escribe el prompt de imagen en el estilo fijo de Aliado Imperfekto'],
       noHace: 'No genera la imagen: te da el prompt.',
@@ -2844,7 +2847,7 @@
         <p class="ag-tile-desc ag-agente-resumen">${esc(a.descripcion)}</p>
         <ul class="ag-agente-tareas">${a.trabajo.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
         <p class="ag-tile-desc"><em>${esc(a.noHace)}</em></p>
-        ${a.usoId ? `<p class="ag-tile-desc" id="${a.usoId}">—</p>` : ''}
+        ${a.uso ? `<p class="ag-tile-desc ag-agente-uso" id="ag-uso-${a.id}" data-uso="${a.uso}">—</p>` : '<p class="ag-tile-desc ag-agente-uso">Sin IA: no gasta.</p>'}
         ${a.nivel ? `<button type="button" class="ag-btn-piloto" data-nivel="${a.nivel}">Ir a su pestaña →</button>` : ''}
       </div>`).join('');
   }
@@ -2871,9 +2874,10 @@
         if (!r || !r.llamadas) return 'Sin usos todavía';
         return `${r.llamadas} uso${r.llamadas === 1 ? '' : 's'} · $${r.costo_total.toFixed(3)} acumulado`;
       };
-      document.getElementById('ag-ia-investigador-uso').textContent = linea('investigador');
-      // La bitacora solo distingue tres oficios: «redactor» cuenta tambien a Doña Fichas, Doña Breve y Doña Tilde.
-      document.getElementById('ag-ia-redactor-uso').textContent = linea('redactor') + ' (cuenta también a Doña Fichas, Doña Breve y Doña Tilde)';
+      // Cada agente muestra SU gasto. «redactor» conserva el historial anterior, cuando varias agentes se sumaban ahi.
+      document.querySelectorAll('#brigada-elenco [data-uso]').forEach((el) => {
+        el.textContent = linea(el.dataset.uso) + (el.dataset.uso === 'redactor' ? ' · incluye usos anteriores de otras agentes' : '');
+      });
       document.getElementById('ag-ia-costo-mes').textContent = `$${data.costoMesActual.toFixed(3)} este mes`;
     } catch (err) {
       document.getElementById('ag-ia-costo-mes').textContent = 'Error al cargar gasto';

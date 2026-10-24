@@ -181,8 +181,10 @@ describe('el elenco de La Brigada Coquí: una dueña por función', () => {
     const h = htmlElenco(ELENCO_BRIGADA, esc);
     expect((h.match(/data-agente=/g) || []).length).toBe(ELENCO_BRIGADA.length);
     expect((h.match(/próximamente/g) || []).length).toBe(0);
-    expect(h).toContain('id="ag-ia-investigador-uso"');
-    expect(h).toContain('id="ag-ia-redactor-uso"');
+    const conIa = ELENCO_BRIGADA.filter((a) => a.uso);
+    expect(conIa.map((a) => a.id)).toEqual(['investigadora', 'clasificadora', 'redactora', 'resumidora', 'correctora', 'traductora', 'guardiana', 'pintora']);
+    conIa.forEach((a) => expect(h).toContain(`id="ag-uso-${a.id}" data-uso="${a.uso}"`));
+    expect((h.match(/Sin IA: no gasta\./g) || []).length).toBe(2); // Bibliotecaria y Detective
   });
 });
 
@@ -488,5 +490,23 @@ describe('cada agente trae una pequeña descripción de sus funciones', () => {
     expect(por('clasificadora').descripcionNoticia).toContain('categoría');
     expect(por('redactora').descripcionNoticia).toContain('primer borrador');
     expect(js).toContain("(clave === 'noticia' && agente.descripcionNoticia) || agente.descripcion");
+  });
+});
+
+describe('el gasto de cada agente se cuenta con su propio nombre', () => {
+  const { ELENCO_BRIGADA } = new Function(`${entre(js, 'elenco-brigada')}
+    return { ELENCO_BRIGADA };`)();
+  const { AGENTES_CON_REGISTRO } = require('./util/usoIa');
+
+  test('cada nombre de uso del elenco es uno que la base de datos admite, y ninguno se repite', () => {
+    const usos = ELENCO_BRIGADA.filter((a) => a.uso).map((a) => a.uso);
+    expect(new Set(usos).size).toBe(usos.length);
+    usos.forEach((u) => expect(AGENTES_CON_REGISTRO).toContain(u));
+  });
+
+  test('el panel de Gastos y el de uso tienen nombre para cada agente que gasta', () => {
+    AGENTES_CON_REGISTRO.forEach((a) => expect(js).toContain(`${a}:`));
+    expect(js).toContain("document.querySelectorAll('#brigada-elenco [data-uso]')");
+    expect(js).toContain('incluye usos anteriores de otras agentes');
   });
 });
