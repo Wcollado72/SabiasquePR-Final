@@ -40,7 +40,7 @@ describe('registrarUsoAgente', () => {
 describe('la lista de agentes coincide con la base de datos', () => {
   test('migración y schema.sql permiten exactamente los mismos nombres que usa el código', () => {
     const raiz = path.join(__dirname, '..', '..');
-    const mig = fs.readFileSync(path.join(raiz, 'sql', 'migraciones', '2026-10-25-costos-por-agente.sql'), 'utf8');
+    const mig = fs.readFileSync(path.join(raiz, 'sql', 'migraciones', '2026-10-26-taller-semillas.sql'), 'utf8');
     const schema = fs.readFileSync(path.join(raiz, 'sql', 'schema.sql'), 'utf8');
     const nombres = (texto) => [...texto.match(/CHECK \(agente IN \(([^)]*)\)\)/g).pop().matchAll(/'([a-z]+)'/g)].map((m) => m[1]).sort();
     expect(nombres(mig)).toEqual([...AGENTES_CON_REGISTRO].sort());

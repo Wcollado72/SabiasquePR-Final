@@ -917,6 +917,7 @@ const PAGES = [
           <button type="button" class="foro-filter-btn" data-tab="productos">Productos</button>
           <button type="button" class="foro-filter-btn" data-tab="reportes">Reportes</button>
           <button type="button" class="foro-filter-btn" data-tab="agentes">🐸 La Brigada Coquí</button>
+          <button type="button" class="foro-filter-btn" data-tab="taller">🏮 Taller de Aliado</button>
           <button type="button" class="foro-filter-btn" data-tab="seguridad">Seguridad</button>
           <button type="button" class="foro-filter-btn" data-tab="gastos">Gastos</button>
         </nav>
@@ -1445,6 +1446,84 @@ const PAGES = [
           </div>
         </section>
 
+        <section class="admin-tab-panel admin-agentes" id="admin-panel-taller" style="display:none;">
+          <div class="ag-header">
+            <div>
+              <h2>🏮 Taller de Aliado Imperfekto</h2>
+              <p class="ag-sub">Tu cuaderno de ideas propias. Escribe una semilla (una idea, un párrafo, una duda), pon a las agentes a analizarla y tú decides si la desarrollamos.</p>
+            </div>
+          </div>
+          <div class="taller-grid">
+            <aside class="taller-lateral">
+              <button type="button" class="admin-btn-new" id="taller-nueva">＋ Nueva semilla</button>
+              <label for="taller-filtro">Ver</label>
+              <select id="taller-filtro">
+                <option value="">Todas</option>
+                <option value="semilla">🌱 Semillas</option>
+                <option value="explorada">🔎 Exploradas</option>
+                <option value="en_desarrollo">✍️ En desarrollo</option>
+                <option value="lista">✅ Listas</option>
+                <option value="pasada">📤 Pasadas a Contenidos</option>
+              </select>
+              <div id="taller-lista" class="taller-lista"></div>
+            </aside>
+            <div class="taller-principal">
+              <div id="taller-editor" hidden>
+                <h3 id="taller-editor-titulo">Nueva semilla</h3>
+                <form id="taller-form">
+                  <label for="ts-titulo">Título (opcional)</label>
+                  <input type="text" id="ts-titulo" maxlength="160" spellcheck="true" lang="es">
+                  <label for="ts-texto">Tu idea</label>
+                  <textarea id="ts-texto" rows="10" maxlength="20000" spellcheck="true" lang="es" placeholder="Escribe aquí tu idea, pensamiento, análisis o comentario, tal como te salga."></textarea>
+                  <p class="admin-hint" id="ts-contador" aria-live="polite"></p>
+                  <label for="ts-etiquetas">Etiquetas (separadas por comas)</label>
+                  <input type="text" id="ts-etiquetas" placeholder="vergüenza, cambio, empatía">
+                  <label for="ts-estado">Estado</label>
+                  <select id="ts-estado">
+                    <option value="semilla">🌱 Semilla</option>
+                    <option value="explorada">🔎 Explorada</option>
+                    <option value="en_desarrollo">✍️ En desarrollo</option>
+                    <option value="lista">✅ Lista</option>
+                    <option value="pasada">📤 Pasada a Contenidos</option>
+                  </select>
+                  <div class="admin-form-actions">
+                    <button type="submit">Guardar semilla</button>
+                    <button type="button" class="admin-btn-cancel" id="ts-cerrar">Cerrar</button>
+                    <button type="button" class="tr-enlace-peligro" id="ts-borrar" hidden>Eliminar semilla</button>
+                  </div>
+                  <p id="ts-status" class="form-status" aria-live="polite"></p>
+                </form>
+                <section class="brigada-mesa taller-mesa" aria-label="Las agentes del Taller">
+                  <div class="brigada-mesa-head">
+                    <strong>🏮 Las agentes del Taller</strong>
+                    <span class="admin-hint">Ellas analizan y proponen; tu texto nunca cambia solo.</span>
+                  </div>
+                  <div class="brigada-agentes" id="taller-agentes">
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="taller-grieta"><span aria-hidden="true">🏺</span> La Grieta <small>Analizar</small></button>
+                    <p class="brigada-agente-desc" data-desc="grieta"></p>
+                  </div>
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="taller-cazadora" disabled><span aria-hidden="true">📡</span> La Cazadora de Ecos <small>Buscar ecos</small></button> <span class="ag-agente-etiqueta">próximamente</span>
+                    <p class="brigada-agente-desc" data-desc="cazadora"></p>
+                  </div>
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="taller-contrapunto" disabled><span aria-hidden="true">⚖️</span> El Contrapunto <small>Objeciones</small></button> <span class="ag-agente-etiqueta">próximamente</span>
+                    <p class="brigada-agente-desc" data-desc="contrapunto"></p>
+                  </div>
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="taller-farolera" disabled><span aria-hidden="true">🏮</span> La Farolera <small>Desarrollar</small></button> <span class="ag-agente-etiqueta">próximamente</span>
+                    <p class="brigada-agente-desc" data-desc="farolera"></p>
+                  </div>
+                  </div>
+                  <p class="admin-hint brigada-estado" id="taller-estado" aria-live="polite"></p>
+                </section>
+                <div class="brigada-revision" id="taller-resultados" hidden></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section class="admin-tab-panel admin-agentes" id="admin-panel-seguridad" style="display:none;">
           <div class="ag-header">
             <div>
@@ -1561,6 +1640,7 @@ const PAGES = [
   <script src="citas.js"></script>
   <script src="clasificacion.js"></script>
   <script src="correccion.js"></script>
+  <script src="taller.js"></script>
   <script src="admin.js"></script>`,
   },
 

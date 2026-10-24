@@ -32,8 +32,16 @@ const DATOS = {
   ],
   gastos: [], ordenes: [], traducciones: {},
 };
+const SEMILLA = { id: '11111111-1111-4111-8111-111111111111', titulo: 'Vergüenza', texto: 'La gente cambia por vergüenza.', etiquetas: ['cambio'], estado: 'semilla', analisis: {}, desarrollos: [], desactualizados: [], actualizado_en: '2026-10-23' };
 w.fetch = async (url, opts = {}) => {
   const u = String(url);
+  if (/\/api\/semillas\/[^/]+\/agentes\/grieta$/.test(u)) {
+    return { ok: true, status: 200, json: async () => ({ ok: true, agente: 'grieta', estado: 'explorada', analisis: { texto_hash: 'h', creado_en: '2026-10-23', resultado: { tema: 'Vergüenza', etiquetas: [], tesis: 'La gente cambia por vergüenza.', suposiciones: [], grietas: [{ grieta: 'Se contradice', por_que: 'Paraliza.', fragmento: '' }], oro: [], preguntas: [], direcciones: [] } } }) };
+  }
+  if (/\/api\/semillas\/[^/]+$/.test(u) && !opts.method) return { ok: true, status: 200, json: async () => ({ ok: true, semilla: SEMILLA }) };
+  if (/\/api\/semillas\/[^/]+$/.test(u) && opts.method === 'PUT') return { ok: true, status: 200, json: async () => ({ ok: true, semilla: { ...SEMILLA, ...JSON.parse(opts.body) } }) };
+  if (u.endsWith('/api/semillas') && opts.method === 'POST') return { ok: true, status: 201, json: async () => ({ ok: true, semilla: SEMILLA }) };
+  if (u.includes('/api/semillas')) return { ok: true, status: 200, json: async () => ({ ok: true, semillas: [{ id: SEMILLA.id, titulo: 'Vergüenza', extracto: 'La gente cambia...', etiquetas: [], estado: 'semilla', actualizado_en: '2026-10-23', agentes_que_la_analizaron: [] }] }) };
   const json = (o) => ({ ok: true, status: 200, json: async () => o });
   if (u.endsWith('/api/me')) return json({ ok: true, user: { id: 'u1', rol: 'admin' } });
   if (u.endsWith('/contenido-ia/resumir')) return json({ ok: true, resumen: 'Resumen escrito por la IA.' });
@@ -78,7 +86,7 @@ w.fetch = async (url, opts = {}) => {
   return json({ ok: true, ...DATOS });
 };
 
-for (const f of ['ia-herramientas.js', 'editorial.js', 'citas.js', 'clasificacion.js', 'correccion.js', 'admin.js']) {
+for (const f of ['ia-herramientas.js', 'editorial.js', 'citas.js', 'clasificacion.js', 'correccion.js', 'taller.js', 'admin.js']) {
   try { w.eval(fs.readFileSync(path.join(F, f), 'utf8')); } catch (e) { errores.push(`carga ${f}: ${e.message}`); }
 }
 // jsdom dispara DOMContentLoaded por si solo al terminar de leer el documento: no se dispara a mano (se iniciaria dos veces).
@@ -94,7 +102,7 @@ setTimeout(() => {
     ['Reportes muestra el pendiente con su texto', texto('admin-reportes-list').includes('Texto reportado') && !texto('admin-reportes-list').includes('Spam')],
     ['los filtros de Reportes llevan contador', d.querySelector('#admin-reportes-filtros [data-filtro="todos"] .reportes-cuenta').textContent === '2'],
     ['los campos llevan la barra de correctores', d.querySelectorAll('.corr-barra').length >= 10],
-    ['La Brigada Coquí pinta su elenco y existe la pestaña Seguridad', d.querySelectorAll('#brigada-elenco .ag-agente').length === 10 && !!d.getElementById('admin-panel-seguridad')],
+    ['La Brigada Coquí pinta su elenco y existe la pestaña Seguridad', d.querySelectorAll('#brigada-elenco .ag-agente').length === 14 && !!d.getElementById('admin-panel-seguridad')],
   ];
   // Botones de IA del formulario de Contenidos: «Resumir con IA» y «Rellenar desde la URL».
   d.getElementById('ac-cuerpo').value = 'Un texto largo para resumir.';
@@ -125,6 +133,10 @@ setTimeout(() => {
     );
   }, 300);
   // Recomendacion de la mesa y La Guardiana (informe con parecido y banderas).
+  // Taller de Aliado: la lista se pinta, se escribe una semilla nueva y La Grieta la guarda y la analiza.
+  d.getElementById('taller-nueva').click();
+  d.getElementById('ts-texto').value = 'La gente cambia por vergüenza.';
+  d.getElementById('taller-grieta').click();
   d.getElementById('brigada-url-contenido').value = 'https://www.youtube.com/watch?v=abc';
   d.getElementById('brigada-url-contenido').dispatchEvent(new w.Event('blur'));
   d.getElementById('ac-cuerpo').value = 'Un cuerpo con texto para revisar.';
@@ -139,6 +151,11 @@ setTimeout(() => {
       ['La Guardiana muestra el parecido con la fuente y las banderas',
         !d.getElementById('brigada-revision-contenido').hidden && d.getElementById('brigada-revision-contenido').textContent.includes('31% de la pieza')
         && d.getElementById('brigada-revision-contenido').textContent.includes('Persona real')],
+    );
+    comprobaciones.push(
+      ['El Taller pinta la lista de semillas', d.getElementById('taller-lista').textContent.includes('Vergüenza')],
+      ['La Grieta guarda la semilla y muestra su análisis', !d.getElementById('taller-resultados').hidden && d.getElementById('taller-resultados').textContent.includes('Se contradice')
+        && d.getElementById('taller-estado').textContent.includes('La Grieta terminó')],
     );
     comprobaciones.push(
       ['Doña Tilde propone la corrección del título y «Aplicar» la pone', (() => {
