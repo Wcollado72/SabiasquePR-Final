@@ -117,7 +117,7 @@
       // Moderador: sin acceso a gestion de contenido editorial NI a Gastos
       // (informacion financiera) -- el backend ya lo rechaza igual, esto
       // solo evita mostrar tabs que no puede usar.
-      document.querySelectorAll('.admin-tabs [data-tab="noticias"], .admin-tabs [data-tab="contenidos"], .admin-tabs [data-tab="productos"], .admin-tabs [data-tab="gastos"]')
+      document.querySelectorAll('.admin-tabs [data-tab="noticias"], .admin-tabs [data-tab="contenidos"], .admin-tabs [data-tab="productos"], .admin-tabs [data-tab="agentes"], .admin-tabs [data-tab="gastos"]')
         .forEach((btn) => { btn.style.display = 'none'; });
       activarTab('reportes');
     }
@@ -148,7 +148,7 @@
         let v = input.value.trim();
         if (v && !/^[a-z][a-z0-9+.-]*:\/\//i.test(v)) v = 'https://' + v;
         input.value = limpiarUrlDeRastreo(v);
-        if (input.id === 'ac-fuente-url') updateCitationPreview();
+        if (input.id === 'brigada-url-contenido') updateCitationPreview();
       });
     });
   }
@@ -353,6 +353,7 @@
     document.getElementById('admin-panel-productos').style.display = tab === 'productos' ? '' : 'none';
     document.getElementById('admin-panel-reportes').style.display = tab === 'reportes' ? '' : 'none';
     document.getElementById('admin-panel-agentes').style.display = tab === 'agentes' ? '' : 'none';
+    document.getElementById('admin-panel-seguridad').style.display = tab === 'seguridad' ? '' : 'none';
     document.getElementById('admin-panel-gastos').style.display = tab === 'gastos' ? '' : 'none';
   }
 
@@ -838,7 +839,6 @@
     selectorIaNoticia = montarSelectorIa('an-ia-selector', 'an-divulgacion-ia');
     bindMesaBrigada('noticia');
     bindImagePicker('an-imagen', 'an-imagen-preview', 'an-elegir-imagen');
-    document.getElementById('an-autocompletar-ia').addEventListener('click', autocompletarNoticiaConIA);
     bindNewsPanels();
   }
 
@@ -864,9 +864,9 @@
   // La mesa vive arriba de cada formulario: se pega la URL una vez y la agente SUGIERE los campos de la pestaña
   // Clasificación. Nunca guarda nada; marca cada campo con 🤖 y el motivo, y no pisa lo que la persona ya eligió.
   // INICIO brigada-clasificadora
-  const ORDEN_CLASIFICACION = ['idioma', 'seccion', 'clasificacion', 'region', 'formato', 'subformato'];
+  const ORDEN_CLASIFICACION = ['seccion', 'clasificacion', 'region', 'formato', 'subformato'];
   const ETIQUETA_CLASIFICACION = {
-    idioma: 'Idioma original', seccion: 'Sección', clasificacion: 'Sub-sección', region: 'Región', formato: 'Tipo de formato', subformato: 'Subformato',
+    seccion: 'Sección', clasificacion: 'Sub-sección', region: 'Región', formato: 'Tipo de formato', subformato: 'Subformato',
   };
   // Decide que se aplica y que solo se avisa. `manuales` = campos que la persona ya cambio a mano.
   function planClasificacion(sugerencias, manuales) {
@@ -900,13 +900,13 @@
 
   const MESAS = {
     contenido: {
-      destino: 'contenido', fuenteUrlId: 'ac-fuente-url',
-      campos: { idioma: 'ac-idioma-original', seccion: 'ac-seccion', clasificacion: 'ac-clasificacion', region: 'ac-enfoque', formato: 'ac-tipo-formato', subformato: 'ac-subformato' },
+      destino: 'contenido', idiomaPieza: 'ac-idioma-original',
+      campos: { seccion: 'ac-seccion', clasificacion: 'ac-clasificacion', region: 'ac-enfoque', formato: 'ac-tipo-formato', subformato: 'ac-subformato' },
       mostrarNivel: (n) => activarSynthPanel(n), estadoNivel: '#synth-levels [data-status="clasificacion"]',
     },
     noticia: {
-      destino: 'noticia', fuenteUrlId: 'an-fuente-url',
-      campos: { idioma: 'an-idioma-original', clasificacion: 'an-categoria' },
+      destino: 'noticia', idiomaPieza: 'an-idioma-original',
+      campos: { clasificacion: 'an-categoria' },
       mostrarNivel: (n) => activarNewsPanel(n), estadoNivel: '#news-levels [data-status="clasificacion"]',
     },
   };
@@ -943,7 +943,7 @@
     mesaPrevios[clave] = null;
     document.getElementById(`brigada-deshacer-${clave}`).hidden = true;
     document.getElementById(`brigada-estado-${clave}`).textContent = '';
-    document.getElementById(`brigada-url-${clave}`).value = '';
+    document.getElementById(`brigada-fuente-idioma-${clave}`).textContent = '';
     estadoNivelClasificacion(clave, null);
   }
 
@@ -990,7 +990,7 @@
     if (!previos) return;
     const cfg = MESAS[clave];
     // Primero la seccion (reconstruye la lista de sub-secciones) y despues lo demas.
-    ['seccion', 'idioma', 'region', 'formato', 'subformato'].forEach((campo) => {
+    ['seccion', 'region', 'formato', 'subformato'].forEach((campo) => {
       if (previos[campo] === undefined || !cfg.campos[campo]) return;
       document.getElementById(cfg.campos[campo]).value = previos[campo];
     });
@@ -1015,8 +1015,6 @@
     estado.textContent = '🐸 Doña Fichas está leyendo la fuente...';
     try {
       const data = await apiFetch('/api/admin/brigada/clasificar', { method: 'POST', body: JSON.stringify({ url, destino: cfg.destino }) });
-      const fuente = document.getElementById(cfg.fuenteUrlId);
-      if (fuente && !fuente.value.trim()) fuente.value = data.url || url; // la URL pegada aqui tambien es la fuente de la pieza
       aplicarClasificacion(clave, data);
     } catch (err) {
       estado.textContent = 'Doña Fichas no pudo leer la fuente: ' + err.message;
@@ -1025,8 +1023,51 @@
     }
   }
 
+  // La Investigadora detecta el idioma de la FUENTE; el idioma de la PIEZA lo elige la persona y lo usa la Redactora.
+  function mostrarIdiomaFuente(clave, idioma) {
+    const el = document.getElementById(`brigada-fuente-idioma-${clave}`);
+    if (!el) return;
+    if (!idioma) { el.textContent = ''; return; }
+    const pieza = document.getElementById(MESAS[clave].idiomaPieza);
+    const piezaTxt = pieza.selectedOptions[0] ? pieza.selectedOptions[0].text : pieza.value;
+    el.textContent = `🔎 Doña Pesquisa: la fuente está en ${idioma}. Tu pieza irá en ${piezaTxt}.`;
+  }
+
+  // Lo que dicen los estados de cada agente tambien se ve en la mesa (la persona puede estar en otro nivel).
+  function reflejarEstadosEnMesa(clave, mapa) {
+    const mesa = document.getElementById(`brigada-estado-${clave}`);
+    Object.entries(mapa).forEach(([id, prefijo]) => {
+      const origen = document.getElementById(id);
+      if (!origen) return;
+      new MutationObserver(() => { if (origen.textContent) mesa.textContent = `${prefijo}: ${origen.textContent}`; })
+        .observe(origen, { childList: true, characterData: true, subtree: true });
+    });
+  }
+
   function bindMesaBrigada(clave) {
     const cfg = MESAS[clave];
+    if (clave === 'contenido') {
+      document.getElementById('brigada-investigar-contenido').addEventListener('click', () => { activarSynthPanel('ia'); investigarFuente(); });
+      document.getElementById('brigada-redactar-contenido').addEventListener('click', () => {
+        if (!document.getElementById('ia-notas').value.trim()) {
+          document.getElementById('brigada-estado-contenido').textContent = 'La Pluma redacta a partir de las notas: primero pídele a Doña Pesquisa que investigue.';
+          return;
+        }
+        activarSynthPanel('ia');
+        redactarConIA();
+      });
+      document.getElementById('brigada-resumir-contenido').addEventListener('click', () => resumirConIa(false));
+      document.getElementById('brigada-citar-contenido').addEventListener('click', () => rellenarDesdeUrl(false));
+      document.getElementById('ac-idioma-original').addEventListener('change', () => {
+        const txt = document.getElementById('brigada-fuente-idioma-contenido').textContent;
+        if (txt) mostrarIdiomaFuente('contenido', (txt.match(/está en (.+?)\./) || [])[1]);
+      });
+      reflejarEstadosEnMesa('contenido', {
+        'ia-investigar-status': '🔎 Doña Pesquisa', 'ia-redactar-status': '✍️ La Pluma', 'ac-resumir-estado': '✂️ Doña Breve', 'ac-leer-url-estado': '📚 La Bibliotecaria',
+      });
+    } else {
+      document.getElementById('brigada-redactar-noticia').addEventListener('click', autocompletarNoticiaConIA);
+    }
     document.getElementById(`brigada-clasificar-${clave}`).addEventListener('click', () => clasificarConBrigada(clave));
     document.getElementById(`brigada-deshacer-${clave}`).addEventListener('click', () => deshacerClasificacion(clave));
     // Si la persona cambia un campo a mano, deja de ser una sugerencia: se quita la marca y no se vuelve a pisar.
@@ -1043,15 +1084,14 @@
   // Claude (endpoint protegido, la llave nunca llega al navegador). Nunca
   // guarda nada solo -- rellena el formulario para que el admin revise.
   async function autocompletarNoticiaConIA() {
-    const statusEl = document.getElementById('an-autocompletar-status');
-    const url = document.getElementById('an-autocompletar-url').value.trim();
+    const statusEl = document.getElementById('brigada-estado-noticia');
+    const url = document.getElementById('brigada-url-noticia').value.trim();
     if (!url) { statusEl.textContent = 'Pega primero la URL del artículo original.'; return; }
     statusEl.textContent = 'Leyendo el artículo y redactando con IA... (puede tardar unos segundos)';
     try {
       const data = await apiFetch('/api/admin/autocompletar-ia', { method: 'POST', body: JSON.stringify({ url }) });
       document.getElementById('an-titulo').value = data.titulo || '';
       document.getElementById('an-parrafos').value = [data.subtituloResumen, ...(data.parrafos || [])].filter(Boolean).join('\n');
-      document.getElementById('an-fuente-url').value = url;
       document.getElementById('an-fuente-texto').value = data.fuenteTexto || '';
       document.getElementById('an-divulgacion-ia').value = 'parcial';
       selectorIaNoticia.habilitar(true);
@@ -1114,7 +1154,7 @@
     document.getElementById('an-imagen').value = item?.imagen || '';
     document.getElementById('an-imagen-alt').value = item?.imagen_alt || '';
     document.getElementById('an-imagen-caption').value = item?.imagen_caption || '';
-    document.getElementById('an-fuente-url').value = item?.fuente_url || '';
+    document.getElementById('brigada-url-noticia').value = item?.fuente_url || '';
     document.getElementById('an-fuente-texto').value = item?.fuente_texto || '';
     document.getElementById('an-parrafos').value = (item?.parrafos || []).join('\n');
     document.getElementById('an-divulgacion-ia').value = item?.divulgacion_ia || 'no';
@@ -1124,10 +1164,9 @@
     document.getElementById('an-estado').textContent = item
       ? (item.publicado ? 'Estado actual: publicada (se ve en el sitio).' : 'Estado actual: borrador (no se ve en el sitio).')
       : '«Guardar borrador» la deja solo en el panel; «AL AIRE» la publica en el sitio.';
-    document.getElementById('an-autocompletar-url').value = '';
     updateImagePreview('an-imagen', 'an-imagen-preview');
     setStatus(document.getElementById('an-status'), '', '');
-    activarNewsPanel(item ? 'clasificacion' : 'ia');
+    activarNewsPanel('clasificacion');
     reiniciarMesa('noticia');
     refrescarPanelTraduccion('noticia');
     document.getElementById('admin-noticias-form-box').style.display = 'block';
@@ -1152,7 +1191,7 @@
       imagen: document.getElementById('an-imagen').value.trim(),
       imagenAlt: textoAlternativo(document.getElementById('an-imagen-alt').value, document.getElementById('an-titulo').value),
       imagenCaption: document.getElementById('an-imagen-caption').value.trim() || undefined,
-      fuenteUrl: document.getElementById('an-fuente-url').value.trim(),
+      fuenteUrl: document.getElementById('brigada-url-noticia').value.trim(),
       fuenteTexto: document.getElementById('an-fuente-texto').value.trim(),
       parrafos: document.getElementById('an-parrafos').value.split('\n').map((p) => p.trim()).filter(Boolean),
       divulgacionIa: document.getElementById('an-divulgacion-ia').value,
@@ -1255,11 +1294,6 @@
       sincronizarClasificacion();
     });
     document.getElementById('ac-clasificacion').addEventListener('change', sincronizarClasificacion);
-    // El idioma del contenido (Nivel 1) y el idioma de redacción del agente (Nivel 4) van siempre juntos.
-    const idiomaContenido = document.getElementById('ac-idioma-original');
-    const idiomaAgente = document.getElementById('ia-idioma');
-    idiomaContenido.addEventListener('change', () => { idiomaAgente.value = idiomaContenido.value; });
-    idiomaAgente.addEventListener('change', () => { idiomaContenido.value = idiomaAgente.value; });
     document.getElementById('admin-contenidos-new').addEventListener('click', () => openContenidoForm());
     document.getElementById('ac-cancel').addEventListener('click', closeContenidoForm);
     document.getElementById('admin-contenidos-search').addEventListener('input', renderContenidosList);
@@ -1303,14 +1337,14 @@
     });
 
     document.getElementById('ac-cita-sin-fuente').addEventListener('change', () => { toggleCitationFields(); updateCitationPreview(); });
-    ['ac-cita-estilo', 'ac-cita-autor', 'ac-cita-anio', 'ac-cita-titulo-original', 'ac-cita-fecha-acceso', 'ac-fuente-texto', 'ac-fuente-url']
+    ['ac-cita-estilo', 'ac-cita-autor', 'ac-cita-anio', 'ac-cita-titulo-original', 'ac-cita-fecha-acceso', 'ac-fuente-texto', 'brigada-url-contenido']
       .forEach((id) => document.getElementById(id).addEventListener('input', updateCitationPreview));
 
-    document.getElementById('ac-resumir-ia').addEventListener('click', resumirConIa);
+    document.getElementById('ac-resumir-ia').addEventListener('click', () => resumirConIa(false));
     document.getElementById('ac-leer-url').addEventListener('click', () => rellenarDesdeUrl(false));
     // Al salir del campo URL con una URL nueva se lee sola (despues de que el limpiador de URL la ajuste).
-    document.getElementById('ac-fuente-url').addEventListener('blur', () => setTimeout(() => {
-      const url = document.getElementById('ac-fuente-url').value.trim();
+    document.getElementById('brigada-url-contenido').addEventListener('blur', () => setTimeout(() => {
+      const url = document.getElementById('brigada-url-contenido').value.trim();
       if (url && url !== ultimaUrlLeida) rellenarDesdeUrl(true);
     }, 0));
 
@@ -1344,19 +1378,10 @@
   // abierto (la clasificación -- sección/sub-sección/enfoque/categoría --
   // la elige el admin en los <select> de arriba, la IA no la adivina).
   function bindInvestigadorRedactor() {
-    document.querySelectorAll('#ia-fuente-toggle .foro-filter-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#ia-fuente-toggle .foro-filter-btn').forEach((b) => b.classList.toggle('active', b === btn));
-        const esUrl = btn.dataset.fuente === 'url';
-        document.getElementById('ia-fuente-url-box').style.display = esUrl ? '' : 'none';
-        document.getElementById('ia-fuente-texto-box').style.display = esUrl ? 'none' : '';
-      });
-    });
-
     document.getElementById('ia-investigar-btn').addEventListener('click', () => investigarFuente());
     document.getElementById('ia-reinvestigar-btn').addEventListener('click', reinvestigarConRespuestas);
     document.getElementById('ia-restaurar-texto').addEventListener('click', restaurarTextoPegado);
-    document.getElementById('ia-url').addEventListener('blur', sugerirOrigenPorUrl);
+    document.getElementById('brigada-url-contenido').addEventListener('blur', sugerirOrigenPorUrl);
     // Si el admin toca el origen a mano, ya no lo pisamos con una sugerencia futura.
     document.getElementById('ia-continente').addEventListener('change', () => { origenTocadoPorAdmin = true; });
     document.getElementById('ia-region').addEventListener('input', () => { origenTocadoPorAdmin = true; });
@@ -1440,7 +1465,7 @@
 
   function sugerirOrigenPorUrl() {
     if (origenTocadoPorAdmin) return; // el admin ya lo edito, no lo pisamos
-    const url = document.getElementById('ia-url').value.trim();
+    const url = document.getElementById('brigada-url-contenido').value.trim();
     if (!url) return;
     const continente = detectarOrigenPorUrl(url);
     if (continente) document.getElementById('ia-continente').value = continente;
@@ -1448,7 +1473,8 @@
 
   async function investigarFuente(respuestasTexto = '') {
     const statusEl = document.getElementById('ia-investigar-status');
-    const esUrl = document.querySelector('#ia-fuente-toggle .foro-filter-btn.active').dataset.fuente === 'url';
+    // Si hay texto pegado se investiga ese texto; si no, la pagina de la URL de la mesa.
+    const textoPegado = document.getElementById('ia-texto').value.trim();
     const usarBusquedaWeb = document.getElementById('ia-usar-busqueda').checked;
     const body = {
       usarBusquedaWeb,
@@ -1458,39 +1484,25 @@
       continente: document.getElementById('ia-continente').value,
       region: document.getElementById('ia-region').value.trim(),
     };
-    if (esUrl) {
-      const url = document.getElementById('ia-url').value.trim();
-      if (!url) { statusEl.textContent = 'Pega primero la URL de la fuente.'; return; }
-      body.url = url;
-    } else {
-      const texto = document.getElementById('ia-texto').value.trim();
-      if (!texto) { statusEl.textContent = 'Pega primero el texto o la transcripción.'; return; }
+    if (textoPegado) {
       if (textoPegadoOriginal === null) textoPegadoOriginal = document.getElementById('ia-texto').value;
-      body.texto = texto;
-      body.tituloSugerido = document.getElementById('ia-titulo-sugerido').value.trim();
+      body.texto = textoPegado;
+    } else {
+      const url = document.getElementById('brigada-url-contenido').value.trim();
+      if (!url) { statusEl.textContent = 'Pega primero la URL de la fuente (arriba, en la mesa) o un texto.'; return; }
+      body.url = url;
     }
     statusEl.textContent = 'Investigando' + (usarBusquedaWeb ? ' (con búsqueda web, puede tardar más)...' : '...');
     try {
       const data = await apiFetch('/api/admin/investigar', { method: 'POST', body: JSON.stringify(body) });
       document.getElementById('ia-notas').value = data.notas || '';
       document.getElementById('ia-notas-box').style.display = '';
-      if (data.fuenteUrl) document.getElementById('ac-fuente-url').value = data.fuenteUrl;
-      if (data.fuenteTexto) document.getElementById('ac-fuente-texto').value = data.fuenteTexto;
-      // Datos de citacion: el Investigador solo los manda si tuvo confianza
-      // razonable (nunca inventa autor/año/estilo) -- fecha de acceso queda
-      // siempre para que el admin la ponga a mano.
-      if (data.tituloOriginal) document.getElementById('ac-cita-titulo-original').value = data.tituloOriginal;
-      if (data.citaAutor) document.getElementById('ac-cita-autor').value = data.citaAutor;
-      if (data.citaAnio) document.getElementById('ac-cita-anio').value = data.citaAnio;
-      if (data.citaEstiloSugerido) document.getElementById('ac-cita-estilo').value = data.citaEstiloSugerido;
-      if (data.citaAutor || data.citaAnio || data.citaEstiloSugerido || data.fuenteUrl) {
-        document.getElementById('ac-cita-sin-fuente').checked = false;
-        toggleCitationFields();
-        updateCitationPreview();
-      }
+      // Los datos de la cita (autor, año, titulo original, medio) los llena La Bibliotecaria desde la pagina,
+      // no la Investigadora: aqui solo se guardan las notas.
       mostrarCorreccionesIa(data);
       mostrarPreguntasIa(data.preguntas || []);
-      const idioma = data.idiomaDetectado ? ` Idioma detectado: ${data.idiomaDetectado}.` : '';
+      const idioma = data.idiomaDetectado ? ` Fuente en: ${data.idiomaDetectado}.` : '';
+      mostrarIdiomaFuente('contenido', data.idiomaDetectado);
       statusEl.textContent = (data.preguntas && data.preguntas.length
         ? 'Notas provisionales listas — responde las preguntas de abajo para afinarlas, o continúa con "Redactar con IA".'
         : 'Listo — revisa/edita las notas y la citación, luego dale a "Redactar con IA".') + idioma;
@@ -1568,16 +1580,17 @@
           tipoFormato: document.getElementById('ac-tipo-formato').value,
           estilo: document.getElementById('ia-estilo').value,
           tono: document.getElementById('ia-tono').value,
-          idioma: document.getElementById('ia-idioma').value,
+          idioma: document.getElementById('ac-idioma-original').value,
           fuenteTexto: document.getElementById('ac-fuente-texto').value,
-          fuenteUrl: document.getElementById('ac-fuente-url').value,
+          fuenteUrl: document.getElementById('brigada-url-contenido').value,
         }),
       });
       document.getElementById('ac-titulo').value = data.titulo || '';
-      document.getElementById('ac-subtitulo').value = data.subtituloResumen || '';
       document.getElementById('ac-cuerpo').value = (data.parrafos || []).join('\n\n');
       if (data.duracionMinEstimado) document.getElementById('ac-duracion').value = data.duracionMinEstimado;
-      statusEl.textContent = 'Listo — revisa el título, el resumen y el cuerpo antes de guardar.';
+      statusEl.textContent = 'La Pluma terminó el título y el cuerpo. Doña Breve escribe el resumen...';
+      await resumirConIa(true);
+      statusEl.textContent = 'Listo — revisa el título, el cuerpo y el resumen antes de guardar.';
     } catch (err) {
       statusEl.textContent = 'No se pudo redactar: ' + err.message;
     }
@@ -1624,7 +1637,7 @@
 
   async function rellenarDesdeUrl(automatico) {
     const estado = document.getElementById('ac-leer-url-estado');
-    const url = document.getElementById('ac-fuente-url').value.trim();
+    const url = document.getElementById('brigada-url-contenido').value.trim();
     if (!url) { if (!automatico) estado.textContent = 'Escribe primero la URL de la fuente.'; return; }
     if (document.getElementById('ac-cita-sin-fuente').checked) {
       if (!automatico) estado.textContent = 'Está marcado «Sin fuente externa»: desmárcalo para rellenar la cita.';
@@ -1655,12 +1668,12 @@
     }
   }
 
-  async function resumirConIa() {
+  async function resumirConIa(automatico) {
     const estado = document.getElementById('ac-resumir-estado');
     const cuerpo = document.getElementById('ac-cuerpo').value.trim();
     const resumen = document.getElementById('ac-subtitulo');
     if (!cuerpo) { estado.textContent = 'Escribe primero el «Cuerpo del texto» para poder resumirlo.'; return; }
-    if (resumen.value.trim() && !confirm('Ya hay un resumen escrito. ¿Reemplazarlo por el que escriba la IA?')) return;
+    if (!automatico && resumen.value.trim() && !confirm('Ya hay un resumen escrito. ¿Reemplazarlo por el que escriba la IA?')) return;
     const boton = document.getElementById('ac-resumir-ia');
     boton.disabled = true;
     estado.textContent = 'Resumiendo con IA...';
@@ -1686,7 +1699,7 @@
       anio: document.getElementById('ac-cita-anio').value.trim(),
       tituloOriginal: document.getElementById('ac-cita-titulo-original').value.trim(),
       publicacion: document.getElementById('ac-fuente-texto').value.trim(),
-      url: document.getElementById('ac-fuente-url').value.trim(),
+      url: document.getElementById('brigada-url-contenido').value.trim(),
       fechaAcceso: document.getElementById('ac-cita-fecha-acceso').value,
     });
   }
@@ -1768,7 +1781,7 @@
   // Rellena titulo/portada/fuente desde el oembed publico de YouTube (sin
   // llave de API, gratis). NO toca el resumen (ac-subtitulo) a proposito --
   // esa redaccion original la escribe el admin, incluso cuando el video es
-  // de otro canal (ver ac-fuente-texto/ac-fuente-url, que si se rellenan
+  // de otro canal (ver ac-fuente-texto/brigada-url-contenido, que si se rellenan
   // con el canal real para dar credito correcto).
   async function autocompletarYoutube() {
     const statusEl = document.getElementById('ac-youtube-status');
@@ -1789,7 +1802,7 @@
       document.getElementById('ac-tipo-formato').value = 'video';
       if (!document.getElementById('ac-titulo').value.trim()) document.getElementById('ac-titulo').value = data.title || '';
       if (!document.getElementById('ac-fuente-texto').value.trim()) document.getElementById('ac-fuente-texto').value = data.author_name || '';
-      if (!document.getElementById('ac-fuente-url').value.trim()) document.getElementById('ac-fuente-url').value = data.author_url || watchUrl;
+      if (!document.getElementById('brigada-url-contenido').value.trim()) document.getElementById('brigada-url-contenido').value = data.author_url || watchUrl;
       if (!document.getElementById('ac-url-portada').value.trim() && data.thumbnail_url) {
         document.getElementById('ac-url-portada').value = data.thumbnail_url;
         updateImagePreview('ac-url-portada', 'ac-url-portada-preview');
@@ -1839,7 +1852,7 @@
       document.getElementById('ac-tipo-formato').value = 'video';
       if (!document.getElementById('ac-titulo').value.trim()) document.getElementById('ac-titulo').value = btn.dataset.titulo;
       if (!document.getElementById('ac-fuente-texto').value.trim()) document.getElementById('ac-fuente-texto').value = 'Did U Know? PR';
-      if (!document.getElementById('ac-fuente-url').value.trim()) document.getElementById('ac-fuente-url').value = `https://www.youtube.com/@${YOUTUBE_HANDLE}`;
+      if (!document.getElementById('brigada-url-contenido').value.trim()) document.getElementById('brigada-url-contenido').value = `https://www.youtube.com/@${YOUTUBE_HANDLE}`;
       if (!document.getElementById('ac-url-portada').value.trim()) {
         document.getElementById('ac-url-portada').value = btn.dataset.thumb;
         updateImagePreview('ac-url-portada', 'ac-url-portada-preview');
@@ -1963,7 +1976,6 @@
     document.getElementById('ia-region').value = '';
     origenTocadoPorAdmin = false;
     document.getElementById('ac-idioma-original').value = item?.idioma_original || 'es';
-    document.getElementById('ia-idioma').value = document.getElementById('ac-idioma-original').value;
     document.getElementById('ac-seccion').value = item?.seccion || 'noticias';
     document.getElementById('ac-tipo-formato').value = item?.tipo_formato || 'noticia';
     categoriaGuardada = item?.categoria || '';
@@ -1975,7 +1987,7 @@
     document.getElementById('ac-divulgacion-ia').value = item?.divulgacion_ia || 'no';
     cargarIaEnSelector(selectorIaContenido, 'ac-divulgacion-ia', item?.ia_herramientas);
     document.getElementById('ac-url-media').value = item?.url_media || '';
-    document.getElementById('ac-fuente-url').value = item?.fuente_url || '';
+    document.getElementById('brigada-url-contenido').value = item?.fuente_url || '';
     document.getElementById('ac-fuente-texto').value = item?.fuente_texto || '';
     document.getElementById('ac-duracion').value = item?.duracion_min || 1;
     document.getElementById('ac-url-portada').value = item?.url_portada || '';
@@ -2039,7 +2051,7 @@
       divulgacionIa: document.getElementById('ac-divulgacion-ia').value,
       iaHerramientas: selectorIaContenido.leer(),
       urlMedia: document.getElementById('ac-url-media').value.trim() || null,
-      fuenteUrl: document.getElementById('ac-fuente-url').value.trim() || null,
+      fuenteUrl: document.getElementById('brigada-url-contenido').value.trim() || null,
       fuenteTexto: document.getElementById('ac-fuente-texto').value.trim() || null,
       duracionMin: Number(document.getElementById('ac-duracion').value),
       urlPortada: document.getElementById('ac-url-portada').value.trim(),
@@ -2354,14 +2366,82 @@
   }
 
   // ── AGENTES & MODERACIÓN ─────────────────────────────────
+  // INICIO elenco-brigada
+  // El elenco: cada agente con SU oficio. Ninguna tarea se repite entre agentes (hay prueba que lo vigila): si una
+  // función ya es de una agente, las demás no la hacen. `nivel` es la pestaña del formulario de Contenidos donde deja su trabajo.
+  const ELENCO_BRIGADA = [
+    {
+      id: 'investigadora', emoji: '🔎', nombre: 'Investigadora', apodo: 'Doña Pesquisa', estado: 'activa', nivel: 'ia', usoId: 'ag-ia-investigador-uso',
+      trabajo: ['Lee la fuente (URL o texto pegado) en cualquier idioma, lengua o dialecto', 'Detecta el idioma de la fuente', 'Prepara las notas de investigación, con búsqueda web opcional', 'Corrige el texto pegado mostrando cada cambio', 'Pregunta cuando algo de la fuente no está claro'],
+      noHace: 'No clasifica, no redacta y no llena la cita.',
+    },
+    {
+      id: 'clasificadora', emoji: '🗂️', nombre: 'Clasificadora', apodo: 'Doña Fichas', estado: 'activa', nivel: 'clasificacion',
+      trabajo: ['Sugiere la sección y la sub-sección o categoría', 'Sugiere la región', 'Sugiere el formato de la pieza y anota el formato de la fuente', 'Sugiere el subformato'],
+      noHace: 'No decide el idioma: el de la fuente es de la Investigadora y el de la pieza lo eliges tú.',
+    },
+    {
+      id: 'redactora', emoji: '✍️', nombre: 'Redactora', apodo: 'La Pluma', estado: 'activa', nivel: 'ia', usoId: 'ag-ia-redactor-uso',
+      trabajo: ['Escribe el título y el cuerpo con palabras propias, en el idioma de la pieza que le pides', 'Sigue el tono y el estilo elegidos', 'Estima la duración de lectura'],
+      noHace: 'No hace el resumen ni la cita.',
+    },
+    {
+      id: 'resumidora', emoji: '✂️', nombre: 'Resumidora', apodo: 'Doña Breve', estado: 'activa', nivel: 'contenido',
+      trabajo: ['Escribe el resumen a partir del cuerpo del texto, en el mismo idioma', 'Corre sola después de La Pluma, o cuando se lo pides'],
+      noHace: 'No escribe el cuerpo.',
+    },
+    {
+      id: 'bibliotecaria', emoji: '📚', nombre: 'Bibliotecaria', apodo: 'La Bibliotecaria', estado: 'activa', nivel: 'citacion',
+      trabajo: ['Lee de la página autor de la fuente, año, título original y nombre del medio', 'Pone la fecha de acceso', 'Deja vacío lo que la página no declara'],
+      noHace: 'No usa IA ni deduce datos que la página no diga.',
+    },
+    {
+      id: 'correctora', emoji: '🧐', nombre: 'Correctora', apodo: 'Doña Tilde', estado: 'activa', nivel: 'contenido',
+      trabajo: ['Revisa ortografía, tildes y gramática en cada campo según la variante del idioma', 'Respeta el diccionario de Puerto Rico y del proyecto', 'Corrige con IA mostrando cada cambio, sin aplicarlo sola'],
+      noHace: 'No cambia el sentido ni reescribe el estilo.',
+    },
+    {
+      id: 'traductora', emoji: '🗣️', nombre: 'Traductora', apodo: 'La Intérprete', estado: 'activa', nivel: 'contenido',
+      trabajo: ['Traduce la pieza ya guardada al otro idioma del sitio', 'Deja la traducción como borrador para tu revisión'],
+      noHace: 'No escribe la pieza original.',
+    },
+    {
+      id: 'guardiana', emoji: '🛡️', nombre: 'Guardiana', apodo: 'La Guardiana', estado: 'proxima',
+      trabajo: ['Avisa si el contenido toca menores, crímenes, personas reales o requiere 18+', 'Compara tu texto con la fuente y avisa si se parece demasiado (derechos de autor)'],
+      noHace: 'Orienta; no sustituye a un abogado.',
+    },
+    {
+      id: 'detective', emoji: '🕵️', nombre: 'Detective', apodo: 'El Detective', estado: 'proxima',
+      trabajo: ['Avisa si esa historia ya está publicada en el sitio', 'Propone fusionar las piezas repetidas'],
+      noHace: 'No borra nada por su cuenta.',
+    },
+    {
+      id: 'pintora', emoji: '🎨', nombre: 'Pintora', apodo: 'La Pintora', estado: 'proxima',
+      trabajo: ['Sugiere el texto alternativo de las imágenes', 'Escribe el prompt de imagen en el estilo de Aliado Imperfekto'],
+      noHace: 'No genera la imagen: te da el prompt.',
+    },
+  ];
+  function htmlElenco(elenco, esc) {
+    return elenco.map((a) => `
+      <div class="ag-tile ag-agente ${a.estado === 'proxima' ? 'ag-agente-proxima' : ''}" data-agente="${a.id}">
+        <p class="ag-tile-title">${a.emoji} ${esc(a.apodo)} <span class="ag-agente-oficio">· la ${esc(a.nombre)}</span> ${a.estado === 'proxima' ? '<span class="ag-agente-etiqueta">próximamente</span>' : ''}</p>
+        <ul class="ag-agente-tareas">${a.trabajo.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
+        <p class="ag-tile-desc"><em>${esc(a.noHace)}</em></p>
+        ${a.usoId ? `<p class="ag-tile-desc" id="${a.usoId}">—</p>` : ''}
+        ${a.nivel ? `<button type="button" class="ag-btn-piloto" data-nivel="${a.nivel}">Ir a su pestaña →</button>` : ''}
+      </div>`).join('');
+  }
+  // FIN elenco-brigada
+
   function bindAgentes() {
+    document.getElementById('brigada-elenco').innerHTML = htmlElenco(ELENCO_BRIGADA, escapeHtml);
     document.getElementById('ag-ir-reportes').addEventListener('click', () => activarTab('reportes'));
-    const irAContenidos = () => {
+    // «Ir a su pestaña»: abre una pieza nueva de Contenidos en el nivel donde esa agente deja su trabajo.
+    document.querySelectorAll('#brigada-elenco [data-nivel]').forEach((btn) => btn.addEventListener('click', () => {
       activarTab('contenidos');
       document.getElementById('admin-contenidos-new').click();
-    };
-    document.getElementById('ag-ir-contenidos-investigador').addEventListener('click', irAContenidos);
-    document.getElementById('ag-ir-contenidos-redactor').addEventListener('click', irAContenidos);
+      activarSynthPanel(btn.dataset.nivel);
+    }));
   }
 
   async function loadUsoIa() {
@@ -2375,7 +2455,8 @@
         return `${r.llamadas} uso${r.llamadas === 1 ? '' : 's'} · $${r.costo_total.toFixed(3)} acumulado`;
       };
       document.getElementById('ag-ia-investigador-uso').textContent = linea('investigador');
-      document.getElementById('ag-ia-redactor-uso').textContent = linea('redactor');
+      // La bitacora solo distingue tres oficios: «redactor» cuenta tambien a Doña Fichas, Doña Breve y Doña Tilde.
+      document.getElementById('ag-ia-redactor-uso').textContent = linea('redactor') + ' (cuenta también a Doña Fichas, Doña Breve y Doña Tilde)';
       document.getElementById('ag-ia-costo-mes').textContent = `$${data.costoMesActual.toFixed(3)} este mes`;
     } catch (err) {
       document.getElementById('ag-ia-costo-mes').textContent = 'Error al cargar gasto';

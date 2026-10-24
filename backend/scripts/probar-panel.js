@@ -41,7 +41,6 @@ w.fetch = async (url) => {
     return json({
       ok: true, url: 'https://medio.com/nota', formatoOriginal: 'video',
       sugerencias: {
-        idioma: { valor: 'en', motivo: 'La página declara el idioma «en».', confianza: 'alta' },
         seccion: { valor: 'educacion', motivo: 'Trata de leyes escolares.', confianza: 'alta' },
         clasificacion: { valor: 'leyes-educativas', motivo: 'Habla de una ley.', confianza: 'media' },
         region: { valor: null, motivo: 'No se encontró en la fuente.', confianza: 'baja' },
@@ -70,12 +69,13 @@ setTimeout(() => {
     ['Reportes muestra el pendiente con su texto', texto('admin-reportes-list').includes('Texto reportado') && !texto('admin-reportes-list').includes('Spam')],
     ['los filtros de Reportes llevan contador', d.querySelector('#admin-reportes-filtros [data-filtro="todos"] .reportes-cuenta').textContent === '2'],
     ['los campos llevan la barra de correctores', d.querySelectorAll('.corr-barra').length >= 10],
+    ['La Brigada Coquí pinta su elenco y existe la pestaña Seguridad', d.querySelectorAll('#brigada-elenco .ag-agente').length === 10 && !!d.getElementById('admin-panel-seguridad')],
   ];
   // Botones de IA del formulario de Contenidos: «Resumir con IA» y «Rellenar desde la URL».
   d.getElementById('ac-cuerpo').value = 'Un texto largo para resumir.';
   d.getElementById('ac-resumir-ia').click();
-  d.getElementById('ac-fuente-url').value = 'https://medio.com/nota';
-  d.getElementById('ac-leer-url').click();
+  d.getElementById('brigada-url-contenido').value = 'https://medio.com/nota';
+  d.getElementById('brigada-citar-contenido').click();
   // Doña Fichas (Brigada Coquí): abre el formulario, la persona elige el formato a mano y luego pide clasificar.
   d.getElementById('admin-contenidos-new').click();
   const formato = d.getElementById('ac-tipo-formato');
@@ -86,8 +86,8 @@ setTimeout(() => {
   setTimeout(() => {
     const marcaDe = (id) => { const m = d.getElementById(id).parentElement.querySelector(`.brigada-marca[data-campo="${id}"]`); return m ? m.textContent : ''; };
     comprobaciones.push(
-      ['Doña Fichas rellena idioma, sección y sub-sección con su marca 🤖',
-        d.getElementById('ac-idioma-original').value === 'en' && d.getElementById('ac-seccion').value === 'educacion'
+      ['Doña Fichas rellena sección y sub-sección con su marca 🤖 y no toca el idioma de la pieza',
+        d.getElementById('ac-idioma-original').value === 'es' && d.getElementById('ac-seccion').value === 'educacion'
         && d.getElementById('ac-clasificacion').value === 'leyes-educativas' && marcaDe('ac-seccion').includes('🤖 Doña Fichas sugirió')],
       ['no pisa lo que la persona eligió a mano', formato.value === 'audio' && marcaDe('ac-tipo-formato').includes('lo elegiste tú')],
       ['avisa «no encontrado» en lo que no sabe y la duda en lo inseguro', marcaDe('ac-enfoque').includes('⚠️') && marcaDe('ac-subformato').includes('hay duda')],
@@ -96,7 +96,7 @@ setTimeout(() => {
     d.getElementById('brigada-deshacer-contenido').click();
     comprobaciones.push(
       ['Deshacer devuelve los campos y quita las marcas',
-        d.getElementById('ac-seccion').value === 'noticias' && d.getElementById('ac-idioma-original').value === 'es' && marcaDe('ac-seccion') === ''],
+        d.getElementById('ac-seccion').value === 'noticias' && marcaDe('ac-seccion') === ''],
     );
   }, 300);
   setTimeout(() => {

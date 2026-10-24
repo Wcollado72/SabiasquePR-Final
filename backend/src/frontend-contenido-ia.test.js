@@ -17,7 +17,6 @@ describe('etiquetas del formulario de Contenidos', () => {
     ['ac-subtitulo', 'Resumen'],
     ['ac-cuerpo', 'Cuerpo del texto'],
     ['ac-autor', 'Autor'],
-    ['ac-fuente-url', 'URL de la fuente'],
     ['ac-fuente-texto', 'Nombre de la fuente'],
   ])('«%s» no lleva texto entre paréntesis', (id, etiqueta) => {
     expect(html).toContain(`<label for="${id}">${etiqueta}</label>`);

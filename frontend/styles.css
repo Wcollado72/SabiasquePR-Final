@@ -2541,6 +2541,16 @@ html[data-theme="dark"] .social-links img{ filter:invert(1) hue-rotate(180deg); 
 .brigada-mesa-head strong{ color:#4fd671; font-size:1.02rem; }
 .brigada-mesa .admin-hint{ color:#b9c9bf; font-family:inherit; }
 .brigada-mesa-head .admin-hint{ margin:0; }
+.brigada-mesa-fila{ display:flex; flex-wrap:wrap; gap:10px 14px; align-items:flex-end; }
+.brigada-mesa-campo{ display:flex; flex-direction:column; gap:2px; }
+.brigada-mesa-url{ flex:1 1 320px; }
+.brigada-mesa-idioma{ flex:0 0 190px; }
+.brigada-mesa-campo label{ margin:0; }
+.brigada-fuente-idioma{ margin:0; min-height:1.1em; font-size:.85rem; }
+.agente-card{ margin:0 0 14px; padding:12px 14px; border:1px solid rgba(127,127,127,.4); border-radius:var(--radius); display:flex; flex-direction:column; gap:4px; }
+.agente-card legend{ padding:0 8px; font-weight:700; }
+.agente-pistas{ margin:6px 0; }
+.agente-pistas summary{ cursor:pointer; font-weight:600; margin-bottom:6px; }
 .brigada-agentes{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 .brigada-agente{ display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border:1px solid #4fd671; border-radius:999px; background:transparent; color:inherit; font:inherit; font-weight:600; cursor:pointer; }
 .brigada-agente small{ font-weight:400; opacity:.8; }
@@ -2551,3 +2561,10 @@ html[data-theme="dark"] .social-links img{ filter:invert(1) hue-rotate(180deg); 
 .brigada-marca-sugerido{ background:#e1f0e8; color:#12432c; border-left:3px solid #1f6b46; }
 .brigada-marca-no_encontrado, .brigada-marca-duda{ background:#f9efdc; color:#5a3a05; border-left:3px solid #c58a1e; }
 .brigada-marca-respetado{ background:#eceff1; color:#1c2428; border-left:3px solid #888; }
+
+/* Elenco de la Brigada Coquí (pestaña de agentes) */
+.ag-agente{ display:flex; flex-direction:column; gap:6px; }
+.ag-agente-oficio{ font-weight:400; opacity:.8; font-size:.85em; }
+.ag-agente-etiqueta{ margin-left:6px; padding:1px 8px; border-radius:999px; border:1px dashed currentColor; font-size:.7rem; font-weight:600; opacity:.85; }
+.ag-agente-tareas{ margin:0; padding-left:1.1em; font-size:.85rem; line-height:1.4; }
+.ag-agente-proxima{ opacity:.75; border-style:dashed; }
