@@ -1,0 +1,539 @@
+{
+ "generado": "2026-10-24T15:17:16.583Z",
+ "base": "https://sabiasquepr.com",
+ "motor": "WebKit 18.2 (Playwright)",
+ "bloqueoStorage": true,
+ "resultados": [
+  {
+   "dispositivo": "iPhone (Safari iOS)",
+   "pagina": "Inicio",
+   "ruta": "/index.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 390,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [
+    "input#home-email 15.2px"
+   ],
+   "titulo": "Sabías que PR — Noticias, Educación e Información",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "843.984375px",
+    "ventana": 844
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "iPhone (Safari iOS)",
+   "pagina": "Noticias",
+   "ruta": "/noticias.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 390,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "titulo": "Sabías que PR — Noticias",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "843.984375px",
+    "ventana": 844
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "iPhone (Safari iOS)",
+   "pagina": "Revolución Humana",
+   "ruta": "/revolucion-humana.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 390,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "titulo": "Sabías que PR — Revolución Humana",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "843.984375px",
+    "ventana": 844
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "iPhone (Safari iOS)",
+   "pagina": "Educación",
+   "ruta": "/educacion.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 390,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [
+    "input#edu-email 15.2px"
+   ],
+   "titulo": "Sabías que PR — Educación",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "843.984375px",
+    "ventana": 844
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "iPhone (Safari iOS)",
+   "pagina": "Tienda",
+   "ruta": "/tienda.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 390,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "titulo": "Sabías que PR — Tienda",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "843.984375px",
+    "ventana": 844
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "iPhone (Safari iOS)",
+   "pagina": "Premium (apoyo)",
+   "ruta": "/premium.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 390,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "titulo": "Sabías que PR — Apoya el canal",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "843.984375px",
+    "ventana": 844
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "iPhone (Safari iOS)",
+   "pagina": "Contacto",
+   "ruta": "/contacto.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 390,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [
+    "input#nombre 15.2px",
+    "input#email 15.2px",
+    "select#motivo 15.2px",
+    "textarea#mensaje 15.2px"
+   ],
+   "titulo": "Sabías que PR — Quiénes somos",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "843.984375px",
+    "ventana": 844
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "iPad (Safari iPadOS)",
+   "pagina": "Inicio",
+   "ruta": "/index.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 820,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [
+    "input#home-email 15.2px"
+   ],
+   "titulo": "Sabías que PR — Noticias, Educación e Información",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "1180px",
+    "ventana": 1180
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "iPad (Safari iPadOS)",
+   "pagina": "Noticias",
+   "ruta": "/noticias.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 820,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "titulo": "Sabías que PR — Noticias",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "1180px",
+    "ventana": 1180
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "iPad (Safari iPadOS)",
+   "pagina": "Revolución Humana",
+   "ruta": "/revolucion-humana.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 820,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "titulo": "Sabías que PR — Revolución Humana",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "1180px",
+    "ventana": 1180
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "iPad (Safari iPadOS)",
+   "pagina": "Educación",
+   "ruta": "/educacion.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 820,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [
+    "input#edu-email 15.2px"
+   ],
+   "titulo": "Sabías que PR — Educación",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "1180px",
+    "ventana": 1180
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "iPad (Safari iPadOS)",
+   "pagina": "Tienda",
+   "ruta": "/tienda.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 820,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "titulo": "Sabías que PR — Tienda",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "1180px",
+    "ventana": 1180
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "iPad (Safari iPadOS)",
+   "pagina": "Premium (apoyo)",
+   "ruta": "/premium.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 820,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "titulo": "Sabías que PR — Apoya el canal",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "1180px",
+    "ventana": 1180
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "iPad (Safari iPadOS)",
+   "pagina": "Contacto",
+   "ruta": "/contacto.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 820,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [
+    "input#nombre 15.2px",
+    "input#email 15.2px",
+    "select#motivo 15.2px",
+    "textarea#mensaje 15.2px"
+   ],
+   "titulo": "Sabías que PR — Quiénes somos",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "1180px",
+    "ventana": 1180
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "Mac (Safari macOS)",
+   "pagina": "Inicio",
+   "ruta": "/index.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 1440,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [
+    "input#home-email 15.2px"
+   ],
+   "titulo": "Sabías que PR — Noticias, Educación e Información",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "900px",
+    "ventana": 900
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "Mac (Safari macOS)",
+   "pagina": "Noticias",
+   "ruta": "/noticias.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 1440,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "titulo": "Sabías que PR — Noticias",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "900px",
+    "ventana": 900
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "Mac (Safari macOS)",
+   "pagina": "Revolución Humana",
+   "ruta": "/revolucion-humana.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 1440,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "titulo": "Sabías que PR — Revolución Humana",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "900px",
+    "ventana": 900
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "Mac (Safari macOS)",
+   "pagina": "Educación",
+   "ruta": "/educacion.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 1440,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [
+    "input#edu-email 15.2px"
+   ],
+   "titulo": "Sabías que PR — Educación",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "900px",
+    "ventana": 900
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "Mac (Safari macOS)",
+   "pagina": "Tienda",
+   "ruta": "/tienda.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 1440,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "titulo": "Sabías que PR — Tienda",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "900px",
+    "ventana": 900
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "Mac (Safari macOS)",
+   "pagina": "Premium (apoyo)",
+   "ruta": "/premium.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 1440,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "titulo": "Sabías que PR — Apoya el canal",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "900px",
+    "ventana": 900
+   },
+   "menuMovil": true
+  },
+  {
+   "dispositivo": "Mac (Safari macOS)",
+   "pagina": "Contacto",
+   "ruta": "/contacto.html",
+   "estadoHttp": 200,
+   "errores": [
+    "pageerror: The operation is insecure."
+   ],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "ancho": 1440,
+   "desborde": false,
+   "camposConLetraMenorDe16px": [
+    "input#nombre 15.2px",
+    "input#email 15.2px",
+    "select#motivo 15.2px",
+    "textarea#mensaje 15.2px"
+   ],
+   "titulo": "Sabías que PR — Quiénes somos",
+   "tema": "light",
+   "cajonCarritoAltura": {
+    "css": "900px",
+    "ventana": 900
+   },
+   "menuMovil": true
+  }
+ ]
+}

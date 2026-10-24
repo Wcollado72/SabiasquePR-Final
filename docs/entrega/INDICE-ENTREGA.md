@@ -14,7 +14,7 @@ Este índice dice **qué pide la rúbrica y dónde está cada cosa** en este rep
 | Manual de usuario | [`Manual-de-usuario-SabiasquePR.pdf`](Manual-de-usuario-SabiasquePR.pdf) |
 | Documentación técnica | [`Documentacion-Tecnica-SabiasquePR.pdf`](Documentacion-Tecnica-SabiasquePR.pdf) (versión en texto: [`documentacion-tecnica.md`](documentacion-tecnica.md), generada desde el código) |
 | Planificación y diseño de la base de datos | [`planificacion-y-diseno-bd.pdf`](planificacion-y-diseno-bd.pdf) (diagramas, modelo entidad-relación, diccionario de datos y script SQL) |
-| Evidencia de pruebas | [`Evidencia-de-pruebas-SabiasquePR.pdf`](Evidencia-de-pruebas-SabiasquePR.pdf) (datos de origen: `evidencia-pruebas.json`, `evidencia-navegadores.json`, `evidencia-produccion.json`) |
+| Evidencia de pruebas | [`Evidencia-de-pruebas-SabiasquePR.pdf`](Evidencia-de-pruebas-SabiasquePR.pdf) (datos de origen: `evidencia-pruebas.json`, `evidencia-navegadores.json`, `evidencia-webkit*.json` (motor de Safari), `evidencia-produccion.json`) |
 | Capturas de pantalla | Carpeta [`capturas/`](capturas) (escritorio y móvil) |
 | Video de demostración | Guion del video: [`guiones-video.md`](guiones-video.md) |
 | Aplicación desplegada en línea | **https://sabiasquepr.com** (frontend en Netlify; API en Render; base de datos en Supabase) |
