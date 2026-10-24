@@ -165,7 +165,7 @@ describe('el elenco de La Brigada Coquí: una dueña por función', () => {
     ELENCO_BRIGADA.filter((a) => a.estado === 'activa').forEach((a) => expect(niveles).toContain(a.nivel));
     ELENCO_BRIGADA.filter((a) => a.estado === 'proxima').forEach((a) => expect(a.nivel).toBeUndefined());
     expect(ELENCO_BRIGADA.filter((a) => a.estado === 'activa').map((a) => a.id)).toEqual(
-      ['investigadora', 'clasificadora', 'redactora', 'resumidora', 'bibliotecaria', 'correctora', 'traductora']
+      ['investigadora', 'clasificadora', 'redactora', 'resumidora', 'bibliotecaria', 'correctora', 'traductora', 'guardiana']
     );
   });
 
@@ -180,7 +180,7 @@ describe('el elenco de La Brigada Coquí: una dueña por función', () => {
   test('se pinta una tarjeta por agente, con las próximas marcadas y el uso solo donde se mide', () => {
     const h = htmlElenco(ELENCO_BRIGADA, esc);
     expect((h.match(/data-agente=/g) || []).length).toBe(ELENCO_BRIGADA.length);
-    expect((h.match(/próximamente/g) || []).length).toBe(3);
+    expect((h.match(/próximamente/g) || []).length).toBe(2);
     expect(h).toContain('id="ag-ia-investigador-uso"');
     expect(h).toContain('id="ag-ia-redactor-uso"');
   });
@@ -206,5 +206,109 @@ describe('pestañas: La Brigada Coquí y Seguridad', () => {
   test('el moderador ve Seguridad y Reportes, pero no la Brigada (son agentes de contenido)', () => {
     expect(js).toContain('.admin-tabs [data-tab="agentes"]');
     expect(js).toContain("document.getElementById('admin-panel-seguridad').style.display = tab === 'seguridad'");
+  });
+});
+
+describe('recomendación y «Equipo completo»', () => {
+  const f = new Function(`${entre(js, 'brigada-equipo')}
+    return { recomendarBrigada, pasosEquipo, formatoDeHost };`)();
+
+  test('un artículo: se recomienda el equipo completo, en orden de trabajo', () => {
+    const r = f.recomendarBrigada('https://www.bbc.com/mundo/noticias-123', '');
+    expect(r.agentes).toEqual(['investigadora', 'clasificadora', 'redactora', 'bibliotecaria', 'guardiana']);
+    expect(r.mensaje).toContain('equipo completo');
+  });
+
+  test('un video o un audio sin texto pegado: solo lo que se puede hacer con la URL, y se explica por qué', () => {
+    const r = f.recomendarBrigada('https://www.youtube.com/watch?v=abc', '');
+    expect(r.agentes).toEqual(['clasificadora', 'bibliotecaria']);
+    expect(r.formato).toBe('video');
+    expect(r.mensaje).toContain('Pega su transcripción');
+    expect(f.recomendarBrigada('https://open.spotify.com/episode/1', '').formato).toBe('audio');
+  });
+
+  test('un video con su transcripción pegada: equipo completo', () => {
+    expect(f.recomendarBrigada('https://youtu.be/abc', 'Texto de la transcripción').agentes).toHaveLength(5);
+  });
+
+  test('solo texto pegado, sin URL: investigadora, redactora y guardiana (las otras necesitan una URL)', () => {
+    expect(f.recomendarBrigada('', 'Un texto').agentes).toEqual(['investigadora', 'redactora', 'guardiana']);
+  });
+
+  test('sin nada no hay recomendación, y una URL inválida se avisa', () => {
+    expect(f.recomendarBrigada('', '  ')).toBeNull();
+    expect(f.recomendarBrigada('no es una url', '').agentes).toEqual([]);
+  });
+
+  test('los pasos siempre salen en el orden de trabajo y ninguna agente se repite', () => {
+    expect(f.pasosEquipo(['guardiana', 'bibliotecaria', 'investigadora'])).toEqual(['investigadora', 'bibliotecaria', 'guardiana']);
+    expect(f.formatoDeHost('m.youtube.com')).toBe('video');
+    expect(f.formatoDeHost('notyoutube.com')).toBeNull();
+  });
+
+  test('el botón existe, pide confirmación (gasta IA) y se detiene si una agente falla', () => {
+    expect(html).toMatch(/<button type="button" class="brigada-agente brigada-equipo" id="brigada-equipo-contenido"/);
+    const equipo = js.slice(js.indexOf('async function equipoCompleto'), js.indexOf('// ── LA BRIGADA COQUÍ · La Guardiana'));
+    expect(equipo).toContain('if (!confirm(');
+    expect(equipo).toContain('if (!bien) {');
+    expect(equipo).toContain('equipoEnMarcha');
+  });
+
+  test('cada agente avisa si terminó bien (así se pueden encadenar)', () => {
+    ['async function investigarFuente', 'async function redactarConIA', 'async function resumirConIa', 'async function rellenarDesdeUrl', 'async function clasificarConBrigada'].forEach((nombre) => {
+      const i = js.indexOf(nombre);
+      const cuerpo = js.slice(i, js.indexOf('\n  }\n', i));
+      expect(cuerpo).toContain('return true;');
+      expect(cuerpo).toContain('return false;');
+    });
+  });
+});
+
+describe('La Guardiana en el panel', () => {
+  const { veredictoCopia, htmlRevision } = new Function(`${entre(js, 'brigada-guardiana')}
+    return { veredictoCopia, htmlRevision };`)();
+  const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+  test('el veredicto del parecido explica qué hacer según el nivel', () => {
+    expect(veredictoCopia({ evaluable: true, nivel: 'bajo', porcentaje: 3 }).texto).toContain('con palabras propias');
+    expect(veredictoCopia({ evaluable: true, nivel: 'medio', porcentaje: 14 }).texto).toContain('reescríbelos');
+    expect(veredictoCopia({ evaluable: true, nivel: 'alto', porcentaje: 60 }).texto).toContain('Se parece demasiado');
+    expect(veredictoCopia({ evaluable: false, motivo: 'La fuente es un video.' })).toEqual({ nivel: 'nd', texto: 'La fuente es un video.' });
+  });
+
+  test('el informe muestra banderas por gravedad, los pasajes copiados y el aviso de 18+, sin HTML peligroso', () => {
+    const h = htmlRevision({
+      copia: { evaluable: true, nivel: 'alto', porcentaje: 40, pasajes: [{ texto: 'frase <b>copiada</b>', palabras: 12 }] },
+      revision: { banderas: [{ tipo: 'menores', gravedad: 'alta', motivo: 'Habla de un menor.', fragmento: 'un niño de 10' }], requiere18: true, motivo18: 'Es explícito.' },
+    }, esc);
+    expect(h).toContain('brigada-copia-alto');
+    expect(h).toContain('frase &lt;b>copiada&lt;/b>');
+    expect(h).toContain('brigada-bandera-alta');
+    expect(h).toContain('Menores de edad');
+    expect(h).toContain('Podría requerir 18+');
+    expect(h).toContain('no sustituye a un abogado');
+  });
+
+  test('sin banderas lo dice; con parecido bajo no lista pasajes', () => {
+    const h = htmlRevision({ copia: { evaluable: true, nivel: 'bajo', porcentaje: 2, pasajes: [{ texto: 'x', palabras: 8 }] }, revision: { banderas: [], requiere18: false, motivo18: '' } }, esc);
+    expect(h).toContain('Sin banderas de contenido sensible');
+    expect(h).not.toContain('brigada-revision-pasajes');
+  });
+
+  test('hay un botón de La Guardiana en la mesa de Contenidos y de Noticias, con su informe, y llama al servidor', () => {
+    ['contenido', 'noticia'].forEach((c) => {
+      expect(html).toMatch(new RegExp(`<button type="button" class="brigada-agente" id="brigada-revisar-${c}"`));
+      expect(html).toContain(`id="brigada-revision-${c}"`);
+    });
+    expect(js).toContain('/api/admin/brigada/revisar');
+  });
+});
+
+describe('La Bibliotecaria: formato de la cita', () => {
+  test('propone el estilo y se puede copiar la cita; el formato lo arma citas.js (código, sin IA)', () => {
+    expect(js).toContain("{ dato: 'estiloSugerido', id: 'ac-cita-estilo', nombre: 'Estilo de citación' }");
+    expect(html).toContain('id="ac-cita-copiar"');
+    expect(js).toContain('navigator.clipboard.writeText');
+    expect(fs.readFileSync(path.join(frontend, 'citas.js'), 'utf8')).toContain('vancouver');
   });
 });

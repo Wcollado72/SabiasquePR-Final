@@ -6,6 +6,7 @@
 // encuentra o no sabe con seguridad queda en null (el panel lo marca "no encontrado"); nunca inventa.
 const { descargarHtml } = require('./articleExtractor');
 const { llamarHerramienta } = require('./claudeHerramienta');
+const { textoVisible } = require('./textoPagina');
 
 const MODEL = 'claude-haiku-5-5';
 
@@ -56,16 +57,6 @@ function metaContenido(html, clave) {
     }
   }
   return '';
-}
-
-function textoVisible(html, max) {
-  return html
-    .replace(/<(script|style|noscript|svg|nav|footer|header|form)\b[\s\S]*?<\/\1>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, max);
 }
 
 function leerSenales(html, urlStr) {

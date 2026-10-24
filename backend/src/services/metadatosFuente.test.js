@@ -1,4 +1,4 @@
-const { extraerMetadatos } = require('./metadatosFuente');
+const { extraerMetadatos, estiloSugerido } = require('./metadatosFuente');
 
 describe('extraerMetadatos', () => {
   test('lee Open Graph y metadatos de articulo', () => {
@@ -48,5 +48,28 @@ describe('extraerMetadatos', () => {
 
   test('un anio fuera de rango razonable no se toma', () => {
     expect(extraerMetadatos('<meta name="dc.date" content="0000-00-00">').anio).toBe('');
+  });
+});
+
+describe('estiloSugerido (La Bibliotecaria propone el estilo de cita, sin IA)', () => {
+  test.each([
+    ['pubmed.ncbi.nlm.nih.gov', 'vancouver'],
+    ['www.who.int', 'vancouver'],
+    ['www.law.cornell.edu', 'bluebook'],
+    ['ieeexplore.ieee.org', 'ieee'],
+    ['arxiv.org', 'ieee'],
+    ['folha.uol.com.br', 'abnt'],
+    ['eltiempo.com.co', 'icontec'],
+    ['elnuevodia.com', 'apa'],
+    ['www.bbc.com', 'apa'],
+  ])('%s -> %s', (host, estilo) => {
+    expect(estiloSugerido(host).estilo).toBe(estilo);
+  });
+
+  test('explica el motivo y reconoce subdominios, no dominios parecidos', () => {
+    expect(estiloSugerido('x.nih.gov').motivo).toContain('VANCOUVER');
+    expect(estiloSugerido('notnih.gov').estilo).toBe('apa');
+    expect(estiloSugerido('').estilo).toBe('apa');
+    expect(estiloSugerido('sitio.com').motivo).toContain('APA es el estilo más usado');
   });
 });

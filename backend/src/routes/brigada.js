@@ -2,7 +2,8 @@ const express = require('express');
 const { pool } = require('../db');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 const { clasificarUrl } = require('../services/clasificadora');
-const { validateClasificar } = require('../validators/brigada');
+const { revisarPieza } = require('../services/guardiana');
+const { validateClasificar, validateRevisar } = require('../validators/brigada');
 
 const router = express.Router();
 
@@ -31,6 +32,23 @@ router.post('/clasificar', requireAuth, requireAdmin, async (req, res) => {
     });
     await registrarUso(usage, req.user.id);
     res.json({ ok: true, sugerencias, formatoOriginal, url });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: err.message });
+  }
+});
+
+// POST /api/admin/brigada/revisar -- solo admin. La Guardiana compara la pieza con su fuente (anti-copia, sin IA) y
+// marca contenido sensible (IA). Solo orienta: no guarda, no bloquea y no borra nada.
+router.post('/revisar', requireAuth, requireAdmin, async (req, res) => {
+  const errors = validateRevisar(req.body);
+  if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
+  try {
+    const { titulo, resumen, cuerpo, fuenteUrl, seccion } = req.body;
+    const { copia, revision, usage } = await revisarPieza({
+      titulo, resumen, cuerpo, fuenteUrl: typeof fuenteUrl === 'string' ? fuenteUrl.trim() : '', seccion,
+    });
+    await registrarUso(usage, req.user.id);
+    res.json({ ok: true, copia, revision });
   } catch (err) {
     res.status(400).json({ ok: false, error: err.message });
   }

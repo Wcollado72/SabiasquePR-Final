@@ -81,11 +81,11 @@ describe('POST /api/admin/contenido-ia/metadatos-fuente', () => {
     expect(res.body.error).toMatch(/URL/);
   });
 
-  test('200 devuelve solo los cuatro datos (sin IA ni costo)', async () => {
-    leerMetadatosDeUrl.mockResolvedValue({ autorFuente: 'Ana', anio: '2025', tituloOriginal: 'T', nombreFuente: 'BBC', url: 'https://a.com/' });
+  test('200 devuelve los cuatro datos y el estilo sugerido (sin IA ni costo)', async () => {
+    leerMetadatosDeUrl.mockResolvedValue({ autorFuente: 'Ana', anio: '2025', tituloOriginal: 'T', nombreFuente: 'BBC', estiloSugerido: 'apa', motivoEstilo: 'APA es el estilo más usado.', url: 'https://a.com/' });
     const res = await request(app).post(url).set('x-test-user', ADMIN).send({ url: '  https://a.com/x  ' });
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ ok: true, autorFuente: 'Ana', anio: '2025', tituloOriginal: 'T', nombreFuente: 'BBC' });
+    expect(res.body).toEqual({ ok: true, autorFuente: 'Ana', anio: '2025', tituloOriginal: 'T', nombreFuente: 'BBC', estiloSugerido: 'apa', motivoEstilo: 'APA es el estilo más usado.' });
     expect(leerMetadatosDeUrl).toHaveBeenCalledWith('https://a.com/x');
     expect(pool.query).not.toHaveBeenCalled();
   });
