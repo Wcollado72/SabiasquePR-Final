@@ -427,10 +427,14 @@ def fila_si(story, bases_pies, pie, ancho=236):
     items = []
     for base in bases_pies:
         arch = buscar_captura(base)
-        if not arch:
-            return False
-        items.append((arch, None, ancho))
-    figura_fila(story, items, pie)
+        if arch:
+            items.append((arch, None, ancho))
+    if not items:
+        return False
+    if len(items) == 1:  # si falta una de las dos, se muestra la que existe
+        figura(story, items[0][0], pie, ancho=min(CONTENT_W, ancho * 1.7))
+    else:
+        figura_fila(story, items, pie)
     return True
 
 
