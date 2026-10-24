@@ -934,7 +934,25 @@ const PAGES = [
             <form id="admin-noticias-form">
               <input type="hidden" id="an-id">
 
+              <section class="brigada-mesa" aria-label="La Brigada Coquí">
+                <div class="brigada-mesa-head">
+                  <strong>🐸 La Brigada Coquí</strong>
+                  <span class="admin-hint">Pega la URL de la fuente y pon a trabajar a las agentes. Ellas sugieren; tú decides.</span>
+                </div>
+                <label for="brigada-url-noticia">URL de la fuente</label>
+                <input type="url" id="brigada-url-noticia" placeholder="https://...">
+                <div class="brigada-agentes">
+                  <button type="button" class="brigada-agente" id="brigada-clasificar-noticia" title="Lee la fuente y sugiere el idioma y la categoría"><span aria-hidden="true">🗂️</span> Doña Fichas <small>Clasificar</small></button>
+                  <button type="button" class="admin-btn-cancel" id="brigada-deshacer-noticia" hidden>Deshacer sugerencias</button>
+                </div>
+                <p class="admin-hint brigada-estado" id="brigada-estado-noticia" aria-live="polite"></p>
+              </section>
+
               <nav id="news-levels" class="news-levels">
+                <button type="button" class="news-level-card news-level-ia" data-panel="ia" data-help="noticias-ia">
+                  <span class="news-level-title">🤖 Asistente IA</span>
+                  <span class="news-level-status" data-status="ia">✦ LISTO</span>
+                </button>
                 <button type="button" class="news-level-card" data-panel="clasificacion" data-help="noticias-clasificacion">
                   <span class="news-level-title">Clasificación</span>
                   <span class="news-level-status" data-status="clasificacion">● ACTIVO</span>
@@ -947,15 +965,22 @@ const PAGES = [
                   <span class="news-level-title">Multimedia</span>
                   <span class="news-level-status" data-status="multimedia">○ PENDIENTE</span>
                 </button>
-                <button type="button" class="news-level-card news-level-ia" data-panel="ia" data-help="noticias-ia">
-                  <span class="news-level-title">🤖 Asistente IA</span>
-                  <span class="news-level-status" data-status="ia">✦ LISTO</span>
-                </button>
                 <button type="button" class="news-level-card" data-panel="fuente" data-help="noticias-fuente">
                   <span class="news-level-title">Fuente</span>
                   <span class="news-level-status" data-status="fuente">○ PENDIENTE</span>
                 </button>
               </nav>
+
+              <section class="news-panel" data-panel="ia" hidden>
+                <h4 class="news-panel-title">🤖 Asistente IA</h4>
+                <fieldset class="citation-group" id="an-autocompletar-group">
+                  <legend>Autocompletar con IA (opcional)</legend>
+                  <label for="an-autocompletar-url">URL del artículo original</label>
+                  <input type="url" id="an-autocompletar-url" placeholder="https://ejemplo.com/articulo">
+                  <button type="button" id="an-autocompletar-ia" class="admin-btn-cancel">Autocompletar con IA</button>
+                  <p class="admin-hint" id="an-autocompletar-status" aria-live="polite"></p>
+                </fieldset>
+              </section>
 
               <section class="news-panel" data-panel="clasificacion">
                 <h4 class="news-panel-title">Clasificación</h4>
@@ -997,17 +1022,6 @@ const PAGES = [
                 <p class="admin-hint">Describe lo que se ve para quienes usan lector de pantalla. Si lo dejas vacío, se usa el título.</p>
                 <label for="an-imagen-caption">Pie de imagen (opcional)</label>
                 <input type="text" id="an-imagen-caption">
-              </section>
-
-              <section class="news-panel" data-panel="ia" hidden>
-                <h4 class="news-panel-title">🤖 Asistente IA</h4>
-                <fieldset class="citation-group" id="an-autocompletar-group">
-                  <legend>Autocompletar con IA (opcional)</legend>
-                  <label for="an-autocompletar-url">URL del artículo original</label>
-                  <input type="url" id="an-autocompletar-url" placeholder="https://ejemplo.com/articulo">
-                  <button type="button" id="an-autocompletar-ia" class="admin-btn-cancel">Autocompletar con IA</button>
-                  <p class="admin-hint" id="an-autocompletar-status" aria-live="polite"></p>
-                </fieldset>
               </section>
 
               <section class="news-panel" data-panel="fuente" hidden>
@@ -1052,8 +1066,27 @@ const PAGES = [
             <form id="admin-contenidos-form">
               <input type="hidden" id="ac-id">
 
+              <section class="brigada-mesa" aria-label="La Brigada Coquí">
+                <div class="brigada-mesa-head">
+                  <strong>🐸 La Brigada Coquí</strong>
+                  <span class="admin-hint">Pega la URL de la fuente y pon a trabajar a las agentes. Ellas sugieren; tú decides.</span>
+                </div>
+                <label for="brigada-url-contenido">URL de la fuente</label>
+                <input type="url" id="brigada-url-contenido" placeholder="https://...">
+                <div class="brigada-agentes">
+                  <button type="button" class="brigada-agente" id="brigada-clasificar-contenido" title="Lee la fuente y sugiere el idioma, la sección, la sub-sección, la región, el formato y el subformato"><span aria-hidden="true">🗂️</span> Doña Fichas <small>Clasificar</small></button>
+                  <button type="button" class="admin-btn-cancel" id="brigada-deshacer-contenido" hidden>Deshacer sugerencias</button>
+                </div>
+                <p class="admin-hint brigada-estado" id="brigada-estado-contenido" aria-live="polite"></p>
+              </section>
+
               <nav class="synth-levels" id="synth-levels" aria-label="Niveles del formulario">
-                <button type="button" class="synth-level-card active" data-panel="clasificacion">
+                <button type="button" class="synth-level-card synth-level-ia active" data-panel="ia">
+                  <span class="synth-level-icon" aria-hidden="true">🤖</span>
+                  <span class="synth-level-title">Investigador + Redactor</span>
+                  <span class="synth-level-status" data-status="ia">✦ LISTO</span>
+                </button>
+                <button type="button" class="synth-level-card" data-panel="clasificacion">
                   <span class="synth-level-icon" aria-hidden="true">🕹️</span>
                   <span class="synth-level-title">Clasificación</span>
                   <span class="synth-level-status" data-status="clasificacion">● ACTIVO</span>
@@ -1068,11 +1101,6 @@ const PAGES = [
                   <span class="synth-level-title">Multimedia</span>
                   <span class="synth-level-status" data-status="multimedia">○ PENDIENTE</span>
                 </button>
-                <button type="button" class="synth-level-card synth-level-ia" data-panel="ia">
-                  <span class="synth-level-icon" aria-hidden="true">🤖</span>
-                  <span class="synth-level-title">Investigador + Redactor</span>
-                  <span class="synth-level-status" data-status="ia">✦ LISTO</span>
-                </button>
                 <button type="button" class="synth-level-card" data-panel="citacion">
                   <span class="synth-level-icon" aria-hidden="true">📚</span>
                   <span class="synth-level-title">Citación</span>
@@ -1080,82 +1108,8 @@ const PAGES = [
                 </button>
               </nav>
 
-              <section class="synth-panel" data-panel="clasificacion">
-                <h4 class="synth-panel-title">🕹️ NIVEL 1 — CLASIFICACIÓN</h4>
-                <label for="ac-idioma-original">Idioma en que escribiste este contenido</label>
-                <select id="ac-idioma-original">
-                  <option value="es">Español</option>
-                  <option value="en">English</option>
-                </select>
-                <label for="ac-seccion">Sección</label>
-                <select id="ac-seccion">
-                  <option value="noticias">Noticias</option>
-                  <option value="revolucion-humana">Revolución Humana</option>
-                  <option value="educacion">Educación</option>
-                </select>
-                <label for="ac-clasificacion" id="ac-clasificacion-label">Sub-sección</label>
-                <select id="ac-clasificacion" data-opciones='${JSON.stringify(OPCIONES_CLASIFICACION)}'></select>
-                <input type="hidden" id="ac-subseccion">
-                <input type="hidden" id="ac-categoria">
-                <label for="ac-enfoque">Región (filtra el collage público en Noticias, Revolución Humana y Educación)</label>
-                <select id="ac-enfoque">
-                  ${optionsHtml(ENFOQUES, { includeEmpty: 'Ninguna' })}
-                </select>
-                <label for="ac-tipo-formato">Tipo de formato</label>
-                <select id="ac-tipo-formato">
-                  ${optionsHtml(TIPOS_FORMATO)}
-                </select>
-                <label for="ac-subformato">Subformato (opcional)</label>
-                <select id="ac-subformato">
-                  ${optionsHtml(SUBFORMATOS, { includeEmpty: 'Ninguno' })}
-                </select>
-              </section>
-
-              <section class="synth-panel" data-panel="contenido" hidden>
-                <h4 class="synth-panel-title">📜 NIVEL 2 — CONTENIDO</h4>
-                <label for="ac-titulo">Título</label>
-                <input type="text" id="ac-titulo" required minlength="3" maxlength="160" spellcheck="true" lang="es">
-                <label for="ac-subtitulo">Resumen</label>
-                <textarea id="ac-subtitulo" rows="4" required minlength="10" spellcheck="true" lang="es"></textarea>
-                <div class="ia-fila">
-                  <button type="button" class="admin-btn-cancel" id="ac-resumir-ia" title="Escribe el resumen a partir del Cuerpo del texto; tú lo revisas y lo editas">Resumir con IA</button>
-                  <span class="admin-hint" id="ac-resumir-estado" aria-live="polite"></span>
-                </div>
-                <label for="ac-cuerpo">Cuerpo del texto</label>
-                <textarea id="ac-cuerpo" rows="6" spellcheck="true" lang="es"></textarea>
-                <label for="ac-autor">Autor</label>
-                <input type="text" id="ac-autor">
-                <label for="ac-divulgacion-ia">Divulgación de uso de IA</label>
-                <select id="ac-divulgacion-ia">
-                  ${optionsHtml(DIVULGACION_IA)}
-                </select>
-                <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir este contenido. Puedes marcar con cuáles herramientas (varias a la vez); se muestra públicamente con sus iconos en la tarjeta y el artículo.</p>
-                <div id="ac-ia-selector"></div>
-              </section>
-
-              <section class="synth-panel" data-panel="multimedia" hidden>
-                <h4 class="synth-panel-title">🎬 NIVEL 3 — MULTIMEDIA</h4>
-                <label for="ac-url-media">Video/audio embebible (obligatorio si el tipo es Video o Audio, ej. https://www.youtube.com/embed/ID)</label>
-                <input type="url" id="ac-url-media" placeholder="Pega cualquier enlace de YouTube (watch, youtu.be, embed...)">
-                <div class="admin-image-actions">
-                  <button type="button" id="ac-autocompletar-youtube" class="admin-btn-cancel">Autocompletar desde YouTube</button>
-                  <button type="button" id="ac-elegir-video-canal" class="admin-btn-cancel">Elegir de mi canal de YouTube</button>
-                </div>
-                <p class="admin-hint" id="ac-youtube-status"></p>
-                <label for="ac-url-portada">Imagen de portada (ruta o URL)</label>
-                <input type="text" id="ac-url-portada" required placeholder="images/mi-imagen.webp">
-                <div class="admin-image-actions">
-                  <button type="button" id="ac-usar-imagen-categoria" class="admin-btn-cancel">Usar imagen de la categoría seleccionada</button>
-                  <button type="button" id="ac-elegir-imagen" class="admin-btn-cancel">Elegir imagen de la galería</button>
-                </div>
-                <img id="ac-url-portada-preview" class="admin-image-preview" alt="" hidden>
-                <label for="ac-portada-alt">Texto alternativo de la imagen (opcional)</label>
-                <input type="text" id="ac-portada-alt">
-                <p class="admin-hint">Describe lo que se ve para quienes usan lector de pantalla. Si lo dejas vacío, se usa el título.</p>
-              </section>
-
-              <section class="synth-panel" data-panel="ia" hidden>
-                <h4 class="synth-panel-title">🤖 NIVEL 4 — INVESTIGADOR + REDACTOR</h4>
+              <section class="synth-panel" data-panel="ia">
+                <h4 class="synth-panel-title">🤖 NIVEL 1 — INVESTIGADOR + REDACTOR</h4>
                 <div class="ia-asistente-box">
                   <p class="admin-hint">Elige primero la Sección/Sub-sección/Categoría del Nivel 1 (el tono de redacción depende de eso), luego dale una fuente al Investigador. También intenta identificar autor, año y el estilo de citación de la fuente (solo si tiene confianza razonable) — la fecha de acceso siempre la pones tú.</p>
                   <div class="ia-fuente-toggle" id="ia-fuente-toggle">
@@ -1216,6 +1170,80 @@ const PAGES = [
                     <p class="admin-hint" id="ia-redactar-status" aria-live="polite"></p>
                   </div>
                 </div>
+              </section>
+
+              <section class="synth-panel" data-panel="clasificacion" hidden>
+                <h4 class="synth-panel-title">🕹️ NIVEL 2 — CLASIFICACIÓN</h4>
+                <label for="ac-idioma-original">Idioma en que escribiste este contenido</label>
+                <select id="ac-idioma-original">
+                  <option value="es">Español</option>
+                  <option value="en">English</option>
+                </select>
+                <label for="ac-seccion">Sección</label>
+                <select id="ac-seccion">
+                  <option value="noticias">Noticias</option>
+                  <option value="revolucion-humana">Revolución Humana</option>
+                  <option value="educacion">Educación</option>
+                </select>
+                <label for="ac-clasificacion" id="ac-clasificacion-label">Sub-sección</label>
+                <select id="ac-clasificacion" data-opciones='${JSON.stringify(OPCIONES_CLASIFICACION)}'></select>
+                <input type="hidden" id="ac-subseccion">
+                <input type="hidden" id="ac-categoria">
+                <label for="ac-enfoque">Región (filtra el collage público en Noticias, Revolución Humana y Educación)</label>
+                <select id="ac-enfoque">
+                  ${optionsHtml(ENFOQUES, { includeEmpty: 'Ninguna' })}
+                </select>
+                <label for="ac-tipo-formato">Tipo de formato</label>
+                <select id="ac-tipo-formato">
+                  ${optionsHtml(TIPOS_FORMATO)}
+                </select>
+                <label for="ac-subformato">Subformato (opcional)</label>
+                <select id="ac-subformato">
+                  ${optionsHtml(SUBFORMATOS, { includeEmpty: 'Ninguno' })}
+                </select>
+              </section>
+
+              <section class="synth-panel" data-panel="contenido" hidden>
+                <h4 class="synth-panel-title">📜 NIVEL 3 — CONTENIDO</h4>
+                <label for="ac-titulo">Título</label>
+                <input type="text" id="ac-titulo" required minlength="3" maxlength="160" spellcheck="true" lang="es">
+                <label for="ac-subtitulo">Resumen</label>
+                <textarea id="ac-subtitulo" rows="4" required minlength="10" spellcheck="true" lang="es"></textarea>
+                <div class="ia-fila">
+                  <button type="button" class="admin-btn-cancel" id="ac-resumir-ia" title="Escribe el resumen a partir del Cuerpo del texto; tú lo revisas y lo editas">Resumir con IA</button>
+                  <span class="admin-hint" id="ac-resumir-estado" aria-live="polite"></span>
+                </div>
+                <label for="ac-cuerpo">Cuerpo del texto</label>
+                <textarea id="ac-cuerpo" rows="6" spellcheck="true" lang="es"></textarea>
+                <label for="ac-autor">Autor</label>
+                <input type="text" id="ac-autor">
+                <label for="ac-divulgacion-ia">Divulgación de uso de IA</label>
+                <select id="ac-divulgacion-ia">
+                  ${optionsHtml(DIVULGACION_IA)}
+                </select>
+                <p class="admin-hint">Transparencia editorial: indica si se usó inteligencia artificial para redactar o asistir este contenido. Puedes marcar con cuáles herramientas (varias a la vez); se muestra públicamente con sus iconos en la tarjeta y el artículo.</p>
+                <div id="ac-ia-selector"></div>
+              </section>
+
+              <section class="synth-panel" data-panel="multimedia" hidden>
+                <h4 class="synth-panel-title">🎬 NIVEL 4 — MULTIMEDIA</h4>
+                <label for="ac-url-media">Video/audio embebible (obligatorio si el tipo es Video o Audio, ej. https://www.youtube.com/embed/ID)</label>
+                <input type="url" id="ac-url-media" placeholder="Pega cualquier enlace de YouTube (watch, youtu.be, embed...)">
+                <div class="admin-image-actions">
+                  <button type="button" id="ac-autocompletar-youtube" class="admin-btn-cancel">Autocompletar desde YouTube</button>
+                  <button type="button" id="ac-elegir-video-canal" class="admin-btn-cancel">Elegir de mi canal de YouTube</button>
+                </div>
+                <p class="admin-hint" id="ac-youtube-status"></p>
+                <label for="ac-url-portada">Imagen de portada (ruta o URL)</label>
+                <input type="text" id="ac-url-portada" required placeholder="images/mi-imagen.webp">
+                <div class="admin-image-actions">
+                  <button type="button" id="ac-usar-imagen-categoria" class="admin-btn-cancel">Usar imagen de la categoría seleccionada</button>
+                  <button type="button" id="ac-elegir-imagen" class="admin-btn-cancel">Elegir imagen de la galería</button>
+                </div>
+                <img id="ac-url-portada-preview" class="admin-image-preview" alt="" hidden>
+                <label for="ac-portada-alt">Texto alternativo de la imagen (opcional)</label>
+                <input type="text" id="ac-portada-alt">
+                <p class="admin-hint">Describe lo que se ve para quienes usan lector de pantalla. Si lo dejas vacío, se usa el título.</p>
               </section>
 
               <section class="synth-panel" data-panel="citacion" hidden>

@@ -836,6 +836,7 @@
     document.getElementById('an-borrador').addEventListener('click', () => enviarNoticia(false));
     document.getElementById('an-publicar').addEventListener('click', () => enviarNoticia(true));
     selectorIaNoticia = montarSelectorIa('an-ia-selector', 'an-divulgacion-ia');
+    bindMesaBrigada('noticia');
     bindImagePicker('an-imagen', 'an-imagen-preview', 'an-elegir-imagen');
     document.getElementById('an-autocompletar-ia').addEventListener('click', autocompletarNoticiaConIA);
     bindNewsPanels();
@@ -856,6 +857,185 @@
   function bindNewsPanels() {
     document.querySelectorAll('#news-levels .news-level-card').forEach((card) => {
       card.addEventListener('click', () => activarNewsPanel(card.dataset.panel));
+    });
+  }
+
+  // ── LA BRIGADA COQUÍ · Doña Fichas (la Clasificadora) ────
+  // La mesa vive arriba de cada formulario: se pega la URL una vez y la agente SUGIERE los campos de la pestaña
+  // Clasificación. Nunca guarda nada; marca cada campo con 🤖 y el motivo, y no pisa lo que la persona ya eligió.
+  // INICIO brigada-clasificadora
+  const ORDEN_CLASIFICACION = ['idioma', 'seccion', 'clasificacion', 'region', 'formato', 'subformato'];
+  const ETIQUETA_CLASIFICACION = {
+    idioma: 'Idioma original', seccion: 'Sección', clasificacion: 'Sub-sección', region: 'Región', formato: 'Tipo de formato', subformato: 'Subformato',
+  };
+  // Decide que se aplica y que solo se avisa. `manuales` = campos que la persona ya cambio a mano.
+  function planClasificacion(sugerencias, manuales) {
+    const plan = { aplicar: [], avisos: [] };
+    ORDEN_CLASIFICACION.forEach((campo) => {
+      const s = sugerencias[campo];
+      if (!s) return;
+      const nombre = ETIQUETA_CLASIFICACION[campo];
+      if (manuales.includes(campo)) {
+        plan.avisos.push({ campo, tipo: 'respetado', texto: `${nombre}: lo elegiste tú, no lo cambié.` });
+      } else if (s.valor) {
+        plan.aplicar.push({ campo, valor: s.valor, motivo: s.motivo || '', confianza: s.confianza });
+      } else if (s.duda) {
+        plan.avisos.push({ campo, tipo: 'duda', texto: `${nombre}: hay duda (podría ser «${s.duda}»), no lo apliqué. ${s.motivo || ''}`.trim() });
+      } else {
+        plan.avisos.push({ campo, tipo: 'no_encontrado', texto: `${nombre}: ${s.motivo || 'no se encontró en la fuente.'}` });
+      }
+    });
+    return plan;
+  }
+  function resumenClasificacion(plan, formatoOriginal) {
+    const partes = [];
+    if (plan.aplicar.length) partes.push(`Doña Fichas sugirió ${plan.aplicar.length} campo${plan.aplicar.length === 1 ? '' : 's'}: ${plan.aplicar.map((a) => ETIQUETA_CLASIFICACION[a.campo]).join(', ')}.`);
+    else partes.push('Doña Fichas no pudo sugerir ningún campo con seguridad.');
+    if (formatoOriginal) partes.push(`Formato de la fuente: ${formatoOriginal}.`);
+    const pend = plan.avisos.filter((a) => a.tipo !== 'respetado');
+    if (pend.length) partes.push(`Sin sugerencia: ${pend.map((a) => ETIQUETA_CLASIFICACION[a.campo]).join(', ')}.`);
+    return partes.join(' ');
+  }
+  // FIN brigada-clasificadora
+
+  const MESAS = {
+    contenido: {
+      destino: 'contenido', fuenteUrlId: 'ac-fuente-url',
+      campos: { idioma: 'ac-idioma-original', seccion: 'ac-seccion', clasificacion: 'ac-clasificacion', region: 'ac-enfoque', formato: 'ac-tipo-formato', subformato: 'ac-subformato' },
+      mostrarNivel: (n) => activarSynthPanel(n), estadoNivel: '#synth-levels [data-status="clasificacion"]',
+    },
+    noticia: {
+      destino: 'noticia', fuenteUrlId: 'an-fuente-url',
+      campos: { idioma: 'an-idioma-original', clasificacion: 'an-categoria' },
+      mostrarNivel: (n) => activarNewsPanel(n), estadoNivel: '#news-levels [data-status="clasificacion"]',
+    },
+  };
+  const mesaPrevios = { contenido: null, noticia: null };
+
+  function quitarMarcas(clave) {
+    Object.values(MESAS[clave].campos).forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      delete el.dataset.manual;
+      const marca = el.parentElement.querySelector(`.brigada-marca[data-campo="${id}"]`);
+      if (marca) marca.remove();
+    });
+  }
+  function ponerMarca(id, tipo, texto) {
+    const el = document.getElementById(id);
+    let marca = el.parentElement.querySelector(`.brigada-marca[data-campo="${id}"]`);
+    if (!marca) {
+      marca = document.createElement('small');
+      marca.dataset.campo = id;
+      el.insertAdjacentElement('afterend', marca);
+    }
+    marca.className = `brigada-marca brigada-marca-${tipo}`;
+    marca.textContent = texto;
+  }
+  function estadoNivelClasificacion(clave, texto) {
+    const nivel = document.querySelector(MESAS[clave].estadoNivel);
+    if (!nivel) return;
+    if (nivel.dataset.original === undefined) nivel.dataset.original = nivel.textContent;
+    nivel.textContent = texto === null ? nivel.dataset.original : texto;
+  }
+  function reiniciarMesa(clave) {
+    quitarMarcas(clave);
+    mesaPrevios[clave] = null;
+    document.getElementById(`brigada-deshacer-${clave}`).hidden = true;
+    document.getElementById(`brigada-estado-${clave}`).textContent = '';
+    document.getElementById(`brigada-url-${clave}`).value = '';
+    estadoNivelClasificacion(clave, null);
+  }
+
+  function aplicarClasificacion(clave, data) {
+    const cfg = MESAS[clave];
+    const sel = (campo) => document.getElementById(cfg.campos[campo]);
+    const manuales = Object.keys(cfg.campos).filter((c) => sel(c).dataset.manual === '1');
+    const plan = planClasificacion(data.sugerencias || {}, manuales);
+    const previos = {};
+    quitarMarcas(clave);
+    manuales.forEach((c) => { sel(c).dataset.manual = '1'; });
+
+    plan.aplicar.forEach((a) => {
+      const el = sel(a.campo);
+      if (a.campo === 'seccion') {
+        previos.clasificacion = previos.clasificacion === undefined ? sel('clasificacion').value : previos.clasificacion;
+      }
+      if (a.campo === 'clasificacion' && ![...el.options].some((o) => o.value === a.valor)) {
+        plan.avisos.push({ campo: 'clasificacion', tipo: 'no_encontrado', texto: 'Sub-sección: la sugerida no existe en la sección que quedó elegida.' });
+        return;
+      }
+      if (previos[a.campo] === undefined) previos[a.campo] = el.value;
+      el.value = a.valor;
+      if (a.campo === 'seccion') { llenarClasificacion(''); sincronizarClasificacion(); }
+      if (a.campo === 'clasificacion' && clave === 'contenido') sincronizarClasificacion();
+      const opcion = el.selectedOptions[0];
+      const extra = a.campo === 'formato' && data.formatoOriginal ? ` (la fuente es: ${data.formatoOriginal}; esta es la versión del sitio, con palabras propias)` : '';
+      ponerMarca(cfg.campos[a.campo], 'sugerido', `🤖 Doña Fichas sugirió «${opcion ? opcion.text : a.valor}»${a.motivo ? ': ' + a.motivo : ''}${extra}`);
+    });
+    plan.avisos.forEach((av) => {
+      if (!cfg.campos[av.campo]) return;
+      ponerMarca(cfg.campos[av.campo], av.tipo, (av.tipo === 'respetado' ? '' : '⚠️ ') + av.texto);
+    });
+
+    mesaPrevios[clave] = previos;
+    document.getElementById(`brigada-deshacer-${clave}`).hidden = !Object.keys(previos).length;
+    estadoNivelClasificacion(clave, plan.aplicar.length ? '🤖 SUGERIDO — REVISA' : '⚠ SIN SUGERENCIA');
+    document.getElementById(`brigada-estado-${clave}`).textContent = resumenClasificacion(plan, data.formatoOriginal);
+    cfg.mostrarNivel('clasificacion');
+  }
+
+  function deshacerClasificacion(clave) {
+    const previos = mesaPrevios[clave];
+    if (!previos) return;
+    const cfg = MESAS[clave];
+    // Primero la seccion (reconstruye la lista de sub-secciones) y despues lo demas.
+    ['seccion', 'idioma', 'region', 'formato', 'subformato'].forEach((campo) => {
+      if (previos[campo] === undefined || !cfg.campos[campo]) return;
+      document.getElementById(cfg.campos[campo]).value = previos[campo];
+    });
+    if (clave === 'contenido' && previos.seccion !== undefined) llenarClasificacion(previos.clasificacion || '');
+    else if (previos.clasificacion !== undefined) document.getElementById(cfg.campos.clasificacion).value = previos.clasificacion;
+    if (clave === 'contenido') sincronizarClasificacion();
+    quitarMarcas(clave);
+    mesaPrevios[clave] = null;
+    document.getElementById(`brigada-deshacer-${clave}`).hidden = true;
+    document.getElementById(`brigada-estado-${clave}`).textContent = 'Sugerencias deshechas.';
+    estadoNivelClasificacion(clave, null);
+  }
+
+  async function clasificarConBrigada(clave) {
+    const cfg = MESAS[clave];
+    const estado = document.getElementById(`brigada-estado-${clave}`);
+    const urlEl = document.getElementById(`brigada-url-${clave}`);
+    const url = urlEl.value.trim();
+    if (!url) { estado.textContent = 'Pega primero la URL de la fuente.'; return; }
+    const boton = document.getElementById(`brigada-clasificar-${clave}`);
+    boton.disabled = true;
+    estado.textContent = '🐸 Doña Fichas está leyendo la fuente...';
+    try {
+      const data = await apiFetch('/api/admin/brigada/clasificar', { method: 'POST', body: JSON.stringify({ url, destino: cfg.destino }) });
+      const fuente = document.getElementById(cfg.fuenteUrlId);
+      if (fuente && !fuente.value.trim()) fuente.value = data.url || url; // la URL pegada aqui tambien es la fuente de la pieza
+      aplicarClasificacion(clave, data);
+    } catch (err) {
+      estado.textContent = 'Doña Fichas no pudo leer la fuente: ' + err.message;
+    } finally {
+      boton.disabled = false;
+    }
+  }
+
+  function bindMesaBrigada(clave) {
+    const cfg = MESAS[clave];
+    document.getElementById(`brigada-clasificar-${clave}`).addEventListener('click', () => clasificarConBrigada(clave));
+    document.getElementById(`brigada-deshacer-${clave}`).addEventListener('click', () => deshacerClasificacion(clave));
+    // Si la persona cambia un campo a mano, deja de ser una sugerencia: se quita la marca y no se vuelve a pisar.
+    Object.values(cfg.campos).forEach((id) => {
+      document.getElementById(id).addEventListener('change', (e) => {
+        e.target.dataset.manual = '1';
+        const marca = e.target.parentElement.querySelector(`.brigada-marca[data-campo="${id}"]`);
+        if (marca) marca.remove();
+      });
     });
   }
 
@@ -947,7 +1127,8 @@
     document.getElementById('an-autocompletar-url').value = '';
     updateImagePreview('an-imagen', 'an-imagen-preview');
     setStatus(document.getElementById('an-status'), '', '');
-    activarNewsPanel('clasificacion');
+    activarNewsPanel(item ? 'clasificacion' : 'ia');
+    reiniciarMesa('noticia');
     refrescarPanelTraduccion('noticia');
     document.getElementById('admin-noticias-form-box').style.display = 'block';
     document.getElementById('admin-noticias-form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1098,6 +1279,7 @@
     document.getElementById('ac-borrador').addEventListener('click', () => enviarContenido(false));
     document.getElementById('ac-guardar').addEventListener('click', () => enviarContenido(true));
     selectorIaContenido = montarSelectorIa('ac-ia-selector', 'ac-divulgacion-ia');
+    bindMesaBrigada('contenido');
     document.getElementById('ac-usar-imagen-categoria').addEventListener('click', () => {
       const categoria = document.getElementById('ac-categoria').value;
       const img = window.SQPR && window.SQPR.CATEGORIA_IMAGEN && window.SQPR.CATEGORIA_IMAGEN[categoria];
@@ -1827,7 +2009,8 @@
     updateImagePreview('ac-url-portada', 'ac-url-portada-preview');
     setStatus(document.getElementById('ac-status'), '', '');
     actualizarTemaContenidos();
-    activarSynthPanel('clasificacion');
+    activarSynthPanel(item ? 'clasificacion' : 'ia');
+    reiniciarMesa('contenido');
     refrescarPanelTraduccion('contenido');
     document.getElementById('admin-contenidos-form-box').style.display = 'block';
     document.getElementById('admin-contenidos-form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
