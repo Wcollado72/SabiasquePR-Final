@@ -48,6 +48,31 @@ describe('la página no se arrastra de lado en el iPhone', () => {
   });
 });
 
+describe('cabecera en pantallas angostas: el botón de menú siempre cabe', () => {
+  const bloque1200 = css.slice(css.indexOf('@media (max-width:1200px){'), css.indexOf('@media (max-width:1040px){'));
+  const bloque560 = css.slice(css.indexOf('@media (max-width:560px){'), css.indexOf('@media (max-width:400px){'));
+
+  test('el botón de menú no se encoge y el grupo de controles sí; lo único que se acorta es el botón de sesión, con «…»', () => {
+    expect(bloque1200).toMatch(/\.nav-toggle\{ display:flex; order:3; flex-shrink:0; \}/);
+    expect(bloque1200).toMatch(/\.header-controls\{ margin-left:auto; flex-shrink:1; min-width:0; \}/);
+    expect(bloque1200).toMatch(/\.lang-toggle, \.theme-toggle, \.cart-btn\{ flex-shrink:0; \}/);
+    expect(bloque1200).toMatch(/\.login-trigger-btn\{ flex:0 1 auto; min-width:0; overflow:hidden; \}/);
+    expect(bloque1200).toMatch(/#login-trigger-label\{ display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; \}/);
+  });
+
+  test('en teléfono (≤560 px) se aprietan los espacios y se oculta el nombre junto al logo', () => {
+    expect(bloque560).toMatch(/\.site-header-inner\{ gap:8px; \}/);
+    expect(bloque560).toMatch(/\.brand-name\{ display:none; \}/);
+    expect(bloque560).toMatch(/\.theme-toggle, \.cart-btn\{ width:36px; height:36px; \}/);
+  });
+
+  test('el script de WebKit también mide que el botón de menú quede dentro de la pantalla', () => {
+    const script = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'probar-webkit.js'), 'utf8');
+    expect(script).toContain('menuFueraDePantalla');
+    expect(script).toContain('el botón de menú se sale de la pantalla');
+  });
+});
+
 describe('sin almacenamiento (Safari con «Bloquear todas las cookies» lanza SecurityError)', () => {
   test('script.js lee y guarda el tema dentro de try/catch', () => {
     const js = leer('script.js');
