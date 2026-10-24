@@ -1,30 +1,30 @@
 {
-  "generado": "2026-10-23T16:23:58.393Z",
+  "generado": "2026-10-24T15:00:05.591Z",
   "comando": "cd backend && npx jest --json --outputFile=<tmp> --coverage --coverageReporters=json-summary",
   "node": "v24.13.0",
-  "suites_total": 57,
-  "suites_pasadas": 57,
+  "suites_total": 85,
+  "suites_pasadas": 85,
   "suites_falladas": 0,
-  "pruebas_total": 774,
-  "pruebas_pasadas": 774,
+  "pruebas_total": 1261,
+  "pruebas_pasadas": 1261,
   "pruebas_falladas": 0,
   "pruebas_omitidas": 0,
   "exito": true,
-  "duracion_seg": 20.5,
+  "duracion_seg": 33.1,
   "cobertura_global": {
-    "lineas": 88.53,
-    "sentencias": 87.24,
-    "funciones": 87.36,
-    "ramas": 82.65,
-    "lineas_cubiertas": 1274,
-    "lineas_total": 1439
+    "lineas": 92.96,
+    "sentencias": 91.82,
+    "funciones": 92.56,
+    "ramas": 86.31,
+    "lineas_cubiertas": 2248,
+    "lineas_total": 2418
   },
   "cobertura_por_carpeta": [
     {
       "carpeta": "src",
       "archivos": 2,
-      "lineas": 96.3,
-      "sentencias": 96.4,
+      "lineas": 96.6,
+      "sentencias": 96.7,
       "funciones": 77.8,
       "ramas": 92.9
     },
@@ -46,19 +46,19 @@
     },
     {
       "carpeta": "src/routes",
-      "archivos": 13,
-      "lineas": 92.1,
-      "sentencias": 90.6,
-      "funciones": 96.5,
-      "ramas": 88.4
+      "archivos": 17,
+      "lineas": 93.6,
+      "sentencias": 92.6,
+      "funciones": 95,
+      "ramas": 88.7
     },
     {
       "carpeta": "src/services",
-      "archivos": 5,
-      "lineas": 55.5,
-      "sentencias": 54.4,
-      "funciones": 58.7,
-      "ramas": 45.4
+      "archivos": 18,
+      "lineas": 87,
+      "sentencias": 85.8,
+      "funciones": 88.5,
+      "ramas": 75.9
     },
     {
       "carpeta": "src/test-utils",
@@ -70,19 +70,19 @@
     },
     {
       "carpeta": "src/util",
-      "archivos": 6,
-      "lineas": 100,
-      "sentencias": 100,
+      "archivos": 9,
+      "lineas": 97.7,
+      "sentencias": 94.3,
       "funciones": 100,
-      "ramas": 94.7
+      "ramas": 86.7
     },
     {
       "carpeta": "src/validators",
-      "archivos": 12,
-      "lineas": 99.6,
-      "sentencias": 99.7,
+      "archivos": 17,
+      "lineas": 99.8,
+      "sentencias": 99,
       "funciones": 100,
-      "ramas": 99
+      "ramas": 97.3
     }
   ],
   "suites": [
@@ -92,7 +92,7 @@
       "pruebas": 4,
       "pasadas": 4,
       "falladas": 0,
-      "duracion_ms": 320,
+      "duracion_ms": 198,
       "nombres": [
         {
           "titulo": "construirCambios (plantillas de correo -> API de Supabase) usa los nombres de campo de la API para las 6 plantillas de autenticacion",
@@ -118,7 +118,7 @@
       "pruebas": 7,
       "pasadas": 7,
       "falladas": 0,
-      "duracion_ms": 316,
+      "duracion_ms": 195,
       "nombres": [
         {
           "titulo": "calcularDelta detecta faltantes, extras y modificadas",
@@ -156,7 +156,7 @@
       "pruebas": 4,
       "pasadas": 4,
       "falladas": 0,
-      "duracion_ms": 231,
+      "duracion_ms": 180,
       "nombres": [
         {
           "titulo": "env-ensayo cambia solo DATABASE_URL, SUPABASE_URL y FRONTEND_ORIGIN y conserva lo demas",
@@ -182,7 +182,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 271,
+      "duracion_ms": 238,
       "nombres": [
         {
           "titulo": "filtrarToc (restauracion en proyecto nuevo) conserva lo de public (tablas, datos, restricciones, FK, RLS)",
@@ -212,7 +212,7 @@
       "pruebas": 10,
       "pasadas": 10,
       "falladas": 0,
-      "duracion_ms": 11056,
+      "duracion_ms": 1181,
       "nombres": [
         {
           "titulo": "peticiones sin cuerpo (Express 5: req.body undefined) POST /api/comentarios sin cuerpo responde 400 de validacion, no 500",
@@ -262,7 +262,7 @@
       "pruebas": 6,
       "pasadas": 6,
       "falladas": 0,
-      "duracion_ms": 11192,
+      "duracion_ms": 22363,
       "nombres": [
         {
           "titulo": "cabeceras de seguridad del API (#7) no anuncia Express y manda las cabeceras de endurecimiento",
@@ -296,7 +296,7 @@
       "pruebas": 4,
       "pasadas": 4,
       "falladas": 0,
-      "duracion_ms": 11104,
+      "duracion_ms": 1693,
       "nombres": [
         {
           "titulo": "rate limit por cliente real detras del proxy cada cliente tiene su propio contador (no se comparte entre visitantes)",
@@ -322,7 +322,7 @@
       "pruebas": 2,
       "pasadas": 2,
       "falladas": 0,
-      "duracion_ms": 181,
+      "duracion_ms": 142,
       "nombres": [
         {
           "titulo": "fecha de actualización de las páginas legales no se calcula con new Date()",
@@ -340,7 +340,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 274,
+      "duracion_ms": 181,
       "nombres": [
         {
           "titulo": "clasificacion las listas coinciden con las que valida el backend",
@@ -381,12 +381,74 @@
       ]
     },
     {
+      "archivo": "src/correccion.test.js",
+      "estado": "passed",
+      "pruebas": 13,
+      "pasadas": 13,
+      "falladas": 0,
+      "duracion_ms": 540,
+      "nombres": [
+        {
+          "titulo": "variantes coinciden con las que valida el backend",
+          "estado": "passed"
+        },
+        {
+          "titulo": "variantes LanguageTool recibe es o el inglés correspondiente",
+          "estado": "passed"
+        },
+        {
+          "titulo": "variantes variante inicial: español de PR salvo que el destino sea inglés",
+          "estado": "passed"
+        },
+        {
+          "titulo": "diccionario de Puerto Rico y del proyecto no marca puertorriqueñismos ni nombres del proyecto",
+          "estado": "passed"
+        },
+        {
+          "titulo": "diccionario de Puerto Rico y del proyecto sigue marcando errores reales y los que no son de ortografía",
+          "estado": "passed"
+        },
+        {
+          "titulo": "diccionario de Puerto Rico y del proyecto respeta las palabras que el admin agrega",
+          "estado": "passed"
+        },
+        {
+          "titulo": "aplicarReemplazo reemplaza solo el fragmento indicado",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cableado en el panel admin.html carga correccion.js antes de admin.js y ya no tiene el botón viejo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cableado en el panel el service worker lo precarga",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cableado en el panel los campos con barra existen en el panel",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cableado en el panel la ruta del servidor es la que llama el panel",
+          "estado": "passed"
+        },
+        {
+          "titulo": "sintaxis del panel admin.js se puede interpretar sin errores",
+          "estado": "passed"
+        },
+        {
+          "titulo": "sintaxis del panel correccion.js se puede interpretar sin errores",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
       "archivo": "src/frontend-apoyo.test.js",
       "estado": "passed",
       "pruebas": 39,
       "pasadas": 39,
       "falladas": 0,
-      "duracion_ms": 988,
+      "duracion_ms": 627,
       "nombres": [
         {
           "titulo": "Página \"Apoya el canal\" (premium.html) título, subtítulo y secciones aprobadas",
@@ -552,7 +614,7 @@
       "pruebas": 11,
       "pasadas": 11,
       "falladas": 0,
-      "duracion_ms": 369,
+      "duracion_ms": 583,
       "nombres": [
         {
           "titulo": "errorAuthEnEspanol traduce el codigo same_password",
@@ -601,12 +663,246 @@
       ]
     },
     {
+      "archivo": "src/frontend-brigada.test.js",
+      "estado": "passed",
+      "pruebas": 56,
+      "pasadas": 56,
+      "falladas": 0,
+      "duracion_ms": 582,
+      "nombres": [
+        {
+          "titulo": "orden de los niveles: los agentes primero Contenidos: Investigadora y Redactora, luego Clasificación, Contenido, Multimedia y Citación",
+          "estado": "passed"
+        },
+        {
+          "titulo": "orden de los niveles: los agentes primero Noticias: la mesa de la Brigada hace de nivel de los agentes; Fuente (con «AL AIRE») va al final",
+          "estado": "passed"
+        },
+        {
+          "titulo": "orden de los niveles: los agentes primero el panel visible al abrir una pieza nueva es el de los agentes y la numeración sigue el orden",
+          "estado": "passed"
+        },
+        {
+          "titulo": "sin cajas repetidas: una sola URL y una sola caja de idioma contenido: ya no existen las cajas viejas",
+          "estado": "passed"
+        },
+        {
+          "titulo": "sin cajas repetidas: una sola URL y una sola caja de idioma noticia: ya no existen las cajas viejas",
+          "estado": "passed"
+        },
+        {
+          "titulo": "sin cajas repetidas: una sola URL y una sola caja de idioma la URL de la fuente es una sola, la de la mesa (en Noticias sigue siendo obligatoria)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "sin cajas repetidas: una sola URL y una sola caja de idioma el idioma de la pieza es una sola caja, en la mesa, y no está en la pestaña Clasificación",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cada función tiene una sola dueña hay una mesa con la URL y las agentes en Contenidos y en Noticias",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cada función tiene una sola dueña la Investigadora no llena la cita ni la URL: solo guarda notas y detecta el idioma de la fuente",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cada función tiene una sola dueña la Redactora escribe en el idioma de la pieza y no escribe el resumen: lo hace Doña Breve después",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cada función tiene una sola dueña Resumir desde un clic sí pide confirmación si ya hay resumen; después de redactar no",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cada función tiene una sola dueña la Clasificadora ya no sugiere el idioma (ni en el panel ni en el servidor)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cada función tiene una sola dueña los botones de la mesa llaman a las mismas funciones que ya existían",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Doña Fichas: qué se aplica y qué solo se avisa aplica lo que tiene valor, en el orden de la pestaña, y avisa lo demás",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Doña Fichas: qué se aplica y qué solo se avisa no pisa lo que la persona ya eligió a mano",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Doña Fichas: qué se aplica y qué solo se avisa en una noticia rápida solo existe la categoría",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Doña Fichas: qué se aplica y qué solo se avisa el resumen cuenta lo sugerido, el formato de la fuente y lo que quedó sin sugerencia",
+          "estado": "passed"
+        },
+        {
+          "titulo": "el elenco de La Brigada Coquí: una dueña por función cada agente es distinta y ninguna tarea se repite entre agentes",
+          "estado": "passed"
+        },
+        {
+          "titulo": "el elenco de La Brigada Coquí: una dueña por función las agentes que ya trabajan tienen su pestaña; las que vienen después, no",
+          "estado": "passed"
+        },
+        {
+          "titulo": "el elenco de La Brigada Coquí: una dueña por función el idioma se reparte: la Investigadora detecta el de la fuente, la Redactora usa el de la pieza, la Clasificadora no lo toca",
+          "estado": "passed"
+        },
+        {
+          "titulo": "el elenco de La Brigada Coquí: una dueña por función se pinta una tarjeta por agente, con las próximas marcadas y el uso solo donde se mide",
+          "estado": "passed"
+        },
+        {
+          "titulo": "pestañas: La Brigada Coquí y Seguridad la pestaña de agentes se llama La Brigada Coquí y aparece Seguridad aparte",
+          "estado": "passed"
+        },
+        {
+          "titulo": "pestañas: La Brigada Coquí y Seguridad los agentes de seguridad y la moderación viven en Seguridad, no en la Brigada",
+          "estado": "passed"
+        },
+        {
+          "titulo": "pestañas: La Brigada Coquí y Seguridad el moderador ve Seguridad y Reportes, pero no la Brigada (son agentes de contenido)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "recomendación y «Equipo completo» un artículo: se recomienda el equipo completo, en orden de trabajo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "recomendación y «Equipo completo» un video o un audio sin texto pegado: solo lo que se puede hacer con la URL, y se explica por qué",
+          "estado": "passed"
+        },
+        {
+          "titulo": "recomendación y «Equipo completo» un video con su transcripción pegada: equipo completo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "recomendación y «Equipo completo» solo texto pegado, sin URL: las que no necesitan una URL (Doña Fichas y La Bibliotecaria sí la necesitan)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "recomendación y «Equipo completo» sin nada no hay recomendación, y una URL inválida se avisa",
+          "estado": "passed"
+        },
+        {
+          "titulo": "recomendación y «Equipo completo» los pasos siempre salen en el orden de trabajo y ninguna agente se repite",
+          "estado": "passed"
+        },
+        {
+          "titulo": "recomendación y «Equipo completo» el botón existe, pide confirmación (gasta IA) y se detiene si una agente falla",
+          "estado": "passed"
+        },
+        {
+          "titulo": "recomendación y «Equipo completo» cada agente avisa si terminó bien (así se pueden encadenar)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "La Guardiana en el panel el veredicto del parecido explica qué hacer según el nivel",
+          "estado": "passed"
+        },
+        {
+          "titulo": "La Guardiana en el panel el informe muestra banderas por gravedad, los pasajes copiados y el aviso de 18+, sin HTML peligroso",
+          "estado": "passed"
+        },
+        {
+          "titulo": "La Guardiana en el panel sin banderas lo dice; con parecido bajo no lista pasajes",
+          "estado": "passed"
+        },
+        {
+          "titulo": "La Guardiana en el panel hay un botón de La Guardiana en la mesa de Contenidos y de Noticias, con su informe, y llama al servidor",
+          "estado": "passed"
+        },
+        {
+          "titulo": "La Bibliotecaria: formato de la cita propone el estilo y se puede copiar la cita; el formato lo arma citas.js (código, sin IA)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "El Detective en el panel lista las parecidas con nivel, tipo, estado y razones, y deja abrir la existente (sin HTML peligroso)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "El Detective en el panel sin parecidas lo dice, con cuántas piezas revisó",
+          "estado": "passed"
+        },
+        {
+          "titulo": "El Detective en el panel solo una coincidencia «muy probable» detiene el equipo para preguntar",
+          "estado": "passed"
+        },
+        {
+          "titulo": "El Detective en el panel hay un botón en cada mesa, llama al servidor, excluye la pieza que se edita y abre la existente con confirmación",
+          "estado": "passed"
+        },
+        {
+          "titulo": "El Detective en el panel en el equipo va primero y, si hay una coincidencia muy probable, pregunta antes de gastar IA",
+          "estado": "passed"
+        },
+        {
+          "titulo": "La Pintora en el panel muestra el texto alternativo, la escena y el prompt completo con sus botones, sin escribir nada solo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "La Pintora en el panel hay botón en cada mesa y una mini-tarjeta junto al texto alternativo; «Usar» pide confirmación si ya hay uno escrito",
+          "estado": "passed"
+        },
+        {
+          "titulo": "La Pintora en el panel va en el equipo justo antes de la Guardiana, y usa el idioma de la pieza",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Doña Tilde: «Corregir todo» el resumen cuenta los campos revisados, los que tienen correcciones y los que fallaron",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Doña Tilde: «Corregir todo» solo lista los campos con cambios, con antes → después y motivo, y un «Aplicar» por campo y «Aplicar todo»",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Doña Tilde: «Corregir todo» con un solo campo corregido no ofrece «Aplicar todo»; un campo que falló se muestra con su motivo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Doña Tilde: «Corregir todo» hay un botón en cada mesa, llama al servidor con la variante de cada campo y no pisa lo que cambió mientras corregía",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Doña Tilde: «Corregir todo» la variante sigue al idioma de la pieza mientras la persona no haya elegido otra a mano",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cada agente trae una pequeña descripción de sus funciones todas las agentes del elenco tienen una descripción corta y propia",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cada agente trae una pequeña descripción de sus funciones la tarjeta del elenco la muestra encima de sus tareas",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cada agente trae una pequeña descripción de sus funciones en la mesa, cada botón de agente va dentro de una tarjeta con su descripción, que sale del elenco",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cada agente trae una pequeña descripción de sus funciones en Noticias la descripción se adapta a una noticia rápida",
+          "estado": "passed"
+        },
+        {
+          "titulo": "el gasto de cada agente se cuenta con su propio nombre cada nombre de uso del elenco es uno que la base de datos admite, y ninguno se repite",
+          "estado": "passed"
+        },
+        {
+          "titulo": "el gasto de cada agente se cuenta con su propio nombre el panel de Gastos y el de uso tienen nombre para cada agente que gasta",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
       "archivo": "src/frontend-contacto.test.js",
       "estado": "passed",
       "pruebas": 18,
       "pasadas": 18,
       "falladas": 0,
-      "duracion_ms": 575,
+      "duracion_ms": 606,
       "nombres": [
         {
           "titulo": "El CSP deja que el formulario de contacto se envíe script.js envía el formulario con fetch al \"action\" (Formspree)",
@@ -683,12 +979,120 @@
       ]
     },
     {
+      "archivo": "src/frontend-contenido-ia.test.js",
+      "estado": "passed",
+      "pruebas": 10,
+      "pasadas": 10,
+      "falladas": 0,
+      "duracion_ms": 167,
+      "nombres": [
+        {
+          "titulo": "etiquetas del formulario de Contenidos «ac-subtitulo» no lleva texto entre paréntesis",
+          "estado": "passed"
+        },
+        {
+          "titulo": "etiquetas del formulario de Contenidos «ac-cuerpo» no lleva texto entre paréntesis",
+          "estado": "passed"
+        },
+        {
+          "titulo": "etiquetas del formulario de Contenidos «ac-autor» no lleva texto entre paréntesis",
+          "estado": "passed"
+        },
+        {
+          "titulo": "etiquetas del formulario de Contenidos «ac-fuente-texto» no lleva texto entre paréntesis",
+          "estado": "passed"
+        },
+        {
+          "titulo": "etiquetas del formulario de Contenidos el Resumen no tiene tope de largo (solo un mínimo para que no se guarde vacío)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Rellenar desde la URL: qué se escribe rellena lo que la página trae y deja vacío (y avisa) lo que no",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Rellenar desde la URL: qué se escribe no pisa lo que escribió la persona, pero sí actualiza lo que puso el propio botón",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Rellenar desde la URL: qué se escribe si la página no trae nada, no escribe nada",
+          "estado": "passed"
+        },
+        {
+          "titulo": "botones de IA del formulario existen y no envían el formulario",
+          "estado": "passed"
+        },
+        {
+          "titulo": "botones de IA del formulario llaman a los endpoints del servidor y «Resumir» no pisa un resumen sin confirmar",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/frontend-fase6.test.js",
+      "estado": "passed",
+      "pruebas": 12,
+      "pasadas": 12,
+      "falladas": 0,
+      "duracion_ms": 310,
+      "nombres": [
+        {
+          "titulo": "Contenidos: Guardar borrador / AL AIRE el formulario tiene los dos botones (sin \"submit\") y la casilla oculta publicado",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Contenidos: Guardar borrador / AL AIRE el guardado envía publicado y un borrador nunca va destacado",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Contenidos: Guardar borrador / AL AIRE la lista marca los borradores",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Reportes: funciones de la pestaña filtra por estado y cuenta cada grupo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Reportes: funciones de la pestaña recorta el texto largo sin cortar palabras a la mitad",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Reportes: funciones de la pestaña cada tipo de reporte borra por su ruta",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Reportes: funciones de la pestaña el comentario de un artículo enlaza a su noticia o contenido",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Reportes: funciones de la pestaña el panel tiene filtros, estado y reabrir",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Reportar comentarios de artículos el cuadro de reporte es compartido y se carga antes que debate.js y comentarios.js",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Reportar comentarios de artículos comentarios.js reporta con el tipo articulo_comentario y el moderador puede eliminar",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Reportar comentarios de artículos los textos nuevos tienen traducción al inglés",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Mi cuenta avisa que el nombre es público y muestra la etiqueta y el enlace del moderador",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
       "archivo": "src/frontend-filtros.test.js",
       "estado": "passed",
       "pruebas": 26,
       "pasadas": 26,
       "falladas": 0,
-      "duracion_ms": 316,
+      "duracion_ms": 749,
       "nombres": [
         {
           "titulo": "Noticias: botones de región hay una fila de 4 botones de región, con Puerto Rico activo, debajo de las categorías",
@@ -797,12 +1201,84 @@
       ]
     },
     {
+      "archivo": "src/frontend-fuentes.test.js",
+      "estado": "passed",
+      "pruebas": 12,
+      "pasadas": 12,
+      "falladas": 0,
+      "duracion_ms": 815,
+      "nombres": [
+        {
+          "titulo": "formularios: dónde se agregan las otras fuentes la mesa de contenido tiene su lista y su botón «Agregar otra fuente»",
+          "estado": "passed"
+        },
+        {
+          "titulo": "formularios: dónde se agregan las otras fuentes la mesa de noticia tiene su lista y su botón «Agregar otra fuente»",
+          "estado": "passed"
+        },
+        {
+          "titulo": "formularios: dónde se agregan las otras fuentes solo la mesa de Contenidos menciona a Doña Pesquisa (la de Noticias no usa la Investigadora)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "formularios: dónde se agregan las otras fuentes el Detective, la Guardiana y la Investigadora reciben las otras fuentes",
+          "estado": "passed"
+        },
+        {
+          "titulo": "funciones puras de las otras fuentes el nombre por defecto es el sitio del enlace, sin «www.»",
+          "estado": "passed"
+        },
+        {
+          "titulo": "funciones puras de las otras fuentes de las filas del formulario salen solo las que tienen algo, con el nombre completado y sin espacios",
+          "estado": "passed"
+        },
+        {
+          "titulo": "funciones puras de las otras fuentes la fila escapa lo que traiga y deja los dos campos y el botón de quitar",
+          "estado": "passed"
+        },
+        {
+          "titulo": "informe de La Guardiana con otras fuentes muestra el parecido con cada otra fuente y sus pasajes cuando es medio o alto",
+          "estado": "passed"
+        },
+        {
+          "titulo": "informe de La Guardiana con otras fuentes sin otras fuentes el informe es el de siempre",
+          "estado": "passed"
+        },
+        {
+          "titulo": "páginas públicas: «Otras fuentes» lista cada fuente, con enlace solo si es http(s) seguro, y escapa el nombre",
+          "estado": "passed"
+        },
+        {
+          "titulo": "páginas públicas: «Otras fuentes» sin fuentes (o datos raros) no pinta nada",
+          "estado": "passed"
+        },
+        {
+          "titulo": "páginas públicas: «Otras fuentes» las páginas de contenido y de noticia la usan y el texto está traducido al inglés",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/frontend-panel-arranque.test.js",
+      "estado": "passed",
+      "pruebas": 1,
+      "pasadas": 1,
+      "falladas": 0,
+      "duracion_ms": 17082,
+      "nombres": [
+        {
+          "titulo": "el panel arranca sin errores y pinta noticias, contenidos, productos y reportes",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
       "archivo": "src/frontend-panel-ux.test.js",
       "estado": "passed",
-      "pruebas": 14,
-      "pasadas": 14,
+      "pruebas": 25,
+      "pasadas": 25,
       "falladas": 0,
-      "duracion_ms": 273,
+      "duracion_ms": 679,
       "nombres": [
         {
           "titulo": "Noticias rápidas: publicar solo desde el último paso «AL AIRE» y «Guardar borrador» están dentro del panel Fuente (último paso), no en una barra fija",
@@ -859,6 +1335,50 @@
         {
           "titulo": "Debate: editar y reportar los textos nuevos del debate tienen traducción al inglés",
           "estado": "passed"
+        },
+        {
+          "titulo": "2FA del panel: verifica solo al escribir el sexto dígito deja solo números (también al pegar) y recorta a 6",
+          "estado": "passed"
+        },
+        {
+          "titulo": "2FA del panel: verifica solo al escribir el sexto dígito el código está completo solo con exactamente 6 dígitos",
+          "estado": "passed"
+        },
+        {
+          "titulo": "2FA del panel: verifica solo al escribir el sexto dígito el campo envía el formulario al completar el código y no si ya se está verificando",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Guardado continuo: texto alternativo opcional y formulario que sigue abierto el texto alternativo es opcional: vacío se reemplaza por el título",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Guardado continuo: texto alternativo opcional y formulario que sigue abierto an-imagen-alt ya no es obligatorio y dice que es opcional",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Guardado continuo: texto alternativo opcional y formulario que sigue abierto ac-portada-alt ya no es obligatorio y dice que es opcional",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Guardado continuo: texto alternativo opcional y formulario que sigue abierto ap-imagen-alt ya no es obligatorio y dice que es opcional",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Guardado continuo: texto alternativo opcional y formulario que sigue abierto un borrador no puede ser la noticia destacada",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Guardado continuo: texto alternativo opcional y formulario que sigue abierto guardar noticia, contenido o producto deja el formulario abierto y usa despuesDeGuardar",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Guardado continuo: texto alternativo opcional y formulario que sigue abierto una traducción sin guardar se guarda junto con la pieza y puede pedirse al guardar",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Guardado continuo: texto alternativo opcional y formulario que sigue abierto el mensaje del autocompletar ya no habla del casillero «Publicado» ni dice que se guardó",
+          "estado": "passed"
         }
       ]
     },
@@ -868,7 +1388,7 @@
       "pruebas": 14,
       "pasadas": 14,
       "falladas": 0,
-      "duracion_ms": 307,
+      "duracion_ms": 171,
       "nombres": [
         {
           "titulo": "normalizar colapsa espacios y saltos de linea, y recorta",
@@ -934,7 +1454,7 @@
       "pruebas": 11,
       "pasadas": 11,
       "falladas": 0,
-      "duracion_ms": 973,
+      "duracion_ms": 674,
       "nombres": [
         {
           "titulo": "catalogo y limites las claves y los limites coinciden con los que valida el backend",
@@ -988,7 +1508,7 @@
       "pruebas": 8,
       "pasadas": 8,
       "falladas": 0,
-      "duracion_ms": 261,
+      "duracion_ms": 202,
       "nombres": [
         {
           "titulo": "verificacion del JWT con emisor y audiencia requireAuth exige iss = <proyecto>/auth/v1 y aud = authenticated",
@@ -1030,7 +1550,7 @@
       "pruebas": 16,
       "pasadas": 16,
       "falladas": 0,
-      "duracion_ms": 11001,
+      "duracion_ms": 22182,
       "nombres": [
         {
           "titulo": "admin con sesion aal1 (solo contrasena) pierde el poder: rol efectivo \"usuario\" y requireAdmin responde 403 mfa_required",
@@ -1104,7 +1624,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 875,
+      "duracion_ms": 700,
       "nombres": [
         {
           "titulo": "requireAuth responde 401 si no hay encabezado Authorization",
@@ -1134,7 +1654,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 207,
+      "duracion_ms": 135,
       "nombres": [
         {
           "titulo": "netlify.toml construye y publica solo la carpeta frontend/",
@@ -1180,7 +1700,7 @@
       "pruebas": 14,
       "pasadas": 14,
       "falladas": 0,
-      "duracion_ms": 311,
+      "duracion_ms": 237,
       "nombres": [
         {
           "titulo": "filtrarPorRegion sin región elegida devuelve todo",
@@ -1246,7 +1766,7 @@
       "pruebas": 17,
       "pasadas": 17,
       "falladas": 0,
-      "duracion_ms": 11537,
+      "duracion_ms": 22803,
       "nombres": [
         {
           "titulo": "acceso a /api/admin/gastos get /api/admin/gastos: 401 sin sesion",
@@ -1321,10 +1841,10 @@
     {
       "archivo": "src/routes/admin.integration.test.js",
       "estado": "passed",
-      "pruebas": 28,
-      "pasadas": 28,
+      "pruebas": 41,
+      "pasadas": 41,
       "falladas": 0,
-      "duracion_ms": 11767,
+      "duracion_ms": 23137,
       "nombres": [
         {
           "titulo": "POST /api/admin/autocompletar-ia 401 sin autenticacion",
@@ -1387,6 +1907,26 @@
           "estado": "passed"
         },
         {
+          "titulo": "POST /api/admin/investigar con otras fuentes lee todas juntas, devuelve cuáles leyó y cuáles fallaron, y registra el uso",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/investigar sin otras fuentes sigue por el camino de siempre (la respuesta no trae listas de fuentes)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/investigar 400 con otras fuentes inválidas 0",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/investigar 400 con otras fuentes inválidas 1",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/investigar 400 con otras fuentes inválidas 2",
+          "estado": "passed"
+        },
+        {
           "titulo": "POST /api/admin/investigar 200 investigando desde texto pegado",
           "estado": "passed"
         },
@@ -1437,6 +1977,38 @@
         {
           "titulo": "GET /api/admin/uso-ia 200 para un admin",
           "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/autocompletar-ia -- bitacora de uso (A-1) registra la llamada en ia_generaciones como redactor (con 0 si el servicio no devuelve tokens)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/autocompletar-ia -- bitacora de uso (A-1) registra los tokens y el costo cuando el servicio los devuelve",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/autocompletar-ia -- bitacora de uso (A-1) si falla el registro, igual responde 200 al admin",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/autocompletar-ia -- bitacora de uso (A-1) no registra nada si la redaccion falla",
+          "estado": "passed"
+        },
+        {
+          "titulo": "GET /api/admin/ordenes (P-3) 401 sin autenticacion",
+          "estado": "passed"
+        },
+        {
+          "titulo": "GET /api/admin/ordenes (P-3) 403 si el usuario no es admin (ni siquiera moderador)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "GET /api/admin/ordenes (P-3) 200 con los pedidos, direccion y valores por defecto de paginacion",
+          "estado": "passed"
+        },
+        {
+          "titulo": "GET /api/admin/ordenes (P-3) limit tiene tope de 100 y offset nunca es negativo",
+          "estado": "passed"
         }
       ]
     },
@@ -1446,7 +2018,7 @@
       "pruebas": 21,
       "pasadas": 21,
       "falladas": 0,
-      "duracion_ms": 11805,
+      "duracion_ms": 22877,
       "nombres": [
         {
           "titulo": "acceso a /api/admin/traducciones y /traducir get /api/admin/traducciones/noticia/a: 401 sin sesion",
@@ -1540,7 +2112,7 @@
       "pruebas": 17,
       "pasadas": 17,
       "falladas": 0,
-      "duracion_ms": 11417,
+      "duracion_ms": 22660,
       "nombres": [
         {
           "titulo": "GET /api/agradecimientos (público) 200 con la lista de nombres, sin pedir sesión",
@@ -1613,12 +2185,170 @@
       ]
     },
     {
+      "archivo": "src/routes/brigada.integration.test.js",
+      "estado": "passed",
+      "pruebas": 37,
+      "pasadas": 37,
+      "falladas": 0,
+      "duracion_ms": 23195,
+      "nombres": [
+        {
+          "titulo": "POST /api/admin/brigada/clasificar 401 sin sesión; 403 para usuario y moderador (solo admin)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/clasificar 400 con datos inválidos 0",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/clasificar 400 con datos inválidos 1",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/clasificar 400 con datos inválidos 2",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/clasificar 200 devuelve las sugerencias y registra el costo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/clasificar el destino por defecto es contenido",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/clasificar si la página no se puede leer, 400 con el motivo y sin costo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/revisar (La Guardiana) 401 sin sesión; 403 para usuario y moderador (solo admin)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/revisar (La Guardiana) 400 con datos inválidos 0",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/revisar (La Guardiana) 400 con datos inválidos 1",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/revisar (La Guardiana) 400 con datos inválidos 2",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/revisar (La Guardiana) 400 con datos inválidos 3",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/revisar (La Guardiana) 400 con datos inválidos 4",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/revisar (La Guardiana) 200 devuelve la copia y la revisión, y registra el costo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/revisar (La Guardiana) con otras fuentes las limpia y se las pasa a La Guardiana, y devuelve el parecido con cada una",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/revisar (La Guardiana) 400 con otras fuentes inválidas 0",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/revisar (La Guardiana) 400 con otras fuentes inválidas 1",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/revisar (La Guardiana) 400 con otras fuentes inválidas 2",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/revisar (La Guardiana) sin URL de la fuente manda cadena vacía; si la IA falla, 400 sin costo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/duplicados (El Detective) 401 sin sesión; 403 para usuario y moderador (solo admin)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/duplicados (El Detective) 400 con datos inválidos 0",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/duplicados (El Detective) 400 con datos inválidos 1",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/duplicados (El Detective) 400 con datos inválidos 2",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/duplicados (El Detective) 400 con datos inválidos 3",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/duplicados (El Detective) 400 con datos inválidos 4",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/duplicados (El Detective) 400 con datos inválidos 5",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/duplicados (El Detective) 200 busca en noticias y contenidos, deja fuera la pieza que se está editando y no cuesta IA",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/duplicados (El Detective) detecta la misma fuente aunque esté en la lista de OTRAS fuentes de la pieza existente o de la nueva",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/duplicados (El Detective) 400 con otras fuentes inválidas",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/duplicados (El Detective) si la base falla, 500 genérico sin detalles internos",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/pintar (La Pintora) 401 sin sesión; 403 para usuario y moderador (solo admin)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/pintar (La Pintora) 400 con datos inválidos 0",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/pintar (La Pintora) 400 con datos inválidos 1",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/pintar (La Pintora) 400 con datos inválidos 2",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/pintar (La Pintora) 400 con datos inválidos 3",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/pintar (La Pintora) 200 devuelve el texto alternativo, la escena y el prompt, y registra el costo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/brigada/pintar (La Pintora) si la IA falla, 400 con el motivo y sin costo",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
       "archivo": "src/routes/comentarios.integration.test.js",
       "estado": "passed",
-      "pruebas": 13,
-      "pasadas": 13,
+      "pruebas": 21,
+      "pasadas": 21,
       "falladas": 0,
-      "duracion_ms": 11363,
+      "duracion_ms": 22680,
       "nombres": [
         {
           "titulo": "GET /api/comentarios 400 si faltan tipo o itemId",
@@ -1649,6 +2379,22 @@
           "estado": "passed"
         },
         {
+          "titulo": "POST /api/comentarios -- deteccion de riesgo (Fase 6) un comentario con lenguaje de riesgo crea un reporte automatico y sigue publicado",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/comentarios -- deteccion de riesgo (Fase 6) un comentario normal no crea reporte",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/comentarios -- deteccion de riesgo (Fase 6) si falla el reporte automatico el comentario se publica igual",
+          "estado": "passed"
+        },
+        {
+          "titulo": "DELETE /api/comentarios/:id -- cierra sus reportes borra el comentario y pasa sus reportes pendientes a revisado en una sola sentencia",
+          "estado": "passed"
+        },
+        {
           "titulo": "DELETE /api/comentarios/:id 401 sin autenticacion",
           "estado": "passed"
         },
@@ -1671,16 +2417,82 @@
         {
           "titulo": "DELETE /api/comentarios/:id 200 si es moderador borrando el comentario de otro",
           "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/comentarios -- largo y espera (U-9) 400 en espanol si el comentario supera 2000 caracteres",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/comentarios -- largo y espera (U-9) 429 si la misma persona comenta otra vez antes de 10 segundos",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/comentarios -- largo y espera (U-9) otra persona no queda bloqueada por la espera de alguien mas",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/comentarios -- largo y espera (U-9) un comentario rechazado (404) no inicia la espera",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/routes/contenidoIa.integration.test.js",
+      "estado": "passed",
+      "pruebas": 10,
+      "pasadas": 10,
+      "falladas": 0,
+      "duracion_ms": 22505,
+      "nombres": [
+        {
+          "titulo": "POST /api/admin/contenido-ia/resumir 401 sin sesión; 403 para usuario y moderador (solo admin)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/contenido-ia/resumir 400 con datos inválidos 0",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/contenido-ia/resumir 400 con datos inválidos 1",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/contenido-ia/resumir 400 con datos inválidos 2",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/contenido-ia/resumir 200 devuelve el resumen y registra el costo (agente resumidora)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/contenido-ia/resumir si la IA falla, 400 con el mensaje y sin registrar costo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/contenido-ia/metadatos-fuente 401 sin sesión; 403 para usuario y moderador",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/contenido-ia/metadatos-fuente 400 si falta la URL",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/contenido-ia/metadatos-fuente 200 devuelve los cuatro datos y el estilo sugerido (sin IA ni costo)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/contenido-ia/metadatos-fuente si la página no se puede leer (o la dirección no está permitida), 400 con el motivo",
+          "estado": "passed"
         }
       ]
     },
     {
       "archivo": "src/routes/contenidos.integration.test.js",
       "estado": "passed",
-      "pruebas": 42,
-      "pasadas": 42,
+      "pruebas": 50,
+      "pasadas": 50,
       "falladas": 0,
-      "duracion_ms": 12179,
+      "duracion_ms": 7477,
       "nombres": [
         {
           "titulo": "GET /api/contenidos devuelve la lista",
@@ -1831,6 +2643,14 @@
           "estado": "passed"
         },
         {
+          "titulo": "DELETE /api/contenidos/:id 404 si el contenido no existe",
+          "estado": "passed"
+        },
+        {
+          "titulo": "DELETE /api/contenidos/:id borra en una sola sentencia el contenido, sus comentarios y sus traducciones (T-4)",
+          "estado": "passed"
+        },
+        {
           "titulo": "DELETE /api/contenidos/:id 200 al eliminar",
           "estado": "passed"
         },
@@ -1849,16 +2669,130 @@
         {
           "titulo": "GET /api/contenidos?lang= (Fase C2) el detalle acepta ?lang=en",
           "estado": "passed"
+        },
+        {
+          "titulo": "borrador / AL AIRE (publicado) el publico solo ve publicados; el admin ve tambien los borradores",
+          "estado": "passed"
+        },
+        {
+          "titulo": "borrador / AL AIRE (publicado) el detalle de un borrador es 404 para el publico y 200 para el admin",
+          "estado": "passed"
+        },
+        {
+          "titulo": "borrador / AL AIRE (publicado) POST con publicado=false guarda el borrador sin destacar (aunque pidan destacado)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "borrador / AL AIRE (publicado) POST sin publicado queda publicado (AL AIRE)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "borrador / AL AIRE (publicado) PUT puede pasar un contenido a borrador y le quita el destacado",
+          "estado": "passed"
+        },
+        {
+          "titulo": "borrador / AL AIRE (publicado) 400 si publicado no es booleano",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/routes/correccion.integration.test.js",
+      "estado": "passed",
+      "pruebas": 20,
+      "pasadas": 20,
+      "falladas": 0,
+      "duracion_ms": 22500,
+      "nombres": [
+        {
+          "titulo": "POST /api/admin/corregir 401 sin sesión, 403 para usuario y moderador (solo admin)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir 400 con datos inválidos 0",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir 400 con datos inválidos 1",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir 400 con datos inválidos 2",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir 400 con datos inválidos 3",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir 200 devuelve el texto corregido y los cambios, y registra el costo (agente correctora)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir si la IA falla, 400 con el mensaje y sin registrar costo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir un fallo al registrar el costo no tumba la respuesta",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir/varios («Corregir todo», Doña Tilde) 401 sin sesión; 403 para usuario y moderador (solo admin)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir/varios («Corregir todo», Doña Tilde) 400 con datos inválidos 0",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir/varios («Corregir todo», Doña Tilde) 400 con datos inválidos 1",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir/varios («Corregir todo», Doña Tilde) 400 con datos inválidos 2",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir/varios («Corregir todo», Doña Tilde) 400 con datos inválidos 3",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir/varios («Corregir todo», Doña Tilde) 400 con datos inválidos 4",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir/varios («Corregir todo», Doña Tilde) 400 con datos inválidos 5",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir/varios («Corregir todo», Doña Tilde) 400 con datos inválidos 6",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir/varios («Corregir todo», Doña Tilde) 400 con datos inválidos 7",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir/varios («Corregir todo», Doña Tilde) 200 corrige cada campo con SU variante, en el mismo orden, y registra un solo costo sumado",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir/varios («Corregir todo», Doña Tilde) si un campo falla, los demás siguen y el fallo se informa en su campo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/admin/corregir/varios («Corregir todo», Doña Tilde) si TODOS fallan (p. ej. falta la llave de la IA), 400 con el motivo y sin costo",
+          "estado": "passed"
         }
       ]
     },
     {
       "archivo": "src/routes/foro.integration.test.js",
       "estado": "passed",
-      "pruebas": 42,
-      "pasadas": 42,
+      "pruebas": 65,
+      "pasadas": 65,
       "falladas": 0,
-      "duracion_ms": 12293,
+      "duracion_ms": 23618,
       "nombres": [
         {
           "titulo": "GET /api/foro/posts 400 si falta el parametro subseccion",
@@ -2027,6 +2961,164 @@
         {
           "titulo": "POST /api/foro/posts/:postId/comentarios 201 al comentar una publicacion existente",
           "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- verificaciones de la creacion 201 -> reporte automatico: si el texto editado tiene lenguaje de riesgo se crea el reporte (U-3)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- verificaciones de la creacion no apila un segundo reporte automatico si ya hay uno pendiente (U-3)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- verificaciones de la creacion si el titulo y el cuerpo no cambiaron no se vuelve a analizar el riesgo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- verificaciones de la creacion 403 si quien edita no confirmo su edad y la sub-seccion es 18+ (U-4)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- verificaciones de la creacion 403 si la fecha de nacimiento real dice que es menor, aunque haya marcado el checkbox (U-4)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- verificaciones de la creacion 200 en una sub-seccion de audiencia general sin confirmar edad (U-4)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- verificaciones de la creacion 400 si se intenta cambiar la sub-seccion (U-4)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- verificaciones de la creacion si no se manda subseccion se conserva la guardada",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- destacado y tema solo del admin moderador conserva destacado y tema guardados aunque los mande",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- destacado y tema solo del admin autor conserva destacado y tema guardados aunque los mande",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- destacado y tema solo del admin el admin si puede cambiarlos (y el contenido nuevo debe existir)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- destacado y tema solo del admin el admin que no manda destacado ni tema no los borra",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- destacado y tema solo del admin 400 si el admin enlaza un contenido que no existe al editar (C-2)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- destacado y tema solo del admin 400 si el admin crea una publicacion con un contenido relacionado que no existe (C-2)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- destacado y tema solo del admin 201 si el contenido relacionado existe (C-2)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- corregir un typo sin el rol de antes (U-2) 200 si el enlace no cambio aunque ya no sea premium",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- corregir un typo sin el rol de antes (U-2) 400 si cambia el enlace y ya no es premium",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- corregir un typo sin el rol de antes (U-2) un moderador puede editar sin tocar el enlace de la persona premium",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- corregir un typo sin el rol de antes (U-2) el limite de palabras no baja de lo ya guardado (typo en un texto largo)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/foro/posts/:id -- corregir un typo sin el rol de antes (U-2) 400 si el texto editado crece por encima de lo guardado y del limite",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Reportes al eliminar contenido del debate (R-2) y largo de comentarios (U-7) borrar una publicacion cierra en la misma sentencia los reportes pendientes de ella y de sus comentarios",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Reportes al eliminar contenido del debate (R-2) y largo de comentarios (U-7) borrar un comentario cierra en la misma sentencia sus reportes pendientes",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Reportes al eliminar contenido del debate (R-2) y largo de comentarios (U-7) 400 si el comentario del debate supera 2000 caracteres",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/routes/fuentes.integration.test.js",
+      "estado": "passed",
+      "pruebas": 14,
+      "pasadas": 14,
+      "falladas": 0,
+      "duracion_ms": 1339,
+      "nombres": [
+        {
+          "titulo": "otras fuentes en contenidos al crear, se guardan limpias (sin espacios ni enlaces repetidos) como JSON en el último parámetro",
+          "estado": "passed"
+        },
+        {
+          "titulo": "otras fuentes en contenidos sin «fuentes» al crear se guarda una lista vacía",
+          "estado": "passed"
+        },
+        {
+          "titulo": "otras fuentes en contenidos 400 con más de 4 fuentes, sin tocar la base",
+          "estado": "passed"
+        },
+        {
+          "titulo": "otras fuentes en contenidos 400 con una fuente sin nombre, sin tocar la base",
+          "estado": "passed"
+        },
+        {
+          "titulo": "otras fuentes en contenidos 400 con un enlace que no es http(s), sin tocar la base",
+          "estado": "passed"
+        },
+        {
+          "titulo": "otras fuentes en contenidos 400 con algo que no es una lista, sin tocar la base",
+          "estado": "passed"
+        },
+        {
+          "titulo": "otras fuentes en contenidos al editar sin «fuentes» se conservan las que ya tenía, y con «fuentes» se reemplazan",
+          "estado": "passed"
+        },
+        {
+          "titulo": "otras fuentes en noticias al crear, se guardan limpias (sin espacios ni enlaces repetidos) como JSON en el último parámetro",
+          "estado": "passed"
+        },
+        {
+          "titulo": "otras fuentes en noticias sin «fuentes» al crear se guarda una lista vacía",
+          "estado": "passed"
+        },
+        {
+          "titulo": "otras fuentes en noticias 400 con más de 4 fuentes, sin tocar la base",
+          "estado": "passed"
+        },
+        {
+          "titulo": "otras fuentes en noticias 400 con una fuente sin nombre, sin tocar la base",
+          "estado": "passed"
+        },
+        {
+          "titulo": "otras fuentes en noticias 400 con un enlace que no es http(s), sin tocar la base",
+          "estado": "passed"
+        },
+        {
+          "titulo": "otras fuentes en noticias 400 con algo que no es una lista, sin tocar la base",
+          "estado": "passed"
+        },
+        {
+          "titulo": "otras fuentes en noticias al editar sin «fuentes» se conservan las que ya tenía, y con «fuentes» se reemplazan",
+          "estado": "passed"
         }
       ]
     },
@@ -2036,7 +3128,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 11664,
+      "duracion_ms": 22186,
       "nombres": [
         {
           "titulo": "POST /api/newsletter/subscribe 400 con correo invalido",
@@ -2063,10 +3155,10 @@
     {
       "archivo": "src/routes/noticias.integration.test.js",
       "estado": "passed",
-      "pruebas": 39,
-      "pasadas": 39,
+      "pruebas": 45,
+      "pasadas": 45,
       "falladas": 0,
-      "duracion_ms": 11930,
+      "duracion_ms": 23165,
       "nombres": [
         {
           "titulo": "GET /api/noticias devuelve la lista de noticias",
@@ -2201,6 +3293,10 @@
           "estado": "passed"
         },
         {
+          "titulo": "DELETE /api/noticias/:id borra en una sola sentencia la noticia, sus comentarios y sus traducciones (T-4)",
+          "estado": "passed"
+        },
+        {
           "titulo": "DELETE /api/noticias/:id 200 al eliminar una noticia existente",
           "estado": "passed"
         },
@@ -2223,6 +3319,26 @@
         {
           "titulo": "GET /api/noticias?lang= (Fase C2) POST rechaza un idiomaOriginal invalido",
           "estado": "passed"
+        },
+        {
+          "titulo": "Una noticia sin publicar nunca es la destacada (N-1) POST con publicado=false y destacado=true se guarda sin destacar y sin tocar la destacada actual",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Una noticia sin publicar nunca es la destacada (N-1) PUT guardar un borrador con destacado=true no le quita el destacado a la noticia publica",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Una noticia sin publicar nunca es la destacada (N-1) PUT despublicar una noticia destacada le quita el destacado",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Una noticia sin publicar nunca es la destacada (N-1) PUT destacar un borrador existente no abre transaccion ni destaca",
+          "estado": "passed"
+        },
+        {
+          "titulo": "Una noticia sin publicar nunca es la destacada (N-1) PUT destacar una noticia publicada sigue limpiando la anterior en una transaccion",
+          "estado": "passed"
         }
       ]
     },
@@ -2232,7 +3348,7 @@
       "pruebas": 2,
       "pasadas": 2,
       "falladas": 0,
-      "duracion_ms": 10765,
+      "duracion_ms": 967,
       "nombres": [
         {
           "titulo": "GET /api/ordenes 401 sin autenticacion",
@@ -2250,7 +3366,7 @@
       "pruebas": 18,
       "pasadas": 18,
       "falladas": 0,
-      "duracion_ms": 11807,
+      "duracion_ms": 22582,
       "nombres": [
         {
           "titulo": "PUT /api/perfil 401 sin autenticacion",
@@ -2329,10 +3445,10 @@
     {
       "archivo": "src/routes/productos.integration.test.js",
       "estado": "passed",
-      "pruebas": 12,
-      "pasadas": 12,
+      "pruebas": 13,
+      "pasadas": 13,
       "falladas": 0,
-      "duracion_ms": 11441,
+      "duracion_ms": 22381,
       "nombres": [
         {
           "titulo": "GET /api/productos devuelve la lista de productos",
@@ -2371,6 +3487,10 @@
           "estado": "passed"
         },
         {
+          "titulo": "DELETE /api/productos/:id borra en una sola sentencia el producto y sus traducciones (T-4)",
+          "estado": "passed"
+        },
+        {
           "titulo": "DELETE /api/productos/:id 200 al eliminar un producto existente",
           "estado": "passed"
         },
@@ -2387,10 +3507,10 @@
     {
       "archivo": "src/routes/reportes.integration.test.js",
       "estado": "passed",
-      "pruebas": 14,
-      "pasadas": 14,
+      "pruebas": 20,
+      "pasadas": 20,
       "falladas": 0,
-      "duracion_ms": 11860,
+      "duracion_ms": 22650,
       "nombres": [
         {
           "titulo": "POST /api/reportes 401 sin autenticacion",
@@ -2413,6 +3533,18 @@
           "estado": "passed"
         },
         {
+          "titulo": "POST /api/reportes -- comentarios de articulos y duplicados (Fase 6) 201 al reportar un comentario de noticia o contenido (articulo_comentario)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/reportes -- comentarios de articulos y duplicados (Fase 6) 409 si esa persona ya tiene un reporte pendiente del mismo elemento",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/reportes -- comentarios de articulos y duplicados (Fase 6) GET une el comentario de articulo con su noticia o contenido",
+          "estado": "passed"
+        },
+        {
           "titulo": "GET /api/reportes 401 sin autenticacion",
           "estado": "passed"
         },
@@ -2426,6 +3558,18 @@
         },
         {
           "titulo": "GET /api/reportes 200 con la lista para un moderador",
+          "estado": "passed"
+        },
+        {
+          "titulo": "GET /api/reportes -- contenido reportado (R-1) la consulta une el texto reportado y usa el nombre visible, nunca el correo del autor",
+          "estado": "passed"
+        },
+        {
+          "titulo": "GET /api/reportes -- contenido reportado (R-1) filtra por estado con parametro",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PATCH /api/reportes/:id 200 al reabrir un reporte (volver a pendiente)",
           "estado": "passed"
         },
         {
@@ -2451,12 +3595,192 @@
       ]
     },
     {
+      "archivo": "src/routes/semillas.e3.test.js",
+      "estado": "passed",
+      "pruebas": 15,
+      "pasadas": 15,
+      "falladas": 0,
+      "duracion_ms": 22908,
+      "nombres": [
+        {
+          "titulo": "acceso (solo admin) post /api/semillas/11111111-1111-4111-8111-111111111111/desarrollar: 401 sin sesión y 403 para un usuario",
+          "estado": "passed"
+        },
+        {
+          "titulo": "acceso (solo admin) delete /api/semillas/11111111-1111-4111-8111-111111111111/desarrollos/22222222-2222-4222-8222-222222222222: 401 sin sesión y 403 para un usuario",
+          "estado": "passed"
+        },
+        {
+          "titulo": "acceso (solo admin) post /api/semillas/11111111-1111-4111-8111-111111111111/pasar-a-contenidos: 401 sin sesión y 403 para un usuario",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas/:id/desarrollar (La Farolera) 400 sin formato válido o con indicaciones demasiado largas, sin tocar la base",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas/:id/desarrollar (La Farolera) 404 si la semilla no es de quien pregunta o el id no es válido",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas/:id/desarrollar (La Farolera) 200 desarrolla el texto guardado con el análisis previo, guarda el borrador (tope de 5), pasa a «en_desarrollo» y cobra a «farolera»",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas/:id/desarrollar (La Farolera) si la IA falla, 400 con el motivo, sin guardar ni cobrar",
+          "estado": "passed"
+        },
+        {
+          "titulo": "DELETE /api/semillas/:id/desarrollos/:desarrolloId descarta el borrador de esa semilla y de ese autor",
+          "estado": "passed"
+        },
+        {
+          "titulo": "DELETE /api/semillas/:id/desarrollos/:desarrolloId 404 si el borrador ya no existe o los ids no son válidos",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas/:id/pasar-a-contenidos 400 si no se elige un borrador válido, sin abrir la transacción",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas/:id/pasar-a-contenidos 404 si la semilla o el borrador no existen (ROLLBACK y la conexión se suelta)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas/:id/pasar-a-contenidos 409 si la semilla ya pasó a una pieza que todavía existe",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas/:id/pasar-a-contenidos 201 crea el BORRADOR en Contenidos (sin publicar) y marca la semilla «pasada», todo en una transacción",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas/:id/pasar-a-contenidos si el título ya existe agrega un sufijo, y si la pieza anterior fue borrada permite crear otra",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas/:id/pasar-a-contenidos si algo falla a medias, hace ROLLBACK y no deja nada guardado",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/routes/semillas.integration.test.js",
+      "estado": "passed",
+      "pruebas": 25,
+      "pasadas": 25,
+      "falladas": 0,
+      "duracion_ms": 22759,
+      "nombres": [
+        {
+          "titulo": "acceso (todo el Taller es solo de admin) get /api/semillas: 401 sin sesión y 403 para usuario y moderador",
+          "estado": "passed"
+        },
+        {
+          "titulo": "acceso (todo el Taller es solo de admin) get /api/semillas/11111111-1111-4111-8111-111111111111: 401 sin sesión y 403 para usuario y moderador",
+          "estado": "passed"
+        },
+        {
+          "titulo": "acceso (todo el Taller es solo de admin) post /api/semillas: 401 sin sesión y 403 para usuario y moderador",
+          "estado": "passed"
+        },
+        {
+          "titulo": "acceso (todo el Taller es solo de admin) put /api/semillas/11111111-1111-4111-8111-111111111111: 401 sin sesión y 403 para usuario y moderador",
+          "estado": "passed"
+        },
+        {
+          "titulo": "acceso (todo el Taller es solo de admin) delete /api/semillas/11111111-1111-4111-8111-111111111111: 401 sin sesión y 403 para usuario y moderador",
+          "estado": "passed"
+        },
+        {
+          "titulo": "acceso (todo el Taller es solo de admin) post /api/semillas/11111111-1111-4111-8111-111111111111/agentes/grieta: 401 sin sesión y 403 para usuario y moderador",
+          "estado": "passed"
+        },
+        {
+          "titulo": "GET /api/semillas lista solo las semillas de quien pregunta, con extracto y las agentes que ya las analizaron",
+          "estado": "passed"
+        },
+        {
+          "titulo": "GET /api/semillas filtra por estado",
+          "estado": "passed"
+        },
+        {
+          "titulo": "GET /api/semillas/:id 404 con un id que no es uuid (sin tocar la base) o que no existe",
+          "estado": "passed"
+        },
+        {
+          "titulo": "GET /api/semillas/:id 200 con la semilla, buscada por su dueño, y marca los análisis hechos sobre una versión anterior del texto",
+          "estado": "passed"
+        },
+        {
+          "titulo": "GET /api/semillas/:id un análisis hecho sobre el texto actual no se marca como desactualizado",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas 400 con datos inválidos 0",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas 400 con datos inválidos 1",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas 400 con datos inválidos 2",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas 400 con datos inválidos 3",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas 400 con datos inválidos 4",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas 400 con datos inválidos 5",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas 201 crea la semilla a nombre de quien escribe, con el texto y las etiquetas limpios",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PUT /api/semillas/:id 404 si no existe; 400 si lo que se manda no es válido",
+          "estado": "passed"
+        },
+        {
+          "titulo": "PUT /api/semillas/:id 200 cambia solo lo que se manda y conserva lo demás",
+          "estado": "passed"
+        },
+        {
+          "titulo": "DELETE /api/semillas/:id 200 borra la semilla propia; 404 si no existe",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas/:id/agentes/:agente (La Grieta) 404 si la agente todavía no trabaja en el Taller (sin gastar IA)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas/:id/agentes/:agente (La Grieta) 404 si la semilla no es de quien pregunta",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas/:id/agentes/:agente (La Grieta) 200 analiza el texto guardado, guarda el resultado con el hash del texto, pasa a «explorada» y registra el costo de «grieta»",
+          "estado": "passed"
+        },
+        {
+          "titulo": "POST /api/semillas/:id/agentes/:agente (La Grieta) si la IA falla, 400 con el motivo, sin guardar ni cobrar",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
       "archivo": "src/routes/stripe.test.js",
       "estado": "passed",
       "pruebas": 10,
       "pasadas": 10,
       "falladas": 0,
-      "duracion_ms": 10893,
+      "duracion_ms": 919,
       "nombres": [
         {
           "titulo": "POST /api/stripe/create-checkout-session 401 sin autenticacion",
@@ -2506,7 +3830,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 10913,
+      "duracion_ms": 1214,
       "nombres": [
         {
           "titulo": "POST /api/stripe/webhook 400 si la firma es invalida",
@@ -2552,7 +3876,7 @@
       "pruebas": 4,
       "pasadas": 4,
       "falladas": 0,
-      "duracion_ms": 231,
+      "duracion_ms": 531,
       "nombres": [
         {
           "titulo": "isPrivateIp detecta direcciones privadas/internas comunes",
@@ -2573,12 +3897,456 @@
       ]
     },
     {
+      "archivo": "src/services/cazadora.test.js",
+      "estado": "passed",
+      "pruebas": 16,
+      "pasadas": 16,
+      "falladas": 0,
+      "duracion_ms": 376,
+      "nombres": [
+        {
+          "titulo": "citaEstaEnPagina acepta una cita que aparece tal cual, aunque cambien mayúsculas, tildes, comillas o espacios",
+          "estado": "passed"
+        },
+        {
+          "titulo": "citaEstaEnPagina rechaza una cita inventada, una parafraseada y una demasiado corta",
+          "estado": "passed"
+        },
+        {
+          "titulo": "urlsDeBusqueda y normalizarUrl toma solo las URLs que la búsqueda web devolvió, normalizadas",
+          "estado": "passed"
+        },
+        {
+          "titulo": "urlsDeBusqueda y normalizarUrl es la misma página aunque cambie http/https, www, la barra final o el #",
+          "estado": "passed"
+        },
+        {
+          "titulo": "verificarEcos (las tres pruebas) conserva el eco real: la URL salió de la búsqueda, la página se lee y la cita aparece",
+          "estado": "passed"
+        },
+        {
+          "titulo": "verificarEcos (las tres pruebas) descarta una URL que la búsqueda nunca devolvió (el modelo la inventó)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "verificarEcos (las tres pruebas) descarta una cita que NO está en la página, aunque la URL sea real",
+          "estado": "passed"
+        },
+        {
+          "titulo": "verificarEcos (las tres pruebas) descarta si la página no se puede leer (bloqueada, caída o dirección no permitida)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "verificarEcos (las tres pruebas) descarta datos incompletos, relaciones inventadas, citas cortas y fuentes repetidas",
+          "estado": "passed"
+        },
+        {
+          "titulo": "verificarEcos (las tres pruebas) si la búsqueda no devolvió ninguna URL conocida, igual exige descargar y encontrar la cita",
+          "estado": "passed"
+        },
+        {
+          "titulo": "verificarEcos (las tres pruebas) revisa como máximo 8 candidatos",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirPrompt pide fuentes reales de la búsqueda, citas copiadas tal cual, no inventar y tratar la idea como material",
+          "estado": "passed"
+        },
+        {
+          "titulo": "calcularCosto suma tokens (precios de Sonnet) y cada búsqueda web",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cazarEcos (de punta a punta, con la API y la descarga simuladas) sin ANTHROPIC_API_KEY falla con un mensaje claro",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cazarEcos (de punta a punta, con la API y la descarga simuladas) usa Sonnet con la búsqueda web, verifica y cuenta lo descartado y las búsquedas",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cazarEcos (de punta a punta, con la API y la descarga simuladas) si Claude no entrega los hallazgos, pide intentar de nuevo",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/services/clasificadora.test.js",
+      "estado": "passed",
+      "pruebas": 14,
+      "pasadas": 14,
+      "falladas": 0,
+      "duracion_ms": 414,
+      "nombres": [
+        {
+          "titulo": "listas validas coinciden con las del formulario y las que valida el backend",
+          "estado": "passed"
+        },
+        {
+          "titulo": "leerSenales lee tipo de pagina, titulo, descripcion y texto visible (sin menus ni scripts)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "leerSenales el idioma no es asunto de la Clasificadora (lo detecta la Investigadora)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "leerSenales reconoce el formato de la fuente por dominio y por tipo de pagina",
+          "estado": "passed"
+        },
+        {
+          "titulo": "normalizarSalida acepta una respuesta valida y nunca sugiere el idioma",
+          "estado": "passed"
+        },
+        {
+          "titulo": "normalizarSalida el formato de la fuente declarado por la pagina manda sobre lo que diga Claude",
+          "estado": "passed"
+        },
+        {
+          "titulo": "normalizarSalida descarta valores que no estan en las listas del sitio",
+          "estado": "passed"
+        },
+        {
+          "titulo": "normalizarSalida la sub-seccion debe pertenecer a la seccion elegida",
+          "estado": "passed"
+        },
+        {
+          "titulo": "normalizarSalida con confianza baja no se aplica, pero se guarda como duda",
+          "estado": "passed"
+        },
+        {
+          "titulo": "normalizarSalida para una noticia rapida solo clasifica la categoria de noticias",
+          "estado": "passed"
+        },
+        {
+          "titulo": "normalizarSalida una respuesta vacia o rara no inventa nada",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirPrompt y herramienta trata la pagina como material, pide la pieza con palabras propias y prohibe adivinar",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirPrompt y herramienta la herramienta limita cada campo a valores validos",
+          "estado": "passed"
+        },
+        {
+          "titulo": "clasificarUrl rechaza direcciones internas antes de llamar a la IA",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/services/contrapunto.test.js",
+      "estado": "passed",
+      "pruebas": 7,
+      "pasadas": 7,
+      "falladas": 0,
+      "duracion_ms": 279,
+      "nombres": [
+        {
+          "titulo": "limpiarContrapunto ordena las objeciones de más a menos fuertes y normaliza una fuerza desconocida a «media»",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarContrapunto un fragmento del autor que no está en su texto se descarta; el que sí está se conserva",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarContrapunto conserva la postura contraria, los casos límite, lo que resiste y las preguntas",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarContrapunto pone tope a las objeciones y sin postura contraria pide intentar de nuevo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirPrompt pide la versión más fuerte, no inventar datos ni estudios, citas literales y tratar la idea como material",
+          "estado": "passed"
+        },
+        {
+          "titulo": "hacerContrapunto sin ANTHROPIC_API_KEY falla con un mensaje claro",
+          "estado": "passed"
+        },
+        {
+          "titulo": "hacerContrapunto usa Sonnet con la herramienta forzada y cobra con los precios de Sonnet",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/services/corrector.test.js",
+      "estado": "passed",
+      "pruebas": 8,
+      "pasadas": 8,
+      "falladas": 0,
+      "duracion_ms": 337,
+      "nombres": [
+        {
+          "titulo": "corregirTexto sin ANTHROPIC_API_KEY falla con un mensaje claro",
+          "estado": "passed"
+        },
+        {
+          "titulo": "corregirTexto variante desconocida se rechaza antes de llamar a la API",
+          "estado": "passed"
+        },
+        {
+          "titulo": "corregirTexto llama a Haiku con la herramienta y devuelve texto, cambios y costo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "corregirTexto un error de la API se devuelve con su mensaje",
+          "estado": "passed"
+        },
+        {
+          "titulo": "corregirTexto si Claude no usa la herramienta se pide intentar de nuevo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarSalida exige el texto corregido y descarta cambios mal formados",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarSalida recorta cambios muy largos y limita la cantidad",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirPrompt trata el texto como material y pide respetar la variante",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/services/detective.test.js",
+      "estado": "passed",
+      "pruebas": 11,
+      "pasadas": 11,
+      "falladas": 0,
+      "duracion_ms": 191,
+      "nombres": [
+        {
+          "titulo": "normalizarUrl es la misma página aunque cambien http/https, www, la barra final, el # o los parámetros de rastreo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "normalizarUrl conserva los parámetros que sí identifican la página (p. ej. ?v= de un video) y rechaza lo que no es una URL web",
+          "estado": "passed"
+        },
+        {
+          "titulo": "compararPiezas la misma fuente es similitud total, aunque el título sea otro",
+          "estado": "passed"
+        },
+        {
+          "titulo": "compararPiezas la misma fuente se detecta también entre las OTRAS fuentes de cualquiera de las dos piezas",
+          "estado": "passed"
+        },
+        {
+          "titulo": "compararPiezas un título casi igual se detecta aunque se reescriba un poco y no haya URL",
+          "estado": "passed"
+        },
+        {
+          "titulo": "compararPiezas el parecido de los resúmenes suma aunque el título cambie",
+          "estado": "passed"
+        },
+        {
+          "titulo": "compararPiezas historias distintas no se parecen, y ignora tildes, mayúsculas y palabras vacías",
+          "estado": "passed"
+        },
+        {
+          "titulo": "buscarDuplicados devuelve las más parecidas, de mayor a menor, con el nivel y las razones",
+          "estado": "passed"
+        },
+        {
+          "titulo": "buscarDuplicados no se cuenta a sí misma al editar (excluir) y distingue el tipo aunque el id coincida",
+          "estado": "passed"
+        },
+        {
+          "titulo": "buscarDuplicados marca los borradores y solo muestra las candidatas sobre el umbral, hasta cinco",
+          "estado": "passed"
+        },
+        {
+          "titulo": "buscarDuplicados niveles: muy probable, probable y posible",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/services/farolera.test.js",
+      "estado": "passed",
+      "pruebas": 13,
+      "pasadas": 13,
+      "falladas": 0,
+      "duracion_ms": 284,
+      "nombres": [
+        {
+          "titulo": "tramoEsDelAutor acepta lo copiado del texto aunque cambien mayúsculas, tildes o puntuación, y rechaza lo que no está",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarDesarrollo conserva los tramos del autor y de la Farolera en su orden, uno por origen",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarDesarrollo un tramo marcado «autor» que NO está en el texto del autor pasa a ser de la Farolera (nunca se le atribuye lo que no escribió)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarDesarrollo une tramos seguidos del mismo origen y la puntuación suelta hereda el origen del tramo anterior",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarDesarrollo cuenta las palabras de cada quien y el porcentaje del autor",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarDesarrollo señala las cifras o fechas que escribió la Farolera y que el autor no puso (las del autor no)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarDesarrollo limpia título, resumen, idioma y notas, y pone tope a las notas",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarDesarrollo sin ningún párrafo con texto pide intentar de nuevo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "contextoDeAnalisis toma la tesis, las grietas, el oro y la primera objeción de los análisis previos; sin análisis, todo vacío",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirPrompt pide conservar las frases del autor, no inventar datos, ejemplos hipotéticos y tratar la idea como material; incluye el formato y el contexto",
+          "estado": "passed"
+        },
+        {
+          "titulo": "desarrollarSemilla rechaza un formato desconocido",
+          "estado": "passed"
+        },
+        {
+          "titulo": "desarrollarSemilla sin ANTHROPIC_API_KEY falla con un mensaje claro",
+          "estado": "passed"
+        },
+        {
+          "titulo": "desarrollarSemilla usa Sonnet con la herramienta forzada, cobra con sus precios y devuelve el borrador verificado",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/services/grieta.test.js",
+      "estado": "passed",
+      "pruebas": 9,
+      "pasadas": 9,
+      "falladas": 0,
+      "duracion_ms": 324,
+      "nombres": [
+        {
+          "titulo": "fragmentoEnTexto solo acepta frases que están, tal cual, en el texto del autor (ignora mayúsculas, espacios y signos de los bordes)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarAnalisis conserva lo útil, recorta espacios y pone las etiquetas en minúscula",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarAnalisis una cita que NO está en el texto del autor se descarta (el hallazgo se queda, sin cita falsa)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarAnalisis descarta formatos de desarrollo que el sitio no tiene",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarAnalisis pone un tope a cada lista",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarAnalisis sin tesis no hay análisis: pide intentar de nuevo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirPrompt explica el kintsugi, pide trabajar solo con el texto, citas literales y tratar la idea como material",
+          "estado": "passed"
+        },
+        {
+          "titulo": "analizarSemilla sin ANTHROPIC_API_KEY falla con un mensaje claro",
+          "estado": "passed"
+        },
+        {
+          "titulo": "analizarSemilla usa Sonnet con la herramienta forzada y cobra con los precios de Sonnet",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/services/guardiana.test.js",
+      "estado": "passed",
+      "pruebas": 13,
+      "pasadas": 13,
+      "falladas": 0,
+      "duracion_ms": 373,
+      "nombres": [
+        {
+          "titulo": "compararCopia (anti-copia, sin IA) una pieza escrita con otras palabras da un parecido bajo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "compararCopia (anti-copia, sin IA) una pieza copiada casi igual da nivel alto y señala los pasajes copiados",
+          "estado": "passed"
+        },
+        {
+          "titulo": "compararCopia (anti-copia, sin IA) copiar una sola frase larga se nota (nivel medio o alto) aunque el resto sea propio",
+          "estado": "passed"
+        },
+        {
+          "titulo": "compararCopia (anti-copia, sin IA) ignora mayúsculas y puntuación al comparar",
+          "estado": "passed"
+        },
+        {
+          "titulo": "compararCopia (anti-copia, sin IA) si la fuente casi no tiene texto (video, audio) o la pieza es muy corta, dice que no se puede evaluar",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarRevision conserva solo tipos y gravedades válidos, ordena por gravedad y recorta",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarRevision una respuesta vacía no inventa nada y requiere_18 solo vale con true exacto",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirPrompt pide fragmentos literales, no inventar, orientar sin asesoría legal y tratar el texto como material",
+          "estado": "passed"
+        },
+        {
+          "titulo": "revisarPieza compara con la fuente y revisa con la IA",
+          "estado": "passed"
+        },
+        {
+          "titulo": "revisarPieza sin URL de la fuente solo revisa el contenido sensible",
+          "estado": "passed"
+        },
+        {
+          "titulo": "revisarPieza con otras fuentes compara la pieza con CADA una y las devuelve aparte",
+          "estado": "passed"
+        },
+        {
+          "titulo": "revisarPieza sin otras fuentes no hay copiasExtra que mostrar",
+          "estado": "passed"
+        },
+        {
+          "titulo": "revisarPieza si la fuente no se puede leer, lo dice y la revisión sensible sigue",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
       "archivo": "src/services/investigador.test.js",
       "estado": "passed",
       "pruebas": 13,
       "pasadas": 13,
       "falladas": 0,
-      "duracion_ms": 246,
+      "duracion_ms": 200,
       "nombres": [
         {
           "titulo": "aplicarCorrecciones aplica solo los cambios cuyo \"antes\" existe literalmente en el texto",
@@ -2635,12 +4403,162 @@
       ]
     },
     {
+      "archivo": "src/services/investigadorVarias.test.js",
+      "estado": "passed",
+      "pruebas": 7,
+      "pasadas": 7,
+      "falladas": 0,
+      "duracion_ms": 251,
+      "nombres": [
+        {
+          "titulo": "promptBase con varias fuentes pide marcar de cuál fuente salió cada dato y señalar contradicciones; con una sola no lo pide",
+          "estado": "passed"
+        },
+        {
+          "titulo": "investigarDesdeVarias lee la principal y las extra, las manda separadas y numeradas, y devuelve cuáles leyó",
+          "estado": "passed"
+        },
+        {
+          "titulo": "investigarDesdeVarias si una fuente no se puede leer sigue con las demás y avisa cuál falló",
+          "estado": "passed"
+        },
+        {
+          "titulo": "investigarDesdeVarias si ninguna se puede leer, falla con el motivo de cada una",
+          "estado": "passed"
+        },
+        {
+          "titulo": "investigarDesdeVarias un texto pegado cuenta como otra fuente (la primera) junto con las URLs",
+          "estado": "passed"
+        },
+        {
+          "titulo": "investigarDesdeVarias un texto pegado demasiado corto se rechaza; las URLs repetidas se leen una sola vez y hay un tope",
+          "estado": "passed"
+        },
+        {
+          "titulo": "investigarDesdeVarias el texto total se reparte entre las fuentes (costo acotado)",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/services/metadatosFuente.test.js",
+      "estado": "passed",
+      "pruebas": 16,
+      "pasadas": 16,
+      "falladas": 0,
+      "duracion_ms": 187,
+      "nombres": [
+        {
+          "titulo": "extraerMetadatos lee Open Graph y metadatos de articulo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "extraerMetadatos lee las etiquetas academicas (varios autores) y el JSON-LD",
+          "estado": "passed"
+        },
+        {
+          "titulo": "extraerMetadatos si la pagina no declara un dato, queda vacio (no se inventa nada)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "extraerMetadatos usa <title> solo como ultimo recurso para el titulo, y descarta @usuarios y URLs como autor",
+          "estado": "passed"
+        },
+        {
+          "titulo": "extraerMetadatos ignora JSON-LD mal formado sin romperse",
+          "estado": "passed"
+        },
+        {
+          "titulo": "extraerMetadatos un anio fuera de rango razonable no se toma",
+          "estado": "passed"
+        },
+        {
+          "titulo": "estiloSugerido (La Bibliotecaria propone el estilo de cita, sin IA) pubmed.ncbi.nlm.nih.gov -> vancouver",
+          "estado": "passed"
+        },
+        {
+          "titulo": "estiloSugerido (La Bibliotecaria propone el estilo de cita, sin IA) www.who.int -> vancouver",
+          "estado": "passed"
+        },
+        {
+          "titulo": "estiloSugerido (La Bibliotecaria propone el estilo de cita, sin IA) www.law.cornell.edu -> bluebook",
+          "estado": "passed"
+        },
+        {
+          "titulo": "estiloSugerido (La Bibliotecaria propone el estilo de cita, sin IA) ieeexplore.ieee.org -> ieee",
+          "estado": "passed"
+        },
+        {
+          "titulo": "estiloSugerido (La Bibliotecaria propone el estilo de cita, sin IA) arxiv.org -> ieee",
+          "estado": "passed"
+        },
+        {
+          "titulo": "estiloSugerido (La Bibliotecaria propone el estilo de cita, sin IA) folha.uol.com.br -> abnt",
+          "estado": "passed"
+        },
+        {
+          "titulo": "estiloSugerido (La Bibliotecaria propone el estilo de cita, sin IA) eltiempo.com.co -> icontec",
+          "estado": "passed"
+        },
+        {
+          "titulo": "estiloSugerido (La Bibliotecaria propone el estilo de cita, sin IA) elnuevodia.com -> apa",
+          "estado": "passed"
+        },
+        {
+          "titulo": "estiloSugerido (La Bibliotecaria propone el estilo de cita, sin IA) www.bbc.com -> apa",
+          "estado": "passed"
+        },
+        {
+          "titulo": "estiloSugerido (La Bibliotecaria propone el estilo de cita, sin IA) explica el motivo y reconoce subdominios, no dominios parecidos",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/services/pintora.test.js",
+      "estado": "passed",
+      "pruebas": 7,
+      "pasadas": 7,
+      "falladas": 0,
+      "duracion_ms": 701,
+      "nombres": [
+        {
+          "titulo": "limpiarSalida el prompt final es la escena más el estilo fijo, que agrega el código y no el modelo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarSalida recorta el texto alternativo al largo recomendado sin cortar palabras",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarSalida si falta el texto alternativo o la escena, pide intentar de nuevo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirPrompt pide texto alternativo en el idioma de la pieza, escena simbólica en inglés sin estilo, y trata la pieza como material",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirPrompt solo manda el inicio del cuerpo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "pintarPieza sin ANTHROPIC_API_KEY falla con un mensaje claro",
+          "estado": "passed"
+        },
+        {
+          "titulo": "pintarPieza llama a Haiku con la herramienta y devuelve alt, escena, prompt y costo",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
       "archivo": "src/services/redactor.test.js",
       "estado": "passed",
       "pruebas": 7,
       "pasadas": 7,
       "falladas": 0,
-      "duracion_ms": 151,
+      "duracion_ms": 163,
       "nombres": [
         {
           "titulo": "elegirTono devuelve una instruccion distinta por cada tono valido",
@@ -2673,12 +4591,38 @@
       ]
     },
     {
+      "archivo": "src/services/resumidor.test.js",
+      "estado": "passed",
+      "pruebas": 4,
+      "pasadas": 4,
+      "falladas": 0,
+      "duracion_ms": 219,
+      "nombres": [
+        {
+          "titulo": "resumirTexto sin ANTHROPIC_API_KEY falla con un mensaje claro",
+          "estado": "passed"
+        },
+        {
+          "titulo": "resumirTexto llama a Haiku con la herramienta, devuelve el resumen limpio y el costo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "resumirTexto si Claude no usa la herramienta o devuelve vacio, pide intentar de nuevo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirPrompt pide el mismo idioma, solo lo que dice el texto, y trata el texto como material",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
       "archivo": "src/services/traductor.test.js",
       "estado": "passed",
       "pruebas": 11,
       "pasadas": 11,
       "falladas": 0,
-      "duracion_ms": 327,
+      "duracion_ms": 346,
       "nombres": [
         {
           "titulo": "camposPresentes solo campos traducibles con texto",
@@ -2727,12 +4671,126 @@
       ]
     },
     {
+      "archivo": "src/taller.test.js",
+      "estado": "passed",
+      "pruebas": 26,
+      "pasadas": 26,
+      "falladas": 0,
+      "duracion_ms": 872,
+      "nombres": [
+        {
+          "titulo": "etiquetasDeTexto y tituloDe las etiquetas salen en minúscula, sin vacías ni repetidas, máximo 10",
+          "estado": "passed"
+        },
+        {
+          "titulo": "etiquetasDeTexto y tituloDe el título es el que se escribió, o el inicio de la idea, o «(sin título)»",
+          "estado": "passed"
+        },
+        {
+          "titulo": "htmlListaSemillas una tarjeta por semilla, con su estado, la fecha y una marca si La Grieta ya la analizó (sin HTML peligroso)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "htmlListaSemillas sin semillas invita a escribir la primera",
+          "estado": "passed"
+        },
+        {
+          "titulo": "htmlAnalisisGrieta muestra tesis, suposiciones, grietas con su cita, oro, preguntas y caminos",
+          "estado": "passed"
+        },
+        {
+          "titulo": "htmlAnalisisGrieta una grieta sin cita no pone una cita vacía",
+          "estado": "passed"
+        },
+        {
+          "titulo": "htmlAnalisisGrieta si la idea cambió después del análisis, lo avisa",
+          "estado": "passed"
+        },
+        {
+          "titulo": "htmlAnalisisGrieta escapa el HTML que venga en el análisis",
+          "estado": "passed"
+        },
+        {
+          "titulo": "htmlEcos muestra autor, obra con enlace seguro, año, relación, cita verificada y lo descartado",
+          "estado": "passed"
+        },
+        {
+          "titulo": "htmlEcos una URL que no es http(s) no se vuelve enlace",
+          "estado": "passed"
+        },
+        {
+          "titulo": "htmlEcos sin ecos comprobados lo dice en vez de inventar, y avisa si la idea cambió",
+          "estado": "passed"
+        },
+        {
+          "titulo": "htmlContrapunto muestra la postura, las objeciones con su fuerza, la cita y la respuesta posible, y el resto de secciones",
+          "estado": "passed"
+        },
+        {
+          "titulo": "htmlContrapunto escapa el HTML del análisis",
+          "estado": "passed"
+        },
+        {
+          "titulo": "htmlInformes un cuadro por agente que ya trabajó, en orden, y marca solo los desactualizados",
+          "estado": "passed"
+        },
+        {
+          "titulo": "htmlInformes sin análisis no pinta nada",
+          "estado": "passed"
+        },
+        {
+          "titulo": "borradores de La Farolera el texto corrido junta los tramos y separa los párrafos, sin marcas",
+          "estado": "passed"
+        },
+        {
+          "titulo": "borradores de La Farolera lo del autor va normal y lo de La Farolera marcado, con el porcentaje, la leyenda y los botones",
+          "estado": "passed"
+        },
+        {
+          "titulo": "borradores de La Farolera avisa los datos a verificar, las notas y si la idea cambió; y si ya pasó no ofrece pasarla otra vez",
+          "estado": "passed"
+        },
+        {
+          "titulo": "borradores de La Farolera la lista muestra el borrador más nuevo primero y marca solo los desactualizados",
+          "estado": "passed"
+        },
+        {
+          "titulo": "borradores de La Farolera si la semilla ya pasó a Contenidos, lo dice con el botón para abrir esa pieza",
+          "estado": "passed"
+        },
+        {
+          "titulo": "el Taller en el panel hay una pestaña y un panel solo para el administrador, con su editor, su lista y sus agentes",
+          "estado": "passed"
+        },
+        {
+          "titulo": "el Taller en el panel Las cuatro agentes del Taller trabajan (La Farolera con su formato e indicaciones)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "el Taller en el panel guardar manda la semilla, La Grieta guarda primero y analiza ese texto, y borrar pide confirmación",
+          "estado": "passed"
+        },
+        {
+          "titulo": "el Taller en el panel taller.js se carga antes que admin.js, se precarga y el panel lo inicia solo para admin",
+          "estado": "passed"
+        },
+        {
+          "titulo": "el Taller en el panel el elenco de la Brigada incluye a las cuatro agentes del Taller y las lleva a su pestaña",
+          "estado": "passed"
+        },
+        {
+          "titulo": "sintaxis taller.js se puede interpretar sin errores",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
       "archivo": "src/util/autorVisible.test.js",
       "estado": "passed",
       "pruebas": 2,
       "pasadas": 2,
       "falladas": 0,
-      "duracion_ms": 159,
+      "duracion_ms": 153,
       "nombres": [
         {
           "titulo": "nombreVisibleSql usa el nombre del perfil y, si no hay, un alias generico derivado del id",
@@ -2750,7 +4808,7 @@
       "pruebas": 12,
       "pasadas": 12,
       "falladas": 0,
-      "duracion_ms": 188,
+      "duracion_ms": 146,
       "nombres": [
         {
           "titulo": "detectarRiesgo null con texto normal, sin patrones de riesgo",
@@ -2808,7 +4866,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 216,
+      "duracion_ms": 134,
       "nombres": [
         {
           "titulo": "calcularEdad null si no hay fecha",
@@ -2849,12 +4907,66 @@
       ]
     },
     {
+      "archivo": "src/util/semillaAContenido.test.js",
+      "estado": "passed",
+      "pruebas": 11,
+      "pasadas": 11,
+      "falladas": 0,
+      "duracion_ms": 562,
+      "nombres": [
+        {
+          "titulo": "construirContenido es un BORRADOR de Lógica Humana (Revolución Humana), de Aliado Imperfekto, sin premium ni destacado",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirContenido el cuerpo son los párrafos en texto corrido, el título sale limpio y el resumen es el de la Farolera",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirContenido declara la IA parcial y marca «sin fuente externa» porque es una idea propia",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirContenido si todo es del autor no declara IA",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirContenido el formato «ensayo» se vuelve tipo «ensayo» y subformato null",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirContenido el formato «reflexion» se vuelve tipo «ensayo» y subformato \"opinion\"",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirContenido el formato «columna» se vuelve tipo «ensayo» y subformato \"columna\"",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirContenido el formato «lectura_corta» se vuelve tipo «lectura_corta» y subformato null",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirContenido sin título ni resumen usa el de la semilla y el inicio del cuerpo; la duración sale de las palabras",
+          "estado": "passed"
+        },
+        {
+          "titulo": "construirContenido lo que se crea es válido para el validador de Contenidos (mismas reglas que el formulario)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "hoyEnPuertoRico es una fecha AAAA-MM-DD",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
       "archivo": "src/util/slugify.test.js",
       "estado": "passed",
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 176,
+      "duracion_ms": 142,
       "nombres": [
         {
           "titulo": "slugify convierte a minusculas y reemplaza espacios por guiones",
@@ -2884,7 +4996,7 @@
       "pruebas": 8,
       "pasadas": 8,
       "falladas": 0,
-      "duracion_ms": 184,
+      "duracion_ms": 170,
       "nombres": [
         {
           "titulo": "normalizarLang / idiomaOriginalDe solo acepta es/en; el idioma original por defecto es espanol",
@@ -2921,12 +5033,46 @@
       ]
     },
     {
+      "archivo": "src/util/usoIa.test.js",
+      "estado": "passed",
+      "pruebas": 6,
+      "pasadas": 6,
+      "falladas": 0,
+      "duracion_ms": 183,
+      "nombres": [
+        {
+          "titulo": "registrarUsoAgente guarda una fila con el nombre de la agente, la fuente, los tokens y el costo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "registrarUsoAgente un uso sin datos guarda ceros, no vacíos",
+          "estado": "passed"
+        },
+        {
+          "titulo": "registrarUsoAgente un agente o una fuente que la base no admite no se intenta guardar (así no rompe el CHECK)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "registrarUsoAgente si la base falla, no tumba la respuesta: solo lo anota en el registro del servidor",
+          "estado": "passed"
+        },
+        {
+          "titulo": "la lista de agentes coincide con la base de datos migración y schema.sql permiten exactamente los mismos nombres que usa el código",
+          "estado": "passed"
+        },
+        {
+          "titulo": "la lista de agentes coincide con la base de datos cada ruta de agente registra con su propio nombre (ninguna usa ya «redactor» por comodidad)",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
       "archivo": "src/validators/agradecimiento.test.js",
       "estado": "passed",
       "pruebas": 16,
       "pasadas": 16,
       "falladas": 0,
-      "duracion_ms": 228,
+      "duracion_ms": 178,
       "nombres": [
         {
           "titulo": "validateNombreAgradecimiento acepta \"Ana\"",
@@ -2997,10 +5143,10 @@
     {
       "archivo": "src/validators/comentario.test.js",
       "estado": "passed",
-      "pruebas": 5,
-      "pasadas": 5,
+      "pruebas": 7,
+      "pasadas": 7,
       "falladas": 0,
-      "duracion_ms": 178,
+      "duracion_ms": 149,
       "nombres": [
         {
           "titulo": "validateComentario acepta un comentario valido",
@@ -3021,6 +5167,14 @@
         {
           "titulo": "validateComentario rechaza cuerpo muy corto o ausente",
           "estado": "passed"
+        },
+        {
+          "titulo": "validateComentario -- largo maximo rechaza mas de 2000 caracteres y acepta exactamente 2000",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validateComentario -- largo maximo un cuerpo que no es texto da error en vez de romper",
+          "estado": "passed"
         }
       ]
     },
@@ -3030,7 +5184,7 @@
       "pruebas": 37,
       "pasadas": 37,
       "falladas": 0,
-      "duracion_ms": 275,
+      "duracion_ms": 589,
       "nombres": [
         {
           "titulo": "validateContenido acepta un contenido completo y valido",
@@ -3188,7 +5342,7 @@
       "pruebas": 22,
       "pasadas": 22,
       "falladas": 0,
-      "duracion_ms": 242,
+      "duracion_ms": 160,
       "nombres": [
         {
           "titulo": "validateFechaNacimiento acepta 1990-05-17",
@@ -3283,10 +5437,10 @@
     {
       "archivo": "src/validators/foroPost.test.js",
       "estado": "passed",
-      "pruebas": 19,
-      "pasadas": 19,
+      "pruebas": 22,
+      "pasadas": 22,
       "falladas": 0,
-      "duracion_ms": 274,
+      "duracion_ms": 207,
       "nombres": [
         {
           "titulo": "validatePost acepta un post valido sin errores",
@@ -3363,6 +5517,80 @@
         {
           "titulo": "validatePost rechaza esquemas peligrosos (javascript:, data:) en el enlace multimedia",
           "estado": "passed"
+        },
+        {
+          "titulo": "validatePost al editar (publicacion existente) el limite de palabras no baja de lo ya guardado",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validatePost al editar (publicacion existente) un enlace sin cambios no vuelve a exigir premium",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validatePost al editar (publicacion existente) un enlace distinto si lo exige",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
+      "archivo": "src/validators/fuentes.test.js",
+      "estado": "passed",
+      "pruebas": 13,
+      "pasadas": 13,
+      "falladas": 0,
+      "duracion_ms": 152,
+      "nombres": [
+        {
+          "titulo": "validarFuentes lo omitido y una lista válida (con o sin enlace) no tienen errores",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarFuentes rechaza no es una lista",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarFuentes rechaza más de 4 fuentes",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarFuentes rechaza un elemento que no es objeto",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarFuentes rechaza sin nombre",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarFuentes rechaza nombre larguísimo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarFuentes rechaza enlace con otro esquema",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarFuentes rechaza enlace que no es texto",
+          "estado": "passed"
+        },
+        {
+          "titulo": "validarFuentes rechaza enlace sin formato de URL",
+          "estado": "passed"
+        },
+        {
+          "titulo": "normalizarFuentes y resolverFuentes deja solo nombre y enlace, sin espacios sobrantes y sin repetir el mismo enlace (o el mismo nombre sin enlace)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "normalizarFuentes y resolverFuentes omitido conserva lo que había (o vacío); enviado reemplaza, incluso por una lista vacía",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarUrlsExtra acepta textos u objetos con url, omite los que no tienen enlace y quita repetidos",
+          "estado": "passed"
+        },
+        {
+          "titulo": "limpiarUrlsExtra rechaza lo que no es una lista, más de 4 y enlaces que no son http(s)",
+          "estado": "passed"
         }
       ]
     },
@@ -3372,7 +5600,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 336,
+      "duracion_ms": 162,
       "nombres": [
         {
           "titulo": "validateGastoServicio acepta un gasto valido minimo",
@@ -3418,7 +5646,7 @@
       "pruebas": 21,
       "pasadas": 21,
       "falladas": 0,
-      "duracion_ms": 187,
+      "duracion_ms": 207,
       "nombres": [
         {
           "titulo": "esquema SQL schema.sql y la migracion crean la columna con el mismo limite que la validacion",
@@ -3512,7 +5740,7 @@
       "pruebas": 23,
       "pasadas": 23,
       "falladas": 0,
-      "duracion_ms": 297,
+      "duracion_ms": 226,
       "nombres": [
         {
           "titulo": "validateNoticia acepta una noticia completa y valida",
@@ -3614,7 +5842,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 116,
+      "duracion_ms": 128,
       "nombres": [
         {
           "titulo": "validatePerfil acepta un cuerpo vacio (nombre es opcional)",
@@ -3644,7 +5872,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 149,
+      "duracion_ms": 145,
       "nombres": [
         {
           "titulo": "validateProducto acepta un producto completo y valido",
@@ -3690,7 +5918,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 207,
+      "duracion_ms": 137,
       "nombres": [
         {
           "titulo": "validateReporte acepta un reporte valido",
@@ -3720,7 +5948,7 @@
       "pruebas": 7,
       "pasadas": 7,
       "falladas": 0,
-      "duracion_ms": 226,
+      "duracion_ms": 171,
       "nombres": [
         {
           "titulo": "validateTraduccion acepta una traduccion valida de noticia y la sanea",

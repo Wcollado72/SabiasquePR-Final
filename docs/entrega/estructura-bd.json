@@ -260,6 +260,13 @@
    "def": "true"
   },
   {
+   "t": "contenidos",
+   "col": "fuentes",
+   "tipo": "jsonb",
+   "nulo": "NO",
+   "def": "'[]'::jsonb"
+  },
+  {
    "t": "foro_comentarios",
    "col": "id",
    "tipo": "uuid",
@@ -685,6 +692,13 @@
    "tipo": "ARRAY",
    "nulo": "NO",
    "def": "'{}'::text[]"
+  },
+  {
+   "t": "noticias",
+   "col": "fuentes",
+   "tipo": "jsonb",
+   "nulo": "NO",
+   "def": "'[]'::jsonb"
   },
   {
    "t": "ordenes",

@@ -42,10 +42,28 @@ La API es REST, responde JSON y está publicada en `https://sabiasquepr-backend-
 | DELETE | `/api/productos/:id` | Admin | productos.js |
 | POST | `/api/stripe/create-checkout-session` | Sesión | stripe.js |
 | POST | `/api/stripe/create-checkout-session-tienda` | Sesión | stripe.js |
+| POST | `/api/admin/corregir` | Admin | correccion.js |
+| POST | `/api/admin/corregir/varios` | Admin | correccion.js |
+| POST | `/api/admin/contenido-ia/resumir` | Admin | contenidoIa.js |
+| POST | `/api/admin/contenido-ia/metadatos-fuente` | Admin | contenidoIa.js |
+| POST | `/api/admin/brigada/clasificar` | Admin | brigada.js |
+| POST | `/api/admin/brigada/revisar` | Admin | brigada.js |
+| POST | `/api/admin/brigada/duplicados` | Admin | brigada.js |
+| POST | `/api/admin/brigada/pintar` | Admin | brigada.js |
+| GET | `/api/semillas` | Público | semillas.js |
+| GET | `/api/semillas/:id` | Público | semillas.js |
+| POST | `/api/semillas` | Público | semillas.js |
+| PUT | `/api/semillas/:id` | Público | semillas.js |
+| DELETE | `/api/semillas/:id` | Público | semillas.js |
+| POST | `/api/semillas/:id/agentes/:agente` | Público | semillas.js |
+| POST | `/api/semillas/:id/desarrollar` | Público | semillas.js |
+| DELETE | `/api/semillas/:id/desarrollos/:desarrolloId` | Público | semillas.js |
+| POST | `/api/semillas/:id/pasar-a-contenidos` | Público | semillas.js |
 | GET | `/api/admin/estado-seguridad` | Moderador/Admin | admin.js |
 | POST | `/api/admin/autocompletar-ia` | Admin | admin.js |
 | POST | `/api/admin/investigar` | Admin | admin.js |
 | POST | `/api/admin/redactar` | Admin | admin.js |
+| GET | `/api/admin/ordenes` | Admin | admin.js |
 | GET | `/api/admin/uso-ia` | Moderador/Admin | admin.js |
 | GET | `/api/admin/traducciones/:tipo/:id` | Admin | admin.js |
 | PUT | `/api/admin/traducciones/:tipo/:id/:idioma` | Admin | admin.js |
@@ -72,7 +90,7 @@ La API es REST, responde JSON y está publicada en `https://sabiasquepr-backend-
 | PATCH | `/api/reportes/:id` | Moderador/Admin | reportes.js |
 | POST | `/api/newsletter/subscribe` | Público | newsletter.js |
 
-Total: 54 endpoints (Firma de Stripe (sin sesión): 1, Público: 7, Sesión: 18, Opcional: 4, Admin: 20, Moderador/Admin: 4). Además existe `GET /api/health`.
+Total: 72 endpoints (Firma de Stripe (sin sesión): 1, Público: 16, Sesión: 18, Opcional: 4, Admin: 29, Moderador/Admin: 4). Además existe `GET /api/health`.
 
 ## 3. Configuración del entorno
 Variables de entorno del backend (solo nombres; los valores nunca van en el repositorio, ver `backend/.env.example`):
