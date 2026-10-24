@@ -81,16 +81,17 @@ def main():
     s.append(Paragraph('Dónde está cada punto de la rúbrica', h2))
     s.append(tabla([
         ['Criterio (peso)', 'Dónde verlo'],
-        ['Planificación y diseño (10 %)', '<i>planificacion-y-diseno-bd.pdf</i>, secciones 1–7: descripción, objetivo, justificación, alcance, tecnologías, arquitectura y navegación'],
-        ['Base de datos (20 %)', '<i>planificacion-y-diseno-bd.pdf</i>, secciones 8–12 (MER, esquema relacional, diccionario, script) y <font face="Courier">backend/sql/schema.sql</font>: 15 tablas con llaves primarias y foráneas'],
-        ['Funcionalidad y CRUD (30 %)', 'Pasos 2–4 de arriba; endpoints en <i>Documentacion-Tecnica-SabiasquePR.pdf</i>; CRUD de administrador en el video y en el manual'],
-        ['Tecnologías Full-Stack (10 %)', '<i>Documento-Final-SabiasquePR.pdf</i>, sección 4: HTML5/CSS3/JS, Node.js + Express, PostgreSQL, Netlify, Render'],
+        ['Planificación y diseño (10 %)', '<i>Planificación y diseño de la base de datos</i>, secciones 1–7: descripción, objetivo, justificación, alcance, tecnologías, arquitectura y navegación'],
+        ['Base de datos (20 %)', '<i>Planificación y diseño de la base de datos</i>, secciones 8–12 (MER, esquema relacional, diccionario, script) y <font face="Courier">backend/sql/schema.sql</font>: 15 tablas con llaves primarias y foráneas'],
+        ['Funcionalidad y CRUD (30 %)', 'Pasos 2–4 de arriba; endpoints en la <i>Documentación técnica</i>; CRUD de administrador en el video y en el manual'],
+        ['Tecnologías Full-Stack (10 %)', '<i>Documento final</i>, sección 4: HTML5/CSS3/JS, Node.js + Express, PostgreSQL, Netlify, Render'],
         ['Calidad del código (10 %)', f'<font face="Courier">/backend/src</font> organizado por rutas, validadores y middleware; {pruebas} pruebas automáticas ({cobertura} % de líneas); CI en GitHub Actions'],
         ['UX/UI (10 %)', 'El sitio en línea; capturas en el manual; pruebas en Chrome, Edge, Safari (motor WebKit) y un iPhone 14 en la <i>Evidencia de pruebas</i>'],
-        ['Documentación y presentación (5 %)', 'Esta carpeta <font face="Courier">docs/entrega</font>: documento final, manual, documentación técnica, evidencia y video'],
+        ['Documentación y presentación (5 %)', 'Carpeta <font face="Courier">docs/entrega</font>: documento final, manual de usuario, documentación técnica, evidencia de pruebas y video'],
         ['Despliegue (5 %)', '<font face="Courier">sabiasquepr.com</font> (Netlify) + API (Render) + base de datos (Supabase); verificación desde fuera en la <i>Evidencia de pruebas</i>'],
     ], [140, 370]))
 
+    s.append(Paragraph('Los documentos mencionados están en la carpeta <font face="Courier">docs/entrega</font>; los nombres de archivo no llevan tildes ni eñes a propósito, para que funcionen igual en cualquier sistema.', small))
     s.append(Paragraph('Correr las pruebas (opcional)', h2))
     s.append(Paragraph('<font face="Courier">git clone https://github.com/Wcollado72/SabiasquePR-Final.git &amp;&amp; cd SabiasquePR-Final/backend &amp;&amp; npm install &amp;&amp; npm test</font> '
                        f'y deben pasar las {pruebas} pruebas (no necesitan base de datos ni llaves). Instrucciones completas en el README.', small))
