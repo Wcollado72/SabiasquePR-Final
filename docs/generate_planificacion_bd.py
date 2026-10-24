@@ -19,7 +19,7 @@ from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle,
     HRFlowable, ListFlowable, ListItem, Preformatted, CondPageBreak
 )
-from reportlab.graphics.shapes import Drawing, Rect, String, Line, Polygon
+from reportlab.graphics.shapes import Drawing, Rect, String, Line, Polygon, Group
 from reportlab.pdfgen import canvas as pdfcanvas
 
 # ── PALETA ──────────────────────────────────────────────────
@@ -197,7 +197,7 @@ def diagrama_arquitectura():
     box(d, xl, H - 130, bw, 46, 'Frontend estático', 'HTML5 + CSS3 + JavaScript · Netlify', fill=VERDE_SOFT, stroke=DONE, title_color=DONE)
     box(d, xr, H - 130, bw, 46, 'Supabase Auth', 'login, registro, Google, 2FA, JWKS', fill=AMBAR_SOFT, stroke=AMBAR, title_color=AMBAR_TXT)
     box(d, xl, H - 220, bw, 46, 'Backend API propio', 'Node.js + Express · Render')
-    box(d, xr, H - 220, bw, 46, 'Base de datos', 'PostgreSQL (Supabase) · 14 tablas', fill=VERDE_SOFT, stroke=DONE, title_color=DONE)
+    box(d, xr, H - 220, bw, 46, 'Base de datos', 'PostgreSQL (Supabase) · 15 tablas', fill=VERDE_SOFT, stroke=DONE, title_color=DONE)
 
     d.add(String(W/2, 92, 'Servicios de terceros', fontName='Helvetica-Oblique', fontSize=7.5,
                  fillColor=INK_SOFT, textAnchor='middle'))
@@ -284,15 +284,16 @@ def diagrama_navegacion():
     return d
 
 
-# ── DIAGRAMA 3: MODELO ENTIDAD-RELACION (14 tablas) ─────────
+# ── DIAGRAMA 3: MODELO ENTIDAD-RELACION (15 tablas) ─────────
 
 def diagrama_mer():
-    W, H = CONTENT_W, 650
+    W, H = CONTENT_W, 760
     d = Drawing(W, H)
     d.hAlign = 'CENTER'
+    up = Group()  # la parte de arriba se sube 110 para hacer lugar a la entidad nueva (semillas)
 
-    def ent(x, y, w, h, name, cols, ext=False):
-        box(d, x, y, w, h, name, lines=cols, dashed=ext,
+    def ent(x, y, w, h, name, cols, ext=False, dd=None):
+        box(dd or up, x, y, w, h, name, lines=cols, dashed=ext,
             fill=WHITE if not ext else PAPER_RULED, stroke=ACCENT if not ext else LINE,
             title_color=ACCENT_DARK if not ext else INK_SOFT)
 
@@ -302,18 +303,19 @@ def diagrama_mer():
 
     ent(pcx - 70, 606, 140, 36, 'auth.users (Supabase)', ['id uuid PK'], ext=True)
     ent(px, py, pw, ph, 'perfiles', ['id uuid PK, FK', 'email, rol, nombre', 'stripe_customer_id'])
-    pk_fk_line(d, pcx, 606, pcx, py + ph, '1:1')
+    pk_fk_line(up, pcx, 606, pcx, py + ph, '1:1')
 
     # Columna izquierda
     izq = [
-        (520, 'ordenes', ['id uuid PK', 'usuario_id FK', 'items jsonb, total'], 58),
-        (414, 'comentarios', ['id uuid PK', 'autor_id FK', 'tipo, item_id (lógico)'], 42),
-        (308, 'reportes', ['id uuid PK', 'reportado_por FK', 'tipo, item_id (lógico)'], 26),
-        (202, 'traducciones', ['PK (tipo,item_id,idioma)', 'actualizado_por FK', 'campos jsonb'], 10),
+        (520, 'ordenes', ['id uuid PK', 'usuario_id FK', 'items jsonb, total'], 60),
+        (414, 'comentarios', ['id uuid PK', 'autor_id FK', 'tipo, item_id (lógico)'], 48),
+        (308, 'reportes', ['id uuid PK', 'reportado_por FK', 'tipo, item_id (lógico)'], 36),
+        (202, 'traducciones', ['PK (tipo,item_id,idioma)', 'actualizado_por FK', 'campos jsonb'], 24),
+        (96, 'semillas', ['id uuid PK', 'autor_id FK', 'texto, analisis jsonb'], 12),
     ]
     for y, name, cols, off in izq:
         ent(0, y, lw, bh, name, cols)
-        pk_fk_line(d, px, py + off, lw, y + bh / 2, '1:N')
+        pk_fk_line(up, px, py + off, lw, y + bh / 2, '1:N')
 
     # Columna derecha
     rx = W - lw
@@ -321,11 +323,11 @@ def diagrama_mer():
     ent(rx, 454, lw, bh, 'foro_posts', ['id uuid PK', 'autor_id FK', 'tema_contenido_id FK'])
     ent(rx, 348, lw, bh, 'foro_comentarios', ['id uuid PK', 'post_id FK', 'autor_id FK'])
     ent(rx, 242, lw, bh, 'ia_generaciones', ['id uuid PK', 'creado_por FK', 'agente, costo_usd'])
-    pk_fk_line(d, rx + lw/2, 560, rx + lw/2, 454 + bh, 'N:1 (opcional)')
-    pk_fk_line(d, rx + lw/2, 454, rx + lw/2, 348 + bh, '1:N (post)')
-    pk_fk_line(d, px + pw, py + 58, rx, 454 + bh / 2, '1:N')
-    pk_fk_line(d, px + pw, py + 34, rx, 348 + bh / 2, '1:N (autor)')
-    pk_fk_line(d, px + pw, py + 10, rx, 242 + bh / 2, '1:N')
+    pk_fk_line(up, rx + lw/2, 560, rx + lw/2, 454 + bh, 'N:1 (opcional)')
+    pk_fk_line(up, rx + lw/2, 454, rx + lw/2, 348 + bh, '1:N (post)')
+    pk_fk_line(up, px + pw, py + 58, rx, 454 + bh / 2, '1:N')
+    pk_fk_line(up, px + pw, py + 34, rx, 348 + bh / 2, '1:N (autor)')
+    pk_fk_line(up, px + pw, py + 10, rx, 242 + bh / 2, '1:N')
 
     # Independientes
     d.add(String(W/2, 172, 'Entidades independientes (sin llaves foráneas)',
@@ -340,7 +342,9 @@ def diagrama_mer():
     bw, gap = 92, 11
     x0 = (W - (5 * bw + 4 * gap)) / 2
     for i, (name, cols) in enumerate(ind):
-        ent(x0 + i * (bw + gap), 88, bw, 70, name, cols)
+        ent(x0 + i * (bw + gap), 88, bw, 70, name, cols, dd=d)
+    up.translate(0, 110)
+    d.add(up)
     # Escalado para que el diagrama completo quepa en una página junto a su texto.
     k = 0.76
     d.scale(k, k)
@@ -718,7 +722,7 @@ def build():
         'validaciones) y una descripción. Se genera a partir de la estructura real de la base de datos, por '
         'lo que coincide exactamente con el script <font face="Courier">backend/sql/schema.sql</font>.', styles['Body']))
     orden = ['perfiles', 'noticias', 'contenidos', 'productos', 'ordenes', 'foro_posts', 'foro_comentarios',
-             'comentarios', 'reportes', 'traducciones', 'ia_generaciones', 'gastos_servicios',
+             'comentarios', 'reportes', 'traducciones', 'ia_generaciones', 'semillas', 'gastos_servicios',
              'mensajes_contacto', 'suscriptores']
     assert sorted(orden) == sorted(por_tabla), 'La lista de orden no coincide con las tablas de la base'
     for i, tabla in enumerate(orden):

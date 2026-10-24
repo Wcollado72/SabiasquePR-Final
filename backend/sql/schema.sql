@@ -576,3 +576,27 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_reportes_automatico_pendiente
 ALTER TABLE ia_generaciones DROP CONSTRAINT IF EXISTS ia_generaciones_agente_check;
 ALTER TABLE ia_generaciones ADD CONSTRAINT ia_generaciones_agente_check
   CHECK (agente IN ('investigador', 'redactor', 'traductor', 'clasificadora', 'resumidora', 'correctora', 'guardiana', 'pintora'));
+
+-- ============================================================
+-- Taller de Aliado Imperfekto (2026-10-26): tabla `semillas` (ideas propias del autor) y nombres de sus agentes en la bitacora de IA.
+-- Mismo SQL que backend/sql/migraciones/2026-10-26-taller-semillas.sql.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS semillas (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  autor_id        uuid NOT NULL REFERENCES perfiles(id) ON DELETE CASCADE,
+  titulo          text NOT NULL DEFAULT '',
+  texto           text NOT NULL,
+  etiquetas       text[] NOT NULL DEFAULT '{}',
+  estado          text NOT NULL DEFAULT 'semilla' CHECK (estado IN ('semilla', 'explorada', 'en_desarrollo', 'lista', 'pasada')),
+  analisis        jsonb NOT NULL DEFAULT '{}',
+  desarrollos     jsonb NOT NULL DEFAULT '[]',
+  contenido_id    text,
+  creado_en       timestamptz NOT NULL DEFAULT now(),
+  actualizado_en  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_semillas_autor ON semillas (autor_id, actualizado_en DESC);
+ALTER TABLE semillas ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE ia_generaciones DROP CONSTRAINT IF EXISTS ia_generaciones_agente_check;
+ALTER TABLE ia_generaciones ADD CONSTRAINT ia_generaciones_agente_check
+  CHECK (agente IN ('investigador', 'redactor', 'traductor', 'clasificadora', 'resumidora', 'correctora', 'guardiana', 'pintora', 'grieta', 'cazadora', 'contrapunto', 'farolera'));

@@ -4,15 +4,15 @@
 // que traductor.js.
 const API_URL = 'https://api.anthropic.com/v1/messages';
 
-// Precios estimados por millon de tokens (Haiku); el costo real sale del `usage` que devuelve la API.
-const PRECIO_ENTRADA_POR_MTOK = 1;
-const PRECIO_SALIDA_POR_MTOK = 5;
+// Precios estimados por millon de tokens (Haiku por defecto); el costo real sale del `usage` que devuelve la API.
+// Los agentes que usan otro modelo (p. ej. Sonnet) pasan sus propios precios.
+const PRECIOS_HAIKU = { entrada: 1, salida: 5 };
 
-function calcularCosto(usage) {
-  return ((usage?.input_tokens || 0) * PRECIO_ENTRADA_POR_MTOK + (usage?.output_tokens || 0) * PRECIO_SALIDA_POR_MTOK) / 1_000_000;
+function calcularCosto(usage, precios = PRECIOS_HAIKU) {
+  return ((usage?.input_tokens || 0) * precios.entrada + (usage?.output_tokens || 0) * precios.salida) / 1_000_000;
 }
 
-async function llamarHerramienta({ modelo, maxTokens, herramienta, prompt }) {
+async function llamarHerramienta({ modelo, maxTokens, herramienta, prompt, precios = PRECIOS_HAIKU }) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY no esta configurada en el servidor.');
 
@@ -38,7 +38,7 @@ async function llamarHerramienta({ modelo, maxTokens, herramienta, prompt }) {
     usage: {
       tokensEntrada: data.usage?.input_tokens || 0,
       tokensSalida: data.usage?.output_tokens || 0,
-      costoEstimadoUsd: calcularCosto(data.usage),
+      costoEstimadoUsd: calcularCosto(data.usage, precios),
     },
   };
 }

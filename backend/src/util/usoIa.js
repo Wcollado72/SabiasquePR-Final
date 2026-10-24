@@ -1,7 +1,10 @@
 // Registro del gasto de IA por agente en `ia_generaciones`. Cada agente de la Brigada Coquí que usa IA deja su propia
 // fila con su propio nombre, así el panel muestra cuánto gasta cada una (antes todas se sumaban a «redactor»).
 // Nunca tumba la respuesta: si el registro falla, solo se pierde esa línea del tablero.
-const AGENTES_CON_REGISTRO = ['investigador', 'redactor', 'traductor', 'clasificadora', 'resumidora', 'correctora', 'guardiana', 'pintora'];
+const AGENTES_CON_REGISTRO = [
+  'investigador', 'redactor', 'traductor', 'clasificadora', 'resumidora', 'correctora', 'guardiana', 'pintora',
+  'grieta', 'cazadora', 'contrapunto', 'farolera',
+];
 const FUENTES_TIPO = ['url', 'texto', 'notas'];
 
 async function registrarUsoAgente(pool, { agente, fuenteTipo, usage, creadoPor }) {

@@ -26,7 +26,7 @@ git clone https://github.com/Wcollado72/SabiasquePR.git
 cd SabiasquePR/backend
 npm install
 cp .env.example .env        # completa los valores (ver docs/entrega/documentacion-tecnica.md)
-npm run db:schema           # crea las 14 tablas
+npm run db:schema           # crea las 15 tablas
 cd ../frontend
 node build.js               # genera las páginas del sitio
 ```
@@ -71,7 +71,7 @@ Supabase Auth emite un JWT (ES256). El backend lo verifica en cada ruta protegid
 ## Despliegue
 - **Frontend:** Netlify (construye y publica solo `frontend/`).
 - **Backend:** Render (`backend/`).
-- **Base de datos:** Supabase (PostgreSQL con seguridad por fila activa en las 14 tablas).
+- **Base de datos:** Supabase (PostgreSQL con seguridad por fila activa en las 15 tablas).
 - Las variables de entorno están descritas en `backend/.env.example`; los valores reales nunca se guardan en el repositorio.
 
 ## Documentación

@@ -967,6 +967,83 @@
    "def": "false"
   },
   {
+   "t": "semillas",
+   "col": "id",
+   "tipo": "uuid",
+   "nulo": "NO",
+   "def": "gen_random_uuid()"
+  },
+  {
+   "t": "semillas",
+   "col": "autor_id",
+   "tipo": "uuid",
+   "nulo": "NO",
+   "def": null
+  },
+  {
+   "t": "semillas",
+   "col": "titulo",
+   "tipo": "text",
+   "nulo": "NO",
+   "def": "''::text"
+  },
+  {
+   "t": "semillas",
+   "col": "texto",
+   "tipo": "text",
+   "nulo": "NO",
+   "def": null
+  },
+  {
+   "t": "semillas",
+   "col": "etiquetas",
+   "tipo": "ARRAY",
+   "nulo": "NO",
+   "def": "'{}'::text[]"
+  },
+  {
+   "t": "semillas",
+   "col": "estado",
+   "tipo": "text",
+   "nulo": "NO",
+   "def": "'semilla'::text"
+  },
+  {
+   "t": "semillas",
+   "col": "analisis",
+   "tipo": "jsonb",
+   "nulo": "NO",
+   "def": "'{}'::jsonb"
+  },
+  {
+   "t": "semillas",
+   "col": "desarrollos",
+   "tipo": "jsonb",
+   "nulo": "NO",
+   "def": "'[]'::jsonb"
+  },
+  {
+   "t": "semillas",
+   "col": "contenido_id",
+   "tipo": "text",
+   "nulo": "YES",
+   "def": null
+  },
+  {
+   "t": "semillas",
+   "col": "creado_en",
+   "tipo": "timestamptz",
+   "nulo": "NO",
+   "def": "now()"
+  },
+  {
+   "t": "semillas",
+   "col": "actualizado_en",
+   "tipo": "timestamptz",
+   "nulo": "NO",
+   "def": "now()"
+  },
+  {
    "t": "suscriptores",
    "col": "id",
    "tipo": "uuid",
@@ -1209,7 +1286,7 @@
    "t": "ia_generaciones",
    "tipo": "c",
    "nombre": "ia_generaciones_agente_check",
-   "def": "CHECK ((agente = ANY (ARRAY['investigador'::text, 'redactor'::text, 'traductor'::text, 'clasificadora'::text, 'resumidora'::text, 'correctora'::text, 'guardiana'::text, 'pintora'::text])))"
+   "def": "CHECK ((agente = ANY (ARRAY['investigador'::text, 'redactor'::text, 'traductor'::text, 'clasificadora'::text, 'resumidora'::text, 'correctora'::text, 'guardiana'::text, 'pintora'::text, 'grieta'::text, 'cazadora'::text, 'contrapunto'::text, 'farolera'::text])))"
   },
   {
    "t": "ia_generaciones",
@@ -1324,6 +1401,24 @@
    "tipo": "c",
    "nombre": "reportes_tipo_check",
    "def": "CHECK ((tipo = ANY (ARRAY['debate_post'::text, 'debate_comentario'::text, 'articulo_comentario'::text])))"
+  },
+  {
+   "t": "semillas",
+   "tipo": "p",
+   "nombre": "semillas_pkey",
+   "def": "PRIMARY KEY (id)"
+  },
+  {
+   "t": "semillas",
+   "tipo": "f",
+   "nombre": "semillas_autor_id_fkey",
+   "def": "FOREIGN KEY (autor_id) REFERENCES perfiles(id) ON DELETE CASCADE"
+  },
+  {
+   "t": "semillas",
+   "tipo": "c",
+   "nombre": "semillas_estado_check",
+   "def": "CHECK ((estado = ANY (ARRAY['semilla'::text, 'explorada'::text, 'en_desarrollo'::text, 'lista'::text, 'pasada'::text])))"
   },
   {
    "t": "suscriptores",
@@ -1489,6 +1584,16 @@
    "def": "CREATE UNIQUE INDEX uq_reportes_pendiente_por_persona ON public.reportes USING btree (tipo, item_id, reportado_por) WHERE ((estado = 'pendiente'::text) AND (reportado_por IS NOT NULL))"
   },
   {
+   "t": "semillas",
+   "nombre": "idx_semillas_autor",
+   "def": "CREATE INDEX idx_semillas_autor ON public.semillas USING btree (autor_id, actualizado_en DESC)"
+  },
+  {
+   "t": "semillas",
+   "nombre": "semillas_pkey",
+   "def": "CREATE UNIQUE INDEX semillas_pkey ON public.semillas USING btree (id)"
+  },
+  {
    "t": "suscriptores",
    "nombre": "suscriptores_email_key",
    "def": "CREATE UNIQUE INDEX suscriptores_email_key ON public.suscriptores USING btree (email)"
@@ -1551,6 +1656,10 @@
   },
   {
    "t": "reportes",
+   "rls": true
+  },
+  {
+   "t": "semillas",
    "rls": true
   },
   {

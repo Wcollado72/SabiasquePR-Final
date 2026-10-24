@@ -162,10 +162,12 @@ describe('el elenco de La Brigada Coquí: una dueña por función', () => {
 
   test('las agentes que ya trabajan tienen su pestaña; las que vienen después, no', () => {
     const niveles = ['ia', 'clasificacion', 'contenido', 'multimedia', 'citacion'];
-    ELENCO_BRIGADA.filter((a) => a.estado === 'activa').forEach((a) => expect(niveles).toContain(a.nivel));
+    // Las agentes del Contenido tienen su nivel; las del Taller viven en su propia pestaña.
+    ELENCO_BRIGADA.filter((a) => a.estado === 'activa' && a.lugar !== 'taller').forEach((a) => expect(niveles).toContain(a.nivel));
+    ELENCO_BRIGADA.filter((a) => a.lugar === 'taller').forEach((a) => expect(a.nivel).toBeUndefined());
     ELENCO_BRIGADA.filter((a) => a.estado === 'proxima').forEach((a) => expect(a.nivel).toBeUndefined());
     expect(ELENCO_BRIGADA.filter((a) => a.estado === 'activa').map((a) => a.id)).toEqual(
-      ['investigadora', 'clasificadora', 'redactora', 'resumidora', 'bibliotecaria', 'correctora', 'traductora', 'guardiana', 'detective', 'pintora']
+      ['investigadora', 'clasificadora', 'redactora', 'resumidora', 'bibliotecaria', 'correctora', 'traductora', 'guardiana', 'detective', 'pintora', 'grieta']
     );
   });
 
@@ -180,9 +182,9 @@ describe('el elenco de La Brigada Coquí: una dueña por función', () => {
   test('se pinta una tarjeta por agente, con las próximas marcadas y el uso solo donde se mide', () => {
     const h = htmlElenco(ELENCO_BRIGADA, esc);
     expect((h.match(/data-agente=/g) || []).length).toBe(ELENCO_BRIGADA.length);
-    expect((h.match(/próximamente/g) || []).length).toBe(0);
+    expect((h.match(/próximamente/g) || []).length).toBe(3); // las otras tres agentes del Taller
     const conIa = ELENCO_BRIGADA.filter((a) => a.uso);
-    expect(conIa.map((a) => a.id)).toEqual(['investigadora', 'clasificadora', 'redactora', 'resumidora', 'correctora', 'traductora', 'guardiana', 'pintora']);
+    expect(conIa.map((a) => a.id)).toEqual(['investigadora', 'clasificadora', 'redactora', 'resumidora', 'correctora', 'traductora', 'guardiana', 'pintora', 'grieta', 'cazadora', 'contrapunto', 'farolera']);
     conIa.forEach((a) => expect(h).toContain(`id="ag-uso-${a.id}" data-uso="${a.uso}"`));
     expect((h.match(/Sin IA: no gasta\./g) || []).length).toBe(2); // Bibliotecaria y Detective
   });

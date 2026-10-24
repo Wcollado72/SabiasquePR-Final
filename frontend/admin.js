@@ -106,6 +106,7 @@
       bindProductos();
       bindTraducciones();
       if (window.sqprCorreccionUI) window.sqprCorreccionUI.iniciar({ apiFetch });
+      if (window.sqprTaller) window.sqprTaller.iniciar({ apiFetch, descripcion: (id) => (ELENCO_BRIGADA.find((a) => a.id === id) || {}).descripcion || '' });
       bindUrlNormalizer();
       bindGastos();
       loadNoticias();
@@ -117,7 +118,7 @@
       // Moderador: sin acceso a gestion de contenido editorial NI a Gastos
       // (informacion financiera) -- el backend ya lo rechaza igual, esto
       // solo evita mostrar tabs que no puede usar.
-      document.querySelectorAll('.admin-tabs [data-tab="noticias"], .admin-tabs [data-tab="contenidos"], .admin-tabs [data-tab="productos"], .admin-tabs [data-tab="agentes"], .admin-tabs [data-tab="gastos"]')
+      document.querySelectorAll('.admin-tabs [data-tab="noticias"], .admin-tabs [data-tab="contenidos"], .admin-tabs [data-tab="productos"], .admin-tabs [data-tab="agentes"], .admin-tabs [data-tab="taller"], .admin-tabs [data-tab="gastos"]')
         .forEach((btn) => { btn.style.display = 'none'; });
       activarTab('reportes');
     }
@@ -354,6 +355,7 @@
     document.getElementById('admin-panel-reportes').style.display = tab === 'reportes' ? '' : 'none';
     document.getElementById('admin-panel-agentes').style.display = tab === 'agentes' ? '' : 'none';
     document.getElementById('admin-panel-seguridad').style.display = tab === 'seguridad' ? '' : 'none';
+    document.getElementById('admin-panel-taller').style.display = tab === 'taller' ? '' : 'none';
     document.getElementById('admin-panel-gastos').style.display = tab === 'gastos' ? '' : 'none';
   }
 
@@ -718,6 +720,7 @@
     const AGENTE_LABEL = {
       investigador: 'Investigadora', redactor: 'Redactora (incluye usos anteriores de otras agentes)', traductor: 'Traductora', clasificadora: 'Clasificadora',
       resumidora: 'Resumidora', correctora: 'Correctora', guardiana: 'Guardiana', pintora: 'Pintora',
+      grieta: 'La Grieta', cazadora: 'La Cazadora de Ecos', contrapunto: 'El Contrapunto', farolera: 'La Farolera',
     };
     try {
       const data = await apiFetch('/api/admin/uso-ia');
@@ -2839,6 +2842,30 @@
       trabajo: ['Sugiere el texto alternativo de las imágenes', 'Escribe el prompt de imagen en el estilo fijo de Aliado Imperfekto'],
       noHace: 'No genera la imagen: te da el prompt.',
     },
+    {
+      id: 'grieta', emoji: '🏺', nombre: 'Analista de ideas', apodo: 'La Grieta', estado: 'activa', lugar: 'taller', uso: 'grieta',
+      descripcion: 'Analiza tu idea: su tesis, sus suposiciones, sus grietas, su oro y las preguntas que quedan abiertas.',
+      trabajo: ['Resume la tesis de tu idea con tus palabras', 'Señala las suposiciones, las grietas (tensiones) y el oro (lo valioso) de la idea', 'Cita fragmentos literales de tu texto, comprobados por código', 'Propone preguntas y caminos para desarrollarla'],
+      noHace: 'No agrega ideas ni datos que no estén en tu texto.',
+    },
+    {
+      id: 'cazadora', emoji: '📡', nombre: 'Cazadora de Ecos', apodo: 'La Cazadora de Ecos', estado: 'proxima', lugar: 'taller', uso: 'cazadora',
+      descripcion: 'Busca pensamientos parecidos de otros autores, con fuentes reales y citas verificadas.',
+      trabajo: ['Busca ecos de tu idea en autores, estudios y obras', 'Muestra solo fuentes que leyó de verdad y comprueba las citas por código'],
+      noHace: 'No inventa autores, obras ni citas.',
+    },
+    {
+      id: 'contrapunto', emoji: '⚖️', nombre: 'Contrapunto', apodo: 'El Contrapunto', estado: 'proxima', lugar: 'taller', uso: 'contrapunto',
+      descripcion: 'Te da las mejores objeciones y la versión más fuerte de la postura contraria.',
+      trabajo: ['Formula las objeciones más serias a tu idea', 'Presenta la mejor versión de la postura contraria'],
+      noHace: 'No decide por ti ni te quita la idea.',
+    },
+    {
+      id: 'farolera', emoji: '🏮', nombre: 'Farolera', apodo: 'La Farolera', estado: 'proxima', lugar: 'taller', uso: 'farolera',
+      descripcion: 'Desarrolla tu idea en ensayo, reflexión, columna o lectura corta, marcando lo que ella agregó.',
+      trabajo: ['Convierte la idea en el formato que elijas, cuando tú pulses «Desarrollar»', 'Conserva tus frases y marca en otro color lo que agregó'],
+      noHace: 'No publica ni escribe nada sin que lo pidas.',
+    },
   ];
   function htmlElenco(elenco, esc) {
     return elenco.map((a) => `
@@ -2849,6 +2876,7 @@
         <p class="ag-tile-desc"><em>${esc(a.noHace)}</em></p>
         ${a.uso ? `<p class="ag-tile-desc ag-agente-uso" id="ag-uso-${a.id}" data-uso="${a.uso}">—</p>` : '<p class="ag-tile-desc ag-agente-uso">Sin IA: no gasta.</p>'}
         ${a.nivel ? `<button type="button" class="ag-btn-piloto" data-nivel="${a.nivel}">Ir a su pestaña →</button>` : ''}
+        ${a.lugar === 'taller' && a.estado === 'activa' ? '<button type="button" class="ag-btn-piloto" data-taller>Ir al Taller →</button>' : ''}
       </div>`).join('');
   }
   // FIN elenco-brigada
@@ -2857,6 +2885,7 @@
     document.getElementById('brigada-elenco').innerHTML = htmlElenco(ELENCO_BRIGADA, escapeHtml);
     document.getElementById('ag-ir-reportes').addEventListener('click', () => activarTab('reportes'));
     // «Ir a su pestaña»: abre una pieza nueva de Contenidos en el nivel donde esa agente deja su trabajo.
+    document.querySelectorAll('#brigada-elenco [data-taller]').forEach((btn) => btn.addEventListener('click', () => activarTab('taller')));
     document.querySelectorAll('#brigada-elenco [data-nivel]').forEach((btn) => btn.addEventListener('click', () => {
       activarTab('contenidos');
       document.getElementById('admin-contenidos-new').click();
