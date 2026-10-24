@@ -165,7 +165,7 @@ describe('el elenco de La Brigada Coquí: una dueña por función', () => {
     ELENCO_BRIGADA.filter((a) => a.estado === 'activa').forEach((a) => expect(niveles).toContain(a.nivel));
     ELENCO_BRIGADA.filter((a) => a.estado === 'proxima').forEach((a) => expect(a.nivel).toBeUndefined());
     expect(ELENCO_BRIGADA.filter((a) => a.estado === 'activa').map((a) => a.id)).toEqual(
-      ['investigadora', 'clasificadora', 'redactora', 'resumidora', 'bibliotecaria', 'correctora', 'traductora', 'guardiana']
+      ['investigadora', 'clasificadora', 'redactora', 'resumidora', 'bibliotecaria', 'correctora', 'traductora', 'guardiana', 'detective', 'pintora']
     );
   });
 
@@ -180,7 +180,7 @@ describe('el elenco de La Brigada Coquí: una dueña por función', () => {
   test('se pinta una tarjeta por agente, con las próximas marcadas y el uso solo donde se mide', () => {
     const h = htmlElenco(ELENCO_BRIGADA, esc);
     expect((h.match(/data-agente=/g) || []).length).toBe(ELENCO_BRIGADA.length);
-    expect((h.match(/próximamente/g) || []).length).toBe(2);
+    expect((h.match(/próximamente/g) || []).length).toBe(0);
     expect(h).toContain('id="ag-ia-investigador-uso"');
     expect(h).toContain('id="ag-ia-redactor-uso"');
   });
@@ -215,24 +215,24 @@ describe('recomendación y «Equipo completo»', () => {
 
   test('un artículo: se recomienda el equipo completo, en orden de trabajo', () => {
     const r = f.recomendarBrigada('https://www.bbc.com/mundo/noticias-123', '');
-    expect(r.agentes).toEqual(['investigadora', 'clasificadora', 'redactora', 'bibliotecaria', 'guardiana']);
+    expect(r.agentes).toEqual(['detective', 'investigadora', 'clasificadora', 'redactora', 'bibliotecaria', 'pintora', 'guardiana']);
     expect(r.mensaje).toContain('equipo completo');
   });
 
   test('un video o un audio sin texto pegado: solo lo que se puede hacer con la URL, y se explica por qué', () => {
     const r = f.recomendarBrigada('https://www.youtube.com/watch?v=abc', '');
-    expect(r.agentes).toEqual(['clasificadora', 'bibliotecaria']);
+    expect(r.agentes).toEqual(['detective', 'clasificadora', 'bibliotecaria']);
     expect(r.formato).toBe('video');
     expect(r.mensaje).toContain('Pega su transcripción');
     expect(f.recomendarBrigada('https://open.spotify.com/episode/1', '').formato).toBe('audio');
   });
 
   test('un video con su transcripción pegada: equipo completo', () => {
-    expect(f.recomendarBrigada('https://youtu.be/abc', 'Texto de la transcripción').agentes).toHaveLength(5);
+    expect(f.recomendarBrigada('https://youtu.be/abc', 'Texto de la transcripción').agentes).toHaveLength(7);
   });
 
-  test('solo texto pegado, sin URL: investigadora, redactora y guardiana (las otras necesitan una URL)', () => {
-    expect(f.recomendarBrigada('', 'Un texto').agentes).toEqual(['investigadora', 'redactora', 'guardiana']);
+  test('solo texto pegado, sin URL: las que no necesitan una URL (Doña Fichas y La Bibliotecaria sí la necesitan)', () => {
+    expect(f.recomendarBrigada('', 'Un texto').agentes).toEqual(['detective', 'investigadora', 'redactora', 'pintora', 'guardiana']);
   });
 
   test('sin nada no hay recomendación, y una URL inválida se avisa', () => {
@@ -241,7 +241,7 @@ describe('recomendación y «Equipo completo»', () => {
   });
 
   test('los pasos siempre salen en el orden de trabajo y ninguna agente se repite', () => {
-    expect(f.pasosEquipo(['guardiana', 'bibliotecaria', 'investigadora'])).toEqual(['investigadora', 'bibliotecaria', 'guardiana']);
+    expect(f.pasosEquipo(['guardiana', 'pintora', 'bibliotecaria', 'investigadora', 'detective'])).toEqual(['detective', 'investigadora', 'bibliotecaria', 'pintora', 'guardiana']);
     expect(f.formatoDeHost('m.youtube.com')).toBe('video');
     expect(f.formatoDeHost('notyoutube.com')).toBeNull();
   });
@@ -310,5 +310,87 @@ describe('La Bibliotecaria: formato de la cita', () => {
     expect(html).toContain('id="ac-cita-copiar"');
     expect(js).toContain('navigator.clipboard.writeText');
     expect(fs.readFileSync(path.join(frontend, 'citas.js'), 'utf8')).toContain('vancouver');
+  });
+});
+
+describe('El Detective en el panel', () => {
+  const { htmlDuplicados, hayCoincidenciaFuerte } = new Function(`${entre(js, 'brigada-detective-pintora')}
+    return { htmlDuplicados, hayCoincidenciaFuerte };`)();
+  const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+  test('lista las parecidas con nivel, tipo, estado y razones, y deja abrir la existente (sin HTML peligroso)', () => {
+    const h = htmlDuplicados({
+      revisadas: 12,
+      candidatas: [
+        { tipo: 'noticia', id: 'luna', titulo: 'La NASA <b>halla</b> un cráter', publicado: true, fecha: '2026-09-16', similitud: 0.92, nivel: 'muy_probable', razones: ['Usa la misma fuente (la misma página).'] },
+        { tipo: 'contenido', id: 'ensayo', titulo: 'Otro', publicado: false, fecha: null, similitud: 0.45, nivel: 'posible', razones: ['El título es muy parecido (45%).'] },
+      ],
+    }, esc);
+    expect(h).toContain('Muy probable (92%)');
+    expect(h).toContain('Noticia · Publicada');
+    expect(h).toContain('Contenido · Borrador');
+    expect(h).toContain('La NASA &lt;b>halla&lt;/b> un cráter');
+    expect(h).toContain('data-abrir-tipo="noticia" data-abrir-id="luna"');
+    expect(h).toContain('brigada-bandera-alta');
+    expect(h).toContain('solo avisa');
+  });
+
+  test('sin parecidas lo dice, con cuántas piezas revisó', () => {
+    expect(htmlDuplicados({ revisadas: 40, candidatas: [] }, esc)).toContain('entre las 40 piezas');
+  });
+
+  test('solo una coincidencia «muy probable» detiene el equipo para preguntar', () => {
+    expect(hayCoincidenciaFuerte([{ nivel: 'posible' }, { nivel: 'probable' }])).toBe(false);
+    expect(hayCoincidenciaFuerte([{ nivel: 'probable' }, { nivel: 'muy_probable' }])).toBe(true);
+    expect(hayCoincidenciaFuerte([])).toBe(false);
+  });
+
+  test('hay un botón en cada mesa, llama al servidor, excluye la pieza que se edita y abre la existente con confirmación', () => {
+    ['contenido', 'noticia'].forEach((c) => {
+      expect(html).toMatch(new RegExp(`<button type="button" class="brigada-agente" id="brigada-duplicados-btn-${c}"`));
+      expect(html).toContain(`id="brigada-duplicados-${c}"`);
+    });
+    expect(js).toContain('/api/admin/brigada/duplicados');
+    expect(js).toContain('cuerpo.excluir = { tipo: cfg.detective.tipo, id: idActual }');
+    expect(js).toMatch(/function abrirExistente\(tipo, id\) \{\s+if \(!confirm\(/);
+  });
+
+  test('en el equipo va primero y, si hay una coincidencia muy probable, pregunta antes de gastar IA', () => {
+    expect(js).toContain("detective: () => detectiveAntesDelEquipo()");
+    const antes = js.slice(js.indexOf('async function detectiveAntesDelEquipo'), js.indexOf('// Cierra el formulario actual'));
+    expect(antes).toContain('hayCoincidenciaFuerte(data.candidatas)');
+    expect(antes).toContain('return confirm(');
+  });
+});
+
+describe('La Pintora en el panel', () => {
+  const { htmlPintora } = new Function(`${entre(js, 'brigada-detective-pintora')}
+    return { htmlPintora };`)();
+  const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+  test('muestra el texto alternativo, la escena y el prompt completo con sus botones, sin escribir nada solo', () => {
+    const h = htmlPintora({ textoAlternativo: 'Un farol <i>encendido</i>.', escena: 'A lantern.', promptImagen: 'A lantern. Estilo.' }, esc);
+    expect(h).toContain('Un farol &lt;i>encendido&lt;/i>.');
+    expect(h).toContain('data-accion="usar-alt"');
+    expect(h).toContain('data-accion="copiar-prompt"');
+    expect(h).toContain('<textarea class="brigada-pintora-prompt" rows="5" readonly>A lantern. Estilo.</textarea>');
+    expect(h).toContain('no genera la imagen');
+    expect(h).toContain('Nada se escribe en el formulario hasta que pulses');
+  });
+
+  test('hay botón en cada mesa y una mini-tarjeta junto al texto alternativo; «Usar» pide confirmación si ya hay uno escrito', () => {
+    ['contenido', 'noticia'].forEach((c) => {
+      expect(html).toMatch(new RegExp(`<button type="button" class="brigada-agente" id="brigada-pintar-${c}"`));
+      expect(html).toContain(`id="brigada-pintora-${c}"`);
+    });
+    expect(html).toContain('id="ac-pintora-alt"');
+    expect(html).toContain('id="an-pintora-alt"');
+    expect(js).toContain('/api/admin/brigada/pintar');
+    expect(js).toContain("if (alt.value.trim() && !confirm('Ya hay un texto alternativo escrito.");
+  });
+
+  test('va en el equipo justo antes de la Guardiana, y usa el idioma de la pieza', () => {
+    expect(js).toContain("pintora: () => pintarConPintora('contenido')");
+    expect(js).toContain('idioma: document.getElementById(cfg.idiomaPieza).value');
   });
 });

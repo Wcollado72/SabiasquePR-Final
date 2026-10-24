@@ -2591,3 +2591,10 @@ html[data-theme="dark"] .social-links img{ filter:invert(1) hue-rotate(180deg); 
 .brigada-revision .brigada-bandera-baja{ background:#eceff1; color:#1c2428; border-left-color:#888; }
 .brigada-revision-pasajes li{ padding-left:10px; border-left:3px solid #c58a1e; }
 .brigada-revision-ok{ color:#4fd671; }
+
+/* El Detective y La Pintora */
+.brigada-revision button{ align-self:flex-start; margin-top:4px; }
+.brigada-pintora-texto{ padding:6px 10px; border-left:3px solid #4fd671; background:rgba(79,214,113,.1); }
+.brigada-revision > p, .brigada-revision > p small, .brigada-revision .brigada-pintora-texto{ color:#e6f4ea; }
+.brigada-revision > p.brigada-revision-ok{ color:#4fd671; }
+.brigada-pintora-prompt{ width:100%; font-size:.82rem; }

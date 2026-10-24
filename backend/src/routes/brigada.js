@@ -1,9 +1,12 @@
 const express = require('express');
 const { pool } = require('../db');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
+const { enviarError500 } = require('../util/errores');
 const { clasificarUrl } = require('../services/clasificadora');
 const { revisarPieza } = require('../services/guardiana');
-const { validateClasificar, validateRevisar } = require('../validators/brigada');
+const { pintarPieza } = require('../services/pintora');
+const { buscarDuplicados } = require('../services/detective');
+const { validateClasificar, validateRevisar, validateDuplicados, validatePintar } = require('../validators/brigada');
 
 const router = express.Router();
 
@@ -49,6 +52,46 @@ router.post('/revisar', requireAuth, requireAdmin, async (req, res) => {
     });
     await registrarUso(usage, req.user.id);
     res.json({ ok: true, copia, revision });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: err.message });
+  }
+});
+
+// POST /api/admin/brigada/duplicados -- solo admin. El Detective busca, entre las noticias y los contenidos que ya
+// existen (publicados y borradores), historias que se parezcan a la que se esta escribiendo. Sin IA y sin costo.
+router.post('/duplicados', requireAuth, requireAdmin, async (req, res) => {
+  const errors = validateDuplicados(req.body);
+  if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
+  try {
+    const { titulo, resumen, fuenteUrl, excluir } = req.body;
+    const [noticias, contenidos] = await Promise.all([
+      pool.query(`SELECT id, titulo, fuente_url, publicado, fecha,
+                         concat_ws(' ', parrafos->>0, parrafos->>1) AS resumen
+                  FROM noticias ORDER BY creado_en DESC LIMIT 1000`),
+      pool.query(`SELECT id, titulo, fuente_url, publicado, fecha_publicacion AS fecha, subtitulo_resumen AS resumen
+                  FROM contenidos ORDER BY creado_en DESC LIMIT 1000`),
+    ]);
+    const existentes = [
+      ...noticias.rows.map((r) => ({ tipo: 'noticia', id: r.id, titulo: r.titulo, resumen: r.resumen, fuenteUrl: r.fuente_url, publicado: r.publicado, fecha: r.fecha })),
+      ...contenidos.rows.map((r) => ({ tipo: 'contenido', id: r.id, titulo: r.titulo, resumen: r.resumen, fuenteUrl: r.fuente_url, publicado: r.publicado, fecha: r.fecha })),
+    ];
+    const candidatas = buscarDuplicados({ titulo, resumen, fuenteUrl }, existentes, excluir || null);
+    res.json({ ok: true, candidatas, revisadas: existentes.length });
+  } catch (err) {
+    enviarError500(res, err);
+  }
+});
+
+// POST /api/admin/brigada/pintar -- solo admin. La Pintora sugiere el texto alternativo y un prompt de imagen (en el
+// estilo fijo de Aliado Imperfekto). No genera la imagen ni guarda nada.
+router.post('/pintar', requireAuth, requireAdmin, async (req, res) => {
+  const errors = validatePintar(req.body);
+  if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
+  try {
+    const { titulo, resumen, cuerpo, idioma, seccion } = req.body;
+    const { textoAlternativo, escena, promptImagen, usage } = await pintarPieza({ titulo, resumen, cuerpo, idioma, seccion });
+    await registrarUso(usage, req.user.id);
+    res.json({ ok: true, textoAlternativo, escena, promptImagen });
   } catch (err) {
     res.status(400).json({ ok: false, error: err.message });
   }

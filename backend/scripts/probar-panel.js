@@ -37,6 +37,15 @@ w.fetch = async (url) => {
   const json = (o) => ({ ok: true, status: 200, json: async () => o });
   if (u.endsWith('/api/me')) return json({ ok: true, user: { id: 'u1', rol: 'admin' } });
   if (u.endsWith('/contenido-ia/resumir')) return json({ ok: true, resumen: 'Resumen escrito por la IA.' });
+  if (u.endsWith('/brigada/duplicados')) {
+    return json({
+      ok: true, revisadas: 3,
+      candidatas: [{ tipo: 'noticia', id: 'n1', titulo: 'Noticia de prueba', publicado: false, fecha: '2026-10-01', similitud: 0.9, nivel: 'muy_probable', razones: ['Usa la misma fuente (la misma página).'] }],
+    });
+  }
+  if (u.endsWith('/brigada/pintar')) {
+    return json({ ok: true, textoAlternativo: 'Un farol encendido sobre la Luna.', escena: 'A lantern on the moon.', promptImagen: 'A lantern on the moon. Estilo fijo.' });
+  }
   if (u.endsWith('/brigada/revisar')) {
     return json({
       ok: true,
@@ -111,12 +120,21 @@ setTimeout(() => {
   d.getElementById('brigada-url-contenido').dispatchEvent(new w.Event('blur'));
   d.getElementById('ac-cuerpo').value = 'Un cuerpo con texto para revisar.';
   d.getElementById('brigada-revisar-contenido').click();
+  d.getElementById('brigada-duplicados-btn-contenido').click();
+  d.getElementById('brigada-pintar-contenido').click();
   setTimeout(() => {
     comprobaciones.push(
       ['la mesa recomienda según la URL (video: solo clasificar y citar)', d.getElementById('brigada-recomendacion-contenido').textContent.includes('Pega su transcripción')],
       ['La Guardiana muestra el parecido con la fuente y las banderas',
         !d.getElementById('brigada-revision-contenido').hidden && d.getElementById('brigada-revision-contenido').textContent.includes('31% de la pieza')
         && d.getElementById('brigada-revision-contenido').textContent.includes('Persona real')],
+    );
+    comprobaciones.push(
+      ['El Detective lista la pieza parecida y deja abrirla', d.getElementById('brigada-duplicados-contenido').textContent.includes('Muy probable (90%)') && !!d.querySelector('#brigada-duplicados-contenido [data-abrir-id="n1"]')],
+      ['La Pintora muestra su propuesta y «Usar» la pone en el texto alternativo', (() => {
+        d.querySelector('#brigada-pintora-contenido [data-accion="usar-alt"]').click();
+        return d.getElementById('brigada-pintora-contenido').textContent.includes('A lantern on the moon') && d.getElementById('ac-portada-alt').value === 'Un farol encendido sobre la Luna.';
+      })()],
     );
   }, 600);
   setTimeout(() => {

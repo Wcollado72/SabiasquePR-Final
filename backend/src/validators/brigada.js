@@ -22,4 +22,26 @@ function validateRevisar(body) {
   return [];
 }
 
-module.exports = { validateClasificar, validateRevisar, DESTINOS_VALIDOS, MAX_TEXTO_REVISAR };
+function validateDuplicados(body) {
+  const { titulo, resumen, fuenteUrl, excluir } = body || {};
+  if ([titulo, resumen, fuenteUrl].some((t) => t !== undefined && t !== null && typeof t !== 'string')) return ['Los datos a buscar deben ser texto.'];
+  if (![titulo, fuenteUrl].some((t) => typeof t === 'string' && t.trim())) return ['Escribe el título o la URL de la fuente para buscar historias repetidas.'];
+  if ([titulo, resumen, fuenteUrl].some((t) => t && t.length > 5000)) return ['Los datos a buscar son demasiado largos.'];
+  if (excluir !== undefined && excluir !== null) {
+    if (typeof excluir !== 'object' || !DESTINOS_VALIDOS.includes(excluir.tipo) || typeof excluir.id !== 'string') return ['La pieza a excluir no es válida.'];
+  }
+  return [];
+}
+
+function validatePintar(body) {
+  const { titulo, resumen, cuerpo, idioma, seccion } = body || {};
+  const textos = [titulo, resumen, cuerpo];
+  if (textos.some((t) => t !== undefined && t !== null && typeof t !== 'string')) return ['Los textos deben ser texto.'];
+  if (!textos.some((t) => typeof t === 'string' && t.trim())) return ['Escribe el título, el resumen o el cuerpo para que la pintora imagine la imagen.'];
+  if (textos.reduce((n, t) => n + (t ? t.length : 0), 0) > MAX_TEXTO_REVISAR) return [`El texto es demasiado largo (máximo ${MAX_TEXTO_REVISAR} caracteres).`];
+  if (idioma !== undefined && idioma !== null && !['es', 'en'].includes(idioma)) return ['Idioma no válido.'];
+  if (seccion !== undefined && seccion !== null && typeof seccion !== 'string') return ['Sección no válida.'];
+  return [];
+}
+
+module.exports = { validateClasificar, validateRevisar, validateDuplicados, validatePintar, DESTINOS_VALIDOS, MAX_TEXTO_REVISAR };

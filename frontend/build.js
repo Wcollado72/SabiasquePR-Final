@@ -958,10 +958,14 @@ const PAGES = [
                   <button type="button" class="brigada-agente" id="brigada-clasificar-noticia" title="La Clasificadora sugiere la categoría"><span aria-hidden="true">🗂️</span> Doña Fichas <small>Clasificar</small></button>
                   <button type="button" class="brigada-agente" id="brigada-redactar-noticia" title="Lee la URL y redacta un primer borrador completo (título, párrafos y medio)"><span aria-hidden="true">✍️</span> La Pluma <small>Redactar noticia</small></button>
                   <button type="button" class="brigada-agente" id="brigada-revisar-noticia" title="La Guardiana compara la noticia con la fuente (derechos de autor) y marca contenido sensible"><span aria-hidden="true">🛡️</span> La Guardiana <small>Revisar</small></button>
+                  <button type="button" class="brigada-agente" id="brigada-duplicados-btn-noticia" title="El Detective busca si esta historia ya está publicada o guardada como borrador"><span aria-hidden="true">🕵️</span> El Detective <small>Buscar repetidas</small></button>
+                  <button type="button" class="brigada-agente" id="brigada-pintar-noticia" title="La Pintora sugiere el texto alternativo de la imagen y un prompt de imagen"><span aria-hidden="true">🎨</span> La Pintora <small>Imagen</small></button>
                   <button type="button" class="admin-btn-cancel" id="brigada-deshacer-noticia" hidden>Deshacer sugerencias</button>
                 </div>
                 <p class="admin-hint brigada-estado" id="brigada-estado-noticia" aria-live="polite"></p>
                 <div class="brigada-revision" id="brigada-revision-noticia" hidden></div>
+                <div class="brigada-revision" id="brigada-duplicados-noticia" hidden></div>
+                <div class="brigada-revision" id="brigada-pintora-noticia" hidden></div>
               </section>
 
               <nav id="news-levels" class="news-levels">
@@ -1015,6 +1019,10 @@ const PAGES = [
                 <img id="an-imagen-preview" class="admin-image-preview" alt="" hidden>
                 <label for="an-imagen-alt">Texto alternativo de la imagen (opcional)</label>
                 <input type="text" id="an-imagen-alt">
+                <div class="ia-fila">
+                  <button type="button" class="admin-btn-cancel" id="an-pintora-alt">🎨 La Pintora: sugerir texto alternativo</button>
+                  <span class="admin-hint">Su propuesta aparece arriba, en la mesa.</span>
+                </div>
                 <p class="admin-hint">Describe lo que se ve para quienes usan lector de pantalla. Si lo dejas vacío, se usa el título.</p>
                 <label for="an-imagen-caption">Pie de imagen (opcional)</label>
                 <input type="text" id="an-imagen-caption">
@@ -1089,10 +1097,14 @@ const PAGES = [
                   <button type="button" class="brigada-agente" id="brigada-resumir-contenido" title="La Resumidora escribe el resumen a partir del cuerpo del texto"><span aria-hidden="true">✂️</span> Doña Breve <small>Resumir</small></button>
                   <button type="button" class="brigada-agente" id="brigada-citar-contenido" title="La Bibliotecaria lee los datos de la cita desde la URL (sin IA)"><span aria-hidden="true">📚</span> La Bibliotecaria <small>Citar</small></button>
                   <button type="button" class="brigada-agente" id="brigada-revisar-contenido" title="La Guardiana compara la pieza con la fuente (derechos de autor) y marca contenido sensible"><span aria-hidden="true">🛡️</span> La Guardiana <small>Revisar</small></button>
+                  <button type="button" class="brigada-agente" id="brigada-duplicados-btn-contenido" title="El Detective busca si esta historia ya está publicada o guardada como borrador"><span aria-hidden="true">🕵️</span> El Detective <small>Buscar repetidas</small></button>
+                  <button type="button" class="brigada-agente" id="brigada-pintar-contenido" title="La Pintora sugiere el texto alternativo de la imagen y un prompt de imagen"><span aria-hidden="true">🎨</span> La Pintora <small>Imagen</small></button>
                   <button type="button" class="admin-btn-cancel" id="brigada-deshacer-contenido" hidden>Deshacer sugerencias</button>
                 </div>
                 <p class="admin-hint brigada-estado" id="brigada-estado-contenido" aria-live="polite"></p>
                 <div class="brigada-revision" id="brigada-revision-contenido" hidden></div>
+                <div class="brigada-revision" id="brigada-duplicados-contenido" hidden></div>
+                <div class="brigada-revision" id="brigada-pintora-contenido" hidden></div>
               </section>
 
               <nav class="synth-levels" id="synth-levels" aria-label="Niveles del formulario">
@@ -1244,6 +1256,10 @@ const PAGES = [
                 <img id="ac-url-portada-preview" class="admin-image-preview" alt="" hidden>
                 <label for="ac-portada-alt">Texto alternativo de la imagen (opcional)</label>
                 <input type="text" id="ac-portada-alt">
+                <div class="ia-fila">
+                  <button type="button" class="admin-btn-cancel" id="ac-pintora-alt">🎨 La Pintora: sugerir texto alternativo</button>
+                  <span class="admin-hint">Su propuesta aparece arriba, en la mesa.</span>
+                </div>
                 <p class="admin-hint">Describe lo que se ve para quienes usan lector de pantalla. Si lo dejas vacío, se usa el título.</p>
               </section>
 
