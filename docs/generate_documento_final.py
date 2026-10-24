@@ -50,6 +50,35 @@ def figura(story, archivo, pie, ancho=430, alto_max=330):
     ]))
 
 
+def buscar(base):
+    for ext in ('.png', '.jpg', '.jpeg', '.webp'):
+        if os.path.exists(os.path.join(CAPTURAS, base + ext)):
+            return base + ext
+    return None
+
+
+def rejilla(story, pares, ancho=236, alto_max=170, cols=2):
+    """Capturas de 2 en 2 con su pie numerado. Cada par es (archivo o nombre sin extension, pie); las que todavia no existen se omiten."""
+    from PIL import Image as PILImage
+    celdas = []
+    for nombre, pie in pares:
+        arch = nombre if os.path.exists(os.path.join(CAPTURAS, nombre)) else buscar(nombre)
+        if not arch:
+            continue
+        w, h = PILImage.open(os.path.join(CAPTURAS, arch)).size
+        escala = min(ancho / w, alto_max / h)
+        _fig['n'] += 1
+        celdas.append([Image(os.path.join(CAPTURAS, arch), width=w * escala, height=h * escala, hAlign='CENTER'),
+                       Paragraph(f'Figura {_fig["n"]}. {pie}', styles['Caption'])])
+    for i in range(0, len(celdas), cols):
+        fila = celdas[i:i + cols]
+        while len(fila) < cols:
+            fila.append('')
+        t = Table([fila], colWidths=[CONTENT_W / cols] * cols)
+        t.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP'), ('LEFTPADDING', (0, 0), (-1, -1), 2), ('RIGHTPADDING', (0, 0), (-1, -1), 2)]))
+        story.append(KeepTogether([t, Spacer(1, 4)]))
+
+
 def cargar_endpoints():
     filas = []
     with open(DOC_TECNICA, encoding='utf-8') as f:
@@ -105,7 +134,7 @@ def portada(story):
         meta.append(['Número de estudiante', est['numero']])
     meta += [['Curso', 'COMP2053 — Desarrollo Web Full-Stack'], ['Profesora', 'Milagros Donato Cintrón'],
              ['Institución', 'Universidad Interamericana de Puerto Rico, Recinto de Fajardo'],
-             ['Sitio en línea', 'https://sabiasquepr.com'], ['Repositorio', 'github.com/Wcollado72/SabiasquePR'],
+             ['Sitio en línea', 'https://sabiasquepr.com'], ['Repositorio', 'github.com/Wcollado72/SabiasquePR-Final'],
              ['Fecha', P.fecha_en_letras()]]
     data = [[Paragraph(f'<font color="#51606E">{k}</font>', styles['Body']), Paragraph(v, styles['Body'])] for k, v in meta]
     t = Table(data, colWidths=[130, CONTENT_W - 130], hAlign='LEFT')
@@ -237,7 +266,7 @@ def build():
         'Moderador/Admin y Admin = además exigen ese rol.', styles['BodySmall']))
 
     # 6. Diseño de la base de datos
-    story.append(PageBreak())
+    story.append(CondPageBreak(260))
     h1(story, 6, 'Diseño de la base de datos')
     story.append(Paragraph(
         f'La base de datos tiene <b>{n_tablas} tablas</b>, {n_pk} llaves primarias, <b>{n_fk} llaves foráneas</b> y '
@@ -254,30 +283,44 @@ def build():
         [100, CONTENT_W - 100]))
 
     # 7. Capturas
-    story.append(PageBreak())
+    story.append(CondPageBreak(260))
     h1(story, 7, 'Capturas del sistema en funcionamiento')
     story.append(Paragraph(
-        'Capturas tomadas en la aplicación desplegada (<font face="Courier">https://sabiasquepr.com</font>). '
-        'Cada una muestra una pantalla real servida desde producción.', styles['Body']))
-    figura(story, 'inicio-escritorio.png', 'Página de inicio.')
-    figura(story, 'noticias-escritorio.png', 'Noticias, con filtros por categoría y por región.')
-    figura(story, 'revolucion-humana-escritorio.png', 'Revolución Humana y sus sub-secciones.', alto_max=300)
-    figura(story, 'educacion-escritorio.png', 'Educación, con filtros de tema y de región.')
-    figura(story, 'pieza-detalle-escritorio.png', 'Detalle de una pieza (video).', alto_max=300)
-    figura(story, 'tienda-escritorio.png', 'Tienda.', alto_max=300)
-    figura(story, 'apoyo-escritorio.png', 'Apoya el canal (apoyo voluntario).', alto_max=300)
-    figura(story, 'quienes-somos-escritorio.png', 'Quiénes somos y contacto.', alto_max=300)
-    figura(story, 'inicio-sesion-modal.png', 'Inicio de sesión con verificación anti-robots.', alto_max=300)
-    figura(story, 'registro-modal.png', 'Creación de cuenta.', alto_max=300)
-    story.append(Paragraph('Vistas en teléfono móvil (diseño responsivo)', styles['H2']))
-    movil = [('inicio-movil.png', 'Inicio'), ('noticias-movil.png', 'Noticias'), ('tienda-movil.png', 'Tienda'), ('educacion-movil.png', 'Educación')]
+        'Capturas tomadas en la aplicación desplegada (<font face="Courier">https://sabiasquepr.com</font>) y en las herramientas '
+        'de despliegue. Cada una muestra una pantalla real.', styles['Body']))
+    story.append(Paragraph('Sitio público', styles['H2']))
+    rejilla(story, [
+        ('inicio-escritorio.png', 'Inicio.'), ('noticias-escritorio.png', 'Noticias, con filtros por categoría y región.'),
+        ('revolucion-humana-escritorio.png', 'Revolución Humana.'), ('educacion-escritorio.png', 'Educación.'),
+        ('pieza-detalle-escritorio.png', 'Detalle de una pieza (video).'), ('tienda-escritorio.png', 'Tienda.'),
+        ('apoyo-escritorio.png', 'Apoya el canal.'), ('quienes-somos-escritorio.png', 'Quiénes somos y contacto.'),
+    ])
+    story.append(Paragraph('Cuenta, debate (CRUD de usuario) y panel de administración (CRUD de administrador)', styles['H2']))
+    rejilla(story, [
+        ('inicio-sesion-modal.png', 'Inicio de sesión con verificación anti-robots.'), ('registro-modal.png', 'Creación de cuenta.'),
+        ('A1-registro-ok', 'Sesión iniciada.'), ('A2-foro-crear', 'Debate: crear una publicación.'),
+        ('A3-foro-publicada', 'Debate: publicación creada.'), ('A4-foro-editar', 'Debate: editar.'),
+        ('A5-foro-borrada', 'Debate: borrar.'), ('B1-panel-2fa', 'Panel: verificación en dos pasos.'),
+        ('B2-noticias-lista', 'Panel: lista de noticias.'), ('B3-noticia-validacion', 'Panel: validación del formulario.'),
+        ('B4-noticia-creada', 'Panel: noticia creada.'), ('B5-noticia-publica', 'La noticia en la página pública.'),
+        ('B6-noticia-editada', 'Panel: noticia editada.'), ('B7-noticia-borrar', 'Panel: confirmar borrado.'),
+        ('B8-contenidos', 'Panel: Contenidos.'), ('B9-productos', 'Panel: Productos.'),
+    ], ancho=150, alto_max=118, cols=3)
+    story.append(Paragraph('Consumo de datos, seguridad y despliegue', styles['H2']))
+    rejilla(story, [
+        ('D1-red-json', 'El frontend consume la API: GET /api/noticias devuelve JSON.'), ('D2-api-401', 'Una ruta protegida sin sesión responde 401.'),
+        ('E1-netlify', 'Frontend desplegado en Netlify.'), ('E2-render', 'API desplegada en Render.'),
+        ('E3-supabase-tablas', 'Base de datos en Supabase: las 15 tablas.'), ('E4-github-ci', 'Integración continua en GitHub Actions.'),
+    ], ancho=150, alto_max=118, cols=3)
+    story.append(Paragraph('Vista en celular (diseño responsivo)', styles['H2']))
     from PIL import Image as PILImage
+    movil = [('inicio-movil.png', 'Inicio'), ('noticias-movil.png', 'Noticias'), ('tienda-movil.png', 'Tienda'), ('educacion-movil.png', 'Educación')]
     celdas = []
     for arch, _ in movil:
         ruta = os.path.join(CAPTURAS, arch)
         w, h = PILImage.open(ruta).size
-        k = 112 / w
-        celdas.append(Image(ruta, width=112, height=h * k))
+        k = 100 / w
+        celdas.append(Image(ruta, width=100, height=h * k))
     t = Table([celdas, [Paragraph(n, styles['Caption']) for _, n in movil]], colWidths=[CONTENT_W / 4] * 4)
     t.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER'), ('VALIGN', (0, 0), (-1, 0), 'TOP')]))
     story.append(t)
@@ -285,7 +328,7 @@ def build():
     story.append(Paragraph(f'Figura {_fig["n"]}. El mismo sitio en una pantalla de 390 px de ancho.', styles['Caption']))
 
     # 8. Evidencias de pruebas
-    story.append(PageBreak())
+    story.append(CondPageBreak(260))
     h1(story, 8, 'Evidencias de pruebas')
     c = ev['cobertura_global']
     story.append(Paragraph(
@@ -321,13 +364,6 @@ def build():
         'La seguridad no puede quedarse en el navegador: validar el JWT en el servidor y cerrar la API de datos fue una decisión central.',
         'Los servicios gratuitos tienen límites (pausa por inactividad, arranque lento): fue necesario documentarlos, automatizar un chequeo diario y practicar una migración completa a un proyecto nuevo de Supabase con plan de vuelta atrás.',
         'Las pruebas automáticas y la integración continua evitaron que los cambios rompieran lo que ya funcionaba, incluida la reestructuración final del repositorio en /frontend y /backend.',
-    ])
-    story.append(Paragraph('Trabajo futuro', styles['H2']))
-    bullets(story, [
-        'Activar Stripe en modo real y completar la entidad legal que respalda el proyecto antes del lanzamiento público.',
-        'Unificar las dos tablas de noticias en un solo modelo de contenido.',
-        'Debates en vivo tipo chat y más zonas de debate; que los agentes de IA pregunten idioma, formato y tono antes de investigar.',
-        'Lanzamiento público cuando cada sección tenga suficiente contenido.',
     ])
 
     # 10. Referencias

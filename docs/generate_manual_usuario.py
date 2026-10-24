@@ -380,7 +380,7 @@ def build_portada(story):
     story.append(Paragraph('Sabías que PR', ParagraphStyle('CoverTitle', parent=styles['DocTitle'], fontSize=32, leading=36)))
     story.append(Paragraph('Manual de usuario', ParagraphStyle('CoverSub', parent=styles['DocSub'], fontSize=14, leading=19, textColor=ACCENT_DARK)))
     story.append(Spacer(1, 10))
-    story.append(Paragraph('Descripción del sistema &nbsp;·&nbsp; Requisitos &nbsp;·&nbsp; Guía de uso &nbsp;·&nbsp; Capturas ilustrativas', styles['DocSub']))
+    story.append(Paragraph('Descripción · Requisitos · Guía de uso · Capturas', styles['DocSub']))
     story.append(Spacer(1, 150))
 
     meta = [['Estudiante', est['nombre']]]
@@ -390,7 +390,7 @@ def build_portada(story):
         ['Curso', 'COMP2053 — Desarrollo Web Full-Stack'],
         ['Profesora', 'Milagros Donato Cintrón'],
         ['Institución', 'Universidad Interamericana de Puerto Rico, Recinto de Fajardo'],
-        ['Repositorio', 'github.com/Wcollado72/SabiasquePR'],
+        ['Repositorio', 'github.com/Wcollado72/SabiasquePR-Final'],
         ['Sitio en línea', 'sabiasquepr.com'],
         ['Fecha', fecha_en_letras()],
     ]
@@ -405,607 +405,143 @@ def build_portada(story):
     story.append(PageBreak())
 
 
-# ── CONTENIDO ───────────────────────────────────────────────
-def seccion_indice(story):
-    story.append(Paragraph('Contenido', styles['TOCTitle']))
-    toc = TableOfContents()
-    toc.levelStyles = [TOC_L0, TOC_L1]
-    toc.dotsMinLevel = 0
-    story.append(toc)
-    story.append(Spacer(1, 6))
+# ── CONTENIDO (versión compacta para la entrega: solo lo que pide la rúbrica) ──────────────────
+def buscar_captura(base):
+    """Devuelve el nombre del archivo de captura (png, jpg o jpeg) o None si todavía no existe."""
+    for ext in ('.png', '.jpg', '.jpeg', '.webp'):
+        if os.path.exists(os.path.join(CAPTURAS_DIR, base + ext)):
+            return base + ext
+    return None
+
+
+def figura_si(story, base, pie, ancho=CONTENT_W, recorte=None):
+    arch = buscar_captura(base)
+    if arch:
+        figura(story, arch, pie, recorte=recorte, ancho=ancho)
+        return True
+    return False
+
+
+def fila_si(story, bases_pies, pie, ancho=236):
+    """Dos capturas lado a lado con un solo pie; si falta alguna, se omite la fila."""
+    items = []
+    for base in bases_pies:
+        arch = buscar_captura(base)
+        if not arch:
+            return False
+        items.append((arch, None, ancho))
+    figura_fila(story, items, pie)
+    return True
 
 
 def seccion_descripcion(story):
     h1(story, 1, 'Descripción del sistema')
     p(story,
-      '<b>Sabías que PR</b> es un sitio web informativo y comunitario creado en Puerto Rico. Su propósito es '
-      'ayudar a cualquier persona a entender, cuestionar y mejorar la sociedad en la que vive. Reúne noticias con '
-      'contexto, contenido educativo, ensayos, videos y audios, un espacio de debate moderado, una tienda y un '
-      'apoyo voluntario al proyecto. <b>Todo el contenido se puede leer gratis</b>, con cuenta o sin ella.')
-    pl(story,
-      f'El sitio está publicado en <font face="Courier">{SITIO.replace("https://", "")}</font> y funciona en '
-      'computadora, tableta y celular. Se puede ver en español o en inglés y en modo claro u oscuro. Todavía está en '
-      'fase <b>BETA</b> (así lo indica la etiqueta junto al nombre en el encabezado): se sigue ampliando el contenido.')
-
-    h3t(story, 'Secciones del sitio')
+      '<b>Sabías que PR</b> es un sitio web informativo y comunitario creado en Puerto Rico: reúne noticias con contexto, '
+      'contenido educativo, un espacio de debate moderado, una tienda y un apoyo voluntario. '
+      f'Está publicado en <font face="Courier">{SITIO.replace("https://", "")}</font> y funciona en computadora, tableta y celular, '
+      'en español o inglés y en modo claro u oscuro. <b>Todo el contenido se puede leer gratis</b>, con cuenta o sin ella.')
     agregar_tabla(story, [
-        ['Sección', 'Qué encuentras'],
-        ['Inicio', 'Una pieza destacada, "Lo más reciente", accesos a las secciones, el boletín y el manifiesto del proyecto.'],
-        ['Noticias', 'Un collage con piezas de todas las secciones (noticias, videos, ensayos, audios) que se puede filtrar por categoría y por región.'],
-        ['Revolución Humana', 'Cuatro sub-secciones: <b>Nuevos Humanos</b> (lo mejor de la humanidad), <b>Lógica Humana</b> (ideas del autor Aliado Imperfekto), <b>Corrupción Humana</b> y <b>Ilógica Humana</b> (lo que le falla; estas dos son para mayores de 18 años). Cada una tiene su cuadrícula de contenido y, salvo Lógica Humana, su debate.'],
-        ['Educación', 'Piezas sobre leyes educativas, estudiantes sobresalientes, programas educativos y sistemas educativos del mundo; tablas con rankings educativos y el foro de la sección.'],
-        ['Tienda', 'Productos del proyecto con carrito de compras y pago con Stripe.'],
-        ['Apoya el canal', 'Apoyo voluntario mensual o único, y el muro de agradecimiento para quienes apoyan cada mes.'],
-        ['Quiénes somos', 'Visión y datos del proyecto, y un formulario para escribirle al equipo.'],
-        ['Mi cuenta', 'Perfil, muro de agradecimiento y pedidos de la persona que inició sesión.'],
-        ['Panel de administración', 'Herramientas para publicar y moderar. Solo para el rol administrador o moderador (sección 3.10).'],
+        ['Tipo de visita', 'Qué puede hacer'],
+        ['Sin cuenta', 'Leer todo, filtrar por categoría y región, cambiar idioma y modo, suscribirse al boletín y escribir por el formulario de contacto.'],
+        ['Con cuenta gratuita', 'Lo anterior, más publicar y comentar en los debates (<b>crear, ver, editar y borrar sus propias publicaciones</b>) y reportar contenido.'],
+        ['Administrador', 'Gestiona noticias, contenidos, productos y reportes desde el panel de administración (CRUD completo). Exige verificación en dos pasos.'],
     ], [105, CONTENT_W - 105])
-
-    h3t(story, 'Qué se puede hacer según el tipo de visita')
-    agregar_tabla(story, [
-        ['Tipo de visita', 'Puede'],
-        ['Sin cuenta', 'Leer todo el contenido y los debates; ver videos y escuchar audios; filtrar por categoría y región; cambiar idioma y modo claro/oscuro; suscribirse al boletín; enviar un mensaje desde "Quiénes somos". Las secciones 18+ piden confirmar la edad con una casilla.'],
-        ['Con cuenta gratuita', 'Todo lo anterior, más: publicar y comentar en los debates (hasta 200 palabras por publicación) y editar o eliminar sus propias publicaciones, comentar en noticias y piezas, reportar contenido de otras personas, comprar en la tienda, activar el apoyo mensual, editar su nombre y ver sus pedidos.'],
-        ['Con apoyo mensual (Colaborador)', 'Todo lo de la cuenta gratuita, más: insignia "Colaborador", publicaciones de hasta 1000 palabras, enlace multimedia (imagen, audio o video) en sus publicaciones, acceso completo a las piezas marcadas como premium y la opción de aparecer en el muro de agradecimiento.'],
-        ['Administrador o moderador', 'El administrador gestiona noticias, contenidos, productos, reportes, agentes de IA y gastos. El moderador solo atiende reportes y ve el estado de las defensas.'],
-    ], [125, CONTENT_W - 125])
-    nota(story, 'Pagos en modo de prueba.',
-         'El apoyo voluntario y la tienda funcionan con Stripe en <b>modo de prueba</b>: se puede recorrer todo el '
-         'proceso de pago con una tarjeta de prueba y <b>no se cobra dinero real</b> (ver sección 3.7).', 'aviso')
 
 
 def seccion_requisitos(story):
     h1(story, 2, 'Requisitos')
-    p(story, 'No hay que instalar nada. Para usar el sitio solo se necesita lo siguiente:')
     agregar_tabla(story, [
         ['Requisito', 'Detalle'],
-        ['Dispositivo', 'Computadora, tableta o celular.'],
-        ['Navegador', 'Una versión reciente de Chrome, Edge, Firefox o Safari.'],
-        ['Conexión', 'Acceso a internet. Todo el contenido se carga desde el servidor del sitio.'],
-        ['JavaScript', f'Debe estar activado (lo está por defecto). Noticias, filtros, tienda, cuenta y debate se cargan con JavaScript; sin él, el sitio muestra un aviso como "Activa JavaScript para ver las noticias".'],
-        ['Dirección', f'<font face="Courier">{SITIO}</font>'],
-        ['Correo electrónico', 'Solo para crear una cuenta (se envía un enlace de confirmación) y para recuperar la contraseña.'],
-        ['Para probar un pago', 'No hace falta una tarjeta real: se usa la tarjeta de prueba de Stripe (sección 3.7).'],
-        ['Para probar el panel de administración', 'La cuenta de evaluación se entrega por separado. Requiere una app de autenticación en el celular (Google Authenticator, Microsoft Authenticator, Authy o similar).'],
+        ['Dispositivo y navegador', 'Computadora, tableta o celular con una versión reciente de Chrome, Edge, Firefox o Safari. JavaScript activado (lo está por defecto).'],
+        ['Dirección', f'<font face="Courier">{SITIO}</font>. No hay que instalar nada.'],
+        ['Cuenta de evaluación', 'Una cuenta de usuario para probar el inicio de sesión y el CRUD del debate. El estudiante entrega el correo y la contraseña por separado.'],
+        ['Panel de administración', 'Se muestra en el video y en las capturas de la sección 3.6: exige una app de autenticación en el celular.'],
     ], [135, CONTENT_W - 135])
     nota(story, 'La primera visita puede tardar.',
-         'El servidor del sitio usa un plan gratuito que se "duerme" cuando nadie lo usa. Si es la primera visita en un '
-         'rato, las noticias, el debate o la tienda pueden tardar <b>hasta unos 50 segundos</b> en aparecer. '
-         'Mientras tanto verás un aviso como "Cargando… el servidor puede tardar unos segundos en despertar". '
-         'Es normal: espera y no recargues varias veces seguidas.', 'aviso')
+         'El servidor usa un plan gratuito que se «duerme» si nadie lo usa: la primera carga de noticias, debate o tienda puede '
+         'tardar <b>hasta unos 50 segundos</b>. Es normal; espera y no recargues varias veces.', 'aviso')
 
 
 def seccion_guia(story, capturas_admin):
     story.append(CondPageBreak(220))
     h1(story, 3, 'Guía de uso')
-    p(story,
-      'Cada paso dice qué hacer y, en verde, <font color="#2E7D5B"><b>qué debes ver</b></font> al terminarlo. '
-      'Las capturas son del sitio publicado en sabiasquepr.com. Si algo no coincide, consulta la sección 4.')
 
-    # 3.1 ────────────────────────────────────────────────────
     h2(story, '3.1', 'Navegar el sitio')
+    p(story, 'La cabecera tiene el logo, el selector <b>ES / EN</b>, el modo claro/oscuro, el carrito y el botón de sesión; en pantallas '
+             'pequeñas el menú (tres líneas) abre la lista de secciones: Noticias, Revolución Humana, Educación, Tienda, Apoya el canal y Quiénes somos.')
+    items = [('inicio-escritorio.png', None, 300), ('inicio-movil.png', None, 118)]
+    figura_fila(story, items, 'Inicio en computadora (izquierda) y en celular (derecha).')
+    if not fila_si(story, ['C1-iphone-inicio', 'C2-iphone-menu'], 'Inicio y menú abierto en un iPhone.', ancho=140):
+        pass
+
+    h2(story, '3.2', 'Noticias, Revolución Humana y Educación')
+    p(story, 'Cada sección muestra piezas (noticias, videos, ensayos, audios) que se filtran por categoría y por región. Al tocar una pieza se abre '
+             'su página, con la fuente, la divulgación del uso de IA y los comentarios.')
+    figura(story, 'noticias-escritorio.png', 'Noticias, con filtros por categoría y región.', ancho=330)
+
+    h2(story, '3.3', 'Crear una cuenta e iniciar sesión')
     pasos(story, [
-        (f'Abre <font face="Courier">{SITIO}</font> en tu navegador.',
-         'la página de inicio con una pieza destacada grande y, debajo, "Lo más reciente" (Figura 1).'),
-        ('Usa el menú del encabezado: <b>Noticias</b>, <b>Revolución Humana</b>, <b>Educación</b>, <b>Tienda</b>, '
-         '<b>Quiénes somos</b> y <b>Apoya el canal</b>. En el celular, el menú se abre con el botón de tres rayitas.',
-         'la página cambia y la opción donde estás queda resaltada. Pulsa el nombre del sitio, a la izquierda, para volver al inicio.'),
-        ('Cambia el idioma con el botón <b>ES / EN</b> del encabezado.',
-         'la página se recarga y los textos aparecen en inglés (o de vuelta en español). El sitio recuerda tu elección en este navegador.'),
-        ('Cambia entre modo claro y oscuro con el botón de la luna (en modo oscuro muestra un sol).',
-         'los colores del sitio cambian al instante y se recuerdan en este navegador.'),
-        ('Revisa el pie de página: allí están los enlaces a las secciones, al Manifiesto, a Servicios, a "Apoya el canal", '
-         'al RSS, el correo de contacto y los enlaces a Privacidad y Términos.', None),
-        ('<i>Opcional.</i> Si tu navegador lo ofrece (por ejemplo, el icono de instalar en la barra de direcciones de Chrome o Edge, '
-         'o "Agregar a pantalla de inicio" en el celular), puedes instalar el sitio como una aplicación. No es necesario para usarlo.', None),
+        ('Toca <b>Iniciar sesión</b> en la cabecera y elige <b>Crear cuenta</b>.', 'Una ventana con correo, contraseña y fecha de nacimiento.'),
+        ('Completa los datos, marca la casilla anti-robots y pulsa el botón.', 'Un aviso de que se envió un enlace de confirmación a tu correo.'),
+        ('Abre el enlace del correo y vuelve a iniciar sesión.', 'Tu correo aparece en el botón de la cabecera.'),
     ])
-    nota(story, 'Idioma.',
-         'Si una pieza todavía no está traducida, en inglés se muestra en español con la etiqueta "Solo en español". '
-         'Los Términos y la Política de Privacidad llevan un aviso: la versión en español es la que prevalece. '
-         'El panel de administración siempre se muestra en español.')
-    figura(story, 'inicio-escritorio.png',
-           'Página de inicio en computadora: menú, botones de idioma, modo oscuro, carrito e inicio de sesión.',
-           recorte=(0, 0, 1280, 700))
-    figura_fila(story, [
-        ('inicio-movil.png', (0, 0, 390, 640), 150),
-        ('noticias-movil.png', (0, 0, 390, 640), 150),
-        ('tienda-movil.png', (0, 0, 390, 640), 150),
-    ], 'Vista en celular: inicio, noticias y tienda.', separacion=18)
+    figura_fila(story, [('inicio-sesion-modal.png', None, 236), ('registro-modal.png', None, 236)], 'Inicio de sesión (izquierda) y creación de cuenta (derecha).')
+    figura_si(story, 'A1-registro-ok', 'Sesión iniciada: el correo aparece en la cabecera.', ancho=330)
 
-    # 3.2 ────────────────────────────────────────────────────
-    h2(story, '3.2', 'Noticias')
+    h2(story, '3.4', 'Debate: crear, editar y borrar publicaciones (CRUD de usuario)')
+    p(story, 'Con la sesión iniciada, en el debate de Revolución Humana o Educación puedes hacer las cuatro operaciones sobre tus publicaciones '
+             'y comentar en las de otras personas (máximo 200 palabras; el apoyo mensual sube el límite a 1000).')
     pasos(story, [
-        ('Entra a <b>Noticias</b> desde el menú.',
-         'una fila de botones de categoría (Ciencia, Clima y Medio Ambiente, Crimen, Cultura, Deportes, Descubrimientos, '
-         'Finanzas, Internacionales, Política, Salud y Tecnología) y, debajo, los de región: Puerto Rico, Estados Unidos, '
-         'Hispanoamérica e Internacionales (Figura 3).'),
-        ('Para <b>filtrar por categoría</b>, pulsa un botón de categoría. Funciona como un interruptor: al pulsarlo se activa; '
-         'si lo pulsas otra vez, se desactiva y vuelves a ver todas.',
-         'el botón se oscurece y la cuadrícula se actualiza con las piezas de esa categoría.'),
-        ('Para <b>filtrar por región</b>, pulsa Puerto Rico, Estados Unidos, Hispanoamérica o Internacionales. '
-         'Al entrar, Puerto Rico viene activa.',
-         'solo las piezas de esa región. Las piezas que no tienen región asignada se muestran en todas.'),
-        ('Para <b>abrir una pieza</b>, pulsa su título o su imagen.',
-         'la página de lectura: sección, formato y categoría, título, fecha, tiempo de lectura o duración, el texto y, al final, '
-         'la fuente con su enlace. Algunas piezas llevan etiquetas como "Original", "Asistencia parcial de IA" o "Generado con IA" '
-         '(la divulgación del uso de inteligencia artificial) (Figura 4).'),
-        ('Para <b>reproducir un video o un audio</b>, pulsa el botón de reproducir sobre la imagen de la tarjeta.',
-         'el video se reproduce dentro de la misma tarjeta; en un audio aparece una barra de reproducción. '
-         'También puedes abrir la pieza y reproducirlo allí.'),
-        ('Al final de cada pieza está la sección <b>Comentarios</b>. Sin cuenta verás "Inicia sesión para comentar". '
-         'Con cuenta, escribe tu comentario (mínimo 2 caracteres) y pulsa <b>Comentar</b>.',
-         'tu comentario aparece en la lista con tu nombre de perfil (o un alias genérico como "Participante-a3f9" si no has escrito tu nombre) '
-         'y la fecha, y un botón <b>Eliminar</b> para quitarlo.'),
+        ('<b>Crear:</b> escribe título y texto y pulsa <b>Publicar</b>.', 'Tu publicación aparece al inicio de la lista.'),
+        ('<b>Leer:</b> abre la publicación y sus comentarios.', 'El texto completo y la lista de comentarios.'),
+        ('<b>Editar:</b> en tu publicación pulsa <b>Editar</b>, cambia el texto y guarda.', 'El texto actualizado, marcado como editado.'),
+        ('<b>Borrar:</b> pulsa <b>Eliminar</b> y confirma.', 'La publicación desaparece de la lista.'),
     ])
-    nota(story, 'Qué muestra el collage.',
-         'La página Noticias mezcla piezas de todas las secciones, de la más reciente a la más antigua, y procura mostrar '
-         'al menos una de cada sección. Las piezas de Corrupción Humana e Ilógica Humana (18+) solo aparecen si ya '
-         'confirmaste que eres mayor de 18 años (sección 3.3). Algunas piezas llevan la insignia "Premium": '
-         'sin apoyo mensual verás un adelanto y el aviso "Este contenido es para quienes apoyan el canal".')
-    figura(story, 'noticias-escritorio.png',
-           'Noticias: filtros de categoría (arriba), filtros de región (debajo) y el collage de piezas.',
-           recorte=(0, 0, 1280, 740))
-    figura(story, 'pieza-detalle-escritorio.png',
-           'Una pieza abierta: clasificación, título, fecha, reproductor de video y texto.',
-           recorte=(0, 0, 1280, 700))
+    a = fila_si(story, ['A2-foro-crear', 'A3-foro-publicada'], 'Crear una publicación (izquierda) y verla publicada (derecha).')
+    b = fila_si(story, ['A4-foro-editar', 'A5-foro-borrada'], 'Editarla (izquierda) y borrarla (derecha).')
 
-    # 3.3 ────────────────────────────────────────────────────
-    h2(story, '3.3', 'Revolución Humana')
+    h2(story, '3.5', 'Tienda, apoyo voluntario y Mi cuenta')
+    p(story, 'La <b>Tienda</b> tiene carrito y pago con Stripe; <b>Apoya el canal</b> permite un apoyo voluntario mensual o único. Ambos funcionan en '
+             '<b>modo de prueba</b> (tarjeta <font face="Courier">4242 4242 4242 4242</font>, cualquier fecha futura y cualquier CVC): no se cobra dinero real. '
+             '<b>Mi cuenta</b> muestra tu perfil y tus pedidos.')
+    figura_fila(story, [('tienda-escritorio.png', None, 236), ('apoyo-escritorio.png', None, 236)], 'Tienda (izquierda) y Apoya el canal (derecha).')
+
+    h2(story, '3.6', 'Panel de administración (CRUD completo)')
+    p(story, 'Solo el rol <b>administrador</b> ve el panel. Al entrar pide un código de 6 dígitos de la app de autenticación (verificación en dos pasos); '
+             'sin él, la API responde 403. Cada pestaña (Noticias rápidas, Contenidos, Productos, Reportes) tiene su lista y su formulario.')
     pasos(story, [
-        ('Entra a <b>Revolución Humana</b>.',
-         'el título, cuatro botones de sub-sección (Corrupción Humana, Ilógica Humana, Lógica Humana y Nuevos Humanos, que viene '
-         'activa), los botones de región y la presentación del autor, Aliado Imperfekto (Figura 5).'),
-        ('Pulsa una sub-sección para cambiar de tema.',
-         'la cuadrícula muestra las piezas de esa sub-sección. En Nuevos Humanos, Corrupción Humana e Ilógica Humana, '
-         'debajo aparece el debate (sección 3.6). En Lógica Humana aparece el cuadro "Herramientas para pensar en voz alta", '
-         'cuyo botón <b>Lógica</b> abre un ensayo del autor.'),
-        ('<b>Corrupción Humana</b> e <b>Ilógica Humana</b> son solo para mayores de 18 años. Al elegirlas verás un aviso. '
-         'Marca la casilla <i>"Confirmo que soy mayor de 18 años y acepto los términos de esta sección"</i> y pulsa <b>Entrar</b>.',
-         'el botón Entrar se habilita al marcar la casilla y, al pulsarlo, aparece el debate de la sección.'),
-        ('Para filtrar por <b>región</b>, pulsa Puerto Rico, Estados Unidos, Hispanoamérica o Internacionales.',
-         'la cuadrícula se actualiza con las piezas de esa región.'),
+        ('<b>Crear:</b> en <b>Noticias rápidas</b> pulsa <b>+ Nueva noticia</b>, llena el formulario y guarda. Si dejas campos obligatorios vacíos, el formulario muestra el error.', 'La noticia aparece en la lista y en la página pública.'),
+        ('<b>Editar:</b> pulsa <b>Editar</b> en la lista, cambia el título y guarda.', 'El título nuevo en la lista y en la página pública.'),
+        ('<b>Borrar:</b> pulsa <b>Eliminar</b> y confirma.', 'La noticia desaparece de las dos.'),
     ])
-    nota(story, 'Sobre la confirmación de edad.',
-         'La confirmación se pide una sola vez y sirve para las dos secciones 18+. Sin cuenta se recuerda mientras '
-         'dure la sesión del navegador; con cuenta queda guardada en tu perfil. Es una declaración tuya: '
-         'el sitio no verifica tu identidad.')
-    figura(story, 'revolucion-humana-escritorio.png',
-           'Revolución Humana: sub-secciones, región y presentación del autor.',
-           recorte=(0, 0, 1280, 720))
-
-    # 3.4 ────────────────────────────────────────────────────
-    h2(story, '3.4', 'Educación')
-    pasos(story, [
-        ('Entra a <b>Educación</b>.',
-         'cuatro botones de tema: Estudiantes sobresalientes (activo), Leyes educativas, Programas educativos destacados y '
-         'Sistemas educativos mundiales. Debajo, los botones de región con "Todas" activo (Figura 6).'),
-        ('Pulsa un tema para ver sus piezas. La región que elegiste se mantiene al cambiar de tema.',
-         'la cuadrícula se actualiza. Si todavía no hay piezas en esa selección verás el mensaje '
-         '"Aún no hay contenido en esta selección en esta sección": es normal.'),
-        ('Para ver piezas de un lugar específico, pulsa Puerto Rico, Estados Unidos, Hispanoamérica o Internacionales. '
-         'Pulsa <b>Todas</b> para quitar el filtro de región.',
-         'las piezas de esa región y las que no tienen región asignada.'),
-        ('Baja hasta <b>Educación en el mundo</b>.',
-         'dos tablas con datos y fuentes enlazadas: el top 10 mundial de PISA 2022 y el top 10 de estados de EE. UU., '
-         'cada una con un recuadro sobre la posición de Puerto Rico.'),
-        ('Al final de la página están el foro de la sección (sección 3.6), el formulario del boletín (sección 3.8) y un correo para ideas y sugerencias.', None),
-    ])
-    figura(story, 'educacion-escritorio.png',
-           'Educación: temas, región y, más abajo, la sección "Educación en el mundo".',
-           recorte=(0, 0, 1280, 640))
-
-    # 3.5 ────────────────────────────────────────────────────
-    h2(story, '3.5', 'Crear cuenta, iniciar sesión y recuperar la contraseña')
-    h3(story, 'Crear una cuenta')
-    pasos(story, [
-        ('Pulsa <b>Iniciar sesión</b>, en la esquina superior derecha de cualquier página.',
-         'un cuadro con los campos "Usuario o correo" y "Contraseña", una verificación de Cloudflare, el botón <b>Entrar</b>, '
-         'un botón con una G (Google) y los enlaces "Registrar" y "¿Olvidaste tu contraseña?" (Figura 7, izquierda).'),
-        ('Pulsa <b>Registrar</b>.',
-         'el botón Entrar cambia a <b>Crear cuenta</b> y aparece el campo <b>Fecha de nacimiento</b> (Figura 7, derecha).'),
-        ('Escribe tu correo, una contraseña de al menos 8 caracteres (mejor con mayúsculas, minúsculas, números y símbolos) '
-         'y tu fecha de nacimiento.', None),
-        ('Espera a que la verificación de Cloudflare Turnstile termine (pasa de "Verifying…" a una marca de verificado). '
-         'Es un control automático que evita registros hechos por robots; normalmente no hay que hacer nada.', None),
-        ('Pulsa <b>Crear cuenta</b>.',
-         'el mensaje "Revisa tu correo para confirmar tu cuenta."'),
-        ('Abre el correo que te llegó y pulsa el enlace de confirmación (si no lo ves, revisa la carpeta de spam). '
-         'Después vuelve al sitio e inicia sesión.', 'tu cuenta lista para usarse.'),
-    ])
-    nota(story, 'Sobre la fecha de nacimiento.',
-         'Se pide una sola vez, no se muestra a nadie y no se puede cambiar después. Sirve para aplicar las reglas de edad '
-         '(algunas secciones son solo para mayores de 18). No se rechaza a nadie por su edad. Si la contraseña que '
-         'escribes aparece en filtraciones de datos conocidas, el sitio te pide elegir otra.')
-    figura_fila(story, [
-        ('inicio-sesion-modal.png', (452, 180, 828, 620), 232),
-        ('registro-modal.png', (452, 180, 828, 620), 232),
-    ], 'Cuadro de inicio de sesión (izquierda) y el mismo cuadro en modo de registro, con la fecha de nacimiento (derecha).', separacion=16)
-
-    h3(story, 'Iniciar sesión')
-    pasos(story, [
-        ('Pulsa <b>Iniciar sesión</b>, escribe tu correo y tu contraseña y pulsa <b>Entrar</b> (o la tecla Enter).',
-         '"¡Bienvenido!" y el cuadro se cierra. El botón del encabezado ahora muestra tu correo.'),
-        ('Pulsa el botón con tu correo para abrir el menú de tu cuenta.',
-         '"Bienvenido/a", tu correo, tu estado (Cuenta gratuita, Colaborador o Administrador) y los enlaces '
-         '<b>Mi cuenta</b>, <b>Cambiar contraseña</b> y <b>Cerrar sesión</b>.'),
-        ('<b>Entrar con Google:</b> pulsa el botón <b>G</b>, elige tu cuenta de Google y regresarás al sitio con la sesión iniciada. '
-         'Si es tu primera vez, aparece el cuadro "Completa tu perfil" para escribir tu fecha de nacimiento y pulsar <b>Guardar</b>.', None),
-    ])
-    p(story, 'Por seguridad, la sesión se cierra sola después de 30 minutos sin actividad.')
-
-    h3(story, 'Recuperar la contraseña')
-    pasos(story, [
-        ('Pulsa <b>Iniciar sesión</b> y escribe tu correo en el primer campo. Si lo dejas vacío, el sitio avisa "Escribe tu correo primero."', None),
-        ('Pulsa <b>¿Olvidaste tu contraseña?</b>',
-         '"Revisa tu correo para restablecer la contraseña."'),
-        ('Abre el correo y pulsa el enlace.',
-         'la página "Restablecer contraseña" con los campos "Nueva contraseña" y "Confirma la contraseña". '
-         'Si tu cuenta tiene verificación en dos pasos, antes te pedirá el código de 6 dígitos de tu app.'),
-        ('Escribe la nueva contraseña dos veces (mínimo 8 caracteres) y pulsa <b>Guardar nueva contraseña</b>.',
-         '"¡Listo! Tu contraseña se actualizó. Ya puedes iniciar sesión."'),
-    ])
-
-    # 3.6 ────────────────────────────────────────────────────
-    h2(story, '3.6', 'Debate')
-    p(story,
-      'El debate está en <b>Nuevos Humanos</b>, <b>Corrupción Humana</b> e <b>Ilógica Humana</b> (dentro de Revolución Humana) '
-      'y en <b>Educación</b>. Cualquiera puede leerlo; para escribir hace falta una cuenta.')
-    pasos(story, [
-        ('<b>Leer sin cuenta.</b> Baja hasta la lista de publicaciones y pulsa el título de una.',
-         'la publicación se despliega con su texto y los comentarios. Pulsa el título otra vez para cerrarla. '
-         'Cada publicación muestra el autor (nombre de perfil o alias genérico, nunca un correo), la fecha y cuántos comentarios tiene; la "Tema oficial de la semana" lleva una etiqueta.'),
-        ('<b>Escribir una publicación.</b> Inicia sesión y, en el formulario "Nueva publicación", escribe el <b>Título</b> '
-         '(de 3 a 140 caracteres) y <b>Tu opinión</b> (mínimo 10 caracteres). Espera la verificación de Cloudflare y pulsa <b>Publicar</b>.',
-         'un contador de palabras bajo el texto (por ejemplo, "35/200 palabras"). Al publicar aparece "¡Publicado!" '
-         'y tu publicación entra a la lista. Sin sesión, en lugar del formulario verás "Inicia sesión para participar en el debate".'),
-        ('<b>Comentar.</b> Abre una publicación, escribe en el campo "Comentar..." y pulsa <b>Comentar</b>.',
-         'tu comentario al final de la lista de comentarios.'),
-        ('<b>Modificar lo tuyo (Editar).</b> Abre una publicación tuya: debajo del texto aparecen los botones <b>Editar</b> y <b>Eliminar</b> '
-         '(el administrador los ve en todas las publicaciones). Pulsa <b>Editar</b>.',
-         'el texto se reemplaza por un formulario con el <b>Título</b> y el <b>Mensaje</b> actuales y un contador de palabras (200 con cuenta gratuita, 1000 si apoyas cada mes).'),
-        ('Cambia lo que necesites y pulsa <b>Guardar cambios</b> (o <b>Cancelar</b> para dejar todo como estaba).',
-         'la publicación con el texto nuevo y una etiqueta <b>editada</b> junto a la fecha. Si te pasas del límite de palabras, el sitio no guarda y muestra el aviso.'),
-        ('<b>Reportar.</b> Pulsa <b>Reportar</b> en una publicación o comentario de otra persona. Se abre el cuadro <b>Reportar contenido</b>: '
-         'escribe el motivo (mínimo 5 caracteres) y pulsa <b>Enviar reporte</b> (o <b>Cancelar</b>).',
-         'el botón cambia a "Reporte enviado" y queda desactivado. El reporte llega a la pestaña Reportes del panel de administración (sección 3.10).'),
-        ('<b>Eliminar lo tuyo.</b> En tus propias publicaciones y comentarios aparece el botón <b>Eliminar</b>; confirma en la ventana.',
-         'la publicación o el comentario desaparece de la lista.'),
-    ])
-    nota(story, 'Qué botones ves.',
-         'En lo que escribiste tú aparecen <b>Editar</b> (solo en publicaciones) y <b>Eliminar</b>, pero <b>no</b> Reportar: '
-         'el reporte es para el contenido de otras personas. En lo de los demás solo ves <b>Reportar</b>. '
-         'Así queda completo el ciclo de tus publicaciones: crear (publicar o comentar), leer, modificar (Editar) y eliminar.')
-    h3t(story, 'Reglas del debate')
-    agregar_tabla(story, [
-        ['Regla', 'Cómo funciona'],
-        ['Límite de palabras', 'Cuenta gratuita: <b>200 palabras</b> por publicación. Quien apoya cada mes (Colaborador): <b>1000 palabras</b>. '
-                              'Si te pasas, el contador se pone en rojo y el sitio rechaza la publicación (o la edición) con un aviso.'],
-        ['Cuenta nueva', 'Para publicar o comentar, la cuenta debe tener al menos 1 hora de creada.'],
-        ['Secciones 18+', 'Corrupción Humana e Ilógica Humana exigen haber confirmado que eres mayor de 18 años.'],
-        ['Contra robots', 'Verificación de Cloudflare, un campo oculto que solo los robots llenan y un máximo de 20 envíos '
-                          'cada 15 minutos.'],
-        ['Quien apoya cada mes', 'Puede añadir a su publicación un enlace de imagen, audio o video (campo "Enlace multimedia").'],
-    ], [115, CONTENT_W - 115])
-    h3(story, 'Cómo funciona la moderación')
-    bullets(story, [
-        'Cualquier persona con sesión puede <b>reportar</b> una publicación o un comentario de otra persona (el botón no aparece en lo que escribiste tú).',
-        'Además, el sistema revisa cada publicación y comentario nuevo y, si detecta señales de riesgo, crea por su cuenta un '
-        'reporte marcado como "detección automática". Esto <b>no bloquea ni borra</b> nada: solo avisa a quien modera.',
-        'Los reportes llegan a la pestaña <b>Reportes</b> del panel. El equipo (administrador o moderador) revisa la cola y puede <b>marcarlos como revisados</b>, '
-        '<b>descartarlos</b> o <b>eliminar el contenido</b> reportado.',
-        'La base de las secciones 18+ es la libertad de expresión: no se censura una opinión por ser incómoda, pero los '
-        'casos extremos, como amenazas de daño o contenido ilegal, se revisan y se eliminan. La Educación admite todo '
-        'lo que sea respetuoso: no se toleran el lenguaje ofensivo, el contenido sexual ni los ataques personales.',
-    ])
-    nota(story, 'Tu publicación es pública.',
-         'Todo lo que escribes en un debate o en un comentario lo puede leer cualquier visitante. Como autor se muestra el '
-         '<b>nombre de tu perfil</b> (el campo Nombre de <b>Mi cuenta</b>, sección 3.9) o, si no lo has escrito, un alias genérico '
-         'como "Participante-a3f9". <b>Tu correo no se muestra.</b> Escribe pensando en que el texto es público.', 'aviso')
-
-    # 3.7 ────────────────────────────────────────────────────
-    h2(story, '3.7', 'Tienda y apoyo voluntario')
-    nota(story, 'Modo de prueba.',
-         'Stripe está en modo de prueba: <b>nada se cobra de verdad</b>. Usa siempre la tarjeta de prueba '
-         '<font face="Courier"><b>4242 4242 4242 4242</b></font>, <b>cualquier fecha de vencimiento futura</b> '
-         '(por ejemplo, 12/34) y <b>cualquier código CVC</b> de 3 dígitos (por ejemplo, 123). Para el código postal y los '
-         'demás datos puedes escribir valores de ejemplo. Una tarjeta real no será aceptada.', 'aviso')
-    h3(story, 'Comprar en la tienda')
-    pasos(story, [
-        ('Entra a <b>Tienda</b>.',
-         'los productos disponibles, cada uno con su foto, descripción, precio y el botón <b>Añadir al carrito</b> (Figura 8).'),
-        ('Pulsa <b>Añadir al carrito</b> en un producto.',
-         'un aviso con el nombre del producto y, a la derecha, el panel <b>Tu carrito</b> con el producto, su cantidad, '
-         'el precio, el <b>Total</b> y el botón <b>Ir al pago</b>. El número sobre el icono de la bolsa sube.'),
-        ('En el panel, usa los botones <b>-</b> y <b>+</b> para cambiar la cantidad y la <b>x</b> para quitar un producto.',
-         'el total se actualiza al momento.'),
-        ('Pulsa <b>Ir al pago</b>. Si no has iniciado sesión, el sitio avisa "Inicia sesión para completar tu compra." y abre el cuadro '
-         'de inicio de sesión; inicia sesión y vuelve a pulsar <b>Ir al pago</b>.',
-         'el botón cambia a "Procesando..." y se abre la página de pago de Stripe.'),
-        ('En Stripe escribe tu correo, la dirección de envío y de facturación (el envío es solo a Estados Unidos, lo que incluye a '
-         'Puerto Rico) y los datos de la tarjeta de prueba. Pulsa el botón de pagar.',
-         'regresas a la tienda cuando el pago se completa.'),
-        ('Abre el menú de tu cuenta, entra a <b>Mi cuenta</b> y baja a <b>Mis pedidos</b>.',
-         'tu pedido con el total, el estado (Pendiente o Pagada), la fecha, los productos y la dirección de envío.'),
-    ])
-    nota(story, 'Consejo.',
-         'El carrito no se guarda si recargas la página o cambias a otra: añade los productos y paga sin salir de la '
-         'misma página. Si cierras el panel de Stripe sin pagar, no se hace ningún cargo.')
-    figura(story, 'tienda-escritorio.png',
-           'Tienda: cada producto muestra foto, descripción, precio y el botón "Añadir al carrito".',
-           recorte=(0, 0, 1280, 720))
-
-    h3(story, 'Apoyar el canal')
-    pasos(story, [
-        ('Entra a <b>Apoya el canal</b>.',
-         'por qué existe el apoyo, las formas de apoyar (mensual, único y la tienda), el muro de agradecimiento y "Lo que debes saber" (Figura 9).'),
-        ('<b>Apoyo mensual:</b> inicia sesión y pulsa <b>Apoyar cada mes</b> (el botón solo aparece con la sesión iniciada; '
-         'sin sesión verás "Inicia sesión para activar el apoyo mensual y recibir tu insignia").',
-         '"Redirigiendo a Stripe..." y la página de pago. Completa el pago con la tarjeta de prueba.'),
-        ('Al volver al sitio:',
-         '"¡Gracias por apoyar a Sabías que PR!" (o, si cancelaste, "Cancelaste el proceso. No se hizo ningún cargo."). '
-         'Tu estado cambia a <b>Colaborador</b>, lo que puede tardar unos instantes en reflejarse; recarga la página si hace falta.'),
-        ('<b>Apoyo único:</b> si el botón <b>Apoyar una vez</b> está disponible, abre un enlace de pago de Stripe donde tú decides la cantidad, sin necesidad de cuenta. '
-         'No da insignia ni cambia tu cuenta.', None),
-    ])
-    pl(story,
-      'El apoyo es voluntario, para mayores de 18 años y no abre ni cierra contenido. No es una donación deducible de impuestos. '
-      'El apoyo mensual se puede cancelar en cualquier momento escribiendo a '
-      f'<font face="Courier">{CORREO}</font> o desde el enlace del recibo. El resto de las condiciones está en la propia página "Apoya el canal".')
-    figura(story, 'apoyo-escritorio.png',
-           'Apoya el canal: formas de apoyar y muro de agradecimiento.',
-           recorte=(0, 0, 1280, 960), ancho=360)
-
-    # 3.8 ────────────────────────────────────────────────────
-    h2(story, '3.8', 'Quiénes somos, contacto y boletín')
-    pasos(story, [
-        ('Entra a <b>Quiénes somos</b>.',
-         'la visión del proyecto, los datos del proyecto y el recuadro "Cómo comunicarte" con el correo, el teléfono y la ubicación (Figura 10).'),
-        ('Baja hasta "Envíanos un mensaje". Escribe tu <b>Nombre</b> (mínimo 2 letras), tu <b>Correo</b>, elige el <b>Motivo</b> '
-         '(Consulta general, Propuesta de colaboración, Reportar un error, Sugerencia de contenido u Otro) y escribe el <b>Mensaje</b> (mínimo 10 caracteres). '
-         'Si ya iniciaste sesión, el correo y el nombre vienen escritos; puedes cambiarlos.', None),
-        ('Pulsa <b>Enviar mensaje</b>.',
-         '"¡Mensaje enviado! Te responderemos pronto." Si falta algún dato, el sitio te dice cuál corregir.'),
-        ('<b>Boletín.</b> En la página de inicio, en Educación y en Servicios hay un cuadro para recibir nuevo contenido. '
-         'Escribe tu correo y pulsa <b>Suscribirme</b>.',
-         '"¡Suscripción exitosa! Revisa tu correo para confirmar." Para darte de baja usa el enlace que viene en cada correo del boletín.'),
-    ])
-    figura(story, 'quienes-somos-escritorio.png',
-           'Quiénes somos: visión y datos del proyecto; más abajo, el formulario de contacto.',
-           recorte=(0, 0, 1280, 720))
-
-    # 3.9 ────────────────────────────────────────────────────
-    h2(story, '3.9', 'Mi cuenta')
-    pasos(story, [
-        ('Inicia sesión, pulsa el botón con tu correo y elige <b>Mi cuenta</b>.',
-         'tu correo, tu estado (Cuenta gratuita, Colaborador o Administrador) y el campo <b>Nombre</b>. '
-         'Si no has iniciado sesión, el sitio muestra "Inicia sesión para ver tu cuenta".'),
-        ('Para cambiar tu nombre, escríbelo y pulsa <b>Guardar cambios</b>. Este es el nombre que se muestra como autor en tus publicaciones y comentarios; '
-         'si lo dejas vacío, el sitio usa un alias genérico como "Participante-a3f9".', '"Guardado."'),
-        ('Para cambiar la contraseña, usa el enlace "Restablécela aquí", que lleva a la página de restablecer contraseña (sección 3.5).', None),
-        ('<b>Muro de agradecimiento</b> (solo aparece si apoyas cada mes). Escribe el nombre o alias que quieras mostrar, marca la casilla de autorización y pulsa <b>Guardar</b>. '
-         'Para quitarlo, pulsa <b>Retirar mi nombre</b>.',
-         '"Listo: tu nombre aparecerá en la página Apoya el canal." o "Tu nombre se retiró del muro."'),
-        ('<b>Mis pedidos:</b> lista tus compras de la tienda.',
-         'el total, el estado, la fecha, los productos y la dirección de envío; o "Todavía no tienes pedidos."'),
-    ])
-    p(story, 'Las cuentas de administración también ven en esta página un enlace al panel de administración.')
-
-    # 3.10 ───────────────────────────────────────────────────
-    story.append(CondPageBreak(180))
-    h2(story, '3.10', 'Panel de administración')
-    pl(story,
-      'El panel es solo para cuentas con rol <b>administrador</b> o <b>moderador</b>. Cualquier otra cuenta que entre a '
-      '<font face="Courier">/admin.html</font> verá el aviso "Tu cuenta no tiene permisos de administrador ni de moderador". '
-      'El administrador puede usar todas las pestañas; el moderador solo ve <b>Reportes</b> y <b>Agentes</b>.')
-    h3(story, 'Cómo entrar')
-    pasos(story, [
-        ('Inicia sesión con la cuenta de administración. Al iniciar sesión, el sitio te lleva solo al panel.', None),
-        ('<b>Verificación en dos pasos.</b> La primera vez, el panel muestra un código QR: escanéalo con tu app de autenticación y escribe el código de 6 dígitos que te muestra. '
-         'Las veces siguientes basta con escribir el código de 6 dígitos y pulsar <b>Verificar</b>.',
-         '"Verificado. Abriendo el panel..." y luego el panel con sus pestañas.'),
-    ])
-    h3t(story, 'Pestañas del panel')
-    agregar_tabla(story, [
-        ['Pestaña', 'Para qué sirve'],
-        ['Noticias rápidas', 'Crear, buscar, editar y eliminar noticias. El formulario tiene cinco niveles: <b>Clasificación</b> (idioma en que se escribió y categoría), '
-                             '<b>Contenido</b> (título, párrafos —uno por línea— y divulgación de IA con sus iconos), <b>Multimedia</b> (imagen, texto alternativo y pie), '
-                             '<b>Asistente IA</b> (autocompleta un borrador a partir de la URL del artículo original, que queda sin publicar) y <b>Fuente</b> (URL y nombre de la fuente). '
-                             'El último nivel, <b>Fuente</b>, también trae la fecha, la casilla "★ Destacada" y los botones <b>Guardar borrador</b> (la noticia queda solo en el panel), '
-                             '<b>AL AIRE</b> (la publica en el sitio) y Cancelar.'],
-        ['Contenidos', 'Crear, buscar, editar y eliminar piezas multi-formato (video, audio, foto, ensayo, noticia, lectura corta) para Noticias, Revolución Humana y Educación. '
-                       'La lista se agrupa por sub-sección. Ver el ejemplo paso a paso más abajo.'],
-        ['Productos', 'Crear, buscar, editar y eliminar los productos de la tienda: nombre, descripción, precio en USD, imagen y texto alternativo, el Price ID de Stripe para el carrito, '
-                      'un enlace de pago opcional y la casilla "Disponible en la tienda" (si se desmarca, el producto queda oculto).'],
-        ['Reportes', 'La cola de moderación del debate: aquí llegan los reportes que envían las personas con el botón Reportar y los de detección automática. Cada reporte indica quién lo hizo (o "detección automática"), el motivo y su estado. '
-                     'Acciones: <b>Marcar revisado</b>, <b>Descartar</b> y <b>Eliminar contenido</b> (borra la publicación o el comentario reportado).'],
-        ['Agentes', 'Estado real de las defensas del sitio (Turnstile, campo oculto, límite de uso, espera de cuentas nuevas y confirmaciones de edad), '
-                    'el uso y el costo de los agentes de IA <b>Investigador</b> y <b>Redactor</b> en el mes, y accesos directos a Contenidos y a Reportes.'],
-        ['Gastos (solo administrador)', 'Control de los servicios y suscripciones del proyecto (nombre, estado gratis / gratis por ahora / por uso, costo mensual, renovación, enlace y notas) '
-                                        'con el total mensual estimado y el gasto automático de los agentes de IA. También se puede crear, editar y eliminar cada servicio.'],
-    ], [105, CONTENT_W - 105])
-    p(story,
-      'Debajo de los formularios de noticias, contenidos y productos hay un bloque <b>Traducción al inglés</b> (o al español, si la pieza se escribió en inglés). '
-      'Es <b>colapsable y opcional</b>: se abre pulsando su título y muestra un estado a la derecha: <b>Guardada</b> (ya hay traducción), <b>Pendiente</b> '
-      '(la pieza existe pero aún no se traduce) o <b>Guarda primero</b> (la pieza todavía no se ha guardado). La traducción se hace <i>después</i> de guardar la pieza: '
-      'guárdala, vuelve a abrirla con <b>Editar</b>, abre el bloque y escribe la versión en el otro idioma o pulsa <b>Traducir con IA</b> para obtener un borrador '
-      '(que se revisa y no se guarda solo) y luego <b>Guardar traducción</b>. Sin traducción, quien elige el otro idioma ve la pieza con la etiqueta "Solo en español". '
-      'El botón <b>?</b> abre un manual de ayuda dentro del panel.')
-
-    h3(story, 'Divulgación de uso de IA con iconos')
-    p(story,
-      'En los formularios de <b>Noticias rápidas</b> (nivel Contenido) y de <b>Contenidos</b> (nivel Contenido), debajo de la lista <b>Divulgación de uso de IA</b> '
-      '(No se usó IA, Asistencia parcial de IA o Generado principalmente con IA) hay fichas con el icono de cada herramienta: '
-      '<b>Claude, Gemini, Perplexity, ChatGPT y Copilot</b>.')
-    bullets(story, [
-        '<b>Marcar fichas:</b> pulsa una ficha para activarla (puedes marcar varias) y vuelve a pulsarla para quitarla.',
-        '<b>Otra IA:</b> escribe el nombre en el campo <b>Otra IA</b> y pulsa <b>Agregar</b> (o la tecla Enter, que no envía el formulario). '
-        'La IA aparece como una etiqueta con una <b>×</b> para quitarla.',
-        '<b>Vínculo con la divulgación:</b> al marcar una IA, "No se usó IA" cambia solo a "Asistencia parcial de IA". '
-        'Si eliges "No se usó IA", la lista se vacía y las fichas se bloquean.',
-        '<b>Lo que ve el público:</b> la etiqueta de divulgación y los iconos de las IA marcadas, en las tarjetas y en el artículo '
-        '(las IA escritas a mano salen solo con su nombre).',
-    ])
-
-    h3t(story, 'Las cuatro operaciones (crear, consultar, modificar y eliminar)')
-    agregar_tabla(story, [
-        ['Operación', 'Cómo se hace en el panel', 'Qué debes ver'],
-        ['Crear', 'Botón <b>+ Nueva noticia</b>, <b>+ Nuevo contenido</b> o <b>+ Nuevo producto</b>; llenar el formulario y guardar.',
-                  'El formulario se cierra y el elemento nuevo aparece en la lista.'],
-        ['Consultar', 'Las listas se cargan al abrir cada pestaña; el buscador de arriba filtra por título o nombre.',
-                      'Cada elemento con sus etiquetas (Borrador, Destacado, Premium, Oculto) y botones Editar y Eliminar.'],
-        ['Modificar', 'Botón <b>Editar</b> en la fila; cambiar lo necesario y guardar.',
-                      'El formulario se abre con los datos actuales y, al guardar, la lista refleja el cambio.'],
-        ['Eliminar', 'Botón <b>Eliminar</b> en la fila; confirmar en la ventana ("Esta acción no se puede deshacer").',
-                     'El elemento desaparece de la lista.'],
-    ], [62, 235, CONTENT_W - 62 - 235])
-
-    h3(story, 'Ejemplo: crear una noticia rápida')
-    p(story, 'Supongamos que quieres publicar una noticia de la categoría Ciencia.')
-    pasos(story, [
-        ('Abre la pestaña <b>Noticias rápidas</b> y pulsa <b>+ Nueva noticia</b>.',
-         'el formulario "Nueva noticia" con cinco tarjetas de niveles: Clasificación, Contenido, Multimedia, Asistente IA y Fuente.'),
-        ('<b>Clasificación.</b> Deja el idioma en Español y elige la <b>Categoría</b> (por ejemplo, Ciencia).', None),
-        ('<b>Contenido.</b> Escribe el <b>Título</b> y los <b>Párrafos</b> (uno por línea). En <b>Divulgación de uso de IA</b> deja "No se usó IA" '
-         'o, si usaste una herramienta, pulsa su ficha (Claude, Gemini, Perplexity, ChatGPT o Copilot) o escribe otra en "Otra IA" y pulsa <b>Agregar</b>.',
-         'al marcar una IA, la divulgación cambia sola a "Asistencia parcial de IA" y el icono queda resaltado.'),
-        ('<b>Multimedia.</b> Escribe la ruta o URL de la imagen (o usa "Elegir imagen de la galería") y su texto alternativo.',
-         'una vista previa de la imagen.'),
-        ('<i>Opcional.</i> <b>Asistente IA.</b> Pega la URL del artículo original y pulsa <b>Autocompletar con IA</b>: rellena un borrador que revisas antes de publicar.', None),
-        ('<b>Fuente</b> (último paso). Escribe la URL y el nombre de la fuente, elige la <b>Fecha</b> y marca <b>★ Destacada</b> si quieres que ocupe la portada. '
-         'Aquí están los dos botones de guardado: <b>Guardar borrador</b> deja la noticia solo en el panel (con la etiqueta Borrador) y <b>AL AIRE</b> la publica en el sitio.',
-         'el formulario se cierra y la noticia aparece en la lista. Pulsar Enter dentro de un campo ya <b>no</b> guarda la noticia: solo lo hacen esos dos botones.'),
-        ('Si te falta un dato obligatorio de otro paso, el panel abre ese paso por ti.',
-         'el aviso "Falta completar: …" con el nombre del campo, y el paso correspondiente abierto.'),
-    ])
-
-    h3(story, 'Ejemplo: crear un contenido nuevo')
-    p(story, 'Supongamos que quieres publicar un ensayo en la sub-sección Nuevos Humanos de Revolución Humana.')
-    pasos(story, [
-        ('Abre la pestaña <b>Contenidos</b> y pulsa <b>+ Nuevo contenido</b>.',
-         'el formulario "Nuevo contenido" con cinco tarjetas de niveles: Clasificación, Contenido, Multimedia, Investigador + Redactor y Citación.'),
-        ('<b>Nivel 1, Clasificación.</b> Deja el idioma en Español. En <b>Sección</b> elige <i>Revolución Humana</i>. '
-         'En la lista siguiente, que cambia según la sección, elige <i>Nuevos Humanos</i>. '
-         'En <b>Región</b> elige, por ejemplo, <i>Puerto Rico</i> (o "Ninguna" para que se vea en todas las regiones). En <b>Tipo de formato</b> elige <i>Ensayo</i>.',
-         'una única lista de sub-sección que cambia según la Sección: en Revolución Humana se llama "Sub-sección de Revolución Humana (opcional)"; '
-         'si eliges Noticias, la lista pasa a ser las 11 categorías de noticias (Sub-sección de Noticias); si eliges Educación, los 4 temas de Educación '
-         '(Sub-sección de Educación), y en esos dos casos es obligatoria. La Región aplica a las tres secciones.'),
-        ('<b>Nivel 2, Contenido.</b> Escribe el <b>Título</b> (3 a 160 caracteres), el <b>Resumen</b> (2 o 3 oraciones, mínimo 10 caracteres), '
-         'el <b>Cuerpo del texto</b> (opcional) y, si quieres, el autor. El botón <b>Revisar texto</b> sugiere correcciones de ortografía. '
-         'En <b>Divulgación de uso de IA</b> indica si se usó inteligencia artificial y, si quieres, con cuáles herramientas: pulsa las fichas con icono '
-         '(Claude, Gemini, Perplexity, ChatGPT, Copilot) o escribe otra en "Otra IA" y pulsa <b>Agregar</b> (o Enter); las agregadas salen como etiquetas con × para quitarlas. '
-         'Al marcar una IA, "No se usó IA" cambia a "Asistencia parcial de IA".', None),
-        ('<b>Nivel 3, Multimedia.</b> Escribe la ruta o URL de la <b>Imagen de portada</b> (obligatoria) y su texto alternativo, o usa "Elegir imagen de la galería" '
-         'o "Usar imagen de la categoría seleccionada". Si el tipo es Video o Audio, pega también el enlace del video o audio.',
-         'una vista previa de la imagen.'),
-        ('<i>Opcional.</i> <b>Nivel 4, Investigador + Redactor.</b> Pega la URL de una fuente (o un texto) y pulsa <b>Investigar</b>; luego <b>Redactar con IA</b>. '
-         'El resultado rellena Título, Resumen y Cuerpo para que lo revises antes de guardar; nunca se publica solo. Cada uso tiene un costo pequeño que se registra en la pestaña Gastos.', None),
-        ('<b>Nivel 5, Citación.</b> Escribe el nombre y la URL de la fuente y elige el estilo de citación (APA, MLA, etc.), '
-         'o marca "Sin fuente externa / contenido 100% original".',
-         'una vista previa de la cita.'),
-        ('En la barra inferior escribe la <b>Fecha</b> y la <b>Duración</b> en minutos. Marca <b>Destacado</b> (reemplaza al destacado anterior de esa sección) o '
-         '<b>Premium</b> (los visitantes sin apoyo mensual ven solo un adelanto) si corresponde. Pulsa <b>GUARDAR</b>.',
-         'el formulario se cierra y la pieza aparece en la lista, dentro del grupo "Nuevos Humanos". Si falta un campo obligatorio de otro nivel, el panel abre ese nivel y avisa "Falta completar: …".'),
-        ('Comprueba el resultado: en el sitio público abre <b>Revolución Humana</b>, Nuevos Humanos, con la región elegida.',
-         'la tarjeta de la nueva pieza. Para quitarla, vuelve al panel y usa <b>Eliminar</b>.'),
-    ])
-    for ruta in capturas_admin:
-        figura(story, os.path.basename(ruta), 'Panel de administración', recorte=None)
+    figura_si(story, 'B1-panel-2fa', 'Verificación en dos pasos al entrar al panel.', ancho=300)
+    fila_si(story, ['B2-noticias-lista', 'B3-noticia-validacion'], 'Lista de noticias (izquierda) y validación del formulario (derecha).')
+    fila_si(story, ['B4-noticia-creada', 'B5-noticia-publica'], 'Noticia creada (izquierda) y la misma noticia en la página pública (derecha).')
+    fila_si(story, ['B6-noticia-editada', 'B7-noticia-borrar'], 'Noticia editada (izquierda) y confirmación de borrado (derecha).')
+    fila_si(story, ['B8-contenidos', 'B9-productos'], 'Las pestañas Contenidos (izquierda) y Productos (derecha) tienen el mismo CRUD.')
 
 
 def seccion_faq(story):
     story.append(CondPageBreak(120))
-    h1(story, 4, 'Preguntas frecuentes y solución de problemas')
-
-    h3(story, 'La página tarda mucho en cargar o dice "Cargando…"')
-    pl(story,
-      'El servidor gratuito se duerme cuando pasa un rato sin visitas y puede tardar hasta unos 50 segundos en despertar la primera vez. '
-      'Espera un momento y no recargues varias veces seguidas. Si después de un par de minutos sigue igual, revisa tu conexión a internet '
-      f'o escríbenos a <font face="Courier">{CORREO}</font>.')
-
-    h3(story, 'No me llega el correo de confirmación')
-    bullets(story, [
-        'Espera unos minutos y revisa la carpeta de <b>spam</b> o de promociones.',
-        'Confirma que escribiste bien el correo al registrarte.',
-        'Si el sitio dice "Pediste demasiados correos seguidos", espera unos minutos antes de pedir otro.',
-        'Si dice "Ya existe una cuenta con ese correo", ya te registraste: inicia sesión o usa "¿Olvidaste tu contraseña?".',
-        'Si al iniciar sesión dice "Todavía no confirmas tu correo", abre el correo de confirmación y pulsa su enlace.',
-    ])
-
-    h3(story, 'Olvidé mi contraseña')
-    pl(story,
-      'Sigue los pasos de "Recuperar la contraseña" en la sección 3.5. Si al abrir el enlace ves "Este enlace no es válido o ya expiró", '
-      'pide uno nuevo desde "¿Olvidaste tu contraseña?". Si el sitio dice que la contraseña "aparece en filtraciones de datos conocidas", '
-      'elige una distinta: debe tener al menos 8 caracteres.')
-
-    h3t(story, 'No puedo escribir en el debate')
+    h1(story, 4, 'Problemas frecuentes y privacidad')
     agregar_tabla(story, [
-        ['Lo que ves', 'Qué significa y qué hacer'],
-        ['"Inicia sesión para participar en el debate"', 'Para escribir hace falta una cuenta: inicia sesión o crea una.'],
-        ['"Tu cuenta debe tener al menos 1 hora de creada…"', 'Es una protección contra robots: espera una hora desde que creaste la cuenta.'],
-        ['"Debes confirmar que eres mayor de 18 años…"', 'Estás en Corrupción Humana o Ilógica Humana: marca la casilla de confirmación de edad.'],
-        ['"El mensaje no puede superar 200 palabras"', 'Acorta el texto (también al usar Editar). Quien apoya cada mes puede escribir hasta 1000 palabras.'],
-        ['"Completa la verificación antes de publicar"', 'Espera a que termine la verificación de Cloudflare (pasa a marca de verificado) y vuelve a pulsar Publicar.'],
-        ['"Demasiadas publicaciones en poco tiempo"', 'Hay un máximo de 20 envíos cada 15 minutos: espera unos minutos.'],
-    ], [190, CONTENT_W - 190])
-
-    h3(story, 'No puedo pagar o el pago de prueba no funciona')
-    bullets(story, [
-        'Para comprar en la tienda y para el apoyo mensual hay que <b>iniciar sesión</b>. Sin sesión, el carrito avisa "Inicia sesión para completar tu compra".',
-        'Usa solo la tarjeta de prueba <font face="Courier">4242 4242 4242 4242</font>, cualquier fecha futura y cualquier CVC de 3 dígitos. '
-        'Como Stripe está en modo de prueba, una tarjeta real no se acepta y no se cobra nada.',
-        'El carrito se vacía si recargas o cambias de página: vuelve a añadir los productos y paga sin salir de la misma página.',
-        'Tus compras aparecen en <b>Mi cuenta</b>, sección <b>Mis pedidos</b>. Si acabas de pagar, el estado puede pasar de "Pendiente" a "Pagada" '
-        'después de unos instantes: recarga la página.',
-        'Si algo falla de forma repetida, escríbenos con el motivo "Reportar un error" desde Quiénes somos.',
-    ])
-
-    h3(story, 'Otras dudas')
-    bullets(story, [
-        '<b>Mi sesión se cerró sola.</b> Por seguridad, se cierra tras 30 minutos sin actividad. Vuelve a iniciar sesión.',
-        '<b>Veo el sitio en inglés (o en español) y quiero cambiarlo.</b> Usa el botón ES / EN del encabezado.',
-        '<b>No veo Corrupción Humana ni Ilógica Humana en Noticias.</b> Son secciones 18+: aparecen en el collage cuando confirmas la edad (sección 3.3).',
-        '<b>Una pieza muestra solo un adelanto.</b> Es contenido marcado como premium: se ve completo con el apoyo mensual.',
-        '<b>Una pieza dice "Solo en español".</b> Todavía no tiene versión en inglés; se muestra en español.',
-    ])
+        ['Problema', 'Qué hacer'],
+        ['La página tarda mucho en cargar la primera vez', 'Espera hasta 50 segundos: el servidor gratuito se está despertando.'],
+        ['No llega el correo de confirmación', 'Revisa la carpeta de spam y espera unos minutos; si no llega, intenta crear la cuenta de nuevo.'],
+        ['Olvidé mi contraseña', 'En el inicio de sesión elige <b>¿Olvidaste tu contraseña?</b> y sigue el enlace que llega al correo.'],
+        ['Pide un código de 6 dígitos', 'Es la verificación en dos pasos del panel de administración; el código sale de la app de autenticación.'],
+        ['Algo no se ve bien en mi teléfono', f'Actualiza el navegador y escribe a <font face="Courier">{CORREO}</font> con el modelo del teléfono.'],
+    ], [160, CONTENT_W - 160])
+    p(story, '<b>Privacidad y seguridad.</b> Las contraseñas las gestiona el servicio de autenticación (nunca se guardan en el sitio); la API valida el '
+             'token de sesión en cada ruta protegida y las secciones para adultos piden confirmar la edad. No se guardan datos de tarjeta: los pagos '
+             'los procesa Stripe. Más detalle en las páginas de Privacidad y Términos del sitio.')
 
 
 def seccion_privacidad(story):
-    story.append(CondPageBreak(120))
-    h1(story, 5, 'Privacidad y seguridad')
-    pl(story,
-      'Resumen en lenguaje simple. El detalle completo está en la '
-      f'<b>Política de Privacidad</b> (<font face="Courier">{SITIO}/privacidad.html</font>) y en los '
-      f'<b>Términos de uso</b> (<font face="Courier">{SITIO}/terminos.html</font>), enlazados en el pie de cada página.')
-    h3t(story, 'Qué datos se piden y quién los maneja')
-    agregar_tabla(story, [
-        ['Cuándo', 'Qué se pide', 'Quién lo maneja'],
-        ['Crear una cuenta', 'Correo, contraseña (se guarda cifrada) y fecha de nacimiento', 'Supabase'],
-        ['Escribir desde "Quiénes somos"', 'Nombre, correo y mensaje', 'Formspree'],
-        ['Suscribirte al boletín', 'Correo', 'beehiiv'],
-        ['Pagar en la tienda o apoyar', 'Datos de tarjeta, dirección y correo', 'Stripe (el sitio no los ve ni los guarda)'],
-        ['Visitar el sitio', 'Páginas visitadas, dispositivo y ubicación aproximada (estadísticas agregadas)', 'Google Analytics 4'],
-    ], [135, CONTENT_W - 135 - 125, 125])
-    bullets(story, [
-        '<b>Los pagos no pasan por el sitio.</b> Nunca se te piden datos de tu tarjeta en sabiasquepr.com: los escribes en la página de Stripe, '
-        'y el sitio solo guarda tu correo, el identificador de cliente de Stripe y si tu apoyo mensual está activo o cancelado.',
-        '<b>No se venden tus datos.</b> Solo se comparten con los servicios de la tabla, para lo que cada uno hace.',
-        '<b>Protecciones.</b> Verificación de Cloudflare Turnstile en el inicio de sesión y el debate, límites de uso contra abusos, '
-        'cierre de sesión tras 30 minutos de inactividad, rechazo de contraseñas que han aparecido en filtraciones y verificación en dos pasos '
-        'obligatoria para el panel de administración.',
-        '<b>Lo que escribes en un debate o comentario es público</b>, pero se muestra con el nombre de tu perfil o un alias genérico '
-        '("Participante-xxxx"): el debate y los comentarios no muestran correos.',
-        '<b>Tus derechos.</b> Puedes pedir acceso, corrección o eliminación de tus datos, y darte de baja del boletín en cualquier momento. '
-        f'Escribe a <font face="Courier">{CORREO}</font>.',
-        '<b>Recomendación.</b> No compartas tu contraseña ni el código de tu app de autenticación con nadie.',
-    ])
-    figura(story, 'privacidad-escritorio.png',
-           'Política de Privacidad del sitio (privacidad.html): qué datos se recopilan, para qué se usan y cuáles son tus derechos.',
-           recorte=(0, 0, 1280, 700), ancho=400)
-    p(story, f'<font color="#51606E">Este manual describe la versión del sitio publicada en {SITIO.replace("https://", "")} '
-             f'al {fecha_en_letras()}.</font>')
+    return
 
 
-# ── ENSAMBLAJE ──────────────────────────────────────────────
 def build():
     est = datos_estudiante()
     capturas_admin = sorted(glob.glob(os.path.join(CAPTURAS_DIR, 'admin-*.png')))
@@ -1016,12 +552,10 @@ def build():
                     subject='COMP2053 — Desarrollo Web Full-Stack, UIPR Recinto de Fajardo')
     story = []
     build_portada(story)
-    seccion_indice(story)
     seccion_descripcion(story)
     seccion_requisitos(story)
     seccion_guia(story, capturas_admin)
     seccion_faq(story)
-    seccion_privacidad(story)
     doc.multiBuild(story, onFirstPage=draw_footer, onLaterPages=draw_footer)
     print(f'PDF generado: {OUT_PATH}  ({_fig["n"]} figuras, {len(capturas_admin)} capturas de admin)')
 

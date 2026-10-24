@@ -510,7 +510,7 @@ def build_portada(story):
         ['Curso', 'COMP2053 — Desarrollo Web Full-Stack'],
         ['Profesora', 'Milagros Donato Cintrón'],
         ['Institución', 'Universidad Interamericana de Puerto Rico, Recinto de Fajardo'],
-        ['Repositorio', 'github.com/Wcollado72/SabiasquePR'],
+        ['Repositorio', 'github.com/Wcollado72/SabiasquePR-Final'],
         ['Sitio en línea', 'sabiasquepr.com'],
         ['Fecha', fecha_en_letras()],
     ]
@@ -758,11 +758,11 @@ def build():
         'El script completo de creación vive en <font face="Courier">backend/sql/schema.sql</font> y se aplica con '
         '<font face="Courier">npm run db:schema</font>. Un script de comprobación '
         '(<font face="Courier">npm run db:probar-schema</font>) lo ejecuta en un esquema temporal y compara '
-        'columnas, restricciones, índices y RLS con la base real y coinciden todos. Se incluye '
-        'a continuación tal como está en el repositorio.', styles['Body']))
+        'columnas, restricciones, índices y RLS con la base real y coinciden todos. A continuación se muestra '
+        'un extracto (el inicio del script, con las tablas principales); el archivo completo está en el repositorio.', styles['Body']))
     story.append(Spacer(1, 6))
     with open(SCHEMA_SQL_PATH, 'r', encoding='utf-8') as f:
-        sql_text = f.read()
+        sql_text = ''.join(f.readlines()[:170]) + '\n-- ... (el resto del script está en backend/sql/schema.sql)\n'
     pre_style = ParagraphStyle('SqlPre', fontName='Courier', fontSize=7.4, leading=9.6, textColor=INK)
     story.append(HRFlowable(width=CONTENT_W, thickness=0.5, color=LINE, spaceAfter=8))
     story.append(Preformatted(sql_text, pre_style))

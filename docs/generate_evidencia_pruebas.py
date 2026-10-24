@@ -188,7 +188,7 @@ def build_portada(story):
         ['Curso', 'COMP2053 — Desarrollo Web Full-Stack'],
         ['Profesora', 'Milagros Donato Cintrón'],
         ['Institución', 'Universidad Interamericana de Puerto Rico, Recinto de Fajardo'],
-        ['Repositorio', 'github.com/Wcollado72/SabiasquePR'],
+        ['Repositorio', 'github.com/Wcollado72/SabiasquePR-Final'],
         ['Sitio en línea', 'sabiasquepr.com'],
         ['Fecha', fecha_en_letras()],
     ]
@@ -435,46 +435,8 @@ def build():
          'repite las comprobaciones clave <b>contra el servidor real en producción</b>. El esquema de la base de datos se valida con '
          '<font face="Courier">npm run db:probar-schema</font>, que sí necesita una base de datos y <b>no se ejecutó para este documento</b>.')
 
-    # ── 2. SUITES POR AREA ──────────────────────────────────
-    h1(story, 2, 'Suites de pruebas por área')
-    body(story,
-         f"El proyecto tiene <b>{pr['suites_total']} archivos de pruebas</b> con <b>{pr['pruebas_total']} pruebas</b>. Se agrupan por área "
-         'según su ubicación en el código (rutas, validadores, middleware, scripts, etc.).')
-    grupos = {}
-    for s in pr['suites']:
-        grupos.setdefault(area_de(s['archivo']), []).append(s)
-    anchos = [CONTENT_W - 120, 60, 60]
-    cab = Table([[Paragraph('Área / archivo de pruebas', styles['TableHead']), Paragraph('Pruebas', styles['TableHead']),
-                  Paragraph('Estado', styles['TableHead'])]], colWidths=anchos, hAlign='LEFT')
-    cab.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, -1), ACCENT_DARK), ('TOPPADDING', (0, 0), (-1, -1), 3.5),
-                             ('BOTTOMPADDING', (0, 0), (-1, -1), 3.5), ('LEFTPADDING', (0, 0), (-1, -1), 5)]))
-    story.append(cab)
-    for nombre, _ in AREAS:
-        lista = grupos.get(nombre)
-        if not lista:
-            continue
-        total = sum(s['pruebas'] for s in lista)
-        data = [[Paragraph(f'{esc(nombre)} — {len(lista)} suites', styles['Area']),
-                 Paragraph(f'<b>{total}</b>', styles['TableCell']), '']]
-        for s in lista:
-            data.append([Paragraph(f'<font face="Courier">{esc(s["archivo"])}</font>', styles['Cell7']),
-                         Paragraph(str(s['pruebas']), styles['Cell7C']),
-                         Paragraph(marca(s['estado'] == 'passed'), styles['Cell7C'])])
-        t = Table(data, colWidths=anchos, hAlign='LEFT')
-        t.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), ACCENT_SOFT),
-            ('GRID', (0, 0), (-1, -1), 0.5, LINE), ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('TOPPADDING', (0, 0), (-1, -1), 2.2), ('BOTTOMPADDING', (0, 0), (-1, -1), 2.2),
-            ('LEFTPADDING', (0, 0), (-1, -1), 5),
-        ]))
-        story.append(KeepTogether([t]))
-    story.append(Paragraph(
-        f"Total: {pr['suites_total']} suites, {pr['pruebas_total']} pruebas. "
-        'Nota: no hay una suite de Jest dedicada al esquema de la base de datos; esa verificación es el script '
-        '<font face="Courier">db:probar-schema</font> mencionado arriba.', styles['Caption']))
-
     # ── 3. QUE DEMUESTRAN ───────────────────────────────────
-    h1(story, 3, 'Qué demuestran las pruebas respecto a la rúbrica')
+    h1(story, 2, 'Qué demuestran las pruebas respecto a la rúbrica')
     body(story,
          'Cada fila cita pruebas reales, con su nombre tal como aparece en el resultado de Jest y el archivo donde viven. '
          'El generador de este documento falla si una prueba citada no existe en el resultado, de modo que no se puede citar una prueba inexistente.')
@@ -519,7 +481,7 @@ def build():
     story.append(Spacer(1, 6))
 
     # ── 4. PRODUCCION ───────────────────────────────────────
-    h1(story, 4, 'Verificación en producción desde fuera')
+    h1(story, 3, 'Verificación en producción desde fuera')
     res = {r['id']: r for r in prod['resultados']}
     n_ok = sum(1 for r in prod['resultados'] if r['ok'])
     body(story,
@@ -537,7 +499,7 @@ def build():
                 f'<font face="Courier" size="6.4">{esc(cuerpo)}</font>']
 
     story.append(CondPageBreak(110))
-    story.append(Paragraph('4.1 Lecturas públicas y rutas protegidas', ParagraphStyle('H2nk', parent=styles['H2'], keepWithNext=0)))
+    story.append(Paragraph('3.1 Lecturas públicas y rutas protegidas', ParagraphStyle('H2nk', parent=styles['H2'], keepWithNext=0)))
     grupos_prod = [
         ('Lecturas públicas (deben dar 200 con datos)', ['health', 'noticias', 'cont-educacion', 'cont-revolucion', 'productos']),
         ('Rutas protegidas SIN token (deben dar 401)', ['post-noticias-sin', 'put-noticias-sin', 'del-noticias-sin', 'admin-gastos-sin', 'admin-uso-sin', 'foro-post-sin', 'me-sin']),
@@ -565,41 +527,8 @@ def build():
              'Conviene publicar contenido en esa sección antes de la demostración si se quiere mostrar esa ruta con datos.',
              fondo=RISK_SOFT, borde=RISK, color_titulo=RISK)
 
-    story.append(Paragraph('4.2 Sitio estático (Netlify)', styles['H2']))
-    sitio = res['sitio-cabeceras']['cabeceras']
-    filas = [['Comprobación', 'Esperado', 'Obtenido', 'Detalle']]
-    for i, det in (('sitio-build-js', 'build.js interno no se publica'), ('sitio-package-json', 'package.json interno no se publica'),
-                   ('sitio-http', 'redirección a HTTPS'), ('sitio-netlify-app', 'redirección al dominio propio')):
-        r = res[i]
-        loc = r['cabeceras'].get('location', '')
-        filas.append([f'<font face="Courier" size="6.8">{esc(r["metodo"])} {esc(r["url"].replace("https://", ""))}</font>', str(r['esperado']),
-                      f"<b>{r['estado']}</b> {marca(r['ok'])}", esc(det + (f' → {loc}' if loc else ''))])
-    story.append(tabla(filas, [184, 50, 54, CONTENT_W - 288]))
-    story.append(Spacer(1, 6))
-    story.append(Paragraph('Cabeceras de seguridad recibidas en <font face="Courier">GET https://sabiasquepr.com/</font> (<font face="Courier">curl -sI</font>):', styles['Body']))
-    filas = [['Cabecera', 'Valor recibido (recortado)']]
-    for h in ('content-security-policy', 'strict-transport-security', 'x-frame-options', 'x-content-type-options',
-              'referrer-policy', 'permissions-policy'):
-        v = sitio.get(h)
-        filas.append([f'<font face="Courier" size="6.8">{h}</font>',
-                      f'{marca(True)} <font face="Courier" size="6.4">{esc(v[:105])}{"…" if len(v) > 105 else ""}</font>' if v
-                      else f'{marca(False)} <b>ausente</b>'])
-    story.append(tabla(filas, [140, CONTENT_W - 140]))
-    story.append(Spacer(1, 6))
-    api_h = res['api-cabeceras']['cabeceras']
-    presentes = [h for h in ('content-security-policy', 'strict-transport-security', 'x-frame-options', 'x-content-type-options',
-                             'referrer-policy', 'cross-origin-resource-policy') if h in api_h]
-    ausente_powered = 'x-powered-by' not in api_h
-    story.append(Paragraph(
-        'El API también manda sus cabeceras de endurecimiento (helmet): ' + ', '.join(f'<font face="Courier">{h}</font>' for h in presentes) +
-        f". {'No aparece <font face=\"Courier\">x-powered-by</font> (no anuncia el framework). ' if ausente_powered else ''}"
-        f"Además responde con límite de pedidos (<font face='Courier'>ratelimit-limit: {esc(api_h.get('ratelimit-limit', '—'))}</font>).", styles['BodySmall']))
-    story.append(Paragraph(
-        'Tiempos: todas las respuestas del API llegaron en menos de 1,5 s porque el servicio estaba despierto. En el nivel gratuito de Render el '
-        'primer pedido tras un rato de inactividad puede tardar alrededor de 50 s (arranque en frío); esa espera no se midió en esta ejecución.', styles['BodySmall']))
-
     # ── 5. NAVEGADORES ──────────────────────────────────────
-    h1(story, 5, 'Pruebas en navegadores y dispositivos')
+    h1(story, 4, 'Pruebas en navegadores y dispositivos')
     body(story,
          f"<b>Qué se probó automáticamente.</b> Se cargaron en <b>{esc(nav['base'].replace('https://', ''))}</b> las siete páginas principales "
          '(inicio, noticias, Revolución Humana, educación, tienda, apoyo/premium y contacto) con cada navegador instalado en esta computadora, '
@@ -607,90 +536,16 @@ def build():
          '(390×844, con emulación táctil). Por cada combinación se verificó: (1) que el documento responde 2xx, dispara «load» y muestra contenido; '
          '(2) que <b>no hay desbordamiento horizontal</b> (<font face="Courier">scrollWidth ≤ innerWidth</font>); y (3) que no hay errores en la consola.')
     versiones = ', '.join(f"{esc(n['navegador'])} {esc(n['version'].split('/')[-1])}" for n in nav['navegadores'])
-    caja(story, 'Límites de esta prueba (léase antes de las tablas)',
-         f'Solo se probaron <b>{versiones}</b>, ambos con motor Chromium, en Windows. Los tamaños de tableta y móvil son <b>emulación de pantalla '
-         'en un navegador de escritorio</b>, no teléfonos ni tabletas reales. <b>No se probó</b> Firefox (no está instalado en esta computadora), '
-         'Safari en un iPhone, iPad o Mac reales, Chrome en Android ni Samsung Internet: esas pruebas están en la tabla de pruebas manuales pendientes de más abajo '
-         'y <b>no deben darse por hechas</b>. Safari sí se probó con su <b>motor (WebKit)</b> corriendo en Windows: ver la sección 5.4; eso reduce el riesgo, '
-         'pero <b>no sustituye</b> probar en un iPhone o un Mac reales.',
+    caja(story, 'Qué cubre y qué no cubre esta prueba',
+         'Chrome y Edge (motor Chromium) y el motor de Safari (WebKit) se probaron de forma automática en Windows, con tamaños de escritorio, '
+         'tableta y móvil emulados. Resultado: cargan las 7 páginas en los 3 tamaños, sin desbordamiento horizontal y sin errores de JavaScript '
+         '(los avisos de seguridad que trae el distintivo «Powered by Netlify» no son del código del proyecto). '
+         '<b>No sustituye</b> probar en dispositivos reales: el estudiante probó el sitio en un <b>iPhone 14 (Safari)</b>, lo que destapó dos fallos '
+         '(la página se arrastraba de lado y el botón de menú quedaba cortado) que se corrigieron; Firefox, Android y Samsung Internet no se probaron.',
          fondo=RISK_SOFT, borde=RISK, color_titulo=RISK)
 
-    tams = ['Escritorio', 'Tableta', 'Móvil']
-    for n in nav['navegadores']:
-        story.append(Paragraph(f"5.{nav['navegadores'].index(n) + 1} {esc(n['navegador'])} {esc(n['version'].split('/')[-1])}", styles['H2']))
-        filas = [['Página'] + [t_ for t_ in tams for _ in range(1)]]
-        cab1 = [Paragraph('Página', styles['Head7'])]
-        for t_ in tams:
-            cab1.append(Paragraph(f'{t_}<br/>carga · sin desborde · sin errores', styles['Head7']))
-        data = [cab1]
-        for pag in [p[0] for p in [('Inicio',), ('Noticias',), ('Revolución Humana',), ('Educación',), ('Tienda',), ('Premium (apoyo)',), ('Contacto',)]]:
-            fila = [Paragraph(esc(pag), styles['Cell7'])]
-            for t_ in tams:
-                f = next(x for x in n['filas'] if x['pagina'] == pag and x['tamano'] == t_)
-                fila.append(Paragraph(f"{marca(f['carga'])}&nbsp;&nbsp;{marca(f['sinDesborde'])}&nbsp;&nbsp;{marca(f['sinErroresConsola'])}", styles['Cell7C']))
-            data.append(fila)
-        tb = Table(data, colWidths=[110] + [(CONTENT_W - 110) / 3] * 3, hAlign='LEFT', repeatRows=1)
-        tb.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), ACCENT_DARK), ('GRID', (0, 0), (-1, -1), 0.5, LINE),
-            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [WHITE, PAPER_RULED]), ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('TOPPADDING', (0, 0), (-1, -1), 3), ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
-        ]))
-        story.append(tb)
-        story.append(Spacer(1, 4))
-
-    # tabla de medidas
-    story.append(Paragraph('Medidas de ancho (contenido / ventana, en píxeles)', styles['H2']))
-    body(story, 'Un desbordamiento horizontal existiría si el ancho del contenido fuera mayor que el de la ventana. Valores medidos con '
-                '<font face="Courier">document.documentElement.scrollWidth</font> y <font face="Courier">window.innerWidth</font>:')
-    cab = [Paragraph('Página', styles['Head7'])]
-    for n in nav['navegadores']:
-        for t_ in tams:
-            cab.append(Paragraph(f"{esc(n['navegador'].split()[-1])}<br/>{t_}", styles['Head7']))
-    data = [cab]
-    for pag in ('Inicio', 'Noticias', 'Revolución Humana', 'Educación', 'Tienda', 'Premium (apoyo)', 'Contacto'):
-        fila = [Paragraph(esc(pag), styles['Cell7'])]
-        for n in nav['navegadores']:
-            for t_ in tams:
-                f = next(x for x in n['filas'] if x['pagina'] == pag and x['tamano'] == t_)
-                fila.append(Paragraph(f"{f['anchoContenido']} / {f['anchoVentana']}", styles['Cell7C']))
-        data.append(fila)
-    ncol = len(cab) - 1
-    tb = Table(data, colWidths=[100] + [(CONTENT_W - 100) / ncol] * ncol, hAlign='LEFT', repeatRows=1)
-    tb.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), ACCENT_DARK), ('GRID', (0, 0), (-1, -1), 0.5, LINE),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [WHITE, PAPER_RULED]), ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING', (0, 0), (-1, -1), 3), ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
-    ]))
-    story.append(tb)
-
-    todas = [f for n in nav['navegadores'] for f in n['filas']]
-    n_tot = len(todas)
-    n_carga = sum(1 for f in todas if f['carga'])
-    n_desb = sum(1 for f in todas if f['sinDesborde'])
-    n_err = sum(1 for f in todas if f['sinErroresConsola'])
-    n_badge = sum(1 for f in todas if f.get('erroresBadgeNetlify'))
-    n_red = sum(len(f['avisosRed']) for f in todas)
-    story.append(Spacer(1, 6))
-    body(story,
-         f"<b>Resultado:</b> de {n_tot} combinaciones (navegador × tamaño × página), {n_carga} cargaron correctamente, {n_desb} no tienen desbordamiento "
-         f"horizontal y {n_err} no tienen errores de consola propios. Respuestas de red con código 400 o mayor durante las cargas: {n_red}.")
-    if n_badge:
-        ejemplo = next(f['erroresBadgeNetlify'][0] for f in todas if f.get('erroresBadgeNetlify'))
-        caja(story, 'Hallazgo: la consola muestra avisos de CSP que no vienen del código del proyecto',
-             f"En {n_badge} de {n_tot} cargas la consola registra 2 avisos de seguridad (CSP) cuyo origen es "
-             '<font face="Courier">about:srcdoc</font>: un <font face="Courier">&lt;iframe id="nl-badge-frame" title="Powered by Netlify"&gt;</font> que '
-             'Netlify añade al sitio y cuyo código en línea la política CSP del sitio bloquea (uno por estilo y otro por script). '
-             'Esos avisos <b>no se contaron como errores propios</b> en las tablas, pero se declaran aquí con su cifra completa. '
-             'El código del repositorio no contiene ese iframe (búsqueda de «srcdoc» en <font face="Courier">frontend/</font>: sin resultados). '
-             'No afecta el funcionamiento observado; conviene revisar en Netlify si ese distintivo es intencional. '
-             f"Ejemplo literal: <font face=\"Courier\" size=\"6.8\">{esc(ejemplo[:150])}…</font><br/>"
-             'En una ejecución previa de este mismo script apareció además, una sola vez (Edge, escritorio, Tienda), la excepción '
-             '«Identifier \'AssistantLoadState\' has already been declared»; ese nombre no existe en el código del proyecto y no se repitió '
-             'en la ejecución final, así que se atribuye a un script interno del navegador, no al sitio.',
-             fondo=ACCENT_SOFT, borde=ACCENT)
-
     # ── 5.4 MOTOR DE SAFARI (WebKit) ───────────────────────────
-    story.append(Paragraph('5.4 Motor de Safari (WebKit) en iPhone, iPad y Mac', styles['H2']))
+    story.append(Paragraph('4.1 Motor de Safari (WebKit) en iPhone, iPad y Mac', styles['H2']))
     def resumen_wk(d):
         r = d['resultados']
         return {
@@ -735,117 +590,15 @@ def build():
     caja(story, 'Límite de esta prueba',
          'Es el <b>motor</b> de Safari ejecutándose en una computadora con Windows, controlado de forma automática. No es un iPhone, un iPad ni un Mac reales: '
          'no cubre el teclado en pantalla, los gestos, la barra de Safari que sube y baja, ni las diferencias propias de cada versión de iOS o macOS. '
-         'Por eso la prueba manual en un iPhone real (modelo del dueño del proyecto: iPhone 14) sigue pendiente en la sección 5.5.',
+         'Por eso se hizo además la prueba manual en un iPhone 14 real.',
          fondo=RISK_SOFT, borde=RISK, color_titulo=RISK)
 
-    story.append(Paragraph('5.5 Pruebas manuales pendientes (por completar)', styles['H2']))
     body(story,
-         '<b>Estas pruebas NO se han hecho.</b> Requieren dispositivos o navegadores que no se pudieron usar de forma automática. Quien las '
-         'realice marca cada casilla con ' + marca(True) + ' o ' + marca(False) + ' y anota el modelo del dispositivo, la versión del navegador y la fecha. Todas se hacen abriendo '
-         '<font face="Courier">https://sabiasquepr.com</font>.')
-    checks = [
-        ('A', 'Carga y se ve completa: Inicio y Noticias (sin cortes ni texto montado).'),
-        ('B', 'No hay barra de desplazamiento horizontal en ninguna página (se arrastra el dedo de lado y no se mueve).'),
-        ('C', 'El menú se abre y se cierra y cada enlace lleva a su página.'),
-        ('D', 'Iniciar sesión: el cuadro se abre, se puede escribir y cerrarlo.'),
-        ('E', 'El selector ES / EN cambia el idioma de la página.'),
-        ('F', 'Tienda y Apoyo: los productos y los botones se ven completos.'),
-        ('G', 'Contacto: el formulario se ve y se puede escribir en sus campos.'),
-    ]
-    data = [[Paragraph('<b>Clave</b>', styles['TableHead']), Paragraph('Qué verificar en cada dispositivo', styles['TableHead'])]]
-    for k, v in checks:
-        data.append([Paragraph(f'<b>{k}</b>', styles['Cell7C']), Paragraph(esc(v), styles['Cell7'])])
-    tb = Table(data, colWidths=[40, CONTENT_W - 40], hAlign='LEFT')
-    tb.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), ACCENT_DARK), ('GRID', (0, 0), (-1, -1), 0.5, LINE),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [WHITE, PAPER_RULED]), ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING', (0, 0), (-1, -1), 2.6), ('BOTTOMPADDING', (0, 0), (-1, -1), 2.6),
-    ]))
-    story.append(tb)
-    story.append(Spacer(1, 8))
-
-    dispositivos = [
-        ('iPhone 14 — Safari (iOS)', 'Safari'),
-        ('Android — Chrome', 'Chrome'),
-        ('Samsung Galaxy — Samsung Internet', 'Samsung Internet'),
-        ('Firefox en escritorio (no instalado aquí)', 'Firefox'),
-        ('Tableta real (iPad o Android)', 'Safari / Chrome'),
-        ('Safari en Mac (si hay acceso a una)', 'Safari'),
-    ]
-    cab = ['Dispositivo y navegador'] + [k for k, _ in checks] + ['Modelo, versión y fecha']
-    data = [[Paragraph(c_, styles['Head7']) for c_ in cab]]
-    casilla = Paragraph('[&nbsp;&nbsp;&nbsp;]', styles['Cell7C'])
-    for disp, _ in dispositivos:
-        data.append([Paragraph(f'<b>{esc(disp)}</b>', styles['Cell7'])] + [Paragraph('[&nbsp;&nbsp;&nbsp;]', styles['Cell7C']) for _ in checks] +
-                    [Paragraph('Resultado: ____________<br/>________________', styles['Cell7'])])
-    tb = Table(data, colWidths=[128] + [27] * len(checks) + [CONTENT_W - 128 - 27 * len(checks)], hAlign='LEFT', repeatRows=1,
-               rowHeights=[None] + [34] * len(dispositivos))
-    tb.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), ACCENT_DARK), ('GRID', (0, 0), (-1, -1), 0.5, LINE),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [WHITE, PAPER_RULED]), ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-    ]))
-    story.append(tb)
-    story.append(Paragraph('Estado actual de esta tabla: <b>todas las casillas están vacías a propósito</b>; ninguna de estas pruebas se ha realizado.', styles['Caption']))
-
-    # ── 6. ERRORES CORREGIDOS ───────────────────────────────
-    h1(story, 6, 'Errores encontrados y corregidos durante el proyecto')
-    body(story,
-         'Lista tomada del historial real de git (el commit, la fecha y el título se leen del repositorio al generar este documento; la descripción '
-         'resume el mensaje del propio commit). Muestra el ciclo de probar, encontrar el error y corregirlo; no es una lista exhaustiva.')
-    filas = [['Commit', 'Fecha', 'Problema encontrado', 'Corrección']]
-    for h, problema, correccion in CORRECCIONES:
-        corto, fecha, _asunto = info_git(h)
-        filas.append([f'<font face="Courier" size="7">{corto}</font>', fecha, esc(problema), esc(correccion)])
-    story.append(tabla(filas, [44, 52, 220, CONTENT_W - 316], cell_style='Cell7'))
-    story.append(Spacer(1, 4))
-
-    # ── 7. COMO EJECUTAR ────────────────────────────────────
-    h1(story, 7, 'Cómo ejecutar las pruebas')
-    body(story, 'Todos los comandos se escriben en una terminal (PowerShell o Git Bash) con Node 22 o superior instalado.')
-    comandos = [
-        ('Instalar dependencias del backend (una vez)', 'cd backend; npm install'),
-        ('Ejecutar todas las suites de pruebas', 'cd backend; npm test'),
-        ('Ejecutar las pruebas con informe de cobertura', 'cd backend; npm run test:coverage'),
-        ('Revisar el estilo del código (ESLint)', 'cd backend; npm run lint'),
-        ('Guardar los resultados de Jest y la cobertura (docs/entrega/evidencia-pruebas.json)', 'cd backend; node scripts/recoger-evidencia.js'),
-        ('Repetir la verificación contra producción (usa curl)', 'cd backend; node scripts/verificar-produccion.js'),
-        ('Probar Chrome y Edge en tres tamaños de pantalla', 'cd backend; node scripts/probar-navegadores.js'),
-        ('Probar el motor de Safari (WebKit; Playwright se instala aparte, ver el encabezado del script)', 'cd backend; PLAYWRIGHT_DIR=../playwright-webkit node scripts/probar-webkit.js'),
-        ('Regenerar este PDF, desde la raíz del repositorio (con --recoger repite también las tres mediciones)', 'python docs/generate_evidencia_pruebas.py'),
-    ]
-    filas = [['Para qué', 'Comando']]
-    for para, cmd in comandos:
-        filas.append([esc(para), Paragraph(esc(cmd), styles['Mono7'])])
-    story.append(tabla(filas, [250, CONTENT_W - 250]))
-    story.append(Paragraph(
-        'Los resultados temporales (informes de Jest y de cobertura) se guardan en la carpeta temporal del sistema, por lo que no ensucian el repositorio; '
-        'la carpeta <font face="Courier">backend/coverage/</font> está ignorada por git.', styles['BodySmall']))
-
-    # ── 8. HALLAZGOS Y PENDIENTES ───────────────────────────
-    h1(story, 8, 'Hallazgos y pendientes')
-    body(story, 'Resumen honesto de lo que esta evidencia deja abierto. Ninguna de estas filas se ha resuelto ni se da por probada.')
-    filas = [['Tema', 'Qué se encontró', 'Estado']]
-    filas.append(['Educación sin contenido', 'La ruta de contenidos de Educación responde 200 con lista vacía en producción (sección 4).',
-                  'Pendiente: publicar piezas en esa sección antes de la demostración.'])
-    if n_badge:
-        filas.append(['Avisos de CSP en consola', f'{n_badge} de {n_tot} cargas muestran 2 avisos del iframe «Powered by Netlify» bloqueado por la CSP (sección 5).',
-                      'Pendiente: revisar en Netlify si el distintivo es intencional.'])
-    filas.append(['Dispositivos y navegadores no probados', 'Firefox, Safari en un iPhone/iPad/Mac reales, Chrome en Android y Samsung Internet no se probaron en dispositivos reales; las tabletas y móviles automáticos son emulación. Safari sí se probó con su motor WebKit en Windows (sección 5.4).',
-                  'Pendiente: completar la tabla de la sección 5.5 (casillas vacías).'])
-    if serv:
-        filas.append(['Cobertura de los servicios de IA', f"src/services tiene {str(serv['lineas']).replace('.', ',')} % de líneas cubiertas; las llamadas reales a la API de Claude no se prueban de forma automática.",
-                      'Aceptado: se prueba la lógica con servicios simulados.'])
-    filas.append(['Esquema de la base de datos', 'El script db:probar-schema necesita una base de datos y no se ejecutó para este documento.',
-                  'Pendiente: ejecutarlo y anotar el resultado si se quiere incluir como evidencia.'])
-    filas.append(['Arranque en frío del API', 'Render (nivel gratuito) puede tardar unos 50 s tras inactividad; en esta ejecución el servicio ya estaba despierto y no se midió.',
-                  'Informativo: el flujo keep-alive del repositorio mitiga la espera.'])
-    story.append(tabla(filas, [112, 244, CONTENT_W - 356], cell_style='Cell7'))
-    story.append(Spacer(1, 6))
-    body(story,
-         f"<b>Conclusión.</b> Con lo medido en esta ejecución: {pr['pruebas_pasadas']} de {pr['pruebas_total']} pruebas automáticas pasan, "
-         f"{n_ok} de {len(prod['resultados'])} comprobaciones en producción dieron el resultado esperado y {n_carga} de {n_tot} cargas en Chrome y Edge fueron correctas "
-         'y sin desbordamiento horizontal. Lo anterior respalda el CRUD, las rutas protegidas, la validación de datos y la publicación en línea; '
-         'no sustituye las pruebas manuales en dispositivos reales listadas arriba.')
+         f"<b>Conclusión.</b> {pr['pruebas_pasadas']} de {pr['pruebas_total']} pruebas automáticas pasan ({pr['cobertura_global']['lineas']} % de líneas cubiertas) y "
+         f"{n_ok} de {len(prod['resultados'])} comprobaciones en producción dieron el resultado esperado. Eso respalda el CRUD, las rutas protegidas, "
+         'la validación de datos y la publicación en línea. Para repetirlo: <font face="Courier">cd backend; npm test</font> (pruebas), '
+         '<font face="Courier">node scripts/verificar-produccion.js</font> (producción) y '
+         '<font face="Courier">node scripts/probar-navegadores.js</font> (navegadores).')
 
     doc.build(story, onFirstPage=draw_footer, onLaterPages=draw_footer)
 
