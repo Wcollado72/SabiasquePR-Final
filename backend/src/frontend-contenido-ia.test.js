@@ -32,11 +32,11 @@ describe('etiquetas del formulario de Contenidos', () => {
 describe('Rellenar desde la URL: qué se escribe', () => {
   const f = new Function(`${entre(leer('admin.js'), 'metadatos-fuente')}
     return { planRellenado, mensajeRellenado };`)();
-  const vacias = { 'ac-cita-autor': '', 'ac-cita-anio': '', 'ac-cita-titulo-original': '', 'ac-fuente-texto': '' };
+  const vacias = { 'ac-cita-autor': '', 'ac-cita-anio': '', 'ac-cita-titulo-original': '', 'ac-fuente-texto': '', 'ac-cita-estilo': '' };
 
   test('rellena lo que la página trae y deja vacío (y avisa) lo que no', () => {
-    const plan = f.planRellenado({ autorFuente: 'Ana', anio: '2025', tituloOriginal: '', nombreFuente: 'BBC' }, vacias, {});
-    expect(plan.rellenar.map((r) => r.id)).toEqual(['ac-cita-autor', 'ac-cita-anio', 'ac-fuente-texto']);
+    const plan = f.planRellenado({ autorFuente: 'Ana', anio: '2025', tituloOriginal: '', nombreFuente: 'BBC', estiloSugerido: 'apa' }, vacias, {});
+    expect(plan.rellenar.map((r) => r.id)).toEqual(['ac-cita-autor', 'ac-cita-anio', 'ac-fuente-texto', 'ac-cita-estilo']);
     expect(plan.sinDato).toEqual(['Título del artículo original']);
     expect(f.mensajeRellenado(plan)).toContain('La página no lo declara (queda vacío): Título del artículo original.');
   });
@@ -51,7 +51,7 @@ describe('Rellenar desde la URL: qué se escribe', () => {
   test('si la página no trae nada, no escribe nada', () => {
     const plan = f.planRellenado({}, vacias, {});
     expect(plan.rellenar).toEqual([]);
-    expect(plan.sinDato).toHaveLength(4);
+    expect(plan.sinDato).toHaveLength(5);
   });
 });
 

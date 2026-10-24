@@ -901,11 +901,13 @@
   const MESAS = {
     contenido: {
       destino: 'contenido', idiomaPieza: 'ac-idioma-original',
+      revision: { titulo: 'ac-titulo', resumen: 'ac-subtitulo', cuerpo: 'ac-cuerpo', seccion: 'ac-seccion' },
       campos: { seccion: 'ac-seccion', clasificacion: 'ac-clasificacion', region: 'ac-enfoque', formato: 'ac-tipo-formato', subformato: 'ac-subformato' },
       mostrarNivel: (n) => activarSynthPanel(n), estadoNivel: '#synth-levels [data-status="clasificacion"]',
     },
     noticia: {
       destino: 'noticia', idiomaPieza: 'an-idioma-original',
+      revision: { titulo: 'an-titulo', resumen: null, cuerpo: 'an-parrafos', seccion: null },
       campos: { clasificacion: 'an-categoria' },
       mostrarNivel: (n) => activarNewsPanel(n), estadoNivel: '#news-levels [data-status="clasificacion"]',
     },
@@ -944,6 +946,11 @@
     document.getElementById(`brigada-deshacer-${clave}`).hidden = true;
     document.getElementById(`brigada-estado-${clave}`).textContent = '';
     document.getElementById(`brigada-fuente-idioma-${clave}`).textContent = '';
+    const informe = document.getElementById(`brigada-revision-${clave}`);
+    informe.hidden = true;
+    informe.innerHTML = '';
+    const rec = document.getElementById(`brigada-recomendacion-${clave}`);
+    if (rec) rec.textContent = '';
     estadoNivelClasificacion(clave, null);
   }
 
@@ -1009,15 +1016,153 @@
     const estado = document.getElementById(`brigada-estado-${clave}`);
     const urlEl = document.getElementById(`brigada-url-${clave}`);
     const url = urlEl.value.trim();
-    if (!url) { estado.textContent = 'Pega primero la URL de la fuente.'; return; }
+    if (!url) { estado.textContent = 'Pega primero la URL de la fuente.'; return false; }
     const boton = document.getElementById(`brigada-clasificar-${clave}`);
     boton.disabled = true;
     estado.textContent = '🐸 Doña Fichas está leyendo la fuente...';
     try {
       const data = await apiFetch('/api/admin/brigada/clasificar', { method: 'POST', body: JSON.stringify({ url, destino: cfg.destino }) });
       aplicarClasificacion(clave, data);
+      return true;
     } catch (err) {
       estado.textContent = 'Doña Fichas no pudo leer la fuente: ' + err.message;
+      return false;
+    } finally {
+      boton.disabled = false;
+    }
+  }
+
+  // ── LA BRIGADA COQUÍ · recomendación y «Equipo completo» ─
+  // La mesa recomienda qué agentes poner a trabajar según la URL (sin IA, gratis) y «Equipo completo» las corre en orden.
+  // INICIO brigada-equipo
+  const HOSTS_FUENTE = {
+    video: ['youtube.com', 'youtu.be', 'vimeo.com', 'dailymotion.com', 'tiktok.com', 'twitch.tv'],
+    audio: ['open.spotify.com', 'podcasts.apple.com', 'soundcloud.com', 'anchor.fm', 'spotify.link'],
+    foto: ['flickr.com', 'instagram.com', 'unsplash.com', '500px.com', 'pinterest.com'],
+  };
+  const NOMBRE_AGENTE = { investigadora: 'Doña Pesquisa', clasificadora: 'Doña Fichas', redactora: 'La Pluma', bibliotecaria: 'La Bibliotecaria', guardiana: 'La Guardiana' };
+  function formatoDeHost(host) {
+    const h = String(host || '').toLowerCase().replace(/^www\./, '');
+    return Object.keys(HOSTS_FUENTE).find((f) => HOSTS_FUENTE[f].some((d) => h === d || h.endsWith('.' + d))) || null;
+  }
+  // Que agentes conviene poner a trabajar con esta URL (y este texto pegado), en orden de trabajo.
+  function recomendarBrigada(url, textoPegado) {
+    const u = String(url || '').trim();
+    const hayTexto = Boolean(String(textoPegado || '').trim());
+    if (!u && !hayTexto) return null;
+    if (!u) return { agentes: ['investigadora', 'redactora', 'guardiana'], mensaje: 'Con solo el texto pegado: Doña Pesquisa lo investiga, La Pluma redacta y La Guardiana revisa. Doña Fichas y La Bibliotecaria necesitan una URL.' };
+    let host;
+    try { host = new URL(u).hostname; } catch { return { agentes: [], mensaje: 'La URL no parece válida: revisa que empiece con https://' }; }
+    const formato = formatoDeHost(host);
+    if (formato) {
+      const nombre = { video: 'un video', audio: 'un audio', foto: 'una foto' }[formato];
+      return hayTexto
+        ? { agentes: ['investigadora', 'clasificadora', 'redactora', 'bibliotecaria', 'guardiana'], formato, mensaje: `Es ${nombre} y ya pegaste su texto: recomiendo el equipo completo.` }
+        : { agentes: ['clasificadora', 'bibliotecaria'], formato, mensaje: `Es ${nombre}: no hay una página de texto que leer. Pega su transcripción en el cuadro de Doña Pesquisa para investigarlo y redactar; mientras tanto Doña Fichas y La Bibliotecaria sí pueden trabajar con la URL.` };
+    }
+    return { agentes: ['investigadora', 'clasificadora', 'redactora', 'bibliotecaria', 'guardiana'], mensaje: 'Recomiendo el equipo completo: Doña Pesquisa investiga, Doña Fichas clasifica, La Pluma redacta (y Doña Breve resume), La Bibliotecaria cita y La Guardiana revisa.' };
+  }
+  function pasosEquipo(agentes) {
+    return ['investigadora', 'clasificadora', 'redactora', 'bibliotecaria', 'guardiana'].filter((a) => agentes.includes(a));
+  }
+  // FIN brigada-equipo
+
+  function mostrarRecomendacion() {
+    const el = document.getElementById('brigada-recomendacion-contenido');
+    const rec = recomendarBrigada(document.getElementById('brigada-url-contenido').value, document.getElementById('ia-texto').value);
+    el.textContent = rec ? `💡 ${rec.mensaje}` : '';
+    return rec;
+  }
+
+  let equipoEnMarcha = false;
+  async function equipoCompleto() {
+    if (equipoEnMarcha) return;
+    const recomendacion = document.getElementById('brigada-recomendacion-contenido');
+    const rec = mostrarRecomendacion();
+    if (!rec || !rec.agentes.length) {
+      recomendacion.textContent = '💡 Pega primero la URL de la fuente (o un texto) para que el equipo sepa por dónde empezar.';
+      return;
+    }
+    const pasos = pasosEquipo(rec.agentes);
+    if (!confirm(`Voy a poner a trabajar, en este orden: ${pasos.map((p) => NOMBRE_AGENTE[p]).join(' → ')}.\n\nUsa IA (unos centavos en total; con búsqueda web activada, un poco más) y no guarda nada: tú revisas todo. ¿Seguir?`)) return;
+    const ejecutores = {
+      investigadora: () => investigarFuente(),
+      clasificadora: () => clasificarConBrigada('contenido'),
+      redactora: () => redactarConIA(),
+      bibliotecaria: () => rellenarDesdeUrl(false),
+      guardiana: () => revisarConGuardiana('contenido'),
+    };
+    equipoEnMarcha = true;
+    const boton = document.getElementById('brigada-equipo-contenido');
+    boton.disabled = true;
+    let hechos = 0;
+    try {
+      for (const [i, paso] of pasos.entries()) {
+        recomendacion.textContent = `🐸 Paso ${i + 1} de ${pasos.length}: ${NOMBRE_AGENTE[paso]} está trabajando...`;
+        // La Pluma redacta a partir de las notas: sin ellas (porque la investigadora no corrió) se salta.
+        if (paso === 'redactora' && !document.getElementById('ia-notas').value.trim()) continue;
+        const bien = await ejecutores[paso]();
+        if (!bien) {
+          recomendacion.textContent = `🐸 El equipo se detuvo en ${NOMBRE_AGENTE[paso]} (mira su mensaje abajo). Lo que ya hicieron las anteriores sigue en el formulario.`;
+          return;
+        }
+        hechos += 1;
+      }
+      recomendacion.textContent = `🐸 ¡Coquí, coquí! El equipo terminó (${hechos} agentes). Revisa cada pestaña antes de guardar: nada se ha guardado todavía.`;
+    } finally {
+      equipoEnMarcha = false;
+      boton.disabled = false;
+    }
+  }
+
+  // ── LA BRIGADA COQUÍ · La Guardiana ──────────────────────
+  // INICIO brigada-guardiana
+  const ETIQUETA_BANDERA = {
+    menores: 'Menores de edad', violencia_grafica: 'Violencia gráfica', delito_o_acusacion: 'Delito o acusación', persona_real: 'Persona real',
+    contenido_sexual: 'Contenido sexual', salud_o_riesgo: 'Salud o riesgo', lenguaje_odio: 'Lenguaje de odio', otra: 'Otra',
+  };
+  function veredictoCopia(copia) {
+    if (!copia || !copia.evaluable) return { nivel: 'nd', texto: (copia && copia.motivo) || 'No se pudo comparar con la fuente.' };
+    const nivel = copia.nivel;
+    const frase = { bajo: 'Escrito con palabras propias.', medio: 'Hay pasajes parecidos a la fuente: revísalos y reescríbelos con tus palabras.', alto: 'Se parece demasiado a la fuente: reescribe con tus palabras o cítala como cita textual.' }[nivel];
+    return { nivel, texto: `${copia.porcentaje}% de la pieza coincide palabra por palabra con la fuente. ${frase}` };
+  }
+  function htmlRevision(data, esc) {
+    const v = veredictoCopia(data.copia);
+    const pasajes = data.copia && data.copia.evaluable && data.copia.pasajes.length && data.copia.nivel !== 'bajo'
+      ? `<ul class="brigada-revision-pasajes">${data.copia.pasajes.map((p) => `<li>«${esc(p.texto)}» <small>(${p.palabras} palabras seguidas)</small></li>`).join('')}</ul>` : '';
+    const banderas = data.revision.banderas.length
+      ? `<ul class="brigada-revision-banderas">${data.revision.banderas.map((b) => `<li class="brigada-bandera brigada-bandera-${b.gravedad}"><strong>${esc(ETIQUETA_BANDERA[b.tipo] || b.tipo)}</strong> <small>gravedad ${esc(b.gravedad)}</small><br>${esc(b.motivo)}${b.fragmento ? `<br><em>«${esc(b.fragmento)}»</em>` : ''}</li>`).join('')}</ul>`
+      : '<p class="brigada-revision-ok">Sin banderas de contenido sensible.</p>';
+    const edad = data.revision.requiere18
+      ? `<p class="brigada-bandera brigada-bandera-alta"><strong>Podría requerir 18+.</strong> ${esc(data.revision.motivo18)} Solo Corrupción Humana e Ilógica Humana son 18+.</p>`
+      : (data.revision.motivo18 ? `<p class="admin-hint">18+: ${esc(data.revision.motivo18)}</p>` : '');
+    return `<h5>🛡️ La Guardiana</h5>
+      <p class="brigada-copia brigada-copia-${v.nivel}"><strong>Parecido con la fuente.</strong> ${esc(v.texto)}</p>${pasajes}
+      <p><strong>Contenido sensible</strong></p>${banderas}${edad}
+      <p class="admin-hint">La Guardiana orienta: no bloquea ni borra nada, y no sustituye a un abogado ni a tu criterio editorial.</p>`;
+  }
+  // FIN brigada-guardiana
+
+  async function revisarConGuardiana(clave) {
+    const cfg = MESAS[clave];
+    const estado = document.getElementById(`brigada-estado-${clave}`);
+    const contenedor = document.getElementById(`brigada-revision-${clave}`);
+    const valor = (id) => (id ? document.getElementById(id).value.trim() : '');
+    const cuerpo = { titulo: valor(cfg.revision.titulo), resumen: valor(cfg.revision.resumen), cuerpo: valor(cfg.revision.cuerpo), seccion: valor(cfg.revision.seccion), fuenteUrl: valor(`brigada-url-${clave}`) };
+    if (!cuerpo.titulo && !cuerpo.resumen && !cuerpo.cuerpo) { estado.textContent = '🛡️ La Guardiana revisa lo que ya escribiste: escribe o redacta primero el título o el cuerpo.'; return false; }
+    const boton = document.getElementById(`brigada-revisar-${clave}`);
+    boton.disabled = true;
+    estado.textContent = '🛡️ La Guardiana está comparando con la fuente y revisando el contenido...';
+    try {
+      const data = await apiFetch('/api/admin/brigada/revisar', { method: 'POST', body: JSON.stringify(cuerpo) });
+      contenedor.innerHTML = htmlRevision(data, escapeHtml);
+      contenedor.hidden = false;
+      estado.textContent = '🛡️ La Guardiana terminó: mira su informe abajo.';
+      return true;
+    } catch (err) {
+      estado.textContent = 'La Guardiana no pudo revisar: ' + err.message;
+      return false;
     } finally {
       boton.disabled = false;
     }
@@ -1057,6 +1202,10 @@
         redactarConIA();
       });
       document.getElementById('brigada-resumir-contenido').addEventListener('click', () => resumirConIa(false));
+      document.getElementById('brigada-equipo-contenido').addEventListener('click', equipoCompleto);
+      // La recomendacion se actualiza al salir del campo URL o al cambiar el texto pegado (gratis, sin IA).
+      document.getElementById('brigada-url-contenido').addEventListener('blur', () => setTimeout(mostrarRecomendacion, 0));
+      document.getElementById('ia-texto').addEventListener('input', mostrarRecomendacion);
       document.getElementById('brigada-citar-contenido').addEventListener('click', () => rellenarDesdeUrl(false));
       document.getElementById('ac-idioma-original').addEventListener('change', () => {
         const txt = document.getElementById('brigada-fuente-idioma-contenido').textContent;
@@ -1069,6 +1218,7 @@
       document.getElementById('brigada-redactar-noticia').addEventListener('click', autocompletarNoticiaConIA);
     }
     document.getElementById(`brigada-clasificar-${clave}`).addEventListener('click', () => clasificarConBrigada(clave));
+    document.getElementById(`brigada-revisar-${clave}`).addEventListener('click', () => revisarConGuardiana(clave));
     document.getElementById(`brigada-deshacer-${clave}`).addEventListener('click', () => deshacerClasificacion(clave));
     // Si la persona cambia un campo a mano, deja de ser una sugerencia: se quita la marca y no se vuelve a pisar.
     Object.values(cfg.campos).forEach((id) => {
@@ -1342,6 +1492,12 @@
 
     document.getElementById('ac-resumir-ia').addEventListener('click', () => resumirConIa(false));
     document.getElementById('ac-leer-url').addEventListener('click', () => rellenarDesdeUrl(false));
+    document.getElementById('ac-cita-copiar').addEventListener('click', async () => {
+      const estado = document.getElementById('ac-cita-copiar-estado');
+      const texto = document.getElementById('ac-cita-preview').textContent.trim();
+      if (!texto) { estado.textContent = 'Todavía no hay una cita: elige el estilo y llena los datos.'; return; }
+      try { await navigator.clipboard.writeText(texto); estado.textContent = 'Cita copiada.'; } catch { estado.textContent = 'No se pudo copiar: selecciona el texto de la cita y cópialo a mano.'; }
+    });
     // Al salir del campo URL con una URL nueva se lee sola (despues de que el limpiador de URL la ajuste).
     document.getElementById('brigada-url-contenido').addEventListener('blur', () => setTimeout(() => {
       const url = document.getElementById('brigada-url-contenido').value.trim();
@@ -1489,7 +1645,7 @@
       body.texto = textoPegado;
     } else {
       const url = document.getElementById('brigada-url-contenido').value.trim();
-      if (!url) { statusEl.textContent = 'Pega primero la URL de la fuente (arriba, en la mesa) o un texto.'; return; }
+      if (!url) { statusEl.textContent = 'Pega primero la URL de la fuente (arriba, en la mesa) o un texto.'; return false; }
       body.url = url;
     }
     statusEl.textContent = 'Investigando' + (usarBusquedaWeb ? ' (con búsqueda web, puede tardar más)...' : '...');
@@ -1506,8 +1662,10 @@
       statusEl.textContent = (data.preguntas && data.preguntas.length
         ? 'Notas provisionales listas — responde las preguntas de abajo para afinarlas, o continúa con "Redactar con IA".'
         : 'Listo — revisa/edita las notas y la citación, luego dale a "Redactar con IA".') + idioma;
+      return true;
     } catch (err) {
       statusEl.textContent = 'No se pudo investigar: ' + err.message;
+      return false;
     }
   }
 
@@ -1567,7 +1725,7 @@
   async function redactarConIA() {
     const statusEl = document.getElementById('ia-redactar-status');
     const notas = document.getElementById('ia-notas').value.trim();
-    if (!notas) { statusEl.textContent = 'No hay notas para redactar.'; return; }
+    if (!notas) { statusEl.textContent = 'No hay notas para redactar.'; return false; }
     statusEl.textContent = 'Redactando...';
     try {
       const data = await apiFetch('/api/admin/redactar', {
@@ -1591,8 +1749,10 @@
       statusEl.textContent = 'La Pluma terminó el título y el cuerpo. Doña Breve escribe el resumen...';
       await resumirConIa(true);
       statusEl.textContent = 'Listo — revisa el título, el cuerpo y el resumen antes de guardar.';
+      return true;
     } catch (err) {
       statusEl.textContent = 'No se pudo redactar: ' + err.message;
+      return false;
     }
   }
 
@@ -1609,6 +1769,7 @@
     { dato: 'anio', id: 'ac-cita-anio', nombre: 'Año' },
     { dato: 'tituloOriginal', id: 'ac-cita-titulo-original', nombre: 'Título del artículo original' },
     { dato: 'nombreFuente', id: 'ac-fuente-texto', nombre: 'Nombre de la fuente' },
+    { dato: 'estiloSugerido', id: 'ac-cita-estilo', nombre: 'Estilo de citación' },
   ];
   // Decide que se escribe: solo donde la pagina trajo dato Y la casilla esta vacia o todavia tiene lo que puso
   // este mismo boton antes (asi, si cambias la URL, se actualiza; si ya lo escribiste tu, no se pisa).
@@ -1638,10 +1799,10 @@
   async function rellenarDesdeUrl(automatico) {
     const estado = document.getElementById('ac-leer-url-estado');
     const url = document.getElementById('brigada-url-contenido').value.trim();
-    if (!url) { if (!automatico) estado.textContent = 'Escribe primero la URL de la fuente.'; return; }
+    if (!url) { if (!automatico) estado.textContent = 'Escribe primero la URL de la fuente.'; return false; }
     if (document.getElementById('ac-cita-sin-fuente').checked) {
       if (!automatico) estado.textContent = 'Está marcado «Sin fuente externa»: desmárcalo para rellenar la cita.';
-      return;
+      return false;
     }
     ultimaUrlLeida = url;
     const boton = document.getElementById('ac-leer-url');
@@ -1660,9 +1821,11 @@
       });
       const acceso = document.getElementById('ac-cita-fecha-acceso');
       if (plan.rellenar.length && !acceso.value) { acceso.value = new Date().toISOString().slice(0, 10); acceso.dispatchEvent(new Event('input', { bubbles: true })); }
-      estado.textContent = mensajeRellenado(plan);
+      estado.textContent = mensajeRellenado(plan) + (plan.rellenar.some((r) => r.id === 'ac-cita-estilo') && data.motivoEstilo ? ` Estilo: ${data.motivoEstilo}` : '');
+      return true;
     } catch (err) {
       estado.textContent = 'No se pudo leer la página: ' + err.message;
+      return false;
     } finally {
       boton.disabled = false;
     }
@@ -1672,8 +1835,8 @@
     const estado = document.getElementById('ac-resumir-estado');
     const cuerpo = document.getElementById('ac-cuerpo').value.trim();
     const resumen = document.getElementById('ac-subtitulo');
-    if (!cuerpo) { estado.textContent = 'Escribe primero el «Cuerpo del texto» para poder resumirlo.'; return; }
-    if (!automatico && resumen.value.trim() && !confirm('Ya hay un resumen escrito. ¿Reemplazarlo por el que escriba la IA?')) return;
+    if (!cuerpo) { estado.textContent = 'Escribe primero el «Cuerpo del texto» para poder resumirlo.'; return false; }
+    if (!automatico && resumen.value.trim() && !confirm('Ya hay un resumen escrito. ¿Reemplazarlo por el que escriba la IA?')) return false;
     const boton = document.getElementById('ac-resumir-ia');
     boton.disabled = true;
     estado.textContent = 'Resumiendo con IA...';
@@ -1682,8 +1845,10 @@
       resumen.value = data.resumen;
       resumen.dispatchEvent(new Event('input', { bubbles: true }));
       estado.textContent = 'Resumen listo: revísalo y edítalo si hace falta. Todavía no está guardado.';
+      return true;
     } catch (err) {
       estado.textContent = 'No se pudo resumir: ' + err.message;
+      return false;
     } finally {
       boton.disabled = false;
     }
@@ -2392,8 +2557,8 @@
     },
     {
       id: 'bibliotecaria', emoji: '📚', nombre: 'Bibliotecaria', apodo: 'La Bibliotecaria', estado: 'activa', nivel: 'citacion',
-      trabajo: ['Lee de la página autor de la fuente, año, título original y nombre del medio', 'Pone la fecha de acceso', 'Deja vacío lo que la página no declara'],
-      noHace: 'No usa IA ni deduce datos que la página no diga.',
+      trabajo: ['Lee de la página autor de la fuente, año, título original y nombre del medio', 'Propone el estilo de la cita (APA, MLA, Vancouver, etc.) según la fuente', 'Pone la fecha de acceso', 'Deja vacío lo que la página no declara'],
+      noHace: 'No usa IA ni deduce datos que la página no diga. El formato de la cita lo arma el código (citas.js), no la IA.',
     },
     {
       id: 'correctora', emoji: '🧐', nombre: 'Correctora', apodo: 'Doña Tilde', estado: 'activa', nivel: 'contenido',
@@ -2406,9 +2571,9 @@
       noHace: 'No escribe la pieza original.',
     },
     {
-      id: 'guardiana', emoji: '🛡️', nombre: 'Guardiana', apodo: 'La Guardiana', estado: 'proxima',
-      trabajo: ['Avisa si el contenido toca menores, crímenes, personas reales o requiere 18+', 'Compara tu texto con la fuente y avisa si se parece demasiado (derechos de autor)'],
-      noHace: 'Orienta; no sustituye a un abogado.',
+      id: 'guardiana', emoji: '🛡️', nombre: 'Guardiana', apodo: 'La Guardiana', estado: 'activa', nivel: 'contenido',
+      trabajo: ['Marca contenido sensible: menores, violencia gráfica, acusaciones, personas reales, contenido sexual y si pediría 18+', 'Compara tu texto con la fuente y avisa si se parece demasiado (derechos de autor)'],
+      noHace: 'Orienta; no bloquea ni borra, y no sustituye a un abogado.',
     },
     {
       id: 'detective', emoji: '🕵️', nombre: 'Detective', apodo: 'El Detective', estado: 'proxima',

@@ -93,9 +93,29 @@ function extraerMetadatos(html) {
   };
 }
 
-async function leerMetadatosDeUrl(urlStr) {
-  const { html, url } = await descargarHtml(urlStr);
-  return { ...extraerMetadatos(html), url };
+// Estilo de cita que La Bibliotecaria sugiere segun de donde viene la fuente (por reglas, sin IA). El formato de
+// la cita en si lo arma frontend/citas.js; aqui solo se propone cual de los 10 estilos usar.
+const ESTILOS_POR_DOMINIO = [
+  { estilo: 'vancouver', motivo: 'fuente médica o de salud', hosts: ['pubmed.ncbi.nlm.nih.gov', 'ncbi.nlm.nih.gov', 'nih.gov', 'who.int', 'cdc.gov', 'nejm.org', 'thelancet.com', 'bmj.com'] },
+  { estilo: 'bluebook', motivo: 'fuente jurídica', hosts: ['law.cornell.edu', 'supremecourt.gov', 'justia.com', 'courtlistener.com', 'uscourts.gov', 'congress.gov', 'oyez.org'] },
+  { estilo: 'ieee', motivo: 'fuente de ingeniería o computación', hosts: ['ieee.org', 'ieeexplore.ieee.org', 'acm.org', 'arxiv.org'] },
+];
+const ESTILOS_POR_PAIS = { br: ['abnt', 'fuente de Brasil'], co: ['icontec', 'fuente de Colombia'] };
+
+function estiloSugerido(hostname) {
+  const host = String(hostname || '').toLowerCase().replace(/^www\./, '');
+  for (const { estilo, motivo, hosts } of ESTILOS_POR_DOMINIO) {
+    if (hosts.some((h) => host === h || host.endsWith('.' + h))) return { estilo, motivo: `${estilo.toUpperCase()}: ${motivo}.` };
+  }
+  const pais = host.split('.').pop();
+  if (ESTILOS_POR_PAIS[pais]) return { estilo: ESTILOS_POR_PAIS[pais][0], motivo: `${ESTILOS_POR_PAIS[pais][0].toUpperCase()}: ${ESTILOS_POR_PAIS[pais][1]}.` };
+  return { estilo: 'apa', motivo: 'APA es el estilo más usado; cámbialo si tu curso pide otro.' };
 }
 
-module.exports = { extraerMetadatos, leerMetadatosDeUrl };
+async function leerMetadatosDeUrl(urlStr) {
+  const { html, url } = await descargarHtml(urlStr);
+  const { estilo, motivo } = estiloSugerido(url.hostname);
+  return { ...extraerMetadatos(html), estiloSugerido: estilo, motivoEstilo: motivo, url };
+}
+
+module.exports = { extraerMetadatos, estiloSugerido, leerMetadatosDeUrl };

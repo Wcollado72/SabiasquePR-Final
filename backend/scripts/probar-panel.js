@@ -37,6 +37,13 @@ w.fetch = async (url) => {
   const json = (o) => ({ ok: true, status: 200, json: async () => o });
   if (u.endsWith('/api/me')) return json({ ok: true, user: { id: 'u1', rol: 'admin' } });
   if (u.endsWith('/contenido-ia/resumir')) return json({ ok: true, resumen: 'Resumen escrito por la IA.' });
+  if (u.endsWith('/brigada/revisar')) {
+    return json({
+      ok: true,
+      copia: { evaluable: true, porcentaje: 31, nivel: 'alto', pasajes: [{ texto: 'una frase copiada de la fuente', palabras: 12 }] },
+      revision: { banderas: [{ tipo: 'persona_real', gravedad: 'media', motivo: 'Nombra a una persona.', fragmento: 'Juan Pérez' }], requiere18: false, motivo18: 'No es explícito.' },
+    });
+  }
   if (u.endsWith('/brigada/clasificar')) {
     return json({
       ok: true, url: 'https://medio.com/nota', formatoOriginal: 'video',
@@ -99,6 +106,19 @@ setTimeout(() => {
         d.getElementById('ac-seccion').value === 'noticias' && marcaDe('ac-seccion') === ''],
     );
   }, 300);
+  // Recomendacion de la mesa y La Guardiana (informe con parecido y banderas).
+  d.getElementById('brigada-url-contenido').value = 'https://www.youtube.com/watch?v=abc';
+  d.getElementById('brigada-url-contenido').dispatchEvent(new w.Event('blur'));
+  d.getElementById('ac-cuerpo').value = 'Un cuerpo con texto para revisar.';
+  d.getElementById('brigada-revisar-contenido').click();
+  setTimeout(() => {
+    comprobaciones.push(
+      ['la mesa recomienda según la URL (video: solo clasificar y citar)', d.getElementById('brigada-recomendacion-contenido').textContent.includes('Pega su transcripción')],
+      ['La Guardiana muestra el parecido con la fuente y las banderas',
+        !d.getElementById('brigada-revision-contenido').hidden && d.getElementById('brigada-revision-contenido').textContent.includes('31% de la pieza')
+        && d.getElementById('brigada-revision-contenido').textContent.includes('Persona real')],
+    );
+  }, 600);
   setTimeout(() => {
     comprobaciones.push(
       ['Resumir con IA escribe el resumen', d.getElementById('ac-subtitulo').value === 'Resumen escrito por la IA.'],
@@ -110,5 +130,5 @@ setTimeout(() => {
     const todo = fallos.concat(errores);
     console.log(todo.length ? todo.join('\n') : 'OK: el panel arranca sin errores');
     process.exit(todo.length ? 1 : 0);
-  }, 700);
+  }, 900);
 }, 1500);

@@ -35,13 +35,13 @@ router.post('/resumir', requireAuth, requireAdmin, async (req, res) => {
 });
 
 // POST /api/admin/contenido-ia/metadatos-fuente -- solo admin. Lee lo que la pagina declara de si misma (autor,
-// anio, titulo original, nombre del medio). Sin IA y sin costo; los datos que no encuentra vienen vacios.
+// anio, titulo original, nombre del medio) y propone el estilo de cita. Sin IA y sin costo; lo que no encuentra viene vacio.
 router.post('/metadatos-fuente', requireAuth, requireAdmin, async (req, res) => {
   const errors = validateMetadatos(req.body);
   if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
   try {
-    const { autorFuente, anio, tituloOriginal, nombreFuente } = await leerMetadatosDeUrl(req.body.url.trim());
-    res.json({ ok: true, autorFuente, anio, tituloOriginal, nombreFuente });
+    const { autorFuente, anio, tituloOriginal, nombreFuente, estiloSugerido, motivoEstilo } = await leerMetadatosDeUrl(req.body.url.trim());
+    res.json({ ok: true, autorFuente, anio, tituloOriginal, nombreFuente, estiloSugerido, motivoEstilo });
   } catch (err) {
     res.status(400).json({ ok: false, error: err.message });
   }
