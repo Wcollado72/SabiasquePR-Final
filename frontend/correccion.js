@@ -253,5 +253,17 @@
       if (opts && opts.apiFetch) apiFetch = opts.apiFetch;
       montarCampos();
     },
+    // Variante de idioma que usa la barra de un campo. Si la persona la eligio a mano (o ya la tenia guardada) se
+    // respeta; si no, sigue el idioma de la pieza: una pieza en ingles se corrige en ingles (EE. UU.).
+    varianteDe(id, idiomaPieza) {
+      const el = document.getElementById(id);
+      const barra = el && el.nextElementSibling;
+      const select = barra && barra.querySelector ? barra.querySelector('.corr-select') : null;
+      const porIdioma = varianteInicial(idiomaPieza === 'en' ? 'en' : 'es');
+      if (!select) return porIdioma;
+      if (select.dataset.manual || leerLS(LS_VAR + id, '')) return select.value;
+      select.value = porIdioma;
+      return porIdioma;
+    },
   };
 })();

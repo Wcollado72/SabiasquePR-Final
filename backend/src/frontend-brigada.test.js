@@ -215,7 +215,7 @@ describe('recomendación y «Equipo completo»', () => {
 
   test('un artículo: se recomienda el equipo completo, en orden de trabajo', () => {
     const r = f.recomendarBrigada('https://www.bbc.com/mundo/noticias-123', '');
-    expect(r.agentes).toEqual(['detective', 'investigadora', 'clasificadora', 'redactora', 'bibliotecaria', 'pintora', 'guardiana']);
+    expect(r.agentes).toEqual(['detective', 'investigadora', 'clasificadora', 'redactora', 'correctora', 'bibliotecaria', 'pintora', 'guardiana']);
     expect(r.mensaje).toContain('equipo completo');
   });
 
@@ -228,11 +228,11 @@ describe('recomendación y «Equipo completo»', () => {
   });
 
   test('un video con su transcripción pegada: equipo completo', () => {
-    expect(f.recomendarBrigada('https://youtu.be/abc', 'Texto de la transcripción').agentes).toHaveLength(7);
+    expect(f.recomendarBrigada('https://youtu.be/abc', 'Texto de la transcripción').agentes).toHaveLength(8);
   });
 
   test('solo texto pegado, sin URL: las que no necesitan una URL (Doña Fichas y La Bibliotecaria sí la necesitan)', () => {
-    expect(f.recomendarBrigada('', 'Un texto').agentes).toEqual(['detective', 'investigadora', 'redactora', 'pintora', 'guardiana']);
+    expect(f.recomendarBrigada('', 'Un texto').agentes).toEqual(['detective', 'investigadora', 'redactora', 'correctora', 'pintora', 'guardiana']);
   });
 
   test('sin nada no hay recomendación, y una URL inválida se avisa', () => {
@@ -392,5 +392,101 @@ describe('La Pintora en el panel', () => {
   test('va en el equipo justo antes de la Guardiana, y usa el idioma de la pieza', () => {
     expect(js).toContain("pintora: () => pintarConPintora('contenido')");
     expect(js).toContain('idioma: document.getElementById(cfg.idiomaPieza).value');
+  });
+});
+
+describe('Doña Tilde: «Corregir todo»', () => {
+  const { resumenCorreccionTodo, htmlCorreccionTodo } = new Function(`${entre(js, 'brigada-correctora')}
+    return { resumenCorreccionTodo, htmlCorreccionTodo };`)();
+  const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const etiquetas = { 'ac-titulo': 'Título', 'ac-cuerpo': 'Cuerpo del texto', 'ac-subtitulo': 'Resumen' };
+  const resultados = [
+    { id: 'ac-titulo', textoCorregido: 'La guagua llegó', cambios: [{ antes: 'llego', despues: 'llegó', motivo: 'tilde' }] },
+    { id: 'ac-subtitulo', textoCorregido: 'Igual.', cambios: [] },
+    { id: 'ac-cuerpo', textoCorregido: 'B', cambios: [{ antes: 'a<b', despues: 'a', motivo: '' }, { antes: 'x', despues: 'y', motivo: 'm' }] },
+  ];
+
+  test('el resumen cuenta los campos revisados, los que tienen correcciones y los que fallaron', () => {
+    expect(resumenCorreccionTodo(resultados)).toBe('Doña Tilde revisó 3 campos: 2 con correcciones.');
+    expect(resumenCorreccionTodo([{ id: 'a', cambios: [] }])).toBe('Doña Tilde revisó 1 campo: ninguno necesita correcciones.');
+    expect(resumenCorreccionTodo([{ id: 'a', cambios: [] }, { id: 'b', error: 'x' }, { id: 'c', error: 'y' }])).toContain('2 no se pudieron revisar.');
+  });
+
+  test('solo lista los campos con cambios, con antes → después y motivo, y un «Aplicar» por campo y «Aplicar todo»', () => {
+    const h = htmlCorreccionTodo(resultados, etiquetas, esc);
+    expect(h).toContain('data-aplicar="ac-titulo"');
+    expect(h).toContain('data-aplicar="ac-cuerpo"');
+    expect(h).not.toContain('data-aplicar="ac-subtitulo"');
+    expect(h).toContain('<del>llego</del> → <ins>llegó</ins>');
+    expect(h).toContain('(tilde)');
+    expect(h).toContain('<del>a&lt;b</del>');
+    expect(h).toContain('data-aplicar-todo');
+    expect(h).toContain('nada cambia hasta que pulses');
+  });
+
+  test('con un solo campo corregido no ofrece «Aplicar todo»; un campo que falló se muestra con su motivo', () => {
+    const h = htmlCorreccionTodo([resultados[0], { id: 'ac-cuerpo', error: 'El texto es demasiado largo.' }], etiquetas, esc);
+    expect(h).not.toContain('data-aplicar-todo');
+    expect(h).toContain('Cuerpo del texto</strong>: El texto es demasiado largo.');
+  });
+
+  test('hay un botón en cada mesa, llama al servidor con la variante de cada campo y no pisa lo que cambió mientras corregía', () => {
+    ['contenido', 'noticia'].forEach((c) => {
+      expect(html).toMatch(new RegExp(`<button type="button" class="brigada-agente" id="brigada-corregir-${c}"`));
+      expect(html).toContain(`id="brigada-correccion-${c}"`);
+    });
+    expect(js).toContain('/api/admin/corregir/varios');
+    expect(js).toContain('ui.varianteDe(id, idioma)');
+    expect(js).toContain('if (el.value !== enviados[id]) { alert(');
+    expect(js).toContain("correctora: () => corregirTodoConTilde('contenido')");
+  });
+
+  test('la variante sigue al idioma de la pieza mientras la persona no haya elegido otra a mano', () => {
+    const corr = fs.readFileSync(path.join(frontend, 'correccion.js'), 'utf8');
+    expect(corr).toContain('varianteDe(id, idiomaPieza)');
+    expect(corr).toContain("if (select.dataset.manual || leerLS(LS_VAR + id, '')) return select.value;");
+  });
+});
+
+describe('cada agente trae una pequeña descripción de sus funciones', () => {
+  const { ELENCO_BRIGADA, htmlElenco } = new Function(`${entre(js, 'elenco-brigada')}
+    return { ELENCO_BRIGADA, htmlElenco };`)();
+
+  test('todas las agentes del elenco tienen una descripción corta y propia', () => {
+    ELENCO_BRIGADA.forEach((a) => {
+      expect(typeof a.descripcion).toBe('string');
+      expect(a.descripcion.length).toBeGreaterThan(20);
+      expect(a.descripcion.length).toBeLessThanOrEqual(120);
+    });
+    const descripciones = ELENCO_BRIGADA.map((a) => a.descripcion);
+    expect(new Set(descripciones).size).toBe(descripciones.length);
+  });
+
+  test('la tarjeta del elenco la muestra encima de sus tareas', () => {
+    const h = htmlElenco(ELENCO_BRIGADA, (t) => String(t));
+    ELENCO_BRIGADA.forEach((a) => expect(h).toContain(a.descripcion));
+    expect(h.indexOf('ag-agente-resumen')).toBeLessThan(h.indexOf('ag-agente-tareas'));
+  });
+
+  test('en la mesa, cada botón de agente va dentro de una tarjeta con su descripción, que sale del elenco', () => {
+    ['contenido', 'noticia'].forEach((clave) => {
+      const mesa = html.slice(html.indexOf(`id="brigada-agentes-${clave}"`), html.indexOf(`id="brigada-estado-${clave}"`));
+      const botones = (mesa.match(/class="brigada-agente" id="/g) || []).length;
+      const tarjetas = (mesa.match(/class="brigada-agente-card"/g) || []).length;
+      const descripciones = (mesa.match(/class="brigada-agente-desc" data-desc="/g) || []).length;
+      expect(botones).toBeGreaterThan(0);
+      expect(tarjetas).toBe(botones);
+      expect(descripciones).toBe(botones);
+      // cada descripción apunta a una agente que existe
+      [...mesa.matchAll(/data-desc="([a-z]+)"/g)].forEach((m) => expect(ELENCO_BRIGADA.map((a) => a.id)).toContain(m[1]));
+    });
+    expect(js).toContain("document.querySelectorAll(`#brigada-agentes-${clave} [data-desc]`)");
+  });
+
+  test('en Noticias la descripción se adapta a una noticia rápida', () => {
+    const por = (id) => ELENCO_BRIGADA.find((a) => a.id === id);
+    expect(por('clasificadora').descripcionNoticia).toContain('categoría');
+    expect(por('redactora').descripcionNoticia).toContain('primer borrador');
+    expect(js).toContain("(clave === 'noticia' && agente.descripcionNoticia) || agente.descripcion");
   });
 });

@@ -954,16 +954,38 @@ const PAGES = [
                   </div>
                 </div>
                 <p class="admin-hint brigada-fuente-idioma" id="brigada-fuente-idioma-noticia" aria-live="polite"></p>
-                <div class="brigada-agentes">
-                  <button type="button" class="brigada-agente" id="brigada-clasificar-noticia" title="La Clasificadora sugiere la categoría"><span aria-hidden="true">🗂️</span> Doña Fichas <small>Clasificar</small></button>
-                  <button type="button" class="brigada-agente" id="brigada-redactar-noticia" title="Lee la URL y redacta un primer borrador completo (título, párrafos y medio)"><span aria-hidden="true">✍️</span> La Pluma <small>Redactar noticia</small></button>
-                  <button type="button" class="brigada-agente" id="brigada-revisar-noticia" title="La Guardiana compara la noticia con la fuente (derechos de autor) y marca contenido sensible"><span aria-hidden="true">🛡️</span> La Guardiana <small>Revisar</small></button>
-                  <button type="button" class="brigada-agente" id="brigada-duplicados-btn-noticia" title="El Detective busca si esta historia ya está publicada o guardada como borrador"><span aria-hidden="true">🕵️</span> El Detective <small>Buscar repetidas</small></button>
-                  <button type="button" class="brigada-agente" id="brigada-pintar-noticia" title="La Pintora sugiere el texto alternativo de la imagen y un prompt de imagen"><span aria-hidden="true">🎨</span> La Pintora <small>Imagen</small></button>
+                <div class="brigada-acciones">
                   <button type="button" class="admin-btn-cancel" id="brigada-deshacer-noticia" hidden>Deshacer sugerencias</button>
+                </div>
+                <div class="brigada-agentes" id="brigada-agentes-noticia">
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="brigada-duplicados-btn-noticia" title="El Detective busca si esta noticia ya está publicada o guardada como borrador"><span aria-hidden="true">🕵️</span> El Detective <small>Buscar repetidas</small></button>
+                    <p class="brigada-agente-desc" data-desc="detective"></p>
+                  </div>
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="brigada-clasificar-noticia" title="La Clasificadora sugiere la categoría"><span aria-hidden="true">🗂️</span> Doña Fichas <small>Clasificar</small></button>
+                    <p class="brigada-agente-desc" data-desc="clasificadora"></p>
+                  </div>
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="brigada-redactar-noticia" title="Lee la URL y redacta un primer borrador completo (título, párrafos y medio)"><span aria-hidden="true">✍️</span> La Pluma <small>Redactar noticia</small></button>
+                    <p class="brigada-agente-desc" data-desc="redactora"></p>
+                  </div>
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="brigada-corregir-noticia" title="La Correctora revisa de una vez el título, los párrafos y el texto alternativo"><span aria-hidden="true">🧐</span> Doña Tilde <small>Corregir todo</small></button>
+                    <p class="brigada-agente-desc" data-desc="correctora"></p>
+                  </div>
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="brigada-pintar-noticia" title="La Pintora sugiere el texto alternativo de la imagen y un prompt de imagen"><span aria-hidden="true">🎨</span> La Pintora <small>Imagen</small></button>
+                    <p class="brigada-agente-desc" data-desc="pintora"></p>
+                  </div>
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="brigada-revisar-noticia" title="La Guardiana compara la noticia con la fuente (derechos de autor) y marca contenido sensible"><span aria-hidden="true">🛡️</span> La Guardiana <small>Revisar</small></button>
+                    <p class="brigada-agente-desc" data-desc="guardiana"></p>
+                  </div>
                 </div>
                 <p class="admin-hint brigada-estado" id="brigada-estado-noticia" aria-live="polite"></p>
                 <div class="brigada-revision" id="brigada-revision-noticia" hidden></div>
+                <div class="brigada-revision" id="brigada-correccion-noticia" hidden></div>
                 <div class="brigada-revision" id="brigada-duplicados-noticia" hidden></div>
                 <div class="brigada-revision" id="brigada-pintora-noticia" hidden></div>
               </section>
@@ -1089,20 +1111,51 @@ const PAGES = [
                 </div>
                 <p class="admin-hint brigada-fuente-idioma" id="brigada-fuente-idioma-contenido" aria-live="polite"></p>
                 <p class="admin-hint brigada-recomendacion" id="brigada-recomendacion-contenido" aria-live="polite"></p>
-                <div class="brigada-agentes">
-                  <button type="button" class="brigada-agente brigada-equipo" id="brigada-equipo-contenido" title="Pone a trabajar en orden a las agentes que recomienda la mesa: investiga, clasifica, redacta, cita y revisa"><span aria-hidden="true">🐸</span> Equipo completo</button>
-                  <button type="button" class="brigada-agente" id="brigada-investigar-contenido" title="La Investigadora lee la fuente (en cualquier idioma), detecta su idioma y prepara las notas"><span aria-hidden="true">🔎</span> Doña Pesquisa <small>Investigar</small></button>
-                  <button type="button" class="brigada-agente" id="brigada-clasificar-contenido" title="La Clasificadora sugiere la sección, la sub-sección, la región, el formato y el subformato"><span aria-hidden="true">🗂️</span> Doña Fichas <small>Clasificar</small></button>
-                  <button type="button" class="brigada-agente" id="brigada-redactar-contenido" title="La Redactora escribe el título y el cuerpo en el idioma de la pieza (y Doña Breve hace el resumen)"><span aria-hidden="true">✍️</span> La Pluma <small>Redactar</small></button>
-                  <button type="button" class="brigada-agente" id="brigada-resumir-contenido" title="La Resumidora escribe el resumen a partir del cuerpo del texto"><span aria-hidden="true">✂️</span> Doña Breve <small>Resumir</small></button>
-                  <button type="button" class="brigada-agente" id="brigada-citar-contenido" title="La Bibliotecaria lee los datos de la cita desde la URL (sin IA)"><span aria-hidden="true">📚</span> La Bibliotecaria <small>Citar</small></button>
-                  <button type="button" class="brigada-agente" id="brigada-revisar-contenido" title="La Guardiana compara la pieza con la fuente (derechos de autor) y marca contenido sensible"><span aria-hidden="true">🛡️</span> La Guardiana <small>Revisar</small></button>
-                  <button type="button" class="brigada-agente" id="brigada-duplicados-btn-contenido" title="El Detective busca si esta historia ya está publicada o guardada como borrador"><span aria-hidden="true">🕵️</span> El Detective <small>Buscar repetidas</small></button>
-                  <button type="button" class="brigada-agente" id="brigada-pintar-contenido" title="La Pintora sugiere el texto alternativo de la imagen y un prompt de imagen"><span aria-hidden="true">🎨</span> La Pintora <small>Imagen</small></button>
+                <div class="brigada-acciones">
+                  <button type="button" class="brigada-agente brigada-equipo" id="brigada-equipo-contenido" title="Pone a trabajar en orden a las agentes que recomienda la mesa: busca repetidas, investiga, clasifica, redacta, corrige, cita, propone la imagen y revisa"><span aria-hidden="true">🐸</span> Equipo completo</button>
                   <button type="button" class="admin-btn-cancel" id="brigada-deshacer-contenido" hidden>Deshacer sugerencias</button>
+                </div>
+                <div class="brigada-agentes" id="brigada-agentes-contenido">
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="brigada-duplicados-btn-contenido" title="El Detective busca si esta historia ya está publicada o guardada como borrador"><span aria-hidden="true">🕵️</span> El Detective <small>Buscar repetidas</small></button>
+                    <p class="brigada-agente-desc" data-desc="detective"></p>
+                  </div>
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="brigada-investigar-contenido" title="La Investigadora lee la fuente (en cualquier idioma), detecta su idioma y prepara las notas"><span aria-hidden="true">🔎</span> Doña Pesquisa <small>Investigar</small></button>
+                    <p class="brigada-agente-desc" data-desc="investigadora"></p>
+                  </div>
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="brigada-clasificar-contenido" title="La Clasificadora sugiere la sección, la sub-sección, la región, el formato y el subformato"><span aria-hidden="true">🗂️</span> Doña Fichas <small>Clasificar</small></button>
+                    <p class="brigada-agente-desc" data-desc="clasificadora"></p>
+                  </div>
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="brigada-redactar-contenido" title="La Redactora escribe el título y el cuerpo en el idioma de la pieza (y Doña Breve hace el resumen)"><span aria-hidden="true">✍️</span> La Pluma <small>Redactar</small></button>
+                    <p class="brigada-agente-desc" data-desc="redactora"></p>
+                  </div>
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="brigada-resumir-contenido" title="La Resumidora escribe el resumen a partir del cuerpo del texto"><span aria-hidden="true">✂️</span> Doña Breve <small>Resumir</small></button>
+                    <p class="brigada-agente-desc" data-desc="resumidora"></p>
+                  </div>
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="brigada-corregir-contenido" title="La Correctora revisa de una vez el título, el resumen, el cuerpo y el texto alternativo"><span aria-hidden="true">🧐</span> Doña Tilde <small>Corregir todo</small></button>
+                    <p class="brigada-agente-desc" data-desc="correctora"></p>
+                  </div>
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="brigada-citar-contenido" title="La Bibliotecaria lee los datos de la cita desde la URL (sin IA)"><span aria-hidden="true">📚</span> La Bibliotecaria <small>Citar</small></button>
+                    <p class="brigada-agente-desc" data-desc="bibliotecaria"></p>
+                  </div>
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="brigada-pintar-contenido" title="La Pintora sugiere el texto alternativo de la imagen y un prompt de imagen"><span aria-hidden="true">🎨</span> La Pintora <small>Imagen</small></button>
+                    <p class="brigada-agente-desc" data-desc="pintora"></p>
+                  </div>
+                  <div class="brigada-agente-card">
+                    <button type="button" class="brigada-agente" id="brigada-revisar-contenido" title="La Guardiana compara la pieza con la fuente (derechos de autor) y marca contenido sensible"><span aria-hidden="true">🛡️</span> La Guardiana <small>Revisar</small></button>
+                    <p class="brigada-agente-desc" data-desc="guardiana"></p>
+                  </div>
                 </div>
                 <p class="admin-hint brigada-estado" id="brigada-estado-contenido" aria-live="polite"></p>
                 <div class="brigada-revision" id="brigada-revision-contenido" hidden></div>
+                <div class="brigada-revision" id="brigada-correccion-contenido" hidden></div>
                 <div class="brigada-revision" id="brigada-duplicados-contenido" hidden></div>
                 <div class="brigada-revision" id="brigada-pintora-contenido" hidden></div>
               </section>
