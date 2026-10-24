@@ -1,12 +1,14 @@
 jest.mock('../middleware/auth', () => require('../test-utils/authMock'));
 jest.mock('../services/clasificadora');
 jest.mock('../services/guardiana');
+jest.mock('../services/pintora');
 jest.mock('../db', () => ({ pool: { query: jest.fn() } }));
 
 const request = require('supertest');
 const { buildApp } = require('../app');
 const { clasificarUrl } = require('../services/clasificadora');
 const { revisarPieza } = require('../services/guardiana');
+const { pintarPieza } = require('../services/pintora');
 const { pool } = require('../db');
 
 const app = buildApp();
@@ -21,6 +23,7 @@ beforeEach(() => {
   pool.query.mockResolvedValue({ rows: [] });
   clasificarUrl.mockReset();
   revisarPieza.mockReset();
+  pintarPieza.mockReset();
 });
 
 describe('POST /api/admin/brigada/clasificar', () => {
@@ -117,6 +120,100 @@ describe('POST /api/admin/brigada/revisar (La Guardiana)', () => {
     const res = await request(app).post(URL_REVISAR).set('x-test-user', ADMIN).send({ titulo: 'T' });
     expect(res.status).toBe(400);
     expect(revisarPieza).toHaveBeenCalledWith(expect.objectContaining({ fuenteUrl: '' }));
+    expect(pool.query).not.toHaveBeenCalled();
+  });
+});
+
+describe('POST /api/admin/brigada/duplicados (El Detective)', () => {
+  const URL_DUP = '/api/admin/brigada/duplicados';
+
+  test('401 sin sesión; 403 para usuario y moderador (solo admin)', async () => {
+    expect((await request(app).post(URL_DUP).send({ titulo: 'T' })).status).toBe(401);
+    for (const quien of [USUARIO, MODERADOR]) {
+      expect((await request(app).post(URL_DUP).set('x-test-user', quien).send({ titulo: 'T' })).status).toBe(403);
+    }
+    expect(pool.query).not.toHaveBeenCalled();
+  });
+
+  test.each([
+    [{}, /título o la URL/],
+    [{ titulo: '  ', fuenteUrl: '' }, /título o la URL/],
+    [{ titulo: 5 }, /deben ser texto/],
+    [{ titulo: 'x'.repeat(5001) }, /demasiado largos/],
+    [{ titulo: 'T', excluir: { tipo: 'otra', id: 'a' } }, /excluir/],
+    [{ titulo: 'T', excluir: 'a' }, /excluir/],
+  ])('400 con datos inválidos %#', async (body, patron) => {
+    const res = await request(app).post(URL_DUP).set('x-test-user', ADMIN).send(body);
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(patron);
+    expect(pool.query).not.toHaveBeenCalled();
+  });
+
+  test('200 busca en noticias y contenidos, deja fuera la pieza que se está editando y no cuesta IA', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [
+        { id: 'luna', titulo: 'La NASA halla el cráter más grande formado en la Luna', fuente_url: 'https://nasa.gov/crater', publicado: true, fecha: '2026-09-16', resumen: 'Texto.' },
+        { id: 'esta', titulo: 'La NASA halla el cráter más grande formado en la Luna', fuente_url: 'https://nasa.gov/crater', publicado: false, fecha: '2026-09-17', resumen: 'Texto.' },
+      ] })
+      .mockResolvedValueOnce({ rows: [{ id: 'ensayo', titulo: 'Reforma educativa', fuente_url: null, publicado: true, fecha: '2026-01-01', resumen: 'Escuelas.' }] });
+    const res = await request(app).post(URL_DUP).set('x-test-user', ADMIN)
+      .send({ titulo: 'La NASA halla el cráter más grande formado en la Luna', fuenteUrl: 'http://www.nasa.gov/crater/', excluir: { tipo: 'noticia', id: 'esta' } });
+    expect(res.status).toBe(200);
+    expect(res.body.revisadas).toBe(3);
+    expect(res.body.candidatas.map((c) => [c.tipo, c.id])).toEqual([['noticia', 'luna']]);
+    expect(res.body.candidatas[0]).toMatchObject({ nivel: 'muy_probable', publicado: true });
+    expect(pool.query.mock.calls[0][0]).toMatch(/FROM noticias/);
+    expect(pool.query.mock.calls[1][0]).toMatch(/FROM contenidos/);
+    expect(pool.query).toHaveBeenCalledTimes(2); // dos lecturas, ningun registro de costo
+  });
+
+  test('si la base falla, 500 genérico sin detalles internos', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    pool.query.mockRejectedValue(new Error('relation "noticias" secreta'));
+    const res = await request(app).post(URL_DUP).set('x-test-user', ADMIN).send({ titulo: 'T' });
+    expect(res.status).toBe(500);
+    expect(JSON.stringify(res.body)).not.toContain('secreta');
+  });
+});
+
+describe('POST /api/admin/brigada/pintar (La Pintora)', () => {
+  const URL_PINTAR = '/api/admin/brigada/pintar';
+  const RESULTADO = { textoAlternativo: 'Un farol sobre la Luna.', escena: 'A lantern on the moon.', promptImagen: 'A lantern on the moon. Estilo.', usage: USAGE };
+
+  test('401 sin sesión; 403 para usuario y moderador (solo admin)', async () => {
+    expect((await request(app).post(URL_PINTAR).send({ titulo: 'T' })).status).toBe(401);
+    for (const quien of [USUARIO, MODERADOR]) {
+      expect((await request(app).post(URL_PINTAR).set('x-test-user', quien).send({ titulo: 'T' })).status).toBe(403);
+    }
+    expect(pintarPieza).not.toHaveBeenCalled();
+  });
+
+  test.each([
+    [{}, /para que la pintora/],
+    [{ titulo: 7 }, /deben ser texto/],
+    [{ titulo: 'T', idioma: 'fr' }, /Idioma/],
+    [{ cuerpo: 'x'.repeat(60001) }, /demasiado largo/],
+  ])('400 con datos inválidos %#', async (body, patron) => {
+    const res = await request(app).post(URL_PINTAR).set('x-test-user', ADMIN).send(body);
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(patron);
+    expect(pintarPieza).not.toHaveBeenCalled();
+  });
+
+  test('200 devuelve el texto alternativo, la escena y el prompt, y registra el costo', async () => {
+    pintarPieza.mockResolvedValue(RESULTADO);
+    const res = await request(app).post(URL_PINTAR).set('x-test-user', ADMIN).send({ titulo: 'T', resumen: 'R', idioma: 'es', seccion: 'noticias' });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ ok: true, textoAlternativo: 'Un farol sobre la Luna.', escena: 'A lantern on the moon.', promptImagen: 'A lantern on the moon. Estilo.' });
+    expect(pintarPieza).toHaveBeenCalledWith({ titulo: 'T', resumen: 'R', cuerpo: undefined, idioma: 'es', seccion: 'noticias' });
+    expect(pool.query.mock.calls[0][0]).toMatch(/INSERT INTO ia_generaciones/);
+  });
+
+  test('si la IA falla, 400 con el motivo y sin costo', async () => {
+    pintarPieza.mockRejectedValue(new Error('La pintora no devolvió la imagen. Intenta de nuevo.'));
+    const res = await request(app).post(URL_PINTAR).set('x-test-user', ADMIN).send({ titulo: 'T' });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/Intenta de nuevo/);
     expect(pool.query).not.toHaveBeenCalled();
   });
 });

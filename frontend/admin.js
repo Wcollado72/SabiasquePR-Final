@@ -902,12 +902,16 @@
     contenido: {
       destino: 'contenido', idiomaPieza: 'ac-idioma-original',
       revision: { titulo: 'ac-titulo', resumen: 'ac-subtitulo', cuerpo: 'ac-cuerpo', seccion: 'ac-seccion' },
+      detective: { titulo: 'ac-titulo', resumen: 'ac-subtitulo', idInput: 'ac-id', tipo: 'contenido' },
+      pintora: { altId: 'ac-portada-alt' },
       campos: { seccion: 'ac-seccion', clasificacion: 'ac-clasificacion', region: 'ac-enfoque', formato: 'ac-tipo-formato', subformato: 'ac-subformato' },
       mostrarNivel: (n) => activarSynthPanel(n), estadoNivel: '#synth-levels [data-status="clasificacion"]',
     },
     noticia: {
       destino: 'noticia', idiomaPieza: 'an-idioma-original',
       revision: { titulo: 'an-titulo', resumen: null, cuerpo: 'an-parrafos', seccion: null },
+      detective: { titulo: 'an-titulo', resumen: 'an-parrafos', idInput: 'an-id', tipo: 'noticia' },
+      pintora: { altId: 'an-imagen-alt' },
       campos: { clasificacion: 'an-categoria' },
       mostrarNivel: (n) => activarNewsPanel(n), estadoNivel: '#news-levels [data-status="clasificacion"]',
     },
@@ -946,9 +950,11 @@
     document.getElementById(`brigada-deshacer-${clave}`).hidden = true;
     document.getElementById(`brigada-estado-${clave}`).textContent = '';
     document.getElementById(`brigada-fuente-idioma-${clave}`).textContent = '';
-    const informe = document.getElementById(`brigada-revision-${clave}`);
-    informe.hidden = true;
-    informe.innerHTML = '';
+    ['revision', 'duplicados', 'pintora'].forEach((nombre) => {
+      const informe = document.getElementById(`brigada-${nombre}-${clave}`);
+      informe.hidden = true;
+      informe.innerHTML = '';
+    });
     const rec = document.getElementById(`brigada-recomendacion-${clave}`);
     if (rec) rec.textContent = '';
     estadoNivelClasificacion(clave, null);
@@ -1040,7 +1046,7 @@
     audio: ['open.spotify.com', 'podcasts.apple.com', 'soundcloud.com', 'anchor.fm', 'spotify.link'],
     foto: ['flickr.com', 'instagram.com', 'unsplash.com', '500px.com', 'pinterest.com'],
   };
-  const NOMBRE_AGENTE = { investigadora: 'Doña Pesquisa', clasificadora: 'Doña Fichas', redactora: 'La Pluma', bibliotecaria: 'La Bibliotecaria', guardiana: 'La Guardiana' };
+  const NOMBRE_AGENTE = { investigadora: 'Doña Pesquisa', clasificadora: 'Doña Fichas', redactora: 'La Pluma', bibliotecaria: 'La Bibliotecaria', guardiana: 'La Guardiana', detective: 'El Detective', pintora: 'La Pintora' };
   function formatoDeHost(host) {
     const h = String(host || '').toLowerCase().replace(/^www\./, '');
     return Object.keys(HOSTS_FUENTE).find((f) => HOSTS_FUENTE[f].some((d) => h === d || h.endsWith('.' + d))) || null;
@@ -1050,20 +1056,20 @@
     const u = String(url || '').trim();
     const hayTexto = Boolean(String(textoPegado || '').trim());
     if (!u && !hayTexto) return null;
-    if (!u) return { agentes: ['investigadora', 'redactora', 'guardiana'], mensaje: 'Con solo el texto pegado: Doña Pesquisa lo investiga, La Pluma redacta y La Guardiana revisa. Doña Fichas y La Bibliotecaria necesitan una URL.' };
+    if (!u) return { agentes: ['detective', 'investigadora', 'redactora', 'pintora', 'guardiana'], mensaje: 'Con solo el texto pegado: Doña Pesquisa lo investiga, La Pluma redacta, La Pintora propone la imagen y La Guardiana revisa. Doña Fichas y La Bibliotecaria necesitan una URL.' };
     let host;
     try { host = new URL(u).hostname; } catch { return { agentes: [], mensaje: 'La URL no parece válida: revisa que empiece con https://' }; }
     const formato = formatoDeHost(host);
     if (formato) {
       const nombre = { video: 'un video', audio: 'un audio', foto: 'una foto' }[formato];
       return hayTexto
-        ? { agentes: ['investigadora', 'clasificadora', 'redactora', 'bibliotecaria', 'guardiana'], formato, mensaje: `Es ${nombre} y ya pegaste su texto: recomiendo el equipo completo.` }
-        : { agentes: ['clasificadora', 'bibliotecaria'], formato, mensaje: `Es ${nombre}: no hay una página de texto que leer. Pega su transcripción en el cuadro de Doña Pesquisa para investigarlo y redactar; mientras tanto Doña Fichas y La Bibliotecaria sí pueden trabajar con la URL.` };
+        ? { agentes: ['detective', 'investigadora', 'clasificadora', 'redactora', 'bibliotecaria', 'pintora', 'guardiana'], formato, mensaje: `Es ${nombre} y ya pegaste su texto: recomiendo el equipo completo.` }
+        : { agentes: ['detective', 'clasificadora', 'bibliotecaria'], formato, mensaje: `Es ${nombre}: no hay una página de texto que leer. Pega su transcripción en el cuadro de Doña Pesquisa para investigarlo y redactar; mientras tanto Doña Fichas y La Bibliotecaria sí pueden trabajar con la URL.` };
     }
-    return { agentes: ['investigadora', 'clasificadora', 'redactora', 'bibliotecaria', 'guardiana'], mensaje: 'Recomiendo el equipo completo: Doña Pesquisa investiga, Doña Fichas clasifica, La Pluma redacta (y Doña Breve resume), La Bibliotecaria cita y La Guardiana revisa.' };
+    return { agentes: ['detective', 'investigadora', 'clasificadora', 'redactora', 'bibliotecaria', 'pintora', 'guardiana'], mensaje: 'Recomiendo el equipo completo: El Detective revisa que no esté repetida, Doña Pesquisa investiga, Doña Fichas clasifica, La Pluma redacta (y Doña Breve resume), La Bibliotecaria cita, La Pintora propone la imagen y La Guardiana revisa.' };
   }
   function pasosEquipo(agentes) {
-    return ['investigadora', 'clasificadora', 'redactora', 'bibliotecaria', 'guardiana'].filter((a) => agentes.includes(a));
+    return ['detective', 'investigadora', 'clasificadora', 'redactora', 'bibliotecaria', 'pintora', 'guardiana'].filter((a) => agentes.includes(a));
   }
   // FIN brigada-equipo
 
@@ -1091,6 +1097,8 @@
       redactora: () => redactarConIA(),
       bibliotecaria: () => rellenarDesdeUrl(false),
       guardiana: () => revisarConGuardiana('contenido'),
+      detective: () => detectiveAntesDelEquipo(),
+      pintora: () => pintarConPintora('contenido'),
     };
     equipoEnMarcha = true;
     const boton = document.getElementById('brigada-equipo-contenido');
@@ -1101,6 +1109,10 @@
         recomendacion.textContent = `🐸 Paso ${i + 1} de ${pasos.length}: ${NOMBRE_AGENTE[paso]} está trabajando...`;
         // La Pluma redacta a partir de las notas: sin ellas (porque la investigadora no corrió) se salta.
         if (paso === 'redactora' && !document.getElementById('ia-notas').value.trim()) continue;
+        // El Detective necesita la URL o un título para buscar; sin ellos se salta.
+        if (paso === 'detective' && !document.getElementById('brigada-url-contenido').value.trim() && !document.getElementById('ac-titulo').value.trim()) continue;
+        // La Pintora imagina la imagen a partir de lo ya escrito.
+        if (paso === 'pintora' && !document.getElementById('ac-titulo').value.trim() && !document.getElementById('ac-subtitulo').value.trim() && !document.getElementById('ac-cuerpo').value.trim()) continue;
         const bien = await ejecutores[paso]();
         if (!bien) {
           recomendacion.textContent = `🐸 El equipo se detuvo en ${NOMBRE_AGENTE[paso]} (mira su mensaje abajo). Lo que ya hicieron las anteriores sigue en el formulario.`;
@@ -1111,6 +1123,131 @@
       recomendacion.textContent = `🐸 ¡Coquí, coquí! El equipo terminó (${hechos} agentes). Revisa cada pestaña antes de guardar: nada se ha guardado todavía.`;
     } finally {
       equipoEnMarcha = false;
+      boton.disabled = false;
+    }
+  }
+
+  // ── LA BRIGADA COQUÍ · El Detective y La Pintora ─────────
+  // INICIO brigada-detective-pintora
+  const NIVEL_DUPLICADO = { muy_probable: 'Muy probable', probable: 'Probable', posible: 'Posible' };
+  function hayCoincidenciaFuerte(candidatas) {
+    return (candidatas || []).some((c) => c.nivel === 'muy_probable');
+  }
+  function htmlDuplicados(data, esc) {
+    if (!data.candidatas.length) {
+      return `<h5>🕵️ El Detective</h5>
+        <p class="brigada-revision-ok">No encontré historias repetidas entre las ${esc(data.revisadas)} piezas del sitio (noticias y contenidos, publicados y borradores).</p>`;
+    }
+    const filas = data.candidatas.map((c) => `
+      <li class="brigada-bandera brigada-bandera-${c.nivel === 'muy_probable' ? 'alta' : c.nivel === 'probable' ? 'media' : 'baja'}">
+        <strong>${esc(NIVEL_DUPLICADO[c.nivel] || c.nivel)} (${Math.round(c.similitud * 100)}%)</strong> ·
+        ${c.tipo === 'noticia' ? 'Noticia' : 'Contenido'} · ${c.publicado ? 'Publicada' : 'Borrador'}${c.fecha ? ` · ${esc(c.fecha)}` : ''}<br>
+        «${esc(c.titulo)}»<br>
+        <small>${c.razones.map(esc).join(' ')}</small><br>
+        <button type="button" class="admin-btn-cancel" data-abrir-tipo="${esc(c.tipo)}" data-abrir-id="${esc(c.id)}">Abrir la existente</button>
+      </li>`).join('');
+    return `<h5>🕵️ El Detective</h5>
+      <p><strong>Encontré ${data.candidatas.length} pieza${data.candidatas.length === 1 ? '' : 's'} parecida${data.candidatas.length === 1 ? '' : 's'}:</strong></p>
+      <ul>${filas}</ul>
+      <p class="admin-hint">El Detective solo avisa. Si es la misma historia, abre la que ya existe y edítala en lugar de crear otra; si es otra historia, sigue como estás.</p>`;
+  }
+  function htmlPintora(data, esc) {
+    return `<h5>🎨 La Pintora</h5>
+      <p><strong>Texto alternativo sugerido</strong></p>
+      <p class="brigada-pintora-texto">${esc(data.textoAlternativo)}</p>
+      <div class="ia-fila"><button type="button" class="admin-btn-cancel" data-accion="usar-alt">Usar como texto alternativo</button></div>
+      <p><strong>Escena</strong> <small>(en inglés, para la herramienta de imágenes)</small></p>
+      <p class="brigada-pintora-texto">${esc(data.escena)}</p>
+      <p><strong>Prompt completo</strong> <small>(la escena + el estilo fijo de Aliado Imperfekto)</small></p>
+      <textarea class="brigada-pintora-prompt" rows="5" readonly>${esc(data.promptImagen)}</textarea>
+      <div class="ia-fila"><button type="button" class="admin-btn-cancel" data-accion="copiar-prompt">Copiar prompt</button></div>
+      <p class="admin-hint">La Pintora no genera la imagen: te da el prompt para usarlo en la herramienta que prefieras. Nada se escribe en el formulario hasta que pulses «Usar».</p>`;
+  }
+  // FIN brigada-detective-pintora
+
+  // Busca historias repetidas y las muestra. Devuelve la respuesta (o null si no se pudo).
+  async function buscarRepetidas(clave) {
+    const cfg = MESAS[clave];
+    const estado = document.getElementById(`brigada-estado-${clave}`);
+    const contenedor = document.getElementById(`brigada-duplicados-${clave}`);
+    const valor = (id) => (id ? document.getElementById(id).value.trim() : '');
+    const cuerpo = { titulo: valor(cfg.detective.titulo), resumen: valor(cfg.detective.resumen), fuenteUrl: valor(`brigada-url-${clave}`) };
+    const idActual = valor(cfg.detective.idInput);
+    if (idActual) cuerpo.excluir = { tipo: cfg.detective.tipo, id: idActual };
+    if (!cuerpo.titulo && !cuerpo.fuenteUrl) { estado.textContent = '🕵️ El Detective necesita la URL de la fuente o el título para buscar.'; return null; }
+    const boton = document.getElementById(`brigada-duplicados-btn-${clave}`);
+    boton.disabled = true;
+    estado.textContent = '🕵️ El Detective está revisando las piezas del sitio...';
+    try {
+      const data = await apiFetch('/api/admin/brigada/duplicados', { method: 'POST', body: JSON.stringify(cuerpo) });
+      contenedor.innerHTML = htmlDuplicados(data, escapeHtml);
+      contenedor.hidden = false;
+      contenedor.querySelectorAll('[data-abrir-id]').forEach((b) => b.addEventListener('click', () => abrirExistente(b.dataset.abrirTipo, b.dataset.abrirId)));
+      estado.textContent = data.candidatas.length ? `🕵️ El Detective encontró ${data.candidatas.length} pieza(s) parecida(s): mira abajo.` : '🕵️ El Detective no encontró historias repetidas.';
+      return data;
+    } catch (err) {
+      estado.textContent = 'El Detective no pudo buscar: ' + err.message;
+      return null;
+    } finally {
+      boton.disabled = false;
+    }
+  }
+
+  // Primer paso del «Equipo completo»: si hay una coincidencia muy probable, pregunta antes de gastar IA.
+  async function detectiveAntesDelEquipo() {
+    const data = await buscarRepetidas('contenido');
+    if (!data) return false;
+    if (!hayCoincidenciaFuerte(data.candidatas)) return true;
+    return confirm('El Detective encontró una pieza MUY parecida (mira su informe en la mesa). ¿Quieres que el equipo siga de todos modos?');
+  }
+
+  // Cierra el formulario actual y abre en edición la pieza que ya existe.
+  function abrirExistente(tipo, id) {
+    if (!confirm('Se cerrará lo que estás escribiendo (sin guardar) y se abrirá la pieza que ya existe para editarla. ¿Seguir?')) return;
+    if (tipo === 'noticia') {
+      const item = noticiasCache.find((n) => n.id === id);
+      if (!item) { alert('No encontré esa noticia en la lista del panel.'); return; }
+      activarTab('noticias');
+      openNoticiaForm(item);
+    } else {
+      const item = contenidosCache.find((c) => c.id === id);
+      if (!item) { alert('No encontré ese contenido en la lista del panel.'); return; }
+      activarTab('contenidos');
+      openContenidoForm(item);
+    }
+  }
+
+  async function pintarConPintora(clave) {
+    const cfg = MESAS[clave];
+    const estado = document.getElementById(`brigada-estado-${clave}`);
+    const contenedor = document.getElementById(`brigada-pintora-${clave}`);
+    const valor = (id) => (id ? document.getElementById(id).value.trim() : '');
+    const rev = cfg.revision;
+    const cuerpo = { titulo: valor(rev.titulo), resumen: valor(rev.resumen), cuerpo: valor(rev.cuerpo), idioma: document.getElementById(cfg.idiomaPieza).value, seccion: valor(rev.seccion) };
+    if (!cuerpo.titulo && !cuerpo.resumen && !cuerpo.cuerpo) { estado.textContent = '🎨 La Pintora imagina la imagen a partir de lo que ya escribiste: escribe o redacta primero el título o el cuerpo.'; return false; }
+    const boton = document.getElementById(`brigada-pintar-${clave}`);
+    boton.disabled = true;
+    estado.textContent = '🎨 La Pintora está imaginando la imagen...';
+    try {
+      const data = await apiFetch('/api/admin/brigada/pintar', { method: 'POST', body: JSON.stringify(cuerpo) });
+      contenedor.innerHTML = htmlPintora(data, escapeHtml);
+      contenedor.hidden = false;
+      contenedor.querySelector('[data-accion="usar-alt"]').addEventListener('click', () => {
+        const alt = document.getElementById(cfg.pintora.altId);
+        if (alt.value.trim() && !confirm('Ya hay un texto alternativo escrito. ¿Reemplazarlo por el de la Pintora?')) return;
+        alt.value = data.textoAlternativo;
+        alt.dispatchEvent(new Event('input', { bubbles: true }));
+        estado.textContent = '🎨 Texto alternativo puesto en la pestaña Multimedia. Revísalo contra la imagen que elijas.';
+      });
+      contenedor.querySelector('[data-accion="copiar-prompt"]').addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(data.promptImagen); estado.textContent = '🎨 Prompt copiado.'; } catch { estado.textContent = '🎨 No se pudo copiar: selecciona el prompt y cópialo a mano.'; }
+      });
+      estado.textContent = '🎨 La Pintora terminó: mira su propuesta abajo.';
+      return true;
+    } catch (err) {
+      estado.textContent = 'La Pintora no pudo imaginar la imagen: ' + err.message;
+      return false;
+    } finally {
       boton.disabled = false;
     }
   }
@@ -1219,6 +1356,14 @@
     }
     document.getElementById(`brigada-clasificar-${clave}`).addEventListener('click', () => clasificarConBrigada(clave));
     document.getElementById(`brigada-revisar-${clave}`).addEventListener('click', () => revisarConGuardiana(clave));
+    document.getElementById(`brigada-duplicados-btn-${clave}`).addEventListener('click', () => buscarRepetidas(clave));
+    document.getElementById(`brigada-pintar-${clave}`).addEventListener('click', () => pintarConPintora(clave));
+    // Mini-tarjeta junto al texto alternativo: la propuesta de la Pintora aparece en la mesa, que se muestra.
+    const mini = document.getElementById(clave === 'contenido' ? 'ac-pintora-alt' : 'an-pintora-alt');
+    mini.addEventListener('click', async () => {
+      await pintarConPintora(clave);
+      document.querySelector(`#brigada-url-${clave}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
     document.getElementById(`brigada-deshacer-${clave}`).addEventListener('click', () => deshacerClasificacion(clave));
     // Si la persona cambia un campo a mano, deja de ser una sugerencia: se quita la marca y no se vuelve a pisar.
     Object.values(cfg.campos).forEach((id) => {
@@ -2576,13 +2721,13 @@
       noHace: 'Orienta; no bloquea ni borra, y no sustituye a un abogado.',
     },
     {
-      id: 'detective', emoji: '🕵️', nombre: 'Detective', apodo: 'El Detective', estado: 'proxima',
-      trabajo: ['Avisa si esa historia ya está publicada en el sitio', 'Propone fusionar las piezas repetidas'],
-      noHace: 'No borra nada por su cuenta.',
+      id: 'detective', emoji: '🕵️', nombre: 'Detective', apodo: 'El Detective', estado: 'activa', nivel: 'contenido',
+      trabajo: ['Avisa si esa historia ya está publicada o guardada como borrador (misma fuente, título o resumen parecidos)', 'Te deja abrir la pieza que ya existe en lugar de crear otra repetida'],
+      noHace: 'No usa IA y no borra ni fusiona nada por su cuenta.',
     },
     {
-      id: 'pintora', emoji: '🎨', nombre: 'Pintora', apodo: 'La Pintora', estado: 'proxima',
-      trabajo: ['Sugiere el texto alternativo de las imágenes', 'Escribe el prompt de imagen en el estilo de Aliado Imperfekto'],
+      id: 'pintora', emoji: '🎨', nombre: 'Pintora', apodo: 'La Pintora', estado: 'activa', nivel: 'multimedia',
+      trabajo: ['Sugiere el texto alternativo de las imágenes', 'Escribe el prompt de imagen en el estilo fijo de Aliado Imperfekto'],
       noHace: 'No genera la imagen: te da el prompt.',
     },
   ];
