@@ -1,16 +1,16 @@
 {
-  "generado": "2026-10-24T15:00:05.591Z",
+  "generado": "2026-10-24T17:26:39.949Z",
   "comando": "cd backend && npx jest --json --outputFile=<tmp> --coverage --coverageReporters=json-summary",
   "node": "v24.13.0",
-  "suites_total": 85,
-  "suites_pasadas": 85,
+  "suites_total": 86,
+  "suites_pasadas": 86,
   "suites_falladas": 0,
-  "pruebas_total": 1261,
-  "pruebas_pasadas": 1261,
+  "pruebas_total": 1273,
+  "pruebas_pasadas": 1273,
   "pruebas_falladas": 0,
   "pruebas_omitidas": 0,
   "exito": true,
-  "duracion_seg": 33.1,
+  "duracion_seg": 107.2,
   "cobertura_global": {
     "lineas": 92.96,
     "sentencias": 91.82,
@@ -92,7 +92,7 @@
       "pruebas": 4,
       "pasadas": 4,
       "falladas": 0,
-      "duracion_ms": 198,
+      "duracion_ms": 164,
       "nombres": [
         {
           "titulo": "construirCambios (plantillas de correo -> API de Supabase) usa los nombres de campo de la API para las 6 plantillas de autenticacion",
@@ -118,7 +118,7 @@
       "pruebas": 7,
       "pasadas": 7,
       "falladas": 0,
-      "duracion_ms": 195,
+      "duracion_ms": 271,
       "nombres": [
         {
           "titulo": "calcularDelta detecta faltantes, extras y modificadas",
@@ -156,7 +156,7 @@
       "pruebas": 4,
       "pasadas": 4,
       "falladas": 0,
-      "duracion_ms": 180,
+      "duracion_ms": 170,
       "nombres": [
         {
           "titulo": "env-ensayo cambia solo DATABASE_URL, SUPABASE_URL y FRONTEND_ORIGIN y conserva lo demas",
@@ -182,7 +182,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 238,
+      "duracion_ms": 212,
       "nombres": [
         {
           "titulo": "filtrarToc (restauracion en proyecto nuevo) conserva lo de public (tablas, datos, restricciones, FK, RLS)",
@@ -212,7 +212,7 @@
       "pruebas": 10,
       "pasadas": 10,
       "falladas": 0,
-      "duracion_ms": 1181,
+      "duracion_ms": 939,
       "nombres": [
         {
           "titulo": "peticiones sin cuerpo (Express 5: req.body undefined) POST /api/comentarios sin cuerpo responde 400 de validacion, no 500",
@@ -262,7 +262,7 @@
       "pruebas": 6,
       "pasadas": 6,
       "falladas": 0,
-      "duracion_ms": 22363,
+      "duracion_ms": 33024,
       "nombres": [
         {
           "titulo": "cabeceras de seguridad del API (#7) no anuncia Express y manda las cabeceras de endurecimiento",
@@ -296,7 +296,7 @@
       "pruebas": 4,
       "pasadas": 4,
       "falladas": 0,
-      "duracion_ms": 1693,
+      "duracion_ms": 1357,
       "nombres": [
         {
           "titulo": "rate limit por cliente real detras del proxy cada cliente tiene su propio contador (no se comparte entre visitantes)",
@@ -322,7 +322,7 @@
       "pruebas": 2,
       "pasadas": 2,
       "falladas": 0,
-      "duracion_ms": 142,
+      "duracion_ms": 129,
       "nombres": [
         {
           "titulo": "fecha de actualización de las páginas legales no se calcula con new Date()",
@@ -340,7 +340,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 181,
+      "duracion_ms": 200,
       "nombres": [
         {
           "titulo": "clasificacion las listas coinciden con las que valida el backend",
@@ -386,7 +386,7 @@
       "pruebas": 13,
       "pasadas": 13,
       "falladas": 0,
-      "duracion_ms": 540,
+      "duracion_ms": 286,
       "nombres": [
         {
           "titulo": "variantes coinciden con las que valida el backend",
@@ -448,7 +448,7 @@
       "pruebas": 39,
       "pasadas": 39,
       "falladas": 0,
-      "duracion_ms": 627,
+      "duracion_ms": 564,
       "nombres": [
         {
           "titulo": "Página \"Apoya el canal\" (premium.html) título, subtítulo y secciones aprobadas",
@@ -609,12 +609,70 @@
       ]
     },
     {
+      "archivo": "src/frontend-apple.test.js",
+      "estado": "passed",
+      "pruebas": 12,
+      "pasadas": 12,
+      "falladas": 0,
+      "duracion_ms": 690,
+      "nombres": [
+        {
+          "titulo": "campos de formulario: 16 px para que el iPhone no haga zoom al tocarlos la regla base de input, textarea y select usa 1rem (16 px) y no 0.95rem",
+          "estado": "passed"
+        },
+        {
+          "titulo": "campos de formulario: 16 px para que el iPhone no haga zoom al tocarlos la letra base del documento es de 16 px (1rem = 16 px)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cajón del carrito: no queda tapado por la barra de Safari del iPhone mantiene 100vh como respaldo y agrega 100dvh justo después",
+          "estado": "passed"
+        },
+        {
+          "titulo": "la página no se arrastra de lado en el iPhone el cajón del carrito cerrado no queda fuera de la pantalla: right:0, recortado y oculto",
+          "estado": "passed"
+        },
+        {
+          "titulo": "la página no se arrastra de lado en el iPhone html y body recortan el desborde horizontal (overflow-x:clip, que no rompe position:sticky)",
+          "estado": "passed"
+        },
+        {
+          "titulo": "la página no se arrastra de lado en el iPhone ningún elemento del CSS se estaciona fuera de la pantalla con right o left negativos en un position:fixed",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cabecera en pantallas angostas: el botón de menú siempre cabe el botón de menú no se encoge y el grupo de controles sí; lo único que se acorta es el botón de sesión, con «…»",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cabecera en pantallas angostas: el botón de menú siempre cabe en teléfono (≤560 px) se aprietan los espacios y se oculta el nombre junto al logo",
+          "estado": "passed"
+        },
+        {
+          "titulo": "cabecera en pantallas angostas: el botón de menú siempre cabe el script de WebKit también mide que el botón de menú quede dentro de la pantalla",
+          "estado": "passed"
+        },
+        {
+          "titulo": "sin almacenamiento (Safari con «Bloquear todas las cookies» lanza SecurityError) script.js lee y guarda el tema dentro de try/catch",
+          "estado": "passed"
+        },
+        {
+          "titulo": "sin almacenamiento (Safari con «Bloquear todas las cookies» lanza SecurityError) debate.js confirma la edad con sessionStorage dentro de try/catch y la recuerda en memoria si no se puede",
+          "estado": "passed"
+        },
+        {
+          "titulo": "sin almacenamiento (Safari con «Bloquear todas las cookies» lanza SecurityError) los demás usos de storage del sitio ya están protegidos con try/catch",
+          "estado": "passed"
+        }
+      ]
+    },
+    {
       "archivo": "src/frontend-auth-errores.test.js",
       "estado": "passed",
       "pruebas": 11,
       "pasadas": 11,
       "falladas": 0,
-      "duracion_ms": 583,
+      "duracion_ms": 366,
       "nombres": [
         {
           "titulo": "errorAuthEnEspanol traduce el codigo same_password",
@@ -668,7 +726,7 @@
       "pruebas": 56,
       "pasadas": 56,
       "falladas": 0,
-      "duracion_ms": 582,
+      "duracion_ms": 449,
       "nombres": [
         {
           "titulo": "orden de los niveles: los agentes primero Contenidos: Investigadora y Redactora, luego Clasificación, Contenido, Multimedia y Citación",
@@ -902,7 +960,7 @@
       "pruebas": 18,
       "pasadas": 18,
       "falladas": 0,
-      "duracion_ms": 606,
+      "duracion_ms": 565,
       "nombres": [
         {
           "titulo": "El CSP deja que el formulario de contacto se envíe script.js envía el formulario con fetch al \"action\" (Formspree)",
@@ -984,7 +1042,7 @@
       "pruebas": 10,
       "pasadas": 10,
       "falladas": 0,
-      "duracion_ms": 167,
+      "duracion_ms": 146,
       "nombres": [
         {
           "titulo": "etiquetas del formulario de Contenidos «ac-subtitulo» no lleva texto entre paréntesis",
@@ -1034,7 +1092,7 @@
       "pruebas": 12,
       "pasadas": 12,
       "falladas": 0,
-      "duracion_ms": 310,
+      "duracion_ms": 374,
       "nombres": [
         {
           "titulo": "Contenidos: Guardar borrador / AL AIRE el formulario tiene los dos botones (sin \"submit\") y la casilla oculta publicado",
@@ -1092,7 +1150,7 @@
       "pruebas": 26,
       "pasadas": 26,
       "falladas": 0,
-      "duracion_ms": 749,
+      "duracion_ms": 499,
       "nombres": [
         {
           "titulo": "Noticias: botones de región hay una fila de 4 botones de región, con Puerto Rico activo, debajo de las categorías",
@@ -1206,7 +1264,7 @@
       "pruebas": 12,
       "pasadas": 12,
       "falladas": 0,
-      "duracion_ms": 815,
+      "duracion_ms": 288,
       "nombres": [
         {
           "titulo": "formularios: dónde se agregan las otras fuentes la mesa de contenido tiene su lista y su botón «Agregar otra fuente»",
@@ -1264,7 +1322,7 @@
       "pruebas": 1,
       "pasadas": 1,
       "falladas": 0,
-      "duracion_ms": 17082,
+      "duracion_ms": 63838,
       "nombres": [
         {
           "titulo": "el panel arranca sin errores y pinta noticias, contenidos, productos y reportes",
@@ -1278,7 +1336,7 @@
       "pruebas": 25,
       "pasadas": 25,
       "falladas": 0,
-      "duracion_ms": 679,
+      "duracion_ms": 249,
       "nombres": [
         {
           "titulo": "Noticias rápidas: publicar solo desde el último paso «AL AIRE» y «Guardar borrador» están dentro del panel Fuente (último paso), no en una barra fija",
@@ -1388,7 +1446,7 @@
       "pruebas": 14,
       "pasadas": 14,
       "falladas": 0,
-      "duracion_ms": 171,
+      "duracion_ms": 211,
       "nombres": [
         {
           "titulo": "normalizar colapsa espacios y saltos de linea, y recorta",
@@ -1454,7 +1512,7 @@
       "pruebas": 11,
       "pasadas": 11,
       "falladas": 0,
-      "duracion_ms": 674,
+      "duracion_ms": 688,
       "nombres": [
         {
           "titulo": "catalogo y limites las claves y los limites coinciden con los que valida el backend",
@@ -1508,7 +1566,7 @@
       "pruebas": 8,
       "pasadas": 8,
       "falladas": 0,
-      "duracion_ms": 202,
+      "duracion_ms": 208,
       "nombres": [
         {
           "titulo": "verificacion del JWT con emisor y audiencia requireAuth exige iss = <proyecto>/auth/v1 y aud = authenticated",
@@ -1550,7 +1608,7 @@
       "pruebas": 16,
       "pasadas": 16,
       "falladas": 0,
-      "duracion_ms": 22182,
+      "duracion_ms": 32695,
       "nombres": [
         {
           "titulo": "admin con sesion aal1 (solo contrasena) pierde el poder: rol efectivo \"usuario\" y requireAdmin responde 403 mfa_required",
@@ -1624,7 +1682,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 700,
+      "duracion_ms": 520,
       "nombres": [
         {
           "titulo": "requireAuth responde 401 si no hay encabezado Authorization",
@@ -1654,7 +1712,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 135,
+      "duracion_ms": 136,
       "nombres": [
         {
           "titulo": "netlify.toml construye y publica solo la carpeta frontend/",
@@ -1700,7 +1758,7 @@
       "pruebas": 14,
       "pasadas": 14,
       "falladas": 0,
-      "duracion_ms": 237,
+      "duracion_ms": 269,
       "nombres": [
         {
           "titulo": "filtrarPorRegion sin región elegida devuelve todo",
@@ -1766,7 +1824,7 @@
       "pruebas": 17,
       "pasadas": 17,
       "falladas": 0,
-      "duracion_ms": 22803,
+      "duracion_ms": 33419,
       "nombres": [
         {
           "titulo": "acceso a /api/admin/gastos get /api/admin/gastos: 401 sin sesion",
@@ -1844,7 +1902,7 @@
       "pruebas": 41,
       "pasadas": 41,
       "falladas": 0,
-      "duracion_ms": 23137,
+      "duracion_ms": 33775,
       "nombres": [
         {
           "titulo": "POST /api/admin/autocompletar-ia 401 sin autenticacion",
@@ -2018,7 +2076,7 @@
       "pruebas": 21,
       "pasadas": 21,
       "falladas": 0,
-      "duracion_ms": 22877,
+      "duracion_ms": 33554,
       "nombres": [
         {
           "titulo": "acceso a /api/admin/traducciones y /traducir get /api/admin/traducciones/noticia/a: 401 sin sesion",
@@ -2112,7 +2170,7 @@
       "pruebas": 17,
       "pasadas": 17,
       "falladas": 0,
-      "duracion_ms": 22660,
+      "duracion_ms": 33175,
       "nombres": [
         {
           "titulo": "GET /api/agradecimientos (público) 200 con la lista de nombres, sin pedir sesión",
@@ -2190,7 +2248,7 @@
       "pruebas": 37,
       "pasadas": 37,
       "falladas": 0,
-      "duracion_ms": 23195,
+      "duracion_ms": 33851,
       "nombres": [
         {
           "titulo": "POST /api/admin/brigada/clasificar 401 sin sesión; 403 para usuario y moderador (solo admin)",
@@ -2348,7 +2406,7 @@
       "pruebas": 21,
       "pasadas": 21,
       "falladas": 0,
-      "duracion_ms": 22680,
+      "duracion_ms": 33418,
       "nombres": [
         {
           "titulo": "GET /api/comentarios 400 si faltan tipo o itemId",
@@ -2442,7 +2500,7 @@
       "pruebas": 10,
       "pasadas": 10,
       "falladas": 0,
-      "duracion_ms": 22505,
+      "duracion_ms": 33291,
       "nombres": [
         {
           "titulo": "POST /api/admin/contenido-ia/resumir 401 sin sesión; 403 para usuario y moderador (solo admin)",
@@ -2492,7 +2550,7 @@
       "pruebas": 50,
       "pasadas": 50,
       "falladas": 0,
-      "duracion_ms": 7477,
+      "duracion_ms": 1471,
       "nombres": [
         {
           "titulo": "GET /api/contenidos devuelve la lista",
@@ -2702,7 +2760,7 @@
       "pruebas": 20,
       "pasadas": 20,
       "falladas": 0,
-      "duracion_ms": 22500,
+      "duracion_ms": 33470,
       "nombres": [
         {
           "titulo": "POST /api/admin/corregir 401 sin sesión, 403 para usuario y moderador (solo admin)",
@@ -2792,7 +2850,7 @@
       "pruebas": 65,
       "pasadas": 65,
       "falladas": 0,
-      "duracion_ms": 23618,
+      "duracion_ms": 34013,
       "nombres": [
         {
           "titulo": "GET /api/foro/posts 400 si falta el parametro subseccion",
@@ -3062,7 +3120,7 @@
       "pruebas": 14,
       "pasadas": 14,
       "falladas": 0,
-      "duracion_ms": 1339,
+      "duracion_ms": 1221,
       "nombres": [
         {
           "titulo": "otras fuentes en contenidos al crear, se guardan limpias (sin espacios ni enlaces repetidos) como JSON en el último parámetro",
@@ -3128,7 +3186,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 22186,
+      "duracion_ms": 33171,
       "nombres": [
         {
           "titulo": "POST /api/newsletter/subscribe 400 con correo invalido",
@@ -3158,7 +3216,7 @@
       "pruebas": 45,
       "pasadas": 45,
       "falladas": 0,
-      "duracion_ms": 23165,
+      "duracion_ms": 33735,
       "nombres": [
         {
           "titulo": "GET /api/noticias devuelve la lista de noticias",
@@ -3348,7 +3406,7 @@
       "pruebas": 2,
       "pasadas": 2,
       "falladas": 0,
-      "duracion_ms": 967,
+      "duracion_ms": 803,
       "nombres": [
         {
           "titulo": "GET /api/ordenes 401 sin autenticacion",
@@ -3366,7 +3424,7 @@
       "pruebas": 18,
       "pasadas": 18,
       "falladas": 0,
-      "duracion_ms": 22582,
+      "duracion_ms": 33370,
       "nombres": [
         {
           "titulo": "PUT /api/perfil 401 sin autenticacion",
@@ -3448,7 +3506,7 @@
       "pruebas": 13,
       "pasadas": 13,
       "falladas": 0,
-      "duracion_ms": 22381,
+      "duracion_ms": 33198,
       "nombres": [
         {
           "titulo": "GET /api/productos devuelve la lista de productos",
@@ -3510,7 +3568,7 @@
       "pruebas": 20,
       "pasadas": 20,
       "falladas": 0,
-      "duracion_ms": 22650,
+      "duracion_ms": 33448,
       "nombres": [
         {
           "titulo": "POST /api/reportes 401 sin autenticacion",
@@ -3600,7 +3658,7 @@
       "pruebas": 15,
       "pasadas": 15,
       "falladas": 0,
-      "duracion_ms": 22908,
+      "duracion_ms": 33608,
       "nombres": [
         {
           "titulo": "acceso (solo admin) post /api/semillas/11111111-1111-4111-8111-111111111111/desarrollar: 401 sin sesión y 403 para un usuario",
@@ -3670,7 +3728,7 @@
       "pruebas": 25,
       "pasadas": 25,
       "falladas": 0,
-      "duracion_ms": 22759,
+      "duracion_ms": 33717,
       "nombres": [
         {
           "titulo": "acceso (todo el Taller es solo de admin) get /api/semillas: 401 sin sesión y 403 para usuario y moderador",
@@ -3780,7 +3838,7 @@
       "pruebas": 10,
       "pasadas": 10,
       "falladas": 0,
-      "duracion_ms": 919,
+      "duracion_ms": 743,
       "nombres": [
         {
           "titulo": "POST /api/stripe/create-checkout-session 401 sin autenticacion",
@@ -3830,7 +3888,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 1214,
+      "duracion_ms": 944,
       "nombres": [
         {
           "titulo": "POST /api/stripe/webhook 400 si la firma es invalida",
@@ -3876,7 +3934,7 @@
       "pruebas": 4,
       "pasadas": 4,
       "falladas": 0,
-      "duracion_ms": 531,
+      "duracion_ms": 231,
       "nombres": [
         {
           "titulo": "isPrivateIp detecta direcciones privadas/internas comunes",
@@ -3902,7 +3960,7 @@
       "pruebas": 16,
       "pasadas": 16,
       "falladas": 0,
-      "duracion_ms": 376,
+      "duracion_ms": 261,
       "nombres": [
         {
           "titulo": "citaEstaEnPagina acepta una cita que aparece tal cual, aunque cambien mayúsculas, tildes, comillas o espacios",
@@ -3976,7 +4034,7 @@
       "pruebas": 14,
       "pasadas": 14,
       "falladas": 0,
-      "duracion_ms": 414,
+      "duracion_ms": 297,
       "nombres": [
         {
           "titulo": "listas validas coinciden con las del formulario y las que valida el backend",
@@ -4042,7 +4100,7 @@
       "pruebas": 7,
       "pasadas": 7,
       "falladas": 0,
-      "duracion_ms": 279,
+      "duracion_ms": 230,
       "nombres": [
         {
           "titulo": "limpiarContrapunto ordena las objeciones de más a menos fuertes y normaliza una fuerza desconocida a «media»",
@@ -4080,7 +4138,7 @@
       "pruebas": 8,
       "pasadas": 8,
       "falladas": 0,
-      "duracion_ms": 337,
+      "duracion_ms": 175,
       "nombres": [
         {
           "titulo": "corregirTexto sin ANTHROPIC_API_KEY falla con un mensaje claro",
@@ -4122,7 +4180,7 @@
       "pruebas": 11,
       "pasadas": 11,
       "falladas": 0,
-      "duracion_ms": 191,
+      "duracion_ms": 230,
       "nombres": [
         {
           "titulo": "normalizarUrl es la misma página aunque cambien http/https, www, la barra final, el # o los parámetros de rastreo",
@@ -4176,7 +4234,7 @@
       "pruebas": 13,
       "pasadas": 13,
       "falladas": 0,
-      "duracion_ms": 284,
+      "duracion_ms": 327,
       "nombres": [
         {
           "titulo": "tramoEsDelAutor acepta lo copiado del texto aunque cambien mayúsculas, tildes o puntuación, y rechaza lo que no está",
@@ -4238,7 +4296,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 324,
+      "duracion_ms": 172,
       "nombres": [
         {
           "titulo": "fragmentoEnTexto solo acepta frases que están, tal cual, en el texto del autor (ignora mayúsculas, espacios y signos de los bordes)",
@@ -4284,7 +4342,7 @@
       "pruebas": 13,
       "pasadas": 13,
       "falladas": 0,
-      "duracion_ms": 373,
+      "duracion_ms": 227,
       "nombres": [
         {
           "titulo": "compararCopia (anti-copia, sin IA) una pieza escrita con otras palabras da un parecido bajo",
@@ -4346,7 +4404,7 @@
       "pruebas": 13,
       "pasadas": 13,
       "falladas": 0,
-      "duracion_ms": 200,
+      "duracion_ms": 221,
       "nombres": [
         {
           "titulo": "aplicarCorrecciones aplica solo los cambios cuyo \"antes\" existe literalmente en el texto",
@@ -4408,7 +4466,7 @@
       "pruebas": 7,
       "pasadas": 7,
       "falladas": 0,
-      "duracion_ms": 251,
+      "duracion_ms": 266,
       "nombres": [
         {
           "titulo": "promptBase con varias fuentes pide marcar de cuál fuente salió cada dato y señalar contradicciones; con una sola no lo pide",
@@ -4446,7 +4504,7 @@
       "pruebas": 16,
       "pasadas": 16,
       "falladas": 0,
-      "duracion_ms": 187,
+      "duracion_ms": 194,
       "nombres": [
         {
           "titulo": "extraerMetadatos lee Open Graph y metadatos de articulo",
@@ -4520,7 +4578,7 @@
       "pruebas": 7,
       "pasadas": 7,
       "falladas": 0,
-      "duracion_ms": 701,
+      "duracion_ms": 316,
       "nombres": [
         {
           "titulo": "limpiarSalida el prompt final es la escena más el estilo fijo, que agrega el código y no el modelo",
@@ -4558,7 +4616,7 @@
       "pruebas": 7,
       "pasadas": 7,
       "falladas": 0,
-      "duracion_ms": 163,
+      "duracion_ms": 197,
       "nombres": [
         {
           "titulo": "elegirTono devuelve una instruccion distinta por cada tono valido",
@@ -4596,7 +4654,7 @@
       "pruebas": 4,
       "pasadas": 4,
       "falladas": 0,
-      "duracion_ms": 219,
+      "duracion_ms": 199,
       "nombres": [
         {
           "titulo": "resumirTexto sin ANTHROPIC_API_KEY falla con un mensaje claro",
@@ -4622,7 +4680,7 @@
       "pruebas": 11,
       "pasadas": 11,
       "falladas": 0,
-      "duracion_ms": 346,
+      "duracion_ms": 228,
       "nombres": [
         {
           "titulo": "camposPresentes solo campos traducibles con texto",
@@ -4676,7 +4734,7 @@
       "pruebas": 26,
       "pasadas": 26,
       "falladas": 0,
-      "duracion_ms": 872,
+      "duracion_ms": 316,
       "nombres": [
         {
           "titulo": "etiquetasDeTexto y tituloDe las etiquetas salen en minúscula, sin vacías ni repetidas, máximo 10",
@@ -4790,7 +4848,7 @@
       "pruebas": 2,
       "pasadas": 2,
       "falladas": 0,
-      "duracion_ms": 153,
+      "duracion_ms": 135,
       "nombres": [
         {
           "titulo": "nombreVisibleSql usa el nombre del perfil y, si no hay, un alias generico derivado del id",
@@ -4808,7 +4866,7 @@
       "pruebas": 12,
       "pasadas": 12,
       "falladas": 0,
-      "duracion_ms": 146,
+      "duracion_ms": 164,
       "nombres": [
         {
           "titulo": "detectarRiesgo null con texto normal, sin patrones de riesgo",
@@ -4866,7 +4924,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 134,
+      "duracion_ms": 152,
       "nombres": [
         {
           "titulo": "calcularEdad null si no hay fecha",
@@ -4912,7 +4970,7 @@
       "pruebas": 11,
       "pasadas": 11,
       "falladas": 0,
-      "duracion_ms": 562,
+      "duracion_ms": 268,
       "nombres": [
         {
           "titulo": "construirContenido es un BORRADOR de Lógica Humana (Revolución Humana), de Aliado Imperfekto, sin premium ni destacado",
@@ -4966,7 +5024,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 142,
+      "duracion_ms": 138,
       "nombres": [
         {
           "titulo": "slugify convierte a minusculas y reemplaza espacios por guiones",
@@ -4996,7 +5054,7 @@
       "pruebas": 8,
       "pasadas": 8,
       "falladas": 0,
-      "duracion_ms": 170,
+      "duracion_ms": 196,
       "nombres": [
         {
           "titulo": "normalizarLang / idiomaOriginalDe solo acepta es/en; el idioma original por defecto es espanol",
@@ -5038,7 +5096,7 @@
       "pruebas": 6,
       "pasadas": 6,
       "falladas": 0,
-      "duracion_ms": 183,
+      "duracion_ms": 187,
       "nombres": [
         {
           "titulo": "registrarUsoAgente guarda una fila con el nombre de la agente, la fuente, los tokens y el costo",
@@ -5072,7 +5130,7 @@
       "pruebas": 16,
       "pasadas": 16,
       "falladas": 0,
-      "duracion_ms": 178,
+      "duracion_ms": 173,
       "nombres": [
         {
           "titulo": "validateNombreAgradecimiento acepta \"Ana\"",
@@ -5146,7 +5204,7 @@
       "pruebas": 7,
       "pasadas": 7,
       "falladas": 0,
-      "duracion_ms": 149,
+      "duracion_ms": 155,
       "nombres": [
         {
           "titulo": "validateComentario acepta un comentario valido",
@@ -5184,7 +5242,7 @@
       "pruebas": 37,
       "pasadas": 37,
       "falladas": 0,
-      "duracion_ms": 589,
+      "duracion_ms": 247,
       "nombres": [
         {
           "titulo": "validateContenido acepta un contenido completo y valido",
@@ -5342,7 +5400,7 @@
       "pruebas": 22,
       "pasadas": 22,
       "falladas": 0,
-      "duracion_ms": 160,
+      "duracion_ms": 198,
       "nombres": [
         {
           "titulo": "validateFechaNacimiento acepta 1990-05-17",
@@ -5440,7 +5498,7 @@
       "pruebas": 22,
       "pasadas": 22,
       "falladas": 0,
-      "duracion_ms": 207,
+      "duracion_ms": 230,
       "nombres": [
         {
           "titulo": "validatePost acepta un post valido sin errores",
@@ -5538,7 +5596,7 @@
       "pruebas": 13,
       "pasadas": 13,
       "falladas": 0,
-      "duracion_ms": 152,
+      "duracion_ms": 204,
       "nombres": [
         {
           "titulo": "validarFuentes lo omitido y una lista válida (con o sin enlace) no tienen errores",
@@ -5600,7 +5658,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 162,
+      "duracion_ms": 154,
       "nombres": [
         {
           "titulo": "validateGastoServicio acepta un gasto valido minimo",
@@ -5646,7 +5704,7 @@
       "pruebas": 21,
       "pasadas": 21,
       "falladas": 0,
-      "duracion_ms": 207,
+      "duracion_ms": 255,
       "nombres": [
         {
           "titulo": "esquema SQL schema.sql y la migracion crean la columna con el mismo limite que la validacion",
@@ -5740,7 +5798,7 @@
       "pruebas": 23,
       "pasadas": 23,
       "falladas": 0,
-      "duracion_ms": 226,
+      "duracion_ms": 296,
       "nombres": [
         {
           "titulo": "validateNoticia acepta una noticia completa y valida",
@@ -5842,7 +5900,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 128,
+      "duracion_ms": 116,
       "nombres": [
         {
           "titulo": "validatePerfil acepta un cuerpo vacio (nombre es opcional)",
@@ -5872,7 +5930,7 @@
       "pruebas": 9,
       "pasadas": 9,
       "falladas": 0,
-      "duracion_ms": 145,
+      "duracion_ms": 154,
       "nombres": [
         {
           "titulo": "validateProducto acepta un producto completo y valido",
@@ -5918,7 +5976,7 @@
       "pruebas": 5,
       "pasadas": 5,
       "falladas": 0,
-      "duracion_ms": 137,
+      "duracion_ms": 152,
       "nombres": [
         {
           "titulo": "validateReporte acepta un reporte valido",
@@ -5948,7 +6006,7 @@
       "pruebas": 7,
       "pasadas": 7,
       "falladas": 0,
-      "duracion_ms": 171,
+      "duracion_ms": 199,
       "nombres": [
         {
           "titulo": "validateTraduccion acepta una traduccion valida de noticia y la sanea",
