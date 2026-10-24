@@ -1,4 +1,5 @@
 const { validarIaHerramientas } = require('./iaHerramientas');
+const { validarFuentes } = require('./fuentes');
 
 const CATEGORIAS_VALIDAS = [
   'internacionales', 'crimen', 'salud', 'deportes',
@@ -26,6 +27,7 @@ function validateNoticia(body, { partial = false } = {}) {
     errors.push('Divulgacion de IA no valida.');
   }
   errors.push(...validarIaHerramientas(body.iaHerramientas, body.divulgacionIa));
+  errors.push(...validarFuentes(body.fuentes));
   if (body.idiomaOriginal !== undefined && !IDIOMAS_ORIGINAL_VALIDOS.includes(body.idiomaOriginal)) {
     errors.push('Idioma original no valido.');
   }

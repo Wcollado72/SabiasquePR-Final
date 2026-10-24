@@ -9,7 +9,7 @@ const request = require('supertest');
 const { buildApp } = require('../app');
 const { extraerArticulo } = require('../services/articleExtractor');
 const { redactarDesdeArticulo } = require('../services/anthropic');
-const { investigarDesdeUrl, investigarDesdeTexto } = require('../services/investigador');
+const { investigarDesdeUrl, investigarDesdeTexto, investigarDesdeVarias } = require('../services/investigador');
 const { redactarDesdeNotas } = require('../services/redactor');
 const { pool } = require('../db');
 
@@ -24,6 +24,7 @@ beforeEach(() => {
   redactarDesdeArticulo.mockReset();
   investigarDesdeUrl.mockReset();
   investigarDesdeTexto.mockReset();
+  investigarDesdeVarias.mockReset();
   redactarDesdeNotas.mockReset();
   pool.query.mockReset();
 });
@@ -165,6 +166,38 @@ describe('POST /api/admin/investigar', () => {
       expect.stringContaining('INSERT INTO ia_generaciones'),
       expect.arrayContaining(['investigador', 'url', false])
     );
+  });
+
+  test('con otras fuentes lee todas juntas, devuelve cuáles leyó y cuáles fallaron, y registra el uso', async () => {
+    investigarDesdeVarias.mockResolvedValueOnce({
+      notas: 'Notas de 2 fuentes', tituloOriginal: 'T', fuenteTexto: 'El Ejemplo', fuenteUrl: 'https://ejemplo.com/a', fuenteTipo: 'url', usage: USAGE_MOCK,
+      fuentesLeidas: [{ nombre: 'El Ejemplo', url: 'https://ejemplo.com/a' }], fuentesFallidas: [{ url: 'https://malo.com/x', error: 'HTTP 403' }],
+    });
+    pool.query.mockResolvedValueOnce({});
+    const res = await request(app).post('/api/admin/investigar').set('x-test-user', ADMIN)
+      .send({ url: 'https://ejemplo.com/a', fuentesExtra: [{ nombre: 'Malo', url: 'https://malo.com/x' }, { nombre: 'Libro' }] });
+    expect(res.status).toBe(200);
+    expect(res.body.fuentesLeidas).toHaveLength(1);
+    expect(res.body.fuentesFallidas[0].error).toBe('HTTP 403');
+    expect(investigarDesdeVarias).toHaveBeenCalledWith(expect.objectContaining({ url: 'https://ejemplo.com/a', extras: ['https://malo.com/x'] }));
+    expect(investigarDesdeUrl).not.toHaveBeenCalled();
+    expect(pool.query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO ia_generaciones'), expect.arrayContaining(['investigador', 'url']));
+  });
+
+  test('sin otras fuentes sigue por el camino de siempre (la respuesta no trae listas de fuentes)', async () => {
+    investigarDesdeUrl.mockResolvedValueOnce({ notas: 'N', tituloOriginal: 'T', fuenteTexto: 'E', fuenteUrl: 'https://e.com', fuenteTipo: 'url', usage: USAGE_MOCK });
+    pool.query.mockResolvedValueOnce({});
+    const res = await request(app).post('/api/admin/investigar').set('x-test-user', ADMIN).send({ url: 'https://e.com', fuentesExtra: [] });
+    expect(res.status).toBe(200);
+    expect(res.body.fuentesLeidas).toBeUndefined();
+    expect(investigarDesdeVarias).not.toHaveBeenCalled();
+  });
+
+  test.each([['no-es-lista'], [['ftp://x.com']], [Array.from({ length: 5 }, (_, i) => `https://m${i}.com`)]])('400 con otras fuentes inválidas %#', async (fuentesExtra) => {
+    const res = await request(app).post('/api/admin/investigar').set('x-test-user', ADMIN).send({ url: 'https://e.com', fuentesExtra });
+    expect(res.status).toBe(400);
+    expect(investigarDesdeVarias).not.toHaveBeenCalled();
+    expect(investigarDesdeUrl).not.toHaveBeenCalled();
   });
 
   test('200 investigando desde texto pegado', async () => {

@@ -47,8 +47,10 @@ function jaccard(a, b) {
 // Parecido entre la pieza nueva y una existente: 0 a 1, con las razones en palabras.
 function compararPiezas(nueva, existente) {
   const razones = [];
-  const urlNueva = normalizarUrl(nueva.fuenteUrl);
-  const urlIgual = Boolean(urlNueva) && urlNueva === normalizarUrl(existente.fuenteUrl);
+  // Se compara cada fuente de la pieza nueva (la principal y las otras) con cada fuente de la existente.
+  const urlsDe = (p) => new Set([p.fuenteUrl, ...(p.fuentesExtra || [])].map(normalizarUrl).filter(Boolean));
+  const urlsExistente = urlsDe(existente);
+  const urlIgual = [...urlsDe(nueva)].some((u) => urlsExistente.has(u));
   if (urlIgual) razones.push('Usa la misma fuente (la misma página).');
 
   const tituloSim = jaccard(tokens(nueva.titulo), tokens(existente.titulo));

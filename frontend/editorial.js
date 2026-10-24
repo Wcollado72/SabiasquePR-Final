@@ -320,6 +320,16 @@
       + '<div class="skeleton skeleton-line"></div></div>';
   }
 
+  // «Otras fuentes» de una pieza (lista de { nombre, url }): ademas de la fuente principal. El enlace solo si es http(s) seguro.
+  function otrasFuentesHtml(fuentes) {
+    var lista = Array.isArray(fuentes) ? fuentes.filter(function (f) { return f && f.nombre; }) : [];
+    if (!lista.length) return '';
+    return '<p class="article-source article-source-extra">Otras fuentes:</p><ul class="article-sources">' + lista.map(function (f) {
+      var url = safeUrl(f.url);
+      return '<li>' + (url ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(f.nombre) + '</a>' : escapeHtml(f.nombre)) + '</li>';
+    }).join('') + '</ul>';
+  }
+
   window.SQPR = Object.assign(window.SQPR || {}, {
     CATEGORIAS: CATEGORIAS,
     CATEGORIA_IMAGEN: CATEGORIA_IMAGEN,
@@ -336,6 +346,7 @@
     escapeHtml: escapeHtml,
     stripHtml: stripHtml,
     safeUrl: safeUrl,
+    otrasFuentesHtml: otrasFuentesHtml,
     sanitizeHtml: sanitizeHtml,
     dek: dek,
     readingMinutes: readingMinutes,

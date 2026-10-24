@@ -600,3 +600,10 @@ ALTER TABLE semillas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ia_generaciones DROP CONSTRAINT IF EXISTS ia_generaciones_agente_check;
 ALTER TABLE ia_generaciones ADD CONSTRAINT ia_generaciones_agente_check
   CHECK (agente IN ('investigador', 'redactor', 'traductor', 'clasificadora', 'resumidora', 'correctora', 'guardiana', 'pintora', 'grieta', 'cazadora', 'contrapunto', 'farolera'));
+
+-- ============================================================
+-- Varias fuentes por pieza (2026-10-27, Taller E4): otras fuentes ademas de la principal.
+-- Mismo SQL que backend/sql/migraciones/2026-10-27-fuentes-multiples.sql.
+-- ============================================================
+ALTER TABLE contenidos ADD COLUMN IF NOT EXISTS fuentes jsonb NOT NULL DEFAULT '[]';
+ALTER TABLE noticias   ADD COLUMN IF NOT EXISTS fuentes jsonb NOT NULL DEFAULT '[]';

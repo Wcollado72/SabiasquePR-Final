@@ -139,6 +139,7 @@
       + audioEmbed
       + cuerpo
       + fuente
+      + S.otrasFuentesHtml(item.fuentes)
       + cita;
 
     root.insertAdjacentHTML('afterend', '<div id="recurso-comentarios"></div>');

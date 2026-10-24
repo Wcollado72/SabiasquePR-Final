@@ -348,12 +348,12 @@ describe('PUT /api/contenidos/:id', () => {
     expect(res.status).toBe(200);
     const [, values] = pool.query.mock.calls[1];
     // subformato..citaSinFuenteExterna, subseccion, esPremium, enfoque van antes de idioma_original e ia_herramientas
-    expect(values.slice(-14, -3)).toEqual([
+    expect(values.slice(-15, -4)).toEqual([
       'reportaje', 'parcial', 'apa', 'Jane Doe', '2026', 'Original', '2026-09-20', false, null, false, null,
     ]);
-    expect(values[values.length - 3]).toBe('es');
-    expect(values[values.length - 2]).toEqual([]);
-    expect(values[values.length - 1]).toBe(true); // publicado se conserva
+    expect(values[values.length - 4]).toBe('es');
+    expect(values[values.length - 3]).toEqual([]);
+    expect(values[values.length - 2]).toBe(true); // publicado se conserva
   });
 
   test('PUT sin iaHerramientas conserva las guardadas', async () => {
@@ -365,7 +365,7 @@ describe('PUT /api/contenidos/:id', () => {
     expect(res.status).toBe(200);
     const [sql, values] = pool.query.mock.calls[1];
     expect(sql).toMatch(/ia_herramientas=\$29::text\[\]/);
-    expect(values[values.length - 2]).toEqual(['claude', 'Otra IA']);
+    expect(values[values.length - 3]).toEqual(['claude', 'Otra IA']);
   });
 
   test('PUT con iaHerramientas las normaliza y las guarda', async () => {
@@ -377,7 +377,7 @@ describe('PUT /api/contenidos/:id', () => {
       .send({ divulgacionIa: 'generado', iaHerramientas: ['Gemini', ' Mi IA '] });
     expect(res.status).toBe(200);
     const [, values] = pool.query.mock.calls[1];
-    expect(values[values.length - 2]).toEqual(['gemini', 'Mi IA']);
+    expect(values[values.length - 3]).toEqual(['gemini', 'Mi IA']);
   });
 
   test('400 si iaHerramientas llega sin divulgacionIa y la pieza tiene divulgacion "no"', async () => {
@@ -396,7 +396,7 @@ describe('PUT /api/contenidos/:id', () => {
     const res = await request(app).put('/api/contenidos/a').set('x-test-user', ADMIN).send({ divulgacionIa: 'no' });
     expect(res.status).toBe(200);
     const [, values] = pool.query.mock.calls[1];
-    expect(values[values.length - 2]).toEqual([]);
+    expect(values[values.length - 3]).toEqual([]);
   });
 });
 

@@ -105,6 +105,21 @@ describe('revisarPieza', () => {
     expect(r.copia.motivo).toContain('No hay una URL');
   });
 
+  test('con otras fuentes compara la pieza con CADA una y las devuelve aparte', async () => {
+    descargarHtml.mockImplementation(async (u) => (u.includes('copiada') ? { html: `<p>${FUENTE}</p>` } : { html: '<p>Algo totalmente distinto sobre otro asunto de otra cosa muy diferente.</p>' }));
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200, json: async () => RESPUESTA });
+    const r = await G.revisarPieza({ titulo: 'T', cuerpo: FUENTE, fuenteUrl: 'https://principal.com/a', fuentesExtra: ['https://copiada.com/b', 'https://rota.com/c'] });
+    expect(descargarHtml).toHaveBeenCalledTimes(3);
+    expect(r.copiasExtra.map((c) => c.url)).toEqual(['https://copiada.com/b', 'https://rota.com/c']);
+    expect(r.copiasExtra[0].copia.nivel).toBe('alto'); // copiar de una fuente extra se detecta aunque la principal este limpia
+    expect(r.copia.nivel).not.toBe('alto');
+  });
+
+  test('sin otras fuentes no hay copiasExtra que mostrar', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200, json: async () => RESPUESTA });
+    expect((await G.revisarPieza({ titulo: 'T', cuerpo: 'Texto.' })).copiasExtra).toEqual([]);
+  });
+
   test('si la fuente no se puede leer, lo dice y la revisión sensible sigue', async () => {
     descargarHtml.mockRejectedValue(new Error('Esa direccion no esta permitida.'));
     global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200, json: async () => RESPUESTA });

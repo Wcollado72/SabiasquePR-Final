@@ -844,6 +844,7 @@
     document.getElementById('an-publicar').addEventListener('click', () => enviarNoticia(true));
     selectorIaNoticia = montarSelectorIa('an-ia-selector', 'an-divulgacion-ia');
     bindMesaBrigada('noticia');
+    bindFuentesExtra('noticia');
     bindImagePicker('an-imagen', 'an-imagen-preview', 'an-elegir-imagen');
     bindNewsPanels();
   }
@@ -1262,7 +1263,7 @@
     const estado = document.getElementById(`brigada-estado-${clave}`);
     const contenedor = document.getElementById(`brigada-duplicados-${clave}`);
     const valor = (id) => (id ? document.getElementById(id).value.trim() : '');
-    const cuerpo = { titulo: valor(cfg.detective.titulo), resumen: valor(cfg.detective.resumen), fuenteUrl: valor(`brigada-url-${clave}`) };
+    const cuerpo = { titulo: valor(cfg.detective.titulo), resumen: valor(cfg.detective.resumen), fuenteUrl: valor(`brigada-url-${clave}`), fuentesExtra: urlsExtraDe(clave) };
     const idActual = valor(cfg.detective.idInput);
     if (idActual) cuerpo.excluir = { tipo: cfg.detective.tipo, id: idActual };
     if (!cuerpo.titulo && !cuerpo.fuenteUrl) { estado.textContent = '🕵️ El Detective necesita la URL de la fuente o el título para buscar.'; return null; }
@@ -1343,6 +1344,58 @@
     }
   }
 
+  // ── OTRAS FUENTES de una pieza (Taller E4) ──────────────
+  // La fuente principal sigue siendo la URL de la mesa; aqui se agregan hasta 4 fuentes mas ({ nombre, url }).
+  // INICIO fuentes-extra
+  const MAX_FUENTES_EXTRA = 4;
+  function nombreDeUrl(url) {
+    try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; }
+  }
+  // De las filas del formulario a la lista que se guarda: sin filas vacias y, si hay enlace pero no nombre, el nombre es el sitio.
+  function limpiarFilasFuentes(filas) {
+    return filas
+      .map((f) => ({ url: String(f.url || '').trim(), nombre: String(f.nombre || '').trim() }))
+      .filter((f) => f.url || f.nombre)
+      .map((f) => ({ nombre: f.nombre || nombreDeUrl(f.url), url: f.url }))
+      .filter((f) => f.nombre);
+  }
+  function htmlFilaFuente(f, esc) {
+    return `<div class="fuente-extra-fila">
+      <input type="url" class="fe-url" placeholder="https://... (déjalo vacío si es un libro)" value="${esc((f && f.url) || '')}" aria-label="Enlace de la otra fuente">
+      <input type="text" class="fe-nombre" maxlength="200" placeholder="Nombre (opcional si hay enlace)" value="${esc((f && f.nombre) || '')}" aria-label="Nombre de la otra fuente">
+      <button type="button" class="tr-enlace-peligro fe-quitar" aria-label="Quitar esta fuente">✕</button>
+    </div>`;
+  }
+  // FIN fuentes-extra
+  const filasFuentes = (clave) => [...document.querySelectorAll(`#fuentes-extra-lista-${clave} .fuente-extra-fila`)];
+  function leerFuentesExtraDe(clave) {
+    return limpiarFilasFuentes(filasFuentes(clave).map((fila) => ({ url: fila.querySelector('.fe-url').value, nombre: fila.querySelector('.fe-nombre').value })));
+  }
+  // Solo los enlaces (lo que pueden leer las agentes); los libros sin enlace no se leen.
+  const urlsExtraDe = (clave) => leerFuentesExtraDe(clave).map((f) => f.url).filter(Boolean);
+  function actualizarBotonFuentes(clave) {
+    document.getElementById(`fuentes-extra-agregar-${clave}`).disabled = filasFuentes(clave).length >= MAX_FUENTES_EXTRA;
+  }
+  function pintarFuentesExtra(clave, fuentes) {
+    document.getElementById(`fuentes-extra-lista-${clave}`).innerHTML = (Array.isArray(fuentes) ? fuentes : []).slice(0, MAX_FUENTES_EXTRA).map((f) => htmlFilaFuente(f, escapeHtml)).join('');
+    actualizarBotonFuentes(clave);
+  }
+  function bindFuentesExtra(clave) {
+    const lista = document.getElementById(`fuentes-extra-lista-${clave}`);
+    document.getElementById(`fuentes-extra-agregar-${clave}`).addEventListener('click', () => {
+      if (filasFuentes(clave).length >= MAX_FUENTES_EXTRA) return;
+      lista.insertAdjacentHTML('beforeend', htmlFilaFuente({}, escapeHtml));
+      actualizarBotonFuentes(clave);
+      lista.lastElementChild.querySelector('.fe-url').focus();
+    });
+    lista.addEventListener('click', (e) => {
+      const quitar = e.target.closest('.fe-quitar');
+      if (!quitar) return;
+      quitar.closest('.fuente-extra-fila').remove();
+      actualizarBotonFuentes(clave);
+    });
+  }
+
   // ── LA BRIGADA COQUÍ · La Guardiana ──────────────────────
   // INICIO brigada-guardiana
   const ETIQUETA_BANDERA = {
@@ -1355,10 +1408,18 @@
     const frase = { bajo: 'Escrito con palabras propias.', medio: 'Hay pasajes parecidos a la fuente: revísalos y reescríbelos con tus palabras.', alto: 'Se parece demasiado a la fuente: reescribe con tus palabras o cítala como cita textual.' }[nivel];
     return { nivel, texto: `${copia.porcentaje}% de la pieza coincide palabra por palabra con la fuente. ${frase}` };
   }
+  function htmlPasajes(copia, esc) {
+    return copia && copia.evaluable && copia.pasajes.length && copia.nivel !== 'bajo'
+      ? `<ul class="brigada-revision-pasajes">${copia.pasajes.map((p) => `<li>«${esc(p.texto)}» <small>(${p.palabras} palabras seguidas)</small></li>`).join('')}</ul>` : '';
+  }
   function htmlRevision(data, esc) {
     const v = veredictoCopia(data.copia);
-    const pasajes = data.copia && data.copia.evaluable && data.copia.pasajes.length && data.copia.nivel !== 'bajo'
-      ? `<ul class="brigada-revision-pasajes">${data.copia.pasajes.map((p) => `<li>«${esc(p.texto)}» <small>(${p.palabras} palabras seguidas)</small></li>`).join('')}</ul>` : '';
+    const pasajes = htmlPasajes(data.copia, esc);
+    // Copiar de CUALQUIERA de las otras fuentes cuenta: se muestra el parecido con cada una.
+    const otras = (data.copiasExtra || []).map((c) => {
+      const ve = veredictoCopia(c.copia);
+      return `<p class="brigada-copia brigada-copia-${ve.nivel}"><strong>Parecido con otra fuente</strong> (${esc(c.url)}). ${esc(ve.texto)}</p>${htmlPasajes(c.copia, esc)}`;
+    }).join('');
     const banderas = data.revision.banderas.length
       ? `<ul class="brigada-revision-banderas">${data.revision.banderas.map((b) => `<li class="brigada-bandera brigada-bandera-${b.gravedad}"><strong>${esc(ETIQUETA_BANDERA[b.tipo] || b.tipo)}</strong> <small>gravedad ${esc(b.gravedad)}</small><br>${esc(b.motivo)}${b.fragmento ? `<br><em>«${esc(b.fragmento)}»</em>` : ''}</li>`).join('')}</ul>`
       : '<p class="brigada-revision-ok">Sin banderas de contenido sensible.</p>';
@@ -1366,7 +1427,7 @@
       ? `<p class="brigada-bandera brigada-bandera-alta"><strong>Podría requerir 18+.</strong> ${esc(data.revision.motivo18)} Solo Corrupción Humana e Ilógica Humana son 18+.</p>`
       : (data.revision.motivo18 ? `<p class="admin-hint">18+: ${esc(data.revision.motivo18)}</p>` : '');
     return `<h5>🛡️ La Guardiana</h5>
-      <p class="brigada-copia brigada-copia-${v.nivel}"><strong>Parecido con la fuente.</strong> ${esc(v.texto)}</p>${pasajes}
+      <p class="brigada-copia brigada-copia-${v.nivel}"><strong>Parecido con la fuente.</strong> ${esc(v.texto)}</p>${pasajes}${otras}
       <p><strong>Contenido sensible</strong></p>${banderas}${edad}
       <p class="admin-hint">La Guardiana orienta: no bloquea ni borra nada, y no sustituye a un abogado ni a tu criterio editorial.</p>`;
   }
@@ -1377,7 +1438,7 @@
     const estado = document.getElementById(`brigada-estado-${clave}`);
     const contenedor = document.getElementById(`brigada-revision-${clave}`);
     const valor = (id) => (id ? document.getElementById(id).value.trim() : '');
-    const cuerpo = { titulo: valor(cfg.revision.titulo), resumen: valor(cfg.revision.resumen), cuerpo: valor(cfg.revision.cuerpo), seccion: valor(cfg.revision.seccion), fuenteUrl: valor(`brigada-url-${clave}`) };
+    const cuerpo = { titulo: valor(cfg.revision.titulo), resumen: valor(cfg.revision.resumen), cuerpo: valor(cfg.revision.cuerpo), seccion: valor(cfg.revision.seccion), fuenteUrl: valor(`brigada-url-${clave}`), fuentesExtra: urlsExtraDe(clave) };
     if (!cuerpo.titulo && !cuerpo.resumen && !cuerpo.cuerpo) { estado.textContent = '🛡️ La Guardiana revisa lo que ya escribiste: escribe o redacta primero el título o el cuerpo.'; return false; }
     const boton = document.getElementById(`brigada-revisar-${clave}`);
     boton.disabled = true;
@@ -1547,6 +1608,7 @@
     document.getElementById('an-imagen-alt').value = item?.imagen_alt || '';
     document.getElementById('an-imagen-caption').value = item?.imagen_caption || '';
     document.getElementById('brigada-url-noticia').value = item?.fuente_url || '';
+    pintarFuentesExtra('noticia', item?.fuentes);
     document.getElementById('an-fuente-texto').value = item?.fuente_texto || '';
     document.getElementById('an-parrafos').value = (item?.parrafos || []).join('\n');
     document.getElementById('an-divulgacion-ia').value = item?.divulgacion_ia || 'no';
@@ -1584,6 +1646,7 @@
       imagenAlt: textoAlternativo(document.getElementById('an-imagen-alt').value, document.getElementById('an-titulo').value),
       imagenCaption: document.getElementById('an-imagen-caption').value.trim() || undefined,
       fuenteUrl: document.getElementById('brigada-url-noticia').value.trim(),
+      fuentes: leerFuentesExtraDe('noticia'),
       fuenteTexto: document.getElementById('an-fuente-texto').value.trim(),
       parrafos: document.getElementById('an-parrafos').value.split('\n').map((p) => p.trim()).filter(Boolean),
       divulgacionIa: document.getElementById('an-divulgacion-ia').value,
@@ -1706,6 +1769,7 @@
     document.getElementById('ac-guardar').addEventListener('click', () => enviarContenido(true));
     selectorIaContenido = montarSelectorIa('ac-ia-selector', 'ac-divulgacion-ia');
     bindMesaBrigada('contenido');
+    bindFuentesExtra('contenido');
     document.getElementById('ac-usar-imagen-categoria').addEventListener('click', () => {
       const categoria = document.getElementById('ac-categoria').value;
       const img = window.SQPR && window.SQPR.CATEGORIA_IMAGEN && window.SQPR.CATEGORIA_IMAGEN[categoria];
@@ -1882,9 +1946,14 @@
       continente: document.getElementById('ia-continente').value,
       region: document.getElementById('ia-region').value.trim(),
     };
+    // Con otras fuentes, la Investigadora las lee todas juntas (la principal, el texto pegado y las extra).
+    const extras = urlsExtraDe('contenido');
+    if (extras.length) body.fuentesExtra = extras;
     if (textoPegado) {
       if (textoPegadoOriginal === null) textoPegadoOriginal = document.getElementById('ia-texto').value;
       body.texto = textoPegado;
+      const urlPrincipal = document.getElementById('brigada-url-contenido').value.trim();
+      if (extras.length && urlPrincipal) body.url = urlPrincipal;
     } else {
       const url = document.getElementById('brigada-url-contenido').value.trim();
       if (!url) { statusEl.textContent = 'Pega primero la URL de la fuente (arriba, en la mesa) o un texto.'; return false; }
@@ -1899,7 +1968,9 @@
       // no la Investigadora: aqui solo se guardan las notas.
       mostrarCorreccionesIa(data);
       mostrarPreguntasIa(data.preguntas || []);
-      const idioma = data.idiomaDetectado ? ` Fuente en: ${data.idiomaDetectado}.` : '';
+      const idioma = (data.idiomaDetectado ? ` Fuente en: ${data.idiomaDetectado}.` : '')
+        + (data.fuentesLeidas ? ` Leyó ${data.fuentesLeidas.length} fuente${data.fuentesLeidas.length === 1 ? '' : 's'} de página.` : '')
+        + ((data.fuentesFallidas || []).length ? ` ⚠️ No pudo leer: ${data.fuentesFallidas.map((f) => `${f.url} (${f.error})`).join('; ')}.` : '');
       mostrarIdiomaFuente('contenido', data.idiomaDetectado);
       statusEl.textContent = (data.preguntas && data.preguntas.length
         ? 'Notas provisionales listas — responde las preguntas de abajo para afinarlas, o continúa con "Redactar con IA".'
@@ -2404,6 +2475,7 @@
     cargarIaEnSelector(selectorIaContenido, 'ac-divulgacion-ia', item?.ia_herramientas);
     document.getElementById('ac-url-media').value = item?.url_media || '';
     document.getElementById('brigada-url-contenido').value = item?.fuente_url || '';
+    pintarFuentesExtra('contenido', item?.fuentes);
     document.getElementById('ac-fuente-texto').value = item?.fuente_texto || '';
     document.getElementById('ac-duracion').value = item?.duracion_min || 1;
     document.getElementById('ac-url-portada').value = item?.url_portada || '';
@@ -2468,6 +2540,7 @@
       iaHerramientas: selectorIaContenido.leer(),
       urlMedia: document.getElementById('ac-url-media').value.trim() || null,
       fuenteUrl: document.getElementById('brigada-url-contenido').value.trim() || null,
+      fuentes: leerFuentesExtraDe('contenido'),
       fuenteTexto: document.getElementById('ac-fuente-texto').value.trim() || null,
       duracionMin: Number(document.getElementById('ac-duracion').value),
       urlPortada: document.getElementById('ac-url-portada').value.trim(),
