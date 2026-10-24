@@ -144,7 +144,7 @@ describe('POST /api/semillas/:id/agentes/:agente (La Grieta)', () => {
   const RESULTADO = { resultado: { tesis: 'T', grietas: [] }, usage: { tokensEntrada: 900, tokensSalida: 400, costoEstimadoUsd: 0.006 } };
 
   test('404 si la agente todavía no trabaja en el Taller (sin gastar IA)', async () => {
-    const res = await request(app).post(`/api/semillas/${ID}/agentes/cazadora`).set('x-test-user', ADMIN);
+    const res = await request(app).post(`/api/semillas/${ID}/agentes/farolera`).set('x-test-user', ADMIN);
     expect(res.status).toBe(404);
     expect(res.body.error).toMatch(/todavía no trabaja/);
     expect(analizarSemilla).not.toHaveBeenCalled();
@@ -168,7 +168,7 @@ describe('POST /api/semillas/:id/agentes/:agente (La Grieta)', () => {
     expect(res.body.estado).toBe('explorada');
     expect(res.body.analisis.resultado).toEqual(RESULTADO.resultado);
     expect(res.body.analisis.texto_hash).toBe(hash('La gente cambia por vergüenza.'));
-    expect(pool.query.mock.calls[1][1]).toEqual(['grieta', 'texto', 900, 400, 0.006, 'admin-1']);
+    expect(pool.query.mock.calls[1][1]).toEqual(['grieta', 'texto', 900, 400, 0.006, 'admin-1', 0]);
     const [sql, params] = pool.query.mock.calls[2];
     expect(sql).toMatch(/jsonb_set\(analisis/);
     expect(sql).toMatch(/WHEN estado = 'semilla' THEN 'explorada'/);

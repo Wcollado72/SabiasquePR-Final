@@ -2612,13 +2612,34 @@ html[data-theme="dark"] .social-links img{ filter:invert(1) hue-rotate(180deg); 
 .brigada-revision ins{ background:rgba(79,214,113,.3); text-decoration:none; }
 
 /* Taller de Aliado Imperfekto */
-.taller-grid{ display:grid; grid-template-columns:minmax(210px, 290px) 1fr; gap:16px; align-items:start; }
-@media (max-width:820px){ .taller-grid{ grid-template-columns:1fr; } }
-.taller-lateral{ display:flex; flex-direction:column; gap:6px; }
-.taller-lista{ display:flex; flex-direction:column; gap:6px; max-height:60vh; overflow:auto; }
+.taller-barra{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:10px; }
+.taller-barra label{ margin:0; }
+.taller-barra select{ width:auto; min-width:180px; }
+.taller-lista{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:8px; max-height:32vh; overflow:auto; margin-bottom:16px; }
+.taller-lista > .foro-empty, .taller-lista > .foro-loading, .taller-lista > .foro-error{ grid-column:1 / -1; }
 .taller-semilla{ text-align:left; display:flex; flex-direction:column; gap:2px; padding:8px 10px; border:1px solid rgba(127,127,127,.4); border-radius:var(--radius); background:transparent; color:inherit; font:inherit; cursor:pointer; }
 .taller-semilla:hover, .taller-semilla.activa{ border-color:#4fd671; background:rgba(79,214,113,.08); }
 .taller-semilla-estado{ font-size:.75rem; opacity:.85; }
+.taller-editor{ width:100%; }
+.taller-editor textarea{ width:100%; }
+.taller-campos{ display:grid; grid-template-columns:2fr 1fr; gap:12px; }
+@media (max-width:640px){ .taller-campos{ grid-template-columns:1fr; } }
+.taller-informes{ display:grid; grid-template-columns:repeat(auto-fit, minmax(420px, 1fr)); gap:12px; margin-top:12px; align-items:start; }
+@media (max-width:520px){ .taller-informes{ grid-template-columns:1fr; } }
+.taller-informes .taller-informe{ margin-top:0; }
+.taller-informe h5{ margin:0 0 4px; font-size:1.05rem; }
+.taller-informe-cols{ columns:2 320px; column-gap:20px; }
+.taller-informe-cols > div{ break-inside:avoid; margin-bottom:8px; }
+.taller-informe ul{ margin:4px 0 0; padding-left:18px; }
+.taller-informe li{ margin-bottom:6px; }
+.taller-eco{ break-inside:avoid; margin-bottom:10px; padding:8px 12px; border-left:3px solid rgba(127,127,127,.6); background:rgba(127,127,127,.06); border-radius:var(--radius); }
+.taller-eco-coincide{ border-left-color:#4fd671; }
+.taller-eco-matiza{ border-left-color:#ffb238; }
+.taller-eco-contradice{ border-left-color:#b5432e; }
+.taller-eco p{ margin:0 0 4px; }
+.taller-eco blockquote{ margin:4px 0; padding-left:10px; border-left:2px solid rgba(127,127,127,.5); font-style:italic; }
+.taller-eco-relacion{ font-size:.75rem; padding:1px 8px; border-radius:10px; border:1px solid rgba(127,127,127,.5); margin-left:4px; }
+.taller-eco-verif{ font-size:.8rem; color:#4fd671; }
 .taller-tesis{ padding:8px 12px; border-left:3px solid #ffb238; background:rgba(255,178,56,.1); font-style:italic; }
 .taller-mesa{ margin-top:12px; }
 .brigada-agente:disabled{ opacity:.5; cursor:not-allowed; }

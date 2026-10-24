@@ -167,7 +167,7 @@ describe('el elenco de La Brigada Coquí: una dueña por función', () => {
     ELENCO_BRIGADA.filter((a) => a.lugar === 'taller').forEach((a) => expect(a.nivel).toBeUndefined());
     ELENCO_BRIGADA.filter((a) => a.estado === 'proxima').forEach((a) => expect(a.nivel).toBeUndefined());
     expect(ELENCO_BRIGADA.filter((a) => a.estado === 'activa').map((a) => a.id)).toEqual(
-      ['investigadora', 'clasificadora', 'redactora', 'resumidora', 'bibliotecaria', 'correctora', 'traductora', 'guardiana', 'detective', 'pintora', 'grieta']
+      ['investigadora', 'clasificadora', 'redactora', 'resumidora', 'bibliotecaria', 'correctora', 'traductora', 'guardiana', 'detective', 'pintora', 'grieta', 'cazadora', 'contrapunto']
     );
   });
 
@@ -182,7 +182,7 @@ describe('el elenco de La Brigada Coquí: una dueña por función', () => {
   test('se pinta una tarjeta por agente, con las próximas marcadas y el uso solo donde se mide', () => {
     const h = htmlElenco(ELENCO_BRIGADA, esc);
     expect((h.match(/data-agente=/g) || []).length).toBe(ELENCO_BRIGADA.length);
-    expect((h.match(/próximamente/g) || []).length).toBe(3); // las otras tres agentes del Taller
+    expect((h.match(/próximamente/g) || []).length).toBe(1); // solo La Farolera
     const conIa = ELENCO_BRIGADA.filter((a) => a.uso);
     expect(conIa.map((a) => a.id)).toEqual(['investigadora', 'clasificadora', 'redactora', 'resumidora', 'correctora', 'traductora', 'guardiana', 'pintora', 'grieta', 'cazadora', 'contrapunto', 'farolera']);
     conIa.forEach((a) => expect(h).toContain(`id="ag-uso-${a.id}" data-uso="${a.uso}"`));

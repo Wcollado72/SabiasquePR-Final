@@ -2849,13 +2849,13 @@
       noHace: 'No agrega ideas ni datos que no estén en tu texto.',
     },
     {
-      id: 'cazadora', emoji: '📡', nombre: 'Cazadora de Ecos', apodo: 'La Cazadora de Ecos', estado: 'proxima', lugar: 'taller', uso: 'cazadora',
+      id: 'cazadora', emoji: '📡', nombre: 'Cazadora de Ecos', apodo: 'La Cazadora de Ecos', estado: 'activa', lugar: 'taller', uso: 'cazadora',
       descripcion: 'Busca pensamientos parecidos de otros autores, con fuentes reales y citas verificadas.',
       trabajo: ['Busca ecos de tu idea en autores, estudios y obras', 'Muestra solo fuentes que leyó de verdad y comprueba las citas por código'],
       noHace: 'No inventa autores, obras ni citas.',
     },
     {
-      id: 'contrapunto', emoji: '⚖️', nombre: 'Contrapunto', apodo: 'El Contrapunto', estado: 'proxima', lugar: 'taller', uso: 'contrapunto',
+      id: 'contrapunto', emoji: '⚖️', nombre: 'Contrapunto', apodo: 'El Contrapunto', estado: 'activa', lugar: 'taller', uso: 'contrapunto',
       descripcion: 'Te da las mejores objeciones y la versión más fuerte de la postura contraria.',
       trabajo: ['Formula las objeciones más serias a tu idea', 'Presenta la mejor versión de la postura contraria'],
       noHace: 'No decide por ti ni te quita la idea.',

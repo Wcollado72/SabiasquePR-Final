@@ -5,6 +5,8 @@ const { enviarError500 } = require('../util/errores');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 const { registrarUsoAgente } = require('../util/usoIa');
 const { analizarSemilla } = require('../services/grieta');
+const { cazarEcos } = require('../services/cazadora');
+const { hacerContrapunto } = require('../services/contrapunto');
 const { validateSemilla, normalizarEtiquetas, esUuid } = require('../validators/semilla');
 
 const router = express.Router();
@@ -13,7 +15,12 @@ const router = express.Router();
 router.use(requireAuth, requireAdmin);
 
 // Agentes que ya trabajan en el Taller (el nombre es el de la clave dentro de `analisis` y de la bitacora de uso).
-const AGENTES_DEL_TALLER = { grieta: { analizar: analizarSemilla, fuenteTipo: 'texto' } };
+// La Cazadora tambien recibe lo que ya se sabe de la idea (la tesis que saco La Grieta) para buscar mejor.
+const AGENTES_DEL_TALLER = {
+  grieta: { analizar: analizarSemilla, fuenteTipo: 'texto' },
+  contrapunto: { analizar: hacerContrapunto, fuenteTipo: 'texto' },
+  cazadora: { analizar: cazarEcos, fuenteTipo: 'texto' },
+};
 
 const hashTexto = (texto) => crypto.createHash('sha1').update(String(texto)).digest('hex').slice(0, 16);
 
@@ -107,12 +114,12 @@ router.post('/:id/agentes/:agente', async (req, res) => {
   const agente = AGENTES_DEL_TALLER[req.params.agente];
   if (!agente) return res.status(404).json({ ok: false, error: 'Esa agente todavía no trabaja en el Taller.' });
   try {
-    const { rows } = await pool.query('SELECT titulo, texto FROM semillas WHERE id = $1 AND autor_id = $2', [req.params.id, req.user.id]);
+    const { rows } = await pool.query('SELECT titulo, texto, analisis FROM semillas WHERE id = $1 AND autor_id = $2', [req.params.id, req.user.id]);
     if (!rows.length) return res.status(404).json({ ok: false, error: 'Semilla no encontrada.' });
 
     let resultado;
     try {
-      resultado = await agente.analizar({ titulo: rows[0].titulo, texto: rows[0].texto });
+      resultado = await agente.analizar({ titulo: rows[0].titulo, texto: rows[0].texto, analisis: rows[0].analisis });
     } catch (err) {
       return res.status(400).json({ ok: false, error: err.message });
     }
