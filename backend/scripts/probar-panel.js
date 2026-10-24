@@ -32,11 +32,20 @@ const DATOS = {
   ],
   gastos: [], ordenes: [], traducciones: {},
 };
-w.fetch = async (url) => {
+w.fetch = async (url, opts = {}) => {
   const u = String(url);
   const json = (o) => ({ ok: true, status: 200, json: async () => o });
   if (u.endsWith('/api/me')) return json({ ok: true, user: { id: 'u1', rol: 'admin' } });
   if (u.endsWith('/contenido-ia/resumir')) return json({ ok: true, resumen: 'Resumen escrito por la IA.' });
+  if (u.endsWith('/corregir/varios')) {
+    const items = JSON.parse(opts.body).items;
+    return json({
+      ok: true,
+      resultados: items.map((it) => (it.id === 'ac-titulo'
+        ? { id: it.id, textoCorregido: 'Un título corregido', cambios: [{ antes: 'titulo', despues: 'título', motivo: 'tilde' }] }
+        : { id: it.id, textoCorregido: it.texto, cambios: [] })),
+    });
+  }
   if (u.endsWith('/brigada/duplicados')) {
     return json({
       ok: true, revisadas: 3,
@@ -122,6 +131,8 @@ setTimeout(() => {
   d.getElementById('brigada-revisar-contenido').click();
   d.getElementById('brigada-duplicados-btn-contenido').click();
   d.getElementById('brigada-pintar-contenido').click();
+  d.getElementById('ac-titulo').value = 'Un titulo sin tilde';
+  d.getElementById('brigada-corregir-contenido').click();
   setTimeout(() => {
     comprobaciones.push(
       ['la mesa recomienda según la URL (video: solo clasificar y citar)', d.getElementById('brigada-recomendacion-contenido').textContent.includes('Pega su transcripción')],
@@ -130,6 +141,14 @@ setTimeout(() => {
         && d.getElementById('brigada-revision-contenido').textContent.includes('Persona real')],
     );
     comprobaciones.push(
+      ['Doña Tilde propone la corrección del título y «Aplicar» la pone', (() => {
+        const boton = d.querySelector('#brigada-correccion-contenido [data-aplicar="ac-titulo"]');
+        if (!boton) return false;
+        boton.click();
+        return d.getElementById('ac-titulo').value === 'Un título corregido';
+      })()],
+      ['cada agente de la mesa muestra su descripción', [...d.querySelectorAll('#brigada-agentes-contenido .brigada-agente-desc')].every((p) => p.textContent.length > 20)
+        && d.querySelectorAll('#brigada-agentes-contenido .brigada-agente-desc').length === 9],
       ['El Detective lista la pieza parecida y deja abrirla', d.getElementById('brigada-duplicados-contenido').textContent.includes('Muy probable (90%)') && !!d.querySelector('#brigada-duplicados-contenido [data-abrir-id="n1"]')],
       ['La Pintora muestra su propuesta y «Usar» la pone en el texto alternativo', (() => {
         d.querySelector('#brigada-pintora-contenido [data-accion="usar-alt"]').click();

@@ -904,6 +904,7 @@
       revision: { titulo: 'ac-titulo', resumen: 'ac-subtitulo', cuerpo: 'ac-cuerpo', seccion: 'ac-seccion' },
       detective: { titulo: 'ac-titulo', resumen: 'ac-subtitulo', idInput: 'ac-id', tipo: 'contenido' },
       pintora: { altId: 'ac-portada-alt' },
+      correccion: [['ac-titulo', 'Título'], ['ac-subtitulo', 'Resumen'], ['ac-cuerpo', 'Cuerpo del texto'], ['ac-portada-alt', 'Texto alternativo']],
       campos: { seccion: 'ac-seccion', clasificacion: 'ac-clasificacion', region: 'ac-enfoque', formato: 'ac-tipo-formato', subformato: 'ac-subformato' },
       mostrarNivel: (n) => activarSynthPanel(n), estadoNivel: '#synth-levels [data-status="clasificacion"]',
     },
@@ -912,6 +913,7 @@
       revision: { titulo: 'an-titulo', resumen: null, cuerpo: 'an-parrafos', seccion: null },
       detective: { titulo: 'an-titulo', resumen: 'an-parrafos', idInput: 'an-id', tipo: 'noticia' },
       pintora: { altId: 'an-imagen-alt' },
+      correccion: [['an-titulo', 'Título'], ['an-parrafos', 'Párrafos'], ['an-imagen-alt', 'Texto alternativo'], ['an-imagen-caption', 'Pie de imagen']],
       campos: { clasificacion: 'an-categoria' },
       mostrarNivel: (n) => activarNewsPanel(n), estadoNivel: '#news-levels [data-status="clasificacion"]',
     },
@@ -950,7 +952,7 @@
     document.getElementById(`brigada-deshacer-${clave}`).hidden = true;
     document.getElementById(`brigada-estado-${clave}`).textContent = '';
     document.getElementById(`brigada-fuente-idioma-${clave}`).textContent = '';
-    ['revision', 'duplicados', 'pintora'].forEach((nombre) => {
+    ['revision', 'duplicados', 'pintora', 'correccion'].forEach((nombre) => {
       const informe = document.getElementById(`brigada-${nombre}-${clave}`);
       informe.hidden = true;
       informe.innerHTML = '';
@@ -1046,7 +1048,7 @@
     audio: ['open.spotify.com', 'podcasts.apple.com', 'soundcloud.com', 'anchor.fm', 'spotify.link'],
     foto: ['flickr.com', 'instagram.com', 'unsplash.com', '500px.com', 'pinterest.com'],
   };
-  const NOMBRE_AGENTE = { investigadora: 'Doña Pesquisa', clasificadora: 'Doña Fichas', redactora: 'La Pluma', bibliotecaria: 'La Bibliotecaria', guardiana: 'La Guardiana', detective: 'El Detective', pintora: 'La Pintora' };
+  const NOMBRE_AGENTE = { investigadora: 'Doña Pesquisa', clasificadora: 'Doña Fichas', redactora: 'La Pluma', bibliotecaria: 'La Bibliotecaria', guardiana: 'La Guardiana', detective: 'El Detective', pintora: 'La Pintora', correctora: 'Doña Tilde' };
   function formatoDeHost(host) {
     const h = String(host || '').toLowerCase().replace(/^www\./, '');
     return Object.keys(HOSTS_FUENTE).find((f) => HOSTS_FUENTE[f].some((d) => h === d || h.endsWith('.' + d))) || null;
@@ -1056,20 +1058,20 @@
     const u = String(url || '').trim();
     const hayTexto = Boolean(String(textoPegado || '').trim());
     if (!u && !hayTexto) return null;
-    if (!u) return { agentes: ['detective', 'investigadora', 'redactora', 'pintora', 'guardiana'], mensaje: 'Con solo el texto pegado: Doña Pesquisa lo investiga, La Pluma redacta, La Pintora propone la imagen y La Guardiana revisa. Doña Fichas y La Bibliotecaria necesitan una URL.' };
+    if (!u) return { agentes: ['detective', 'investigadora', 'redactora', 'correctora', 'pintora', 'guardiana'], mensaje: 'Con solo el texto pegado: Doña Pesquisa lo investiga, La Pluma redacta, Doña Tilde corrige, La Pintora propone la imagen y La Guardiana revisa. Doña Fichas y La Bibliotecaria necesitan una URL.' };
     let host;
     try { host = new URL(u).hostname; } catch { return { agentes: [], mensaje: 'La URL no parece válida: revisa que empiece con https://' }; }
     const formato = formatoDeHost(host);
     if (formato) {
       const nombre = { video: 'un video', audio: 'un audio', foto: 'una foto' }[formato];
       return hayTexto
-        ? { agentes: ['detective', 'investigadora', 'clasificadora', 'redactora', 'bibliotecaria', 'pintora', 'guardiana'], formato, mensaje: `Es ${nombre} y ya pegaste su texto: recomiendo el equipo completo.` }
+        ? { agentes: ['detective', 'investigadora', 'clasificadora', 'redactora', 'correctora', 'bibliotecaria', 'pintora', 'guardiana'], formato, mensaje: `Es ${nombre} y ya pegaste su texto: recomiendo el equipo completo.` }
         : { agentes: ['detective', 'clasificadora', 'bibliotecaria'], formato, mensaje: `Es ${nombre}: no hay una página de texto que leer. Pega su transcripción en el cuadro de Doña Pesquisa para investigarlo y redactar; mientras tanto Doña Fichas y La Bibliotecaria sí pueden trabajar con la URL.` };
     }
-    return { agentes: ['detective', 'investigadora', 'clasificadora', 'redactora', 'bibliotecaria', 'pintora', 'guardiana'], mensaje: 'Recomiendo el equipo completo: El Detective revisa que no esté repetida, Doña Pesquisa investiga, Doña Fichas clasifica, La Pluma redacta (y Doña Breve resume), La Bibliotecaria cita, La Pintora propone la imagen y La Guardiana revisa.' };
+    return { agentes: ['detective', 'investigadora', 'clasificadora', 'redactora', 'correctora', 'bibliotecaria', 'pintora', 'guardiana'], mensaje: 'Recomiendo el equipo completo: El Detective revisa que no esté repetida, Doña Pesquisa investiga, Doña Fichas clasifica, La Pluma redacta (y Doña Breve resume), Doña Tilde corrige, La Bibliotecaria cita, La Pintora propone la imagen y La Guardiana revisa.' };
   }
   function pasosEquipo(agentes) {
-    return ['detective', 'investigadora', 'clasificadora', 'redactora', 'bibliotecaria', 'pintora', 'guardiana'].filter((a) => agentes.includes(a));
+    return ['detective', 'investigadora', 'clasificadora', 'redactora', 'correctora', 'bibliotecaria', 'pintora', 'guardiana'].filter((a) => agentes.includes(a));
   }
   // FIN brigada-equipo
 
@@ -1099,6 +1101,7 @@
       guardiana: () => revisarConGuardiana('contenido'),
       detective: () => detectiveAntesDelEquipo(),
       pintora: () => pintarConPintora('contenido'),
+      correctora: () => corregirTodoConTilde('contenido'),
     };
     equipoEnMarcha = true;
     const boton = document.getElementById('brigada-equipo-contenido');
@@ -1123,6 +1126,88 @@
       recomendacion.textContent = `🐸 ¡Coquí, coquí! El equipo terminó (${hechos} agentes). Revisa cada pestaña antes de guardar: nada se ha guardado todavía.`;
     } finally {
       equipoEnMarcha = false;
+      boton.disabled = false;
+    }
+  }
+
+  // ── LA BRIGADA COQUÍ · Doña Tilde: «Corregir todo» ───────
+  // INICIO brigada-correctora
+  function resumenCorreccionTodo(resultados) {
+    const bien = resultados.filter((r) => !r.error);
+    const con = bien.filter((r) => r.cambios.length);
+    const fallos = resultados.length - bien.length;
+    const base = `Doña Tilde revisó ${resultados.length} campo${resultados.length === 1 ? '' : 's'}: ${con.length ? `${con.length} con correcciones` : 'ninguno necesita correcciones'}.`;
+    return fallos ? `${base} ${fallos} ${fallos === 1 ? 'no se pudo' : 'no se pudieron'} revisar.` : base;
+  }
+  function htmlCorreccionTodo(resultados, etiquetas, esc) {
+    const con = resultados.filter((r) => !r.error && r.cambios.length);
+    const campos = con.map((r) => `
+      <div class="brigada-correccion-campo" data-campo="${esc(r.id)}">
+        <p><strong>${esc(etiquetas[r.id] || r.id)}</strong> <small>${r.cambios.length} cambio${r.cambios.length === 1 ? '' : 's'}</small></p>
+        <ul>${r.cambios.map((c) => `<li><del>${esc(c.antes)}</del> → <ins>${esc(c.despues)}</ins>${c.motivo ? ` <small>(${esc(c.motivo)})</small>` : ''}</li>`).join('')}</ul>
+        <div class="ia-fila"><button type="button" class="admin-btn-cancel" data-aplicar="${esc(r.id)}">Aplicar</button></div>
+      </div>`).join('');
+    const fallos = resultados.filter((r) => r.error)
+      .map((r) => `<p class="brigada-bandera brigada-bandera-media"><strong>${esc(etiquetas[r.id] || r.id)}</strong>: ${esc(r.error)}</p>`).join('');
+    const todo = con.length > 1 ? '<div class="ia-fila"><button type="button" class="admin-btn-cancel" data-aplicar-todo>Aplicar todo</button></div>' : '';
+    return `<h5>🧐 Doña Tilde</h5>
+      <p>${esc(resumenCorreccionTodo(resultados))}</p>${campos || ''}${fallos}${todo}
+      <p class="admin-hint">Doña Tilde solo propone: nada cambia hasta que pulses «Aplicar», y puedes deshacerlo.</p>`;
+  }
+  // FIN brigada-correctora
+
+  async function corregirTodoConTilde(clave) {
+    const cfg = MESAS[clave];
+    const estado = document.getElementById(`brigada-estado-${clave}`);
+    const contenedor = document.getElementById(`brigada-correccion-${clave}`);
+    const idioma = document.getElementById(cfg.idiomaPieza).value;
+    const ui = window.sqprCorreccionUI;
+    const items = cfg.correccion
+      .map(([id]) => ({ id, texto: document.getElementById(id).value, variante: ui && ui.varianteDe ? ui.varianteDe(id, idioma) : (idioma === 'en' ? 'en-US' : 'es-PR') }))
+      .filter((it) => it.texto.trim());
+    if (!items.length) { estado.textContent = '🧐 Doña Tilde corrige lo que ya escribiste: escribe o redacta primero algún campo.'; return false; }
+    const boton = document.getElementById(`brigada-corregir-${clave}`);
+    boton.disabled = true;
+    estado.textContent = `🧐 Doña Tilde está revisando ${items.length} campo${items.length === 1 ? '' : 's'}...`;
+    try {
+      const data = await apiFetch('/api/admin/corregir/varios', { method: 'POST', body: JSON.stringify({ items }) });
+      const enviados = Object.fromEntries(items.map((it) => [it.id, it.texto]));
+      const etiquetas = Object.fromEntries(cfg.correccion);
+      const porId = Object.fromEntries(data.resultados.map((r) => [r.id, r]));
+      const previos = {};
+      contenedor.innerHTML = htmlCorreccionTodo(data.resultados, etiquetas, escapeHtml);
+      contenedor.hidden = false;
+
+      const aplicar = (id, boton) => {
+        const el = document.getElementById(id);
+        if (el.value !== enviados[id]) { alert('Este campo cambió mientras Doña Tilde lo revisaba: vuelve a pulsar «Corregir todo».'); return; }
+        previos[id] = el.value;
+        el.value = porId[id].textoCorregido;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        boton.textContent = 'Deshacer';
+        boton.dataset.estado = 'aplicado';
+      };
+      const deshacer = (id, boton) => {
+        const el = document.getElementById(id);
+        el.value = previos[id];
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        delete previos[id];
+        boton.textContent = 'Aplicar';
+        delete boton.dataset.estado;
+      };
+      contenedor.querySelectorAll('[data-aplicar]').forEach((b) => b.addEventListener('click', () => {
+        if (b.dataset.estado === 'aplicado') deshacer(b.dataset.aplicar, b); else aplicar(b.dataset.aplicar, b);
+      }));
+      const todo = contenedor.querySelector('[data-aplicar-todo]');
+      if (todo) todo.addEventListener('click', () => {
+        contenedor.querySelectorAll('[data-aplicar]').forEach((b) => { if (b.dataset.estado !== 'aplicado') aplicar(b.dataset.aplicar, b); });
+      });
+      estado.textContent = `🧐 ${resumenCorreccionTodo(data.resultados)}`;
+      return true;
+    } catch (err) {
+      estado.textContent = 'Doña Tilde no pudo corregir: ' + err.message;
+      return false;
+    } finally {
       boton.disabled = false;
     }
   }
@@ -1358,6 +1443,12 @@
     document.getElementById(`brigada-revisar-${clave}`).addEventListener('click', () => revisarConGuardiana(clave));
     document.getElementById(`brigada-duplicados-btn-${clave}`).addEventListener('click', () => buscarRepetidas(clave));
     document.getElementById(`brigada-pintar-${clave}`).addEventListener('click', () => pintarConPintora(clave));
+    document.getElementById(`brigada-corregir-${clave}`).addEventListener('click', () => corregirTodoConTilde(clave));
+    // La descripcion de cada agente sale del elenco (una sola fuente), ajustada al tipo de pieza.
+    document.querySelectorAll(`#brigada-agentes-${clave} [data-desc]`).forEach((el) => {
+      const agente = ELENCO_BRIGADA.find((a) => a.id === el.dataset.desc);
+      if (agente) el.textContent = (clave === 'noticia' && agente.descripcionNoticia) || agente.descripcion;
+    });
     // Mini-tarjeta junto al texto alternativo: la propuesta de la Pintora aparece en la mesa, que se muestra.
     const mini = document.getElementById(clave === 'contenido' ? 'ac-pintora-alt' : 'an-pintora-alt');
     mini.addEventListener('click', async () => {
@@ -2682,51 +2773,66 @@
   const ELENCO_BRIGADA = [
     {
       id: 'investigadora', emoji: '🔎', nombre: 'Investigadora', apodo: 'Doña Pesquisa', estado: 'activa', nivel: 'ia', usoId: 'ag-ia-investigador-uso',
+      descripcion: 'Lee la fuente en cualquier idioma, detecta su idioma y prepara las notas de investigación.',
       trabajo: ['Lee la fuente (URL o texto pegado) en cualquier idioma, lengua o dialecto', 'Detecta el idioma de la fuente', 'Prepara las notas de investigación, con búsqueda web opcional', 'Corrige el texto pegado mostrando cada cambio', 'Pregunta cuando algo de la fuente no está claro'],
       noHace: 'No clasifica, no redacta y no llena la cita.',
     },
     {
       id: 'clasificadora', emoji: '🗂️', nombre: 'Clasificadora', apodo: 'Doña Fichas', estado: 'activa', nivel: 'clasificacion',
+      descripcion: 'Sugiere la sección, la sub-sección, la región, el formato y el subformato.',
+      descripcionNoticia: 'Sugiere la categoría de la noticia.',
       trabajo: ['Sugiere la sección y la sub-sección o categoría', 'Sugiere la región', 'Sugiere el formato de la pieza y anota el formato de la fuente', 'Sugiere el subformato'],
       noHace: 'No decide el idioma: el de la fuente es de la Investigadora y el de la pieza lo eliges tú.',
     },
     {
       id: 'redactora', emoji: '✍️', nombre: 'Redactora', apodo: 'La Pluma', estado: 'activa', nivel: 'ia', usoId: 'ag-ia-redactor-uso',
+      descripcion: 'Escribe el título y el cuerpo con palabras propias, en el idioma de la pieza.',
+      descripcionNoticia: 'Lee la URL y redacta un primer borrador completo: título, párrafos y medio.',
       trabajo: ['Escribe el título y el cuerpo con palabras propias, en el idioma de la pieza que le pides', 'Sigue el tono y el estilo elegidos', 'Estima la duración de lectura'],
       noHace: 'No hace el resumen ni la cita.',
     },
     {
       id: 'resumidora', emoji: '✂️', nombre: 'Resumidora', apodo: 'Doña Breve', estado: 'activa', nivel: 'contenido',
+      descripcion: 'Resume el cuerpo del texto en su mismo idioma; corre sola después de La Pluma.',
       trabajo: ['Escribe el resumen a partir del cuerpo del texto, en el mismo idioma', 'Corre sola después de La Pluma, o cuando se lo pides'],
       noHace: 'No escribe el cuerpo.',
     },
     {
       id: 'bibliotecaria', emoji: '📚', nombre: 'Bibliotecaria', apodo: 'La Bibliotecaria', estado: 'activa', nivel: 'citacion',
+      descripcion: 'Lee autor, año, título y medio de la página y sugiere el estilo de la cita.',
       trabajo: ['Lee de la página autor de la fuente, año, título original y nombre del medio', 'Propone el estilo de la cita (APA, MLA, Vancouver, etc.) según la fuente', 'Pone la fecha de acceso', 'Deja vacío lo que la página no declara'],
       noHace: 'No usa IA ni deduce datos que la página no diga. El formato de la cita lo arma el código (citas.js), no la IA.',
     },
     {
       id: 'correctora', emoji: '🧐', nombre: 'Correctora', apodo: 'Doña Tilde', estado: 'activa', nivel: 'contenido',
-      trabajo: ['Revisa ortografía, tildes y gramática en cada campo según la variante del idioma', 'Respeta el diccionario de Puerto Rico y del proyecto', 'Corrige con IA mostrando cada cambio, sin aplicarlo sola'],
+      descripcion: 'Corrige la ortografía y la gramática de todos los campos de una vez, sin cambiar el sentido.',
+      descripcionNoticia: 'Corrige el título, los párrafos y el texto alternativo de una vez.',
+      trabajo: ['Revisa ortografía, tildes y gramática en cada campo según la variante del idioma de la pieza', 'Respeta el diccionario de Puerto Rico y del proyecto', 'Corrige con IA mostrando cada cambio, sin aplicarlo sola', 'Corregir todo: revisa de una vez el título, el resumen, el cuerpo y el texto alternativo'],
       noHace: 'No cambia el sentido ni reescribe el estilo.',
     },
     {
       id: 'traductora', emoji: '🗣️', nombre: 'Traductora', apodo: 'La Intérprete', estado: 'activa', nivel: 'contenido',
+      descripcion: 'Traduce la pieza ya guardada al otro idioma, desde su caja de traducción.',
       trabajo: ['Traduce la pieza ya guardada al otro idioma del sitio', 'Deja la traducción como borrador para tu revisión'],
       noHace: 'No escribe la pieza original.',
     },
     {
       id: 'guardiana', emoji: '🛡️', nombre: 'Guardiana', apodo: 'La Guardiana', estado: 'activa', nivel: 'contenido',
+      descripcion: 'Avisa si la pieza se parece demasiado a la fuente o si tiene contenido sensible.',
+      descripcionNoticia: 'Avisa si la noticia se parece demasiado a la fuente o si tiene contenido sensible.',
       trabajo: ['Marca contenido sensible: menores, violencia gráfica, acusaciones, personas reales, contenido sexual y si pediría 18+', 'Compara tu texto con la fuente y avisa si se parece demasiado (derechos de autor)'],
       noHace: 'Orienta; no bloquea ni borra, y no sustituye a un abogado.',
     },
     {
       id: 'detective', emoji: '🕵️', nombre: 'Detective', apodo: 'El Detective', estado: 'activa', nivel: 'contenido',
+      descripcion: 'Avisa si la historia ya está publicada o guardada como borrador.',
+      descripcionNoticia: 'Avisa si la noticia ya está publicada o guardada como borrador.',
       trabajo: ['Avisa si esa historia ya está publicada o guardada como borrador (misma fuente, título o resumen parecidos)', 'Te deja abrir la pieza que ya existe en lugar de crear otra repetida'],
       noHace: 'No usa IA y no borra ni fusiona nada por su cuenta.',
     },
     {
       id: 'pintora', emoji: '🎨', nombre: 'Pintora', apodo: 'La Pintora', estado: 'activa', nivel: 'multimedia',
+      descripcion: 'Propone el texto alternativo de la imagen y un prompt de imagen en el estilo fijo.',
       trabajo: ['Sugiere el texto alternativo de las imágenes', 'Escribe el prompt de imagen en el estilo fijo de Aliado Imperfekto'],
       noHace: 'No genera la imagen: te da el prompt.',
     },
@@ -2735,6 +2841,7 @@
     return elenco.map((a) => `
       <div class="ag-tile ag-agente ${a.estado === 'proxima' ? 'ag-agente-proxima' : ''}" data-agente="${a.id}">
         <p class="ag-tile-title">${a.emoji} ${esc(a.apodo)} <span class="ag-agente-oficio">· la ${esc(a.nombre)}</span> ${a.estado === 'proxima' ? '<span class="ag-agente-etiqueta">próximamente</span>' : ''}</p>
+        <p class="ag-tile-desc ag-agente-resumen">${esc(a.descripcion)}</p>
         <ul class="ag-agente-tareas">${a.trabajo.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
         <p class="ag-tile-desc"><em>${esc(a.noHace)}</em></p>
         ${a.usoId ? `<p class="ag-tile-desc" id="${a.usoId}">—</p>` : ''}
