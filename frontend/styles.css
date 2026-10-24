@@ -2435,8 +2435,12 @@ html[data-theme="dark"] .social-links img{ filter:invert(1) hue-rotate(180deg); 
 
 /* ===== RESPONSIVE ===== */
 @media (max-width:1200px){
-  .nav-toggle{ display:flex; order:3; }
-  .header-controls{ margin-left:auto; }
+  .nav-toggle{ display:flex; order:3; flex-shrink:0; } /* el boton de menu NUNCA se queda fuera de la pantalla */
+  /* La cabecera tiene que caber en pantallas angostas (iPhone): lo unico que se encoge es el boton de sesion (con «…»). */
+  .header-controls{ margin-left:auto; flex-shrink:1; min-width:0; }
+  .lang-toggle, .theme-toggle, .cart-btn{ flex-shrink:0; }
+  .login-trigger-btn{ flex:0 1 auto; min-width:0; overflow:hidden; }
+  #login-trigger-label{ display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .site-header-inner{ gap:14px; }
   .nav{ flex:0 0 auto; order:3; }
   .nav ul{
@@ -2478,7 +2482,11 @@ html[data-theme="dark"] .social-links img{ filter:invert(1) hue-rotate(180deg); 
 }
 @media (max-width:560px){
   :root{ --gutter:16px; }
-  .brand-name{ font-size:1.1rem; }
+  .site-header-inner{ gap:8px; }
+  .header-controls{ gap:2px; }
+  .lang-toggle{ padding:0 6px; }
+  .theme-toggle, .cart-btn{ width:36px; height:36px; }
+  .brand-name{ display:none; } /* en pantalla de telefono queda solo el logo: el nombre no cabe junto al resto */
   .card-grid,
   .tienda-main{ grid-template-columns:minmax(0,1fr); }
   .footer-inner{ grid-template-columns:minmax(0,1fr); gap:28px; }

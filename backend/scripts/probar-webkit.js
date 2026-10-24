@@ -42,7 +42,12 @@ function medir() {
     .filter((e) => e.offsetParent !== null && parseFloat(getComputedStyle(e).fontSize) < 16)
     .map((e) => `${e.tagName.toLowerCase()}#${e.id || e.name || e.className} ${getComputedStyle(e).fontSize}`);
   const cajon = document.querySelector('.cart-drawer');
+  // El boton de menu (hamburguesa) tiene que verse entero dentro de la pantalla cuando la barra de menu esta colapsada.
+  const menu = document.querySelector('.nav-toggle');
+  const rm = menu ? menu.getBoundingClientRect() : null;
+  const menuFueraDePantalla = !!menu && getComputedStyle(menu).display !== 'none' && (rm.right > window.innerWidth + 1 || rm.left < 0);
   return {
+    menuFueraDePantalla,
     desborde: document.documentElement.scrollWidth > ancho + 1,
     camposConLetraMenorDe16px: campos,
     cajonCarrito: cajon ? { alturaCss: getComputedStyle(cajon).height, alturaVentana: window.innerHeight } : null,
@@ -96,6 +101,7 @@ function medir() {
     if (r.estadoHttp !== 200) problemas.push(`HTTP ${r.estadoHttp}`);
     if (r.errores.length) problemas.push(`errores: ${r.errores.join(' | ')}`);
     if (r.desborde) problemas.push('desborde horizontal');
+    if (r.menuFueraDePantalla) problemas.push('el botón de menú se sale de la pantalla');
     if (r.camposConLetraMenorDe16px && r.camposConLetraMenorDe16px.length) problemas.push(`campos <16px: ${r.camposConLetraMenorDe16px.join(', ')}`);
     if (r.red.length) problemas.push(`red: ${r.red.join(' | ')}`);
     if (problemas.length) { conObservaciones += 1; console.log(`${r.dispositivo} · ${r.pagina}: ${problemas.join(' ; ')}`); }
