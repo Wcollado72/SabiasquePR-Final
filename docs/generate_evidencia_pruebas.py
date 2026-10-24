@@ -58,6 +58,11 @@ DATOS_ESTUDIANTE_PATH = os.path.join(DOCS_DIR, 'privado', 'datos-estudiante.json
 JSON_PRUEBAS = os.path.join(ENTREGA_DIR, 'evidencia-pruebas.json')
 JSON_PROD = os.path.join(ENTREGA_DIR, 'evidencia-produccion.json')
 JSON_NAV = os.path.join(ENTREGA_DIR, 'evidencia-navegadores.json')
+# Motor de Safari (WebKit): backend/scripts/probar-webkit.js (se corre aparte; Playwright no es dependencia del proyecto)
+JSON_WEBKIT = os.path.join(ENTREGA_DIR, 'evidencia-webkit.json')
+JSON_WEBKIT_ANTES = os.path.join(ENTREGA_DIR, 'evidencia-webkit-antes.json')
+JSON_WEBKIT_SIN_ALM = os.path.join(ENTREGA_DIR, 'evidencia-webkit-sin-almacenamiento.json')
+JSON_WEBKIT_ANTES_SIN_ALM = os.path.join(ENTREGA_DIR, 'evidencia-webkit-antes-sin-almacenamiento.json')
 
 # Fuente con los simbolos de marca de verificacion (Helvetica estandar no los trae).
 SIMBOLOS = 'SegoeSym'
@@ -358,6 +363,10 @@ def build():
     pr = cargar(JSON_PRUEBAS)
     prod = cargar(JSON_PROD)
     nav = cargar(JSON_NAV)
+    wk = cargar(JSON_WEBKIT)
+    wk_antes = cargar(JSON_WEBKIT_ANTES)
+    wk_sin = cargar(JSON_WEBKIT_SIN_ALM)
+    wk_antes_sin = cargar(JSON_WEBKIT_ANTES_SIN_ALM)
 
     est = datos_estudiante()
     doc = SimpleDocTemplate(OUT_PATH, pagesize=letter,
@@ -601,8 +610,9 @@ def build():
     caja(story, 'Límites de esta prueba (léase antes de las tablas)',
          f'Solo se probaron <b>{versiones}</b>, ambos con motor Chromium, en Windows. Los tamaños de tableta y móvil son <b>emulación de pantalla '
          'en un navegador de escritorio</b>, no teléfonos ni tabletas reales. <b>No se probó</b> Firefox (no está instalado en esta computadora), '
-         'Safari en iPhone o iPad, Chrome en Android ni Samsung Internet: esas pruebas están en la tabla de pruebas manuales pendientes de más abajo '
-         'y <b>no deben darse por hechas</b>.',
+         'Safari en un iPhone, iPad o Mac reales, Chrome en Android ni Samsung Internet: esas pruebas están en la tabla de pruebas manuales pendientes de más abajo '
+         'y <b>no deben darse por hechas</b>. Safari sí se probó con su <b>motor (WebKit)</b> corriendo en Windows: ver la sección 5.4; eso reduce el riesgo, '
+         'pero <b>no sustituye</b> probar en un iPhone o un Mac reales.',
          fondo=RISK_SOFT, borde=RISK, color_titulo=RISK)
 
     tams = ['Escritorio', 'Tableta', 'Móvil']
@@ -679,7 +689,56 @@ def build():
              'en la ejecución final, así que se atribuye a un script interno del navegador, no al sitio.',
              fondo=ACCENT_SOFT, borde=ACCENT)
 
-    story.append(Paragraph('5.4 Pruebas manuales pendientes (por completar)', styles['H2']))
+    # ── 5.4 MOTOR DE SAFARI (WebKit) ───────────────────────────
+    story.append(Paragraph('5.4 Motor de Safari (WebKit) en iPhone, iPad y Mac', styles['H2']))
+    def resumen_wk(d):
+        r = d['resultados']
+        return {
+            'total': len(r),
+            'http': sum(1 for x in r if x['estadoHttp'] == 200),
+            'js': sum(1 for x in r if not any(e.startswith('pageerror') or e.startswith('console') or e.startswith('navegacion') for e in x['errores'])),
+            'desborde': sum(1 for x in r if not x.get('desborde')),
+            'campos': sum(1 for x in r if not x.get('camposConLetraMenorDe16px')),
+            'red': sum(1 for x in r if not x['red']),
+            'pageerror': sum(1 for x in r if any(e.startswith('pageerror') for e in x['errores'])),
+            'con_campos_chicos': sum(1 for x in r if x.get('camposConLetraMenorDe16px')),
+        }
+    a, d_, a_s, d_s = resumen_wk(wk_antes), resumen_wk(wk), resumen_wk(wk_antes_sin), resumen_wk(wk_sin)
+    fecha_wk = wk['generado'][:10]
+    body(story,
+         f"<b>Qué se probó.</b> Con <b>{esc(wk['motor'])}</b> (el motor de Safari) se cargaron en <b>{esc(wk['base'].replace('https://', ''))}</b> las mismas siete páginas "
+         'en tres tamaños con el agente de usuario de Safari: <b>iPhone</b> (390×844, táctil), <b>iPad</b> (820×1180, táctil) y <b>Mac</b> (1440×900). '
+         'Por cada combinación se midió: que responda 200, que no haya errores de JavaScript, que no haya desbordamiento horizontal, que ningún campo de '
+         'formulario tenga letra menor de 16 px (con menos, Safari de iPhone hace zoom solo al tocar el campo) y que no haya respuestas de red con código 400 o mayor. '
+         'Además se repitió con el <b>almacenamiento bloqueado</b>, como Safari con «Bloquear todas las cookies» (tocar <font face="Courier">localStorage</font> '
+         'lanza <font face="Courier">SecurityError</font>).')
+    filas = [['Medición (21 combinaciones: 3 dispositivos × 7 páginas)', f'Antes de los ajustes<br/>({wk_antes["generado"][:10]})', f'Después de los ajustes<br/>({fecha_wk})']]
+    filas += [
+        ['Responden 200', f"{a['http']} de {a['total']}", f"{d_['http']} de {d_['total']}"],
+        ['Sin errores de JavaScript', f"{a['js']} de {a['total']}", f"{d_['js']} de {d_['total']}"],
+        ['Sin desbordamiento horizontal', f"{a['desborde']} de {a['total']}", f"{d_['desborde']} de {d_['total']}"],
+        ['Campos de formulario de 16 px o más (sin zoom en iPhone)', f"{a['campos']} de {a['total']}", f"{d_['campos']} de {d_['total']}"],
+        ['Sin respuestas de red con código 400 o mayor', f"{a['red']} de {a['total']}", f"{d_['red']} de {d_['total']}"],
+        ['Con el almacenamiento bloqueado: sin errores de JavaScript', f"{a_s['total'] - a_s['pageerror']} de {a_s['total']}", f"{d_s['total'] - d_s['pageerror']} de {d_s['total']}"],
+    ]
+    story.append(tabla(filas, [250, (CONTENT_W - 250) / 2, (CONTENT_W - 250) / 2]))
+    story.append(Spacer(1, 6))
+    caja(story, 'Hallazgos de esta prueba y cómo se corrigieron',
+         f"<b>1. Zoom al tocar un campo (iPhone).</b> Los campos de texto medían 15,2 px; en {a['con_campos_chicos']} de {a['total']} combinaciones "
+         'había campos por debajo de 16 px (inicio, educación y contacto). Se subió la regla base a 1rem (16 px). '
+         f"<b>2. Carrito.</b> El cajón del carrito usaba <font face=\"Courier\">100vh</font>, que en iPhone incluye la barra de Safari y puede tapar el botón de pagar; "
+         'se agregó <font face="Courier">100dvh</font> con <font face="Courier">100vh</font> de respaldo. '
+         f"<b>3. Almacenamiento bloqueado.</b> Con «Bloquear todas las cookies», {a_s['pageerror']} de {a_s['total']} combinaciones lanzaban un error de JavaScript sin atrapar "
+         '(el tema claro/oscuro y la confirmación de edad de las secciones 18+ leían <font face="Courier">localStorage</font>/<font face="Courier">sessionStorage</font> sin protección); '
+         f"ahora {d_s['pageerror']}. Las tres correcciones se publicaron y la medición «después» se hizo contra producción. "
+         'Los avisos de CSP del distintivo «Powered by Netlify» (un iframe ajeno al código del proyecto) se separan, igual que en Chrome y Edge.')
+    caja(story, 'Límite de esta prueba',
+         'Es el <b>motor</b> de Safari ejecutándose en una computadora con Windows, controlado de forma automática. No es un iPhone, un iPad ni un Mac reales: '
+         'no cubre el teclado en pantalla, los gestos, la barra de Safari que sube y baja, ni las diferencias propias de cada versión de iOS o macOS. '
+         'Por eso la prueba manual en un iPhone real (modelo del dueño del proyecto: iPhone 14) sigue pendiente en la sección 5.5.',
+         fondo=RISK_SOFT, borde=RISK, color_titulo=RISK)
+
+    story.append(Paragraph('5.5 Pruebas manuales pendientes (por completar)', styles['H2']))
     body(story,
          '<b>Estas pruebas NO se han hecho.</b> Requieren dispositivos o navegadores que no se pudieron usar de forma automática. Quien las '
          'realice marca cada casilla con ' + marca(True) + ' o ' + marca(False) + ' y anota el modelo del dispositivo, la versión del navegador y la fecha. Todas se hacen abriendo '
@@ -706,7 +765,7 @@ def build():
     story.append(Spacer(1, 8))
 
     dispositivos = [
-        ('iPhone — Safari (iOS)', 'Safari'),
+        ('iPhone 14 — Safari (iOS)', 'Safari'),
         ('Android — Chrome', 'Chrome'),
         ('Samsung Galaxy — Samsung Internet', 'Samsung Internet'),
         ('Firefox en escritorio (no instalado aquí)', 'Firefox'),
@@ -751,6 +810,7 @@ def build():
         ('Guardar los resultados de Jest y la cobertura (docs/entrega/evidencia-pruebas.json)', 'cd backend; node scripts/recoger-evidencia.js'),
         ('Repetir la verificación contra producción (usa curl)', 'cd backend; node scripts/verificar-produccion.js'),
         ('Probar Chrome y Edge en tres tamaños de pantalla', 'cd backend; node scripts/probar-navegadores.js'),
+        ('Probar el motor de Safari (WebKit; Playwright se instala aparte, ver el encabezado del script)', 'cd backend; PLAYWRIGHT_DIR=../playwright-webkit node scripts/probar-webkit.js'),
         ('Regenerar este PDF, desde la raíz del repositorio (con --recoger repite también las tres mediciones)', 'python docs/generate_evidencia_pruebas.py'),
     ]
     filas = [['Para qué', 'Comando']]
@@ -770,8 +830,8 @@ def build():
     if n_badge:
         filas.append(['Avisos de CSP en consola', f'{n_badge} de {n_tot} cargas muestran 2 avisos del iframe «Powered by Netlify» bloqueado por la CSP (sección 5).',
                       'Pendiente: revisar en Netlify si el distintivo es intencional.'])
-    filas.append(['Dispositivos y navegadores no probados', 'Firefox, Safari (iPhone/iPad/Mac), Chrome en Android y Samsung Internet no se probaron; las tabletas y móviles automáticos son emulación.',
-                  'Pendiente: completar la tabla de la sección 5.4 (casillas vacías).'])
+    filas.append(['Dispositivos y navegadores no probados', 'Firefox, Safari en un iPhone/iPad/Mac reales, Chrome en Android y Samsung Internet no se probaron en dispositivos reales; las tabletas y móviles automáticos son emulación. Safari sí se probó con su motor WebKit en Windows (sección 5.4).',
+                  'Pendiente: completar la tabla de la sección 5.5 (casillas vacías).'])
     if serv:
         filas.append(['Cobertura de los servicios de IA', f"src/services tiene {str(serv['lineas']).replace('.', ',')} % de líneas cubiertas; las llamadas reales a la API de Claude no se prueban de forma automática.",
                       'Aceptado: se prueba la lógica con servicios simulados.'])

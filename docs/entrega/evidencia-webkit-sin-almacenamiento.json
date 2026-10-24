@@ -1,0 +1,386 @@
+{
+ "generado": "2026-10-24T15:55:03.596Z",
+ "base": "https://sabiasquepr.com",
+ "motor": "WebKit 18.2 (Playwright)",
+ "bloqueoStorage": true,
+ "resultados": [
+  {
+   "dispositivo": "iPhone (Safari iOS)",
+   "pagina": "Inicio",
+   "ruta": "/index.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "843.984375px",
+    "alturaVentana": 844
+   }
+  },
+  {
+   "dispositivo": "iPhone (Safari iOS)",
+   "pagina": "Noticias",
+   "ruta": "/noticias.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "843.984375px",
+    "alturaVentana": 844
+   }
+  },
+  {
+   "dispositivo": "iPhone (Safari iOS)",
+   "pagina": "Revolución Humana",
+   "ruta": "/revolucion-humana.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "843.984375px",
+    "alturaVentana": 844
+   }
+  },
+  {
+   "dispositivo": "iPhone (Safari iOS)",
+   "pagina": "Educación",
+   "ruta": "/educacion.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "843.984375px",
+    "alturaVentana": 844
+   }
+  },
+  {
+   "dispositivo": "iPhone (Safari iOS)",
+   "pagina": "Tienda",
+   "ruta": "/tienda.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "843.984375px",
+    "alturaVentana": 844
+   }
+  },
+  {
+   "dispositivo": "iPhone (Safari iOS)",
+   "pagina": "Premium (apoyo)",
+   "ruta": "/premium.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "843.984375px",
+    "alturaVentana": 844
+   }
+  },
+  {
+   "dispositivo": "iPhone (Safari iOS)",
+   "pagina": "Contacto",
+   "ruta": "/contacto.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "843.984375px",
+    "alturaVentana": 844
+   }
+  },
+  {
+   "dispositivo": "iPad (Safari iPadOS)",
+   "pagina": "Inicio",
+   "ruta": "/index.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "1180px",
+    "alturaVentana": 1180
+   }
+  },
+  {
+   "dispositivo": "iPad (Safari iPadOS)",
+   "pagina": "Noticias",
+   "ruta": "/noticias.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "1180px",
+    "alturaVentana": 1180
+   }
+  },
+  {
+   "dispositivo": "iPad (Safari iPadOS)",
+   "pagina": "Revolución Humana",
+   "ruta": "/revolucion-humana.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "1180px",
+    "alturaVentana": 1180
+   }
+  },
+  {
+   "dispositivo": "iPad (Safari iPadOS)",
+   "pagina": "Educación",
+   "ruta": "/educacion.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "1180px",
+    "alturaVentana": 1180
+   }
+  },
+  {
+   "dispositivo": "iPad (Safari iPadOS)",
+   "pagina": "Tienda",
+   "ruta": "/tienda.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "1180px",
+    "alturaVentana": 1180
+   }
+  },
+  {
+   "dispositivo": "iPad (Safari iPadOS)",
+   "pagina": "Premium (apoyo)",
+   "ruta": "/premium.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "1180px",
+    "alturaVentana": 1180
+   }
+  },
+  {
+   "dispositivo": "iPad (Safari iPadOS)",
+   "pagina": "Contacto",
+   "ruta": "/contacto.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "1180px",
+    "alturaVentana": 1180
+   }
+  },
+  {
+   "dispositivo": "Mac (Safari macOS)",
+   "pagina": "Inicio",
+   "ruta": "/index.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "900px",
+    "alturaVentana": 900
+   }
+  },
+  {
+   "dispositivo": "Mac (Safari macOS)",
+   "pagina": "Noticias",
+   "ruta": "/noticias.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "900px",
+    "alturaVentana": 900
+   }
+  },
+  {
+   "dispositivo": "Mac (Safari macOS)",
+   "pagina": "Revolución Humana",
+   "ruta": "/revolucion-humana.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "900px",
+    "alturaVentana": 900
+   }
+  },
+  {
+   "dispositivo": "Mac (Safari macOS)",
+   "pagina": "Educación",
+   "ruta": "/educacion.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "900px",
+    "alturaVentana": 900
+   }
+  },
+  {
+   "dispositivo": "Mac (Safari macOS)",
+   "pagina": "Tienda",
+   "ruta": "/tienda.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "900px",
+    "alturaVentana": 900
+   }
+  },
+  {
+   "dispositivo": "Mac (Safari macOS)",
+   "pagina": "Premium (apoyo)",
+   "ruta": "/premium.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "900px",
+    "alturaVentana": 900
+   }
+  },
+  {
+   "dispositivo": "Mac (Safari macOS)",
+   "pagina": "Contacto",
+   "ruta": "/contacto.html",
+   "estadoHttp": 200,
+   "errores": [],
+   "erroresBadgeNetlify": [
+    "console: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src [about:srcdoc]",
+    "console: Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src  [about:srcdoc]"
+   ],
+   "red": [],
+   "desborde": false,
+   "camposConLetraMenorDe16px": [],
+   "cajonCarrito": {
+    "alturaCss": "900px",
+    "alturaVentana": 900
+   }
+  }
+ ]
+}
