@@ -80,6 +80,70 @@ describe('htmlAnalisisGrieta', () => {
   });
 });
 
+describe('htmlEcos', () => {
+  const eco = { autor: 'Autora <b>', titulo: 'Sobre la vergüenza', anio: '2010', url: 'https://editorial.com/obra', cita: 'La vergüenza es un sentimiento revolucionario', relacion: 'matiza', porque: 'Agrega un matiz.', verificada: true };
+  const entrada = { resultado: { consultas: ['vergüenza cambio'], busquedas: 2, descartadas: 3, ecos: [eco] } };
+
+  test('muestra autor, obra con enlace seguro, año, relación, cita verificada y lo descartado', () => {
+    const h = T.htmlEcos(entrada, false, esc);
+    ['Autora &lt;b>', 'href="https://editorial.com/obra"', 'rel="noopener noreferrer"', '(2010)', 'Matiza', '«La vergüenza es un sentimiento revolucionario»', 'Cita verificada', 'Descartó 3 fuentes', '2 búsquedas', 'taller-eco-matiza']
+      .forEach((trozo) => expect(h).toContain(trozo));
+  });
+
+  test('una URL que no es http(s) no se vuelve enlace', () => {
+    const h = T.htmlEcos({ resultado: { ...entrada.resultado, ecos: [{ ...eco, url: 'javascript:alert(1)' }] } }, false, esc);
+    expect(h).not.toContain('<a href');
+  });
+
+  test('sin ecos comprobados lo dice en vez de inventar, y avisa si la idea cambió', () => {
+    const h = T.htmlEcos({ resultado: { consultas: [], busquedas: 1, descartadas: 0, ecos: [] } }, true, esc);
+    expect(h).toContain('No encontré ecos que pudiera comprobar');
+    expect(h).toContain('Cambiaste la idea después de este análisis');
+    expect(h).toContain('1 búsqueda)');
+  });
+});
+
+describe('htmlContrapunto', () => {
+  const entrada = {
+    resultado: {
+      postura_contraria: 'Los argumentos sí convencen.',
+      objeciones: [{ objecion: 'Generaliza', fuerza: 'alta', fragmento: 'la gente no cambia', respuesta_posible: 'Matizar con «a veces».' }, { objecion: 'Vaga', fuerza: 'baja', fragmento: '', respuesta_posible: '' }],
+      casos_limite: ['Sin vínculos sociales'], lo_que_resiste: ['La tensión es real'], preguntas_incomodas: ['¿Qué evidencia tienes?'],
+    },
+  };
+
+  test('muestra la postura, las objeciones con su fuerza, la cita y la respuesta posible, y el resto de secciones', () => {
+    const h = T.htmlContrapunto(entrada, false, esc);
+    ['Los argumentos sí convencen.', 'Generaliza', 'Fuerte', 'Leve', '«la gente no cambia»', 'Podrías responder: Matizar', 'Sin vínculos sociales', 'La tensión es real', '¿Qué evidencia tienes?', 'brigada-bandera-alta']
+      .forEach((trozo) => expect(h).toContain(trozo));
+    expect(h).not.toContain('<em>«»</em>');
+  });
+
+  test('escapa el HTML del análisis', () => {
+    const h = T.htmlContrapunto({ resultado: { ...entrada.resultado, postura_contraria: '<img src=x onerror=alert(1)>' } }, false, esc);
+    expect(h).not.toContain('<img');
+  });
+});
+
+describe('htmlInformes', () => {
+  const analisis = {
+    contrapunto: { resultado: { postura_contraria: 'P', objeciones: [], casos_limite: [], lo_que_resiste: [], preguntas_incomodas: [] } },
+    cazadora: { resultado: { consultas: [], busquedas: 0, descartadas: 0, ecos: [] } },
+  };
+
+  test('un cuadro por agente que ya trabajó, en orden, y marca solo los desactualizados', () => {
+    const h = T.htmlInformes(analisis, ['cazadora'], esc);
+    expect((h.match(/class="taller-informe /g) || []).length).toBe(2);
+    expect(h.indexOf('data-agente="cazadora"')).toBeLessThan(h.indexOf('data-agente="contrapunto"'));
+    expect((h.match(/Cambiaste la idea/g) || []).length).toBe(1);
+  });
+
+  test('sin análisis no pinta nada', () => {
+    expect(T.htmlInformes({}, [], esc)).toBe('');
+    expect(T.htmlInformes(null, [], esc)).toBe('');
+  });
+});
+
 describe('el Taller en el panel', () => {
   test('hay una pestaña y un panel solo para el administrador, con su editor, su lista y sus agentes', () => {
     expect(html).toContain('data-tab="taller">🏮 Taller de Aliado</button>');
@@ -90,15 +154,15 @@ describe('el Taller en el panel', () => {
     expect(js).toContain("document.getElementById('admin-panel-taller').style.display = tab === 'taller'");
   });
 
-  test('La Grieta trabaja; las otras tres agentes están a la vista pero todavía deshabilitadas', () => {
-    expect(html).toMatch(/<button type="button" class="brigada-agente" id="taller-grieta"><span/);
-    ['cazadora', 'contrapunto', 'farolera'].forEach((a) => expect(html).toMatch(new RegExp(`id="taller-${a}" disabled`)));
+  test('La Grieta, La Cazadora y El Contrapunto trabajan; La Farolera está a la vista pero todavía deshabilitada', () => {
+    ['grieta', 'cazadora', 'contrapunto'].forEach((a) => expect(html).toMatch(new RegExp(`id="taller-${a}"><span`)));
+    expect(html).toMatch(/id="taller-farolera" disabled/);
     expect((html.match(/data-desc="(grieta|cazadora|contrapunto|farolera)"/g) || []).length).toBe(4);
   });
 
   test('guardar manda la semilla, La Grieta guarda primero y analiza ese texto, y borrar pide confirmación', () => {
     const taller = leer('taller.js');
-    expect(taller).toContain("/api/semillas/${encodeURIComponent(guardada.id)}/agentes/grieta");
+    expect(taller).toContain("/api/semillas/${encodeURIComponent(guardada.id)}/agentes/${agente.id}");
     expect(taller).toContain('const guardada = await guardar();');
     expect(taller).toContain("if (!confirm('¿Borrar esta semilla");
     expect(taller).toContain("method: 'PUT'");

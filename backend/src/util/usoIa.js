@@ -15,8 +15,8 @@ async function registrarUsoAgente(pool, { agente, fuenteTipo, usage, creadoPor }
   try {
     await pool.query(
       `INSERT INTO ia_generaciones (agente, fuente_tipo, uso_busqueda_web, busquedas_realizadas, tokens_entrada, tokens_salida, costo_estimado_usd, creado_por)
-       VALUES ($1,$2,false,0,$3,$4,$5,$6)`,
-      [agente, fuenteTipo, usage.tokensEntrada || 0, usage.tokensSalida || 0, usage.costoEstimadoUsd || 0, creadoPor]
+       VALUES ($1,$2,$7 > 0,$7,$3,$4,$5,$6)`,
+      [agente, fuenteTipo, usage.tokensEntrada || 0, usage.tokensSalida || 0, usage.costoEstimadoUsd || 0, creadoPor, usage.busquedasRealizadas || 0]
     );
   } catch (err) {
     console.error(`No se pudo registrar el uso de IA de ${agente}:`, err.message);

@@ -12,13 +12,13 @@ describe('registrarUsoAgente', () => {
     await registrarUsoAgente(pool, { agente: 'clasificadora', fuenteTipo: 'url', usage: USAGE, creadoPor: 'u1' });
     const [sql, params] = pool.query.mock.calls[0];
     expect(sql).toMatch(/INSERT INTO ia_generaciones/);
-    expect(params).toEqual(['clasificadora', 'url', 120, 30, 0.0007, 'u1']);
+    expect(params).toEqual(['clasificadora', 'url', 120, 30, 0.0007, 'u1', 0]);
   });
 
   test('un uso sin datos guarda ceros, no vacíos', async () => {
     const pool = { query: jest.fn().mockResolvedValue({}) };
     await registrarUsoAgente(pool, { agente: 'pintora', fuenteTipo: 'texto', usage: {}, creadoPor: 'u1' });
-    expect(pool.query.mock.calls[0][1]).toEqual(['pintora', 'texto', 0, 0, 0, 'u1']);
+    expect(pool.query.mock.calls[0][1]).toEqual(['pintora', 'texto', 0, 0, 0, 'u1', 0]);
   });
 
   test('un agente o una fuente que la base no admite no se intenta guardar (así no rompe el CHECK)', async () => {

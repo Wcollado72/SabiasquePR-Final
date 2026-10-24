@@ -32,7 +32,7 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon-96.png" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=f4437ca1">
+  <link rel="stylesheet" href="styles.css?v=e7e0af94">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Panel de administración","description":"Panel de administración de Sabías que PR: gestión de noticias y productos.","url":"https://sabiasquepr.com/admin.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -721,31 +721,33 @@
               <p class="ag-sub">Tu cuaderno de ideas propias. Escribe una semilla (una idea, un párrafo, una duda), pon a las agentes a analizarla y tú decides si la desarrollamos.</p>
             </div>
           </div>
-          <div class="taller-grid">
-            <aside class="taller-lateral">
-              <button type="button" class="admin-btn-new" id="taller-nueva">＋ Nueva semilla</button>
-              <label for="taller-filtro">Ver</label>
-              <select id="taller-filtro">
-                <option value="">Todas</option>
-                <option value="semilla">🌱 Semillas</option>
-                <option value="explorada">🔎 Exploradas</option>
-                <option value="en_desarrollo">✍️ En desarrollo</option>
-                <option value="lista">✅ Listas</option>
-                <option value="pasada">📤 Pasadas a Contenidos</option>
-              </select>
-              <div id="taller-lista" class="taller-lista"></div>
-            </aside>
-            <div class="taller-principal">
-              <div id="taller-editor" hidden>
-                <h3 id="taller-editor-titulo">Nueva semilla</h3>
-                <form id="taller-form">
-                  <label for="ts-titulo">Título (opcional)</label>
-                  <input type="text" id="ts-titulo" maxlength="160" spellcheck="true" lang="es">
-                  <label for="ts-texto">Tu idea</label>
-                  <textarea id="ts-texto" rows="10" maxlength="20000" spellcheck="true" lang="es" placeholder="Escribe aquí tu idea, pensamiento, análisis o comentario, tal como te salga."></textarea>
-                  <p class="admin-hint" id="ts-contador" aria-live="polite"></p>
+          <div class="taller-barra">
+            <button type="button" class="admin-btn-new" id="taller-nueva">＋ Nueva semilla</button>
+            <label for="taller-filtro">Ver</label>
+            <select id="taller-filtro">
+              <option value="">Todas</option>
+              <option value="semilla">🌱 Semillas</option>
+              <option value="explorada">🔎 Exploradas</option>
+              <option value="en_desarrollo">✍️ En desarrollo</option>
+              <option value="lista">✅ Listas</option>
+              <option value="pasada">📤 Pasadas a Contenidos</option>
+            </select>
+          </div>
+          <div id="taller-lista" class="taller-lista"></div>
+          <div id="taller-editor" class="taller-editor" hidden>
+            <h3 id="taller-editor-titulo">Nueva semilla</h3>
+            <form id="taller-form">
+              <label for="ts-titulo">Título (opcional)</label>
+              <input type="text" id="ts-titulo" maxlength="160" spellcheck="true" lang="es">
+              <label for="ts-texto">Tu idea</label>
+              <textarea id="ts-texto" rows="12" maxlength="20000" spellcheck="true" lang="es" placeholder="Escribe aquí tu idea, pensamiento, análisis o comentario, tal como te salga."></textarea>
+              <p class="admin-hint" id="ts-contador" aria-live="polite"></p>
+              <div class="taller-campos">
+                <div>
                   <label for="ts-etiquetas">Etiquetas (separadas por comas)</label>
                   <input type="text" id="ts-etiquetas" placeholder="vergüenza, cambio, empatía">
+                </div>
+                <div>
                   <label for="ts-estado">Estado</label>
                   <select id="ts-estado">
                     <option value="semilla">🌱 Semilla</option>
@@ -754,41 +756,41 @@
                     <option value="lista">✅ Lista</option>
                     <option value="pasada">📤 Pasada a Contenidos</option>
                   </select>
-                  <div class="admin-form-actions">
-                    <button type="submit">Guardar semilla</button>
-                    <button type="button" class="admin-btn-cancel" id="ts-cerrar">Cerrar</button>
-                    <button type="button" class="tr-enlace-peligro" id="ts-borrar" hidden>Eliminar semilla</button>
-                  </div>
-                  <p id="ts-status" class="form-status" aria-live="polite"></p>
-                </form>
-                <section class="brigada-mesa taller-mesa" aria-label="Las agentes del Taller">
-                  <div class="brigada-mesa-head">
-                    <strong>🏮 Las agentes del Taller</strong>
-                    <span class="admin-hint">Ellas analizan y proponen; tu texto nunca cambia solo.</span>
-                  </div>
-                  <div class="brigada-agentes" id="taller-agentes">
-                  <div class="brigada-agente-card">
-                    <button type="button" class="brigada-agente" id="taller-grieta"><span aria-hidden="true">🏺</span> La Grieta <small>Analizar</small></button>
-                    <p class="brigada-agente-desc" data-desc="grieta"></p>
-                  </div>
-                  <div class="brigada-agente-card">
-                    <button type="button" class="brigada-agente" id="taller-cazadora" disabled><span aria-hidden="true">📡</span> La Cazadora de Ecos <small>Buscar ecos</small></button> <span class="ag-agente-etiqueta">próximamente</span>
-                    <p class="brigada-agente-desc" data-desc="cazadora"></p>
-                  </div>
-                  <div class="brigada-agente-card">
-                    <button type="button" class="brigada-agente" id="taller-contrapunto" disabled><span aria-hidden="true">⚖️</span> El Contrapunto <small>Objeciones</small></button> <span class="ag-agente-etiqueta">próximamente</span>
-                    <p class="brigada-agente-desc" data-desc="contrapunto"></p>
-                  </div>
-                  <div class="brigada-agente-card">
-                    <button type="button" class="brigada-agente" id="taller-farolera" disabled><span aria-hidden="true">🏮</span> La Farolera <small>Desarrollar</small></button> <span class="ag-agente-etiqueta">próximamente</span>
-                    <p class="brigada-agente-desc" data-desc="farolera"></p>
-                  </div>
-                  </div>
-                  <p class="admin-hint brigada-estado" id="taller-estado" aria-live="polite"></p>
-                </section>
-                <div class="brigada-revision" id="taller-resultados" hidden></div>
+                </div>
               </div>
-            </div>
+              <div class="admin-form-actions">
+                <button type="submit">Guardar semilla</button>
+                <button type="button" class="admin-btn-cancel" id="ts-cerrar">Cerrar</button>
+                <button type="button" class="tr-enlace-peligro" id="ts-borrar" hidden>Eliminar semilla</button>
+              </div>
+              <p id="ts-status" class="form-status" aria-live="polite"></p>
+            </form>
+            <section class="brigada-mesa taller-mesa" aria-label="Las agentes del Taller">
+              <div class="brigada-mesa-head">
+                <strong>🏮 Las agentes del Taller</strong>
+                <span class="admin-hint">Ellas analizan y proponen; tu texto nunca cambia solo.</span>
+              </div>
+              <div class="brigada-agentes" id="taller-agentes">
+              <div class="brigada-agente-card">
+                <button type="button" class="brigada-agente" id="taller-grieta"><span aria-hidden="true">🏺</span> La Grieta <small>Analizar</small></button>
+                <p class="brigada-agente-desc" data-desc="grieta"></p>
+              </div>
+              <div class="brigada-agente-card">
+                <button type="button" class="brigada-agente" id="taller-cazadora"><span aria-hidden="true">📡</span> La Cazadora de Ecos <small>Buscar ecos</small></button>
+                <p class="brigada-agente-desc" data-desc="cazadora"></p>
+              </div>
+              <div class="brigada-agente-card">
+                <button type="button" class="brigada-agente" id="taller-contrapunto"><span aria-hidden="true">⚖️</span> El Contrapunto <small>Objeciones</small></button>
+                <p class="brigada-agente-desc" data-desc="contrapunto"></p>
+              </div>
+              <div class="brigada-agente-card">
+                <button type="button" class="brigada-agente" id="taller-farolera" disabled><span aria-hidden="true">🏮</span> La Farolera <small>Desarrollar</small></button> <span class="ag-agente-etiqueta">próximamente</span>
+                <p class="brigada-agente-desc" data-desc="farolera"></p>
+              </div>
+              </div>
+              <p class="admin-hint brigada-estado" id="taller-estado" aria-live="polite"></p>
+            </section>
+            <div class="taller-informes" id="taller-resultados" hidden></div>
           </div>
         </section>
 

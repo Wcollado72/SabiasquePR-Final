@@ -33,8 +33,15 @@ const DATOS = {
   gastos: [], ordenes: [], traducciones: {},
 };
 const SEMILLA = { id: '11111111-1111-4111-8111-111111111111', titulo: 'Vergüenza', texto: 'La gente cambia por vergüenza.', etiquetas: ['cambio'], estado: 'semilla', analisis: {}, desarrollos: [], desactualizados: [], actualizado_en: '2026-10-23' };
-w.fetch = async (url, opts = {}) => {
+w.confirm = () => true; // la Cazadora pide confirmar antes de gastar en busquedas
+const fetchBase = async (url, opts = {}) => {
   const u = String(url);
+  if (/\/api\/semillas\/[^/]+\/agentes\/cazadora$/.test(u)) {
+    return { ok: true, status: 200, json: async () => ({ ok: true, agente: 'cazadora', estado: 'explorada', analisis: { texto_hash: 'h', creado_en: '2026-10-24', resultado: { consultas: ['verguenza'], busquedas: 1, descartadas: 1, ecos: [{ autor: 'Autora Real', titulo: 'Sobre la verguenza', anio: '2010', url: 'https://editorial.com/obra', cita: 'La verguenza es un sentimiento revolucionario', relacion: 'coincide', porque: 'Comparte la tesis.', verificada: true }] } } }) };
+  }
+  if (/\/api\/semillas\/[^/]+\/agentes\/contrapunto$/.test(u)) {
+    return { ok: true, status: 200, json: async () => ({ ok: true, agente: 'contrapunto', estado: 'explorada', analisis: { texto_hash: 'h', creado_en: '2026-10-24', resultado: { postura_contraria: 'Los argumentos si convencen.', objeciones: [{ objecion: 'Generaliza', fuerza: 'alta', fragmento: '', respuesta_posible: 'Matizar.' }], casos_limite: [], lo_que_resiste: [], preguntas_incomodas: ['¿Que evidencia tienes?'] } } }) };
+  }
   if (/\/api\/semillas\/[^/]+\/agentes\/grieta$/.test(u)) {
     return { ok: true, status: 200, json: async () => ({ ok: true, agente: 'grieta', estado: 'explorada', analisis: { texto_hash: 'h', creado_en: '2026-10-23', resultado: { tema: 'Vergüenza', etiquetas: [], tesis: 'La gente cambia por vergüenza.', suposiciones: [], grietas: [{ grieta: 'Se contradice', por_que: 'Paraliza.', fragmento: '' }], oro: [], preguntas: [], direcciones: [] } } }) };
   }
@@ -84,6 +91,18 @@ w.fetch = async (url, opts = {}) => {
   }
   if (u.endsWith('/contenido-ia/metadatos-fuente')) return json({ ok: true, autorFuente: 'Ana Pérez', anio: '2025', tituloOriginal: '', nombreFuente: 'BBC' });
   return json({ ok: true, ...DATOS });
+};
+
+// El servidor simulado recuerda los analisis de las agentes del Taller, como la base de datos real: los siguientes
+// GET/PUT de la semilla los devuelven.
+const GUARDADO = {};
+w.fetch = async (url, opts = {}) => {
+  const r = await fetchBase(url, opts);
+  const cuerpo = await r.json();
+  const agente = /\/api\/semillas\/[^/]+\/agentes\/(\w+)$/.exec(String(url));
+  if (agente) GUARDADO[agente[1]] = cuerpo.analisis;
+  if (cuerpo.semilla) cuerpo.semilla = { ...cuerpo.semilla, analisis: { ...GUARDADO } };
+  return { ok: r.ok, status: r.status, json: async () => cuerpo };
 };
 
 for (const f of ['ia-herramientas.js', 'editorial.js', 'citas.js', 'clasificacion.js', 'correccion.js', 'taller.js', 'admin.js']) {
@@ -185,4 +204,16 @@ setTimeout(() => {
     console.log(todo.length ? todo.join('\n') : 'OK: el panel arranca sin errores');
     process.exit(todo.length ? 1 : 0);
   }, 900);
+  // Las otras dos agentes del Taller, una despues de otra (comparten la semilla abierta).
+  setTimeout(() => d.getElementById('taller-contrapunto').click(), 650);
+  setTimeout(() => d.getElementById('taller-cazadora').click(), 750);
+  setTimeout(() => {
+    const r = texto('taller-resultados');
+    comprobaciones.push(
+      ['El Contrapunto muestra la postura contraria y sus objeciones', r.includes('Los argumentos si convencen.') && r.includes('Generaliza') && r.includes('Fuerte')],
+      ['La Cazadora muestra el eco verificado con su enlace y el informe de La Grieta sigue ahi',
+        r.includes('Autora Real') && r.includes('Cita verificada') && !!d.querySelector('#taller-resultados a[href="https://editorial.com/obra"]') && r.includes('Se contradice')],
+      ['hay un cuadro de informe por agente', d.querySelectorAll('#taller-resultados .taller-informe').length === 3],
+    );
+  }, 880);
 }, 1500);

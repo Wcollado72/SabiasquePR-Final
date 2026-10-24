@@ -52,7 +52,7 @@ describe('POST /api/admin/contenido-ia/resumir', () => {
     expect(resumirTexto).toHaveBeenCalledWith({ texto: 'Texto del cuerpo.' });
     const [sql, params] = pool.query.mock.calls[0];
     expect(sql).toMatch(/INSERT INTO ia_generaciones/);
-    expect(params).toEqual(['resumidora', 'texto', 100, 50, 0.0005, 'admin-1']);
+    expect(params).toEqual(['resumidora', 'texto', 100, 50, 0.0005, 'admin-1', 0]);
   });
 
   test('si la IA falla, 400 con el mensaje y sin registrar costo', async () => {
