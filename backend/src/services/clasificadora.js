@@ -1,6 +1,7 @@
 // Agente "Clasificadora" (Doña Fichas): dada la URL de una fuente, sugiere los campos de la pestana
-// Clasificacion (idioma original, seccion, sub-seccion, region, formato y subformato). Primero lee las senales
-// que la pagina DECLARA (idioma del documento, tipo de pagina, dominio) sin IA; solo lo que no es obvio se le
+// Clasificacion (seccion, sub-seccion, region, formato y subformato). El IDIOMA no es suyo: el de la fuente lo
+// detecta la Investigadora y el de la pieza lo elige la persona y lo usa la Redactora. Primero lee las senales
+// que la pagina DECLARA (tipo de pagina, dominio) sin IA; solo lo que no es obvio se le
 // pregunta a Claude Haiku, y su respuesta se valida SIEMPRE contra las listas validas del sitio. Lo que no
 // encuentra o no sabe con seguridad queda en null (el panel lo marca "no encontrado"); nunca inventa.
 const { descargarHtml } = require('./articleExtractor');
@@ -46,8 +47,6 @@ function formatoPorHost(hostname) {
   return null;
 }
 
-const baseIdioma = (codigo) => String(codigo || '').toLowerCase().replace('_', '-').split('-')[0];
-
 function metaContenido(html, clave) {
   for (const etiqueta of html.match(/<meta\b[^>]*>/gi) || []) {
     const nombre = (etiqueta.match(/\b(?:name|property)\s*=\s*["']([^"']+)["']/i) || [])[1];
@@ -75,21 +74,12 @@ function leerSenales(html, urlStr) {
   const titulo = (metaContenido(html, 'og:title') || (html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || '').replace(/\s+/g, ' ').trim();
   return {
     host,
-    htmlLang: baseIdioma((html.match(/<html\b[^>]*\blang\s*=\s*["']([^"']+)["']/i) || [])[1]),
-    ogLocale: baseIdioma(metaContenido(html, 'og:locale')),
     ogType: metaContenido(html, 'og:type').toLowerCase(),
     titulo: titulo.slice(0, 300),
     descripcion: (metaContenido(html, 'og:description') || metaContenido(html, 'description')).slice(0, 500),
     formatoPorHost: formatoPorHost(host),
     texto: textoVisible(html, 4000),
   };
-}
-
-// Idioma segun lo que declara la pagina: 'es', 'en', otro codigo (p. ej. 'fr') o '' si no declara nada util.
-function idiomaDeclarado(senales) {
-  const declarado = senales.htmlLang || senales.ogLocale;
-  if (!declarado || declarado.length !== 2) return '';
-  return declarado;
 }
 
 // Formato de la FUENTE (no el de la pieza nueva), por dominio o tipo de pagina.
@@ -121,7 +111,6 @@ function construirHerramienta() {
     input_schema: {
       type: 'object',
       properties: {
-        idioma: campo('Idioma en que está escrita la fuente.', ['es', 'en', 'otro', 'no_determinado']),
         seccion: campo('Sección del sitio donde encaja mejor la pieza.', [...SECCIONES, 'no_determinado']),
         clasificacion: campo(
           'Categoría o sub-sección DENTRO de la sección elegida (usa "ninguna" si ninguna encaja).',
@@ -135,7 +124,7 @@ function construirHerramienta() {
         ),
         subformato: campo('Subformato de la pieza nueva, o "ninguno" si no aplica.', [...SUBFORMATOS, 'ninguno']),
       },
-      required: ['idioma', 'seccion', 'clasificacion', 'region', 'formato_original', 'formato', 'subformato'],
+      required: ['seccion', 'clasificacion', 'region', 'formato_original', 'formato', 'subformato'],
     },
   };
 }
@@ -144,7 +133,7 @@ function construirPrompt(senales, destino) {
   const listaNoticia = destino === 'noticia';
   return `Eres la clasificadora de "Sabías que PR", un sitio de noticias, reflexión social y educación de Puerto Rico. Te dan datos de una página (fuente) y debes sugerir cómo clasificar la pieza que el sitio escribirá con SUS PROPIAS palabras a partir de ella.
 
-${listaNoticia ? 'Esta pieza es una NOTICIA RÁPIDA: solo importan "idioma" y "clasificacion" (usa únicamente categorías de noticias: ' + CATEGORIAS_NOTICIAS.join(', ') + '). Para lo demás responde "no_determinado" / "ninguna" / "ninguno".' : `Secciones:
+${listaNoticia ? 'Esta pieza es una NOTICIA RÁPIDA: solo importa "clasificacion" (usa únicamente categorías de noticias: ' + CATEGORIAS_NOTICIAS.join(', ') + '). Para lo demás responde "no_determinado" / "ninguna" / "ninguno".' : `Secciones:
 ${Object.entries(DESCRIPCIONES.secciones).map(([k, v]) => `- ${k}: ${v}`).join('\n')}
 Categorías de noticias: ${CATEGORIAS_NOTICIAS.join(', ')}.
 Categorías de educación: ${CATEGORIAS_EDUCACION.join(', ')}.
@@ -158,7 +147,6 @@ Reglas:
 
 Datos de la fuente:
 - Dominio: ${senales.host}
-- Idioma declarado por la página: ${idiomaDeclarado(senales) || '(no declara)'}
 - Tipo de página (og:type): ${senales.ogType || '(no declara)'}
 - Título: ${senales.titulo || '(sin título)'}
 - Descripción: ${senales.descripcion || '(sin descripción)'}
@@ -189,17 +177,6 @@ function campoSugerido(entrada, validos, { permiteNinguno = false } = {}) {
 function normalizarSalida(entrada, senales, destino) {
   const e = entrada || {};
   const sugerencias = {};
-
-  // Idioma: manda lo que la pagina declara; Claude solo si no declara nada.
-  const declarado = idiomaDeclarado(senales);
-  if (declarado === 'es' || declarado === 'en') {
-    sugerencias.idioma = { valor: declarado, motivo: `La página declara el idioma «${declarado}».`, confianza: 'alta' };
-  } else if (declarado) {
-    sugerencias.idioma = { valor: null, otro: declarado, motivo: `La página está en «${declarado}»; el sitio solo publica en español e inglés.`, confianza: 'alta' };
-  } else {
-    sugerencias.idioma = campoSugerido(e.idioma, ['es', 'en']);
-    if (e.idioma?.valor === 'otro') sugerencias.idioma = { valor: null, otro: 'otro', motivo: 'La fuente parece estar en otro idioma; el sitio solo publica en español e inglés.', confianza: 'media' };
-  }
 
   const seccion = destino === 'noticia' ? { valor: 'noticias', motivo: 'Noticias rápidas.', confianza: 'alta' } : campoSugerido(e.seccion, SECCIONES);
   if (destino !== 'noticia') sugerencias.seccion = seccion;
@@ -236,6 +213,6 @@ async function clasificarUrl({ url, destino = 'contenido' }) {
 }
 
 module.exports = {
-  clasificarUrl, leerSenales, idiomaDeclarado, formatoOriginalDeclarado, formatoPorHost, normalizarSalida, construirPrompt, construirHerramienta,
+  clasificarUrl, leerSenales, formatoOriginalDeclarado, formatoPorHost, normalizarSalida, construirPrompt, construirHerramienta,
   CATEGORIAS_NOTICIAS, CATEGORIAS_EDUCACION, SUBSECCIONES_RH, SECCIONES, TIPOS_FORMATO, SUBFORMATOS, REGIONES,
 };

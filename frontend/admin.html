@@ -32,7 +32,7 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon-96.png" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=30e42855">
+  <link rel="stylesheet" href="styles.css?v=a1c226f0">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Panel de administración","description":"Panel de administración de Sabías que PR: gestión de noticias y productos.","url":"https://sabiasquepr.com/admin.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -119,7 +119,8 @@
           <button type="button" class="foro-filter-btn" data-tab="contenidos">Contenidos</button>
           <button type="button" class="foro-filter-btn" data-tab="productos">Productos</button>
           <button type="button" class="foro-filter-btn" data-tab="reportes">Reportes</button>
-          <button type="button" class="foro-filter-btn" data-tab="agentes">Agentes</button>
+          <button type="button" class="foro-filter-btn" data-tab="agentes">🐸 La Brigada Coquí</button>
+          <button type="button" class="foro-filter-btn" data-tab="seguridad">Seguridad</button>
           <button type="button" class="foro-filter-btn" data-tab="gastos">Gastos</button>
         </nav>
         <div class="consola-content">
@@ -140,23 +141,32 @@
               <section class="brigada-mesa" aria-label="La Brigada Coquí">
                 <div class="brigada-mesa-head">
                   <strong>🐸 La Brigada Coquí</strong>
-                  <span class="admin-hint">Pega la URL de la fuente y pon a trabajar a las agentes. Ellas sugieren; tú decides.</span>
+                  <span class="admin-hint">Pega la URL una sola vez y pon a trabajar a las agentes. Ellas sugieren; tú decides.</span>
                 </div>
-                <label for="brigada-url-noticia">URL de la fuente</label>
-                <input type="url" id="brigada-url-noticia" placeholder="https://...">
+                <div class="brigada-mesa-fila">
+                  <div class="brigada-mesa-campo brigada-mesa-url">
+                    <label for="brigada-url-noticia">URL de la fuente</label>
+                    <input type="url" id="brigada-url-noticia" placeholder="https://..." required>
+                  </div>
+                  <div class="brigada-mesa-campo brigada-mesa-idioma">
+                    <label for="an-idioma-original">Idioma de la pieza</label>
+                    <select id="an-idioma-original">
+                      <option value="es">Español</option>
+                      <option value="en">English</option>
+                    </select>
+                  </div>
+                </div>
+                <p class="admin-hint brigada-fuente-idioma" id="brigada-fuente-idioma-noticia" aria-live="polite"></p>
                 <div class="brigada-agentes">
-                  <button type="button" class="brigada-agente" id="brigada-clasificar-noticia" title="Lee la fuente y sugiere el idioma y la categoría"><span aria-hidden="true">🗂️</span> Doña Fichas <small>Clasificar</small></button>
+                  <button type="button" class="brigada-agente" id="brigada-clasificar-noticia" title="La Clasificadora sugiere la categoría"><span aria-hidden="true">🗂️</span> Doña Fichas <small>Clasificar</small></button>
+                  <button type="button" class="brigada-agente" id="brigada-redactar-noticia" title="Lee la URL y redacta un primer borrador completo (título, párrafos y medio)"><span aria-hidden="true">✍️</span> La Pluma <small>Redactar noticia</small></button>
                   <button type="button" class="admin-btn-cancel" id="brigada-deshacer-noticia" hidden>Deshacer sugerencias</button>
                 </div>
                 <p class="admin-hint brigada-estado" id="brigada-estado-noticia" aria-live="polite"></p>
               </section>
 
               <nav id="news-levels" class="news-levels">
-                <button type="button" class="news-level-card news-level-ia" data-panel="ia" data-help="noticias-ia">
-                  <span class="news-level-title">🤖 Asistente IA</span>
-                  <span class="news-level-status" data-status="ia">✦ LISTO</span>
-                </button>
-                <button type="button" class="news-level-card" data-panel="clasificacion" data-help="noticias-clasificacion">
+                <button type="button" class="news-level-card active" data-panel="clasificacion" data-help="noticias-clasificacion">
                   <span class="news-level-title">Clasificación</span>
                   <span class="news-level-status" data-status="clasificacion">● ACTIVO</span>
                 </button>
@@ -174,24 +184,8 @@
                 </button>
               </nav>
 
-              <section class="news-panel" data-panel="ia" hidden>
-                <h4 class="news-panel-title">🤖 Asistente IA</h4>
-                <fieldset class="citation-group" id="an-autocompletar-group">
-                  <legend>Autocompletar con IA (opcional)</legend>
-                  <label for="an-autocompletar-url">URL del artículo original</label>
-                  <input type="url" id="an-autocompletar-url" placeholder="https://ejemplo.com/articulo">
-                  <button type="button" id="an-autocompletar-ia" class="admin-btn-cancel">Autocompletar con IA</button>
-                  <p class="admin-hint" id="an-autocompletar-status" aria-live="polite"></p>
-                </fieldset>
-              </section>
-
               <section class="news-panel" data-panel="clasificacion">
                 <h4 class="news-panel-title">Clasificación</h4>
-                <label for="an-idioma-original">Idioma en que escribiste esta noticia</label>
-                <select id="an-idioma-original">
-                  <option value="es">Español</option>
-                  <option value="en">English</option>
-                </select>
                 <label for="an-categoria">Categoría</label>
                 <select id="an-categoria" required>
                   <option value="">Elige una categoría</option>
@@ -246,8 +240,7 @@
 
               <section class="news-panel" data-panel="fuente" hidden>
                 <h4 class="news-panel-title">Fuente</h4>
-                <label for="an-fuente-url">URL de la fuente</label>
-                <input type="url" id="an-fuente-url" required>
+                <p class="admin-hint">La URL de la fuente está arriba, en la mesa de la Brigada Coquí.</p>
                 <label for="an-fuente-texto">Nombre de la fuente</label>
                 <input type="text" id="an-fuente-texto" required>
 
@@ -289,12 +282,28 @@
               <section class="brigada-mesa" aria-label="La Brigada Coquí">
                 <div class="brigada-mesa-head">
                   <strong>🐸 La Brigada Coquí</strong>
-                  <span class="admin-hint">Pega la URL de la fuente y pon a trabajar a las agentes. Ellas sugieren; tú decides.</span>
+                  <span class="admin-hint">Pega la URL una sola vez y pon a trabajar a las agentes. Ellas sugieren; tú decides.</span>
                 </div>
-                <label for="brigada-url-contenido">URL de la fuente</label>
-                <input type="url" id="brigada-url-contenido" placeholder="https://...">
+                <div class="brigada-mesa-fila">
+                  <div class="brigada-mesa-campo brigada-mesa-url">
+                    <label for="brigada-url-contenido">URL de la fuente</label>
+                    <input type="url" id="brigada-url-contenido" placeholder="https://...">
+                  </div>
+                  <div class="brigada-mesa-campo brigada-mesa-idioma">
+                    <label for="ac-idioma-original">Idioma de la pieza</label>
+                    <select id="ac-idioma-original">
+                      <option value="es">Español</option>
+                      <option value="en">English</option>
+                    </select>
+                  </div>
+                </div>
+                <p class="admin-hint brigada-fuente-idioma" id="brigada-fuente-idioma-contenido" aria-live="polite"></p>
                 <div class="brigada-agentes">
-                  <button type="button" class="brigada-agente" id="brigada-clasificar-contenido" title="Lee la fuente y sugiere el idioma, la sección, la sub-sección, la región, el formato y el subformato"><span aria-hidden="true">🗂️</span> Doña Fichas <small>Clasificar</small></button>
+                  <button type="button" class="brigada-agente" id="brigada-investigar-contenido" title="La Investigadora lee la fuente (en cualquier idioma), detecta su idioma y prepara las notas"><span aria-hidden="true">🔎</span> Doña Pesquisa <small>Investigar</small></button>
+                  <button type="button" class="brigada-agente" id="brigada-clasificar-contenido" title="La Clasificadora sugiere la sección, la sub-sección, la región, el formato y el subformato"><span aria-hidden="true">🗂️</span> Doña Fichas <small>Clasificar</small></button>
+                  <button type="button" class="brigada-agente" id="brigada-redactar-contenido" title="La Redactora escribe el título y el cuerpo en el idioma de la pieza (y Doña Breve hace el resumen)"><span aria-hidden="true">✍️</span> La Pluma <small>Redactar</small></button>
+                  <button type="button" class="brigada-agente" id="brigada-resumir-contenido" title="La Resumidora escribe el resumen a partir del cuerpo del texto"><span aria-hidden="true">✂️</span> Doña Breve <small>Resumir</small></button>
+                  <button type="button" class="brigada-agente" id="brigada-citar-contenido" title="La Bibliotecaria lee los datos de la cita desde la URL (sin IA)"><span aria-hidden="true">📚</span> La Bibliotecaria <small>Citar</small></button>
                   <button type="button" class="admin-btn-cancel" id="brigada-deshacer-contenido" hidden>Deshacer sugerencias</button>
                 </div>
                 <p class="admin-hint brigada-estado" id="brigada-estado-contenido" aria-live="polite"></p>
@@ -303,7 +312,7 @@
               <nav class="synth-levels" id="synth-levels" aria-label="Niveles del formulario">
                 <button type="button" class="synth-level-card synth-level-ia active" data-panel="ia">
                   <span class="synth-level-icon" aria-hidden="true">🤖</span>
-                  <span class="synth-level-title">Investigador + Redactor</span>
+                  <span class="synth-level-title">Investigadora y Redactora</span>
                   <span class="synth-level-status" data-status="ia">✦ LISTO</span>
                 </button>
                 <button type="button" class="synth-level-card" data-panel="clasificacion">
@@ -329,26 +338,18 @@
               </nav>
 
               <section class="synth-panel" data-panel="ia">
-                <h4 class="synth-panel-title">🤖 NIVEL 1 — INVESTIGADOR + REDACTOR</h4>
+                <h4 class="synth-panel-title">🤖 NIVEL 1 — INVESTIGADORA Y REDACTORA</h4>
                 <div class="ia-asistente-box">
-                  <p class="admin-hint">Elige primero la Sección/Sub-sección/Categoría del Nivel 1 (el tono de redacción depende de eso), luego dale una fuente al Investigador. También intenta identificar autor, año y el estilo de citación de la fuente (solo si tiene confianza razonable) — la fecha de acceso siempre la pones tú.</p>
-                  <div class="ia-fuente-toggle" id="ia-fuente-toggle">
-                    <button type="button" class="foro-filter-btn active" data-fuente="url">URL</button>
-                    <button type="button" class="foro-filter-btn" data-fuente="texto">Texto pegado (video/audio)</button>
-                  </div>
-                  <div id="ia-fuente-url-box">
-                    <label for="ia-url">URL de la fuente</label>
-                    <input type="url" id="ia-url" placeholder="https://...">
-                  </div>
-                  <div id="ia-fuente-texto-box" style="display:none;">
-                    <label for="ia-texto">Texto o transcripción pegada</label>
-                    <textarea id="ia-texto" rows="6" placeholder="Pega aquí la transcripción del video/audio, o cualquier texto fuente"></textarea>
-                    <label for="ia-titulo-sugerido">Título sugerido de la fuente (opcional)</label>
-                    <input type="text" id="ia-titulo-sugerido">
-                  </div>
-                  <label for="ia-continente">Origen conocido de la fuente (opcional) — continente</label>
-                  <select id="ia-continente">
-                    <option value="">No sé / no aplica</option>
+                  <fieldset class="agente-card" id="agente-investigadora">
+                    <legend>🔎 Doña Pesquisa · la Investigadora</legend>
+                    <p class="admin-hint">Lee la fuente (en cualquier idioma, lengua o dialecto), detecta en qué idioma está y prepara las notas de investigación. No clasifica, no redacta y no llena la cita: eso lo hacen Doña Fichas, La Pluma y La Bibliotecaria. Usa la URL de la mesa de arriba.</p>
+                    <label for="ia-texto">Texto o transcripción pegada (solo si no hay una página para leer, p. ej. un video o un audio)</label>
+                    <textarea id="ia-texto" rows="5" placeholder="Pega aquí la transcripción del video/audio, o cualquier texto fuente"></textarea>
+                    <details class="agente-pistas">
+                      <summary>Pistas para la investigadora</summary>
+                      <label for="ia-continente">Origen conocido de la fuente: continente</label>
+                      <select id="ia-continente">
+                        <option value="">No sé / no aplica</option>
 <option value="africa">África</option>
 <option value="america-norte">América del Norte</option>
 <option value="america-sur">América del Sur</option>
@@ -356,43 +357,43 @@
 <option value="asia">Asia</option>
 <option value="europa">Europa</option>
 <option value="oceania">Oceanía</option>
-                  </select>
-                  <label for="ia-region">Región, ciudad o país (opcional)</label>
-                  <input type="text" id="ia-region" placeholder="Ej.: Nairobi, Kenia — déjalo vacío si no sabes">
-                  <p class="admin-hint">Si pegas una URL, intentamos adivinarlo del dominio — revisa y corrige si hace falta. Saber el origen ahorra búsquedas (el agente busca directo ahí, no en todo el continente) y da más precisión.</p>
-                  <label for="ia-instrucciones">Instrucciones para el Investigador (opcional)</label>
-                  <textarea id="ia-instrucciones" rows="3" maxlength="1000" placeholder="Ej.: busca noticias, ensayos y videos de África sobre este tema; usa fuentes confiables locales, en los idiomas de cada país"></textarea>
-                  <label for="ia-tono">Tono</label>
-                  <select id="ia-tono">
-                    <option value="">Que el agente me pregunte</option>
+                      </select>
+                      <label for="ia-region">Región, ciudad o país</label>
+                      <input type="text" id="ia-region" placeholder="Ej.: Nairobi, Kenia — déjalo vacío si no sabes">
+                      <p class="admin-hint">Si pegas una URL, intentamos adivinarlo del dominio: revisa y corrige si hace falta. Saber el origen ahorra búsquedas.</p>
+                      <label for="ia-instrucciones">Instrucciones para la investigadora</label>
+                      <textarea id="ia-instrucciones" rows="3" maxlength="1000" placeholder="Ej.: busca noticias, ensayos y videos de África sobre este tema; usa fuentes confiables locales, en los idiomas de cada país"></textarea>
+                      <label class="admin-checkbox"><input type="checkbox" id="ia-usar-busqueda"> Usar búsqueda web (~$0.01-0.03 extra por uso, máximo 3 búsquedas)</label>
+                    </details>
+                    <button type="button" class="admin-btn-cancel" id="ia-investigar-btn">Investigar</button>
+                    <p class="admin-hint" id="ia-investigar-status" aria-live="polite"></p>
+                    <div id="ia-correcciones-box" style="display:none;">
+                      <p class="admin-hint" id="ia-correcciones-resumen"></p>
+                      <ul id="ia-correcciones-lista" class="suggestion-list"></ul>
+                      <button type="button" class="admin-btn-cancel" id="ia-restaurar-texto">Restaurar texto original</button>
+                    </div>
+                    <div id="ia-preguntas-box" style="display:none;">
+                      <p class="admin-hint"><strong>La investigadora tiene dudas antes de seguir:</strong></p>
+                      <div id="ia-preguntas-lista"></div>
+                      <button type="button" class="admin-btn-cancel" id="ia-reinvestigar-btn">Investigar de nuevo con mis respuestas</button>
+                    </div>
+                    <div id="ia-notas-box" style="display:none;">
+                      <label for="ia-notas">Notas de investigación (edítalas si hace falta antes de redactar)</label>
+                      <textarea id="ia-notas" rows="8"></textarea>
+                    </div>
+                  </fieldset>
+                  <fieldset class="agente-card" id="agente-redactora">
+                    <legend>✍️ La Pluma · la Redactora</legend>
+                    <p class="admin-hint">Escribe el título y el cuerpo con palabras propias, a partir de las notas, en el <strong>idioma de la pieza</strong> que eliges arriba (el sitio publica solo en español e inglés). Después Doña Breve escribe el resumen. Puedes redactar las mismas notas varias veces con otro tono, estilo o idioma, sin volver a investigar.</p>
+                    <label for="ia-tono">Tono</label>
+                    <select id="ia-tono">
+                      <option value="">Que la agente me pregunte</option>
 <option value="analitico">Analítico</option>
 <option value="critico">Crítico / directo</option>
 <option value="editorial">Editorial (por defecto)</option>
 <option value="esperanzador">Esperanzador</option>
 <option value="informativo">Informativo</option>
 <option value="neutral">Neutral</option>
-                  </select>
-                  <p class="admin-hint">Los agentes leen e investigan en cualquier idioma, lengua o dialecto del mundo. Al investigar, el agente corrige lo que pegaste (te muestra cada cambio) y te pregunta solo si tiene dudas de tono.</p>
-                  <label class="admin-checkbox"><input type="checkbox" id="ia-usar-busqueda"> Usar búsqueda web (~$0.01-0.03 extra por uso, máximo 3 búsquedas)</label>
-                  <button type="button" class="admin-btn-cancel" id="ia-investigar-btn">Investigar</button>
-                  <p class="admin-hint" id="ia-investigar-status" aria-live="polite"></p>
-                  <div id="ia-correcciones-box" style="display:none;">
-                    <p class="admin-hint" id="ia-correcciones-resumen"></p>
-                    <ul id="ia-correcciones-lista" class="suggestion-list"></ul>
-                    <button type="button" class="admin-btn-cancel" id="ia-restaurar-texto">Restaurar texto original</button>
-                  </div>
-                  <div id="ia-preguntas-box" style="display:none;">
-                    <p class="admin-hint"><strong>El agente tiene dudas antes de seguir:</strong></p>
-                    <div id="ia-preguntas-lista"></div>
-                    <button type="button" class="admin-btn-cancel" id="ia-reinvestigar-btn">Investigar de nuevo con mis respuestas</button>
-                  </div>
-                  <div id="ia-notas-box" style="display:none;">
-                    <label for="ia-notas">Notas de investigación (edítalas si hace falta antes de redactar)</label>
-                    <textarea id="ia-notas" rows="8"></textarea>
-                    <label for="ia-idioma">Idioma de redacción</label>
-                    <select id="ia-idioma">
-                      <option value="es">Español</option>
-                      <option value="en">English</option>
                     </select>
                     <label for="ia-estilo">Estilo de redacción</label>
                     <select id="ia-estilo">
@@ -401,20 +402,14 @@
 <option value="noticia">Noticia corta</option>
 <option value="opinion">Opinión</option>
                     </select>
-                    <p class="admin-hint">Puedes redactar las mismas notas varias veces con tono, estilo o idioma distintos — no hace falta volver a investigar. El sitio publica solo en español e inglés.</p>
                     <button type="button" class="admin-btn-cancel" id="ia-redactar-btn">Redactar con IA</button>
                     <p class="admin-hint" id="ia-redactar-status" aria-live="polite"></p>
-                  </div>
+                  </fieldset>
                 </div>
               </section>
 
               <section class="synth-panel" data-panel="clasificacion" hidden>
                 <h4 class="synth-panel-title">🕹️ NIVEL 2 — CLASIFICACIÓN</h4>
-                <label for="ac-idioma-original">Idioma en que escribiste este contenido</label>
-                <select id="ac-idioma-original">
-                  <option value="es">Español</option>
-                  <option value="en">English</option>
-                </select>
                 <label for="ac-seccion">Sección</label>
                 <select id="ac-seccion">
                   <option value="noticias">Noticias</option>
@@ -506,10 +501,9 @@
 
               <section class="synth-panel" data-panel="citacion" hidden>
                 <h4 class="synth-panel-title">📚 NIVEL 5 — CITACIÓN</h4>
-                <label for="ac-fuente-url">URL de la fuente</label>
-                <input type="url" id="ac-fuente-url">
+                <p class="admin-hint">La URL de la fuente está arriba, en la mesa de la Brigada Coquí.</p>
                 <div class="ia-fila">
-                  <button type="button" class="admin-btn-cancel" id="ac-leer-url" title="Lee lo que la página declara (autor, año, título, medio); lo que no encuentre queda vacío">Rellenar desde la URL</button>
+                  <button type="button" class="admin-btn-cancel" id="ac-leer-url" title="Lee lo que la página declara (autor, año, título, medio); lo que no encuentre queda vacío">📚 La Bibliotecaria: rellenar desde la URL</button>
                   <span class="admin-hint" id="ac-leer-url-estado" aria-live="polite"></span>
                 </div>
                 <label for="ac-fuente-texto">Nombre de la fuente</label>
@@ -626,7 +620,24 @@
         <section class="admin-tab-panel admin-agentes" id="admin-panel-agentes" style="display:none;">
           <div class="ag-header">
             <div>
-              <h2>Agentes &amp; Moderación</h2>
+              <h2>🐸 La Brigada Coquí</h2>
+              <p class="ag-sub">Cada agente tiene un oficio propio y ninguna repite el trabajo de otra. Pegas la URL en la mesa que está arriba de cada formulario y ellas sugieren; tú decides.</p>
+            </div>
+          </div>
+
+          <div class="ag-section">
+            <div class="ag-section-head">
+              <h3>El elenco</h3>
+              <span class="ag-status-ok" id="ag-ia-costo-mes">Cargando...</span>
+            </div>
+            <div class="ag-grid ag-grid-2" id="brigada-elenco"></div>
+          </div>
+        </section>
+
+        <section class="admin-tab-panel admin-agentes" id="admin-panel-seguridad" style="display:none;">
+          <div class="ag-header">
+            <div>
+              <h2>Seguridad y moderación</h2>
               <p class="ag-sub">Estado real de las defensas del sitio y de la cola de moderación.</p>
             </div>
           </div>
@@ -638,31 +649,6 @@
             </div>
             <div class="ag-grid" id="ag-seguridad-grid">
               <p class="admin-hint">Cargando estado de seguridad...</p>
-            </div>
-          </div>
-
-          <div class="ag-section">
-            <div class="ag-section-head">
-              <h3>Agentes de contenido (IA)</h3>
-              <span class="ag-status-ok" id="ag-ia-costo-mes">Cargando...</span>
-            </div>
-            <div class="ag-grid ag-grid-2">
-              <div class="ag-tile ag-tile-row" data-help="investigador">
-                <div>
-                  <p class="ag-tile-title">Investigador</p>
-                  <p class="ag-tile-desc">Organiza una fuente (URL o texto pegado) en notas de investigación. Búsqueda web opcional.</p>
-                  <p class="ag-tile-desc" id="ag-ia-investigador-uso">—</p>
-                </div>
-                <button type="button" class="ag-btn-piloto" id="ag-ir-contenidos-investigador">Ir a Contenidos →</button>
-              </div>
-              <div class="ag-tile ag-tile-row" data-help="redactor">
-                <div>
-                  <p class="ag-tile-title">Redactor</p>
-                  <p class="ag-tile-desc">Redacta el borrador final con el tono de cada sección, listo para revisar.</p>
-                  <p class="ag-tile-desc" id="ag-ia-redactor-uso">—</p>
-                </div>
-                <button type="button" class="ag-btn-piloto" id="ag-ir-contenidos-redactor">Ir a Contenidos →</button>
-              </div>
             </div>
           </div>
 
