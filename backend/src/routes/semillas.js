@@ -7,6 +7,9 @@ const { registrarUsoAgente } = require('../util/usoIa');
 const { analizarSemilla } = require('../services/grieta');
 const { cazarEcos } = require('../services/cazadora');
 const { hacerContrapunto } = require('../services/contrapunto');
+const { desarrollarSemilla, FORMATOS, MAX: MAX_FAROLERA } = require('../services/farolera');
+const { construirContenido, hoyEnPuertoRico } = require('../util/semillaAContenido');
+const { slugify } = require('../util/slugify');
 const { validateSemilla, normalizarEtiquetas, esUuid } = require('../validators/semilla');
 
 const router = express.Router();
@@ -28,7 +31,8 @@ const hashTexto = (texto) => crypto.createHash('sha1').update(String(texto)).dig
 function conDesactualizados(fila) {
   const hash = hashTexto(fila.texto);
   const desactualizados = Object.entries(fila.analisis || {}).filter(([, a]) => a && a.texto_hash !== hash).map(([nombre]) => nombre);
-  return { ...fila, desactualizados };
+  const desarrollosDesactualizados = (fila.desarrollos || []).filter((d) => d && d.texto_hash !== hash).map((d) => d.id);
+  return { ...fila, desactualizados, desarrollos_desactualizados: desarrollosDesactualizados };
 }
 
 const COLUMNAS = 'id, titulo, texto, etiquetas, estado, analisis, desarrollos, contenido_id, creado_en, actualizado_en';
@@ -134,6 +138,101 @@ router.post('/:id/agentes/:agente', async (req, res) => {
     );
     res.json({ ok: true, agente: req.params.agente, analisis: entrada, estado: guardada[0] ? guardada[0].estado : 'explorada' });
   } catch (err) { enviarError500(res, err); }
+});
+
+// POST /api/semillas/:id/desarrollar -- La Farolera desarrolla la idea en el formato elegido y guarda el BORRADOR en
+// `desarrollos` (hasta 5; el mas viejo sale). Cada tramo va marcado como del autor o de ella. No publica nada.
+router.post('/:id/desarrollar', async (req, res) => {
+  if (!esUuid(req.params.id)) return res.status(404).json({ ok: false, error: 'Semilla no encontrada.' });
+  const { formato, indicaciones } = req.body || {};
+  if (!FORMATOS.includes(formato)) return res.status(400).json({ ok: false, error: 'Elige un formato válido: ensayo, reflexión, columna o lectura corta.' });
+  if (indicaciones !== undefined && (typeof indicaciones !== 'string' || indicaciones.length > MAX_FAROLERA.indicaciones)) {
+    return res.status(400).json({ ok: false, error: `Las indicaciones deben ser texto de máximo ${MAX_FAROLERA.indicaciones} caracteres.` });
+  }
+  try {
+    const { rows } = await pool.query('SELECT titulo, texto, analisis FROM semillas WHERE id = $1 AND autor_id = $2', [req.params.id, req.user.id]);
+    if (!rows.length) return res.status(404).json({ ok: false, error: 'Semilla no encontrada.' });
+
+    let resultado;
+    try {
+      resultado = await desarrollarSemilla({ titulo: rows[0].titulo, texto: rows[0].texto, formato, indicaciones, analisis: rows[0].analisis });
+    } catch (err) {
+      return res.status(400).json({ ok: false, error: err.message });
+    }
+    await registrarUsoAgente(pool, { agente: 'farolera', fuenteTipo: 'texto', usage: resultado.usage, creadoPor: req.user.id });
+
+    const desarrollo = {
+      id: crypto.randomUUID(), formato, indicaciones: (indicaciones || '').trim(), ...resultado.resultado,
+      texto_hash: hashTexto(rows[0].texto), creado_en: new Date().toISOString(),
+    };
+    const { rows: guardada } = await pool.query(
+      `UPDATE semillas SET desarrollos = jsonb_path_query_array(desarrollos || $3::jsonb, '$[last-4 to last]'),
+                          estado = CASE WHEN estado IN ('semilla', 'explorada') THEN 'en_desarrollo' ELSE estado END, actualizado_en = now()
+       WHERE id = $1 AND autor_id = $2 RETURNING estado`,
+      [req.params.id, req.user.id, JSON.stringify([desarrollo])]
+    );
+    res.json({ ok: true, desarrollo, estado: guardada[0] ? guardada[0].estado : 'en_desarrollo' });
+  } catch (err) { enviarError500(res, err); }
+});
+
+// DELETE /api/semillas/:id/desarrollos/:desarrolloId -- descartar un borrador de La Farolera
+router.delete('/:id/desarrollos/:desarrolloId', async (req, res) => {
+  if (!esUuid(req.params.id) || !esUuid(req.params.desarrolloId)) return res.status(404).json({ ok: false, error: 'Borrador no encontrado.' });
+  try {
+    const { rows } = await pool.query(
+      `UPDATE semillas SET desarrollos = COALESCE((SELECT jsonb_agg(e ORDER BY n) FROM jsonb_array_elements(desarrollos) WITH ORDINALITY t(e, n) WHERE e->>'id' <> $3), '[]'::jsonb),
+                          actualizado_en = now()
+       WHERE id = $1 AND autor_id = $2 AND desarrollos @> jsonb_build_array(jsonb_build_object('id', $3::text)) RETURNING id`,
+      [req.params.id, req.user.id, req.params.desarrolloId]
+    );
+    if (!rows.length) return res.status(404).json({ ok: false, error: 'Borrador no encontrado.' });
+    res.json({ ok: true });
+  } catch (err) { enviarError500(res, err); }
+});
+
+// POST /api/semillas/:id/pasar-a-contenidos { desarrolloId } -- crea el BORRADOR de una pieza en Contenidos (Revolucion
+// Humana / Logica Humana, de Aliado Imperfekto) con ese desarrollo, y marca la semilla como «pasada». No publica nada.
+router.post('/:id/pasar-a-contenidos', async (req, res) => {
+  const { desarrolloId } = req.body || {};
+  if (!esUuid(req.params.id) || !esUuid(desarrolloId)) return res.status(400).json({ ok: false, error: 'Elige el borrador que quieres pasar a Contenidos.' });
+  let client;
+  try {
+    client = await pool.connect();
+    await client.query('BEGIN');
+    const { rows } = await client.query('SELECT titulo, desarrollos, contenido_id FROM semillas WHERE id = $1 AND autor_id = $2 FOR UPDATE', [req.params.id, req.user.id]);
+    if (!rows.length) { await client.query('ROLLBACK'); return res.status(404).json({ ok: false, error: 'Semilla no encontrada.' }); }
+    const desarrollo = (rows[0].desarrollos || []).find((d) => d && d.id === desarrolloId);
+    if (!desarrollo) { await client.query('ROLLBACK'); return res.status(404).json({ ok: false, error: 'Borrador no encontrado.' }); }
+    if (rows[0].contenido_id) {
+      const { rows: existe } = await client.query('SELECT id FROM contenidos WHERE id = $1', [rows[0].contenido_id]);
+      if (existe.length) {
+        await client.query('ROLLBACK');
+        return res.status(409).json({ ok: false, error: 'Esta semilla ya pasó a Contenidos. Edita esa pieza allá.', contenidoId: rows[0].contenido_id });
+      }
+    }
+
+    const c = construirContenido(rows[0], desarrollo, hoyEnPuertoRico());
+    let id = slugify(c.titulo) || 'pieza';
+    const { rows: dupe } = await client.query('SELECT id FROM contenidos WHERE id = $1', [id]);
+    if (dupe.length) id = `${id}-${Date.now().toString(36)}`;
+    await client.query(
+      `INSERT INTO contenidos (id, seccion, subseccion, tipo_formato, subformato, categoria, titulo, subtitulo_resumen, cuerpo, autor,
+         url_portada, portada_alt, fecha_publicacion, duracion_min, divulgacion_ia, ia_herramientas, cita_sin_fuente_externa,
+         es_premium, destacado, publicado, idioma_original)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::text[],$17,$18,$19,$20,$21)`,
+      [id, c.seccion, c.subseccion, c.tipo_formato, c.subformato, c.categoria, c.titulo, c.subtitulo_resumen, c.cuerpo, c.autor,
+        c.url_portada, c.portada_alt, c.fecha_publicacion, c.duracion_min, c.divulgacion_ia, c.ia_herramientas, c.cita_sin_fuente_externa,
+        c.es_premium, c.destacado, c.publicado, c.idioma_original]
+    );
+    await client.query("UPDATE semillas SET estado = 'pasada', contenido_id = $3, actualizado_en = now() WHERE id = $1 AND autor_id = $2", [req.params.id, req.user.id, id]);
+    await client.query('COMMIT');
+    res.status(201).json({ ok: true, estado: 'pasada', contenido: { id, titulo: c.titulo, publicado: false } });
+  } catch (err) {
+    if (client) await client.query('ROLLBACK').catch(() => {});
+    enviarError500(res, err);
+  } finally {
+    if (client) client.release();
+  }
 });
 
 module.exports = router;

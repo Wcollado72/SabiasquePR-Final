@@ -106,8 +106,49 @@
       .join('');
   }
 
+  // El borrador de La Farolera en texto corrido (párrafos separados por una línea en blanco), sin marcas de color.
+  function textoDeDesarrollo(d) {
+    return (d.parrafos || []).map((p) => p.map((t) => t.texto).join('')).join('\n\n');
+  }
+
+  // Un borrador de La Farolera: lo del autor en tinta normal y lo que ella agregó marcado en otro color (y subrayado,
+  // para que no dependa solo del color). `hecho` = la semilla ya pasó a Contenidos.
+  function htmlDesarrollo(d, { desactualizado, hecho }, esc) {
+    const parrafos = d.parrafos.map((p) => `<p>${p.map((t) => (t.origen === 'autor'
+      ? `<span class="taller-del-autor">${esc(t.texto)}</span>`
+      : `<mark class="taller-de-farolera">${esc(t.texto)}</mark>`)).join('')}</p>`).join('');
+    const pal = d.palabras || { autor: 0, farolera: 0, porcentaje_autor: 0 };
+    const botones = hecho ? '' : `<button type="button" data-accion="pasar" data-did="${esc(d.id)}">📤 Pasar a Contenidos</button>`;
+    return `<article class="taller-desarrollo brigada-revision" data-did="${esc(d.id)}">
+      <h5>🏮 ${esc(FORMATOS[d.formato] || d.formato)}: ${esc(d.titulo || '(sin título)')}</h5>${avisoViejo(desactualizado)}
+      ${d.resumen ? `<p><em>${esc(d.resumen)}</em></p>` : ''}
+      <p class="admin-hint">${esc(pal.porcentaje_autor)}% de las palabras son tuyas (${esc(pal.autor)}) · ${esc(pal.farolera)} las agregó La Farolera.
+        <span class="taller-leyenda"><span class="taller-del-autor">Tus palabras</span> <mark class="taller-de-farolera">Lo que agregó La Farolera</mark></span></p>
+      <div class="taller-borrador">${parrafos}</div>
+      ${d.datos_a_verificar && d.datos_a_verificar.length ? `<p class="brigada-bandera brigada-bandera-alta"><strong>Verifica estos datos:</strong> La Farolera escribió ${d.datos_a_verificar.map((x) => `«${esc(x)}»`).join(', ')}, que no aparece en tu texto. Compruébalos con una fuente o quítalos.</p>` : ''}
+      ${d.notas && d.notas.length ? lista('Avisos de La Farolera para ti', d.notas.map((n) => `<li>${esc(n)}</li>`), esc) : ''}
+      <div class="admin-form-actions">${botones}
+        <button type="button" class="admin-btn-cancel" data-accion="copiar" data-did="${esc(d.id)}">📋 Copiar texto</button>
+        <button type="button" class="tr-enlace-peligro" data-accion="descartar" data-did="${esc(d.id)}">Descartar borrador</button>
+      </div>
+    </article>`;
+  }
+
+  // Todos los borradores de La Farolera de una semilla (el más nuevo primero) y, si ya pasó a Contenidos, el aviso con su pieza.
+  function htmlDesarrollos(semilla, esc) {
+    const lista_ = semilla && semilla.desarrollos ? semilla.desarrollos : [];
+    const pieza = semilla && semilla.contenido_id
+      ? `<p class="brigada-bandera brigada-bandera-baja"><strong>Esta semilla ya pasó a Contenidos</strong> como borrador sin publicar («${esc(semilla.contenido_id)}»). Revísala y edítala allá antes de publicar.
+         <button type="button" data-accion="abrir-contenido" data-id="${esc(semilla.contenido_id)}">Abrir en Contenidos</button></p>` : '';
+    if (!lista_.length) return pieza;
+    return pieza + lista_.slice().reverse().map((d) => htmlDesarrollo(d, {
+      desactualizado: (semilla.desarrollos_desactualizados || []).includes(d.id), hecho: Boolean(semilla.contenido_id),
+    }, esc)).join('');
+  }
+
   const api = {
     ESTADOS, FORMATOS, AGENTES, etiquetasDeTexto, tituloDe, htmlListaSemillas, htmlAnalisisGrieta, htmlEcos, htmlContrapunto, htmlInformes,
+    textoDeDesarrollo, htmlDesarrollo, htmlDesarrollos,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   if (typeof window === 'undefined') return;
@@ -116,6 +157,7 @@
   // ─── Interfaz (solo en el navegador) ────────────────────────────────────────────
   let apiFetch = null;
   let descripcionDe = () => '';
+  let abrirContenido = null; // la pantalla de Contenidos la da el panel (admin.js)
   let semillas = [];
   let actual = null; // la semilla abierta (completa), o null si es nueva
   let filtro = '';
@@ -158,6 +200,8 @@
     $('ts-estado').value = semilla ? semilla.estado : 'semilla';
     $('ts-borrar').hidden = !semilla;
     $('taller-editor-titulo').textContent = semilla ? 'Tu semilla' : 'Nueva semilla';
+    $('taller-formato').value = formatoSugerido(semilla);
+    $('taller-indicaciones').value = '';
     contarLetras();
     pintarResultados();
     pintarLista();
@@ -178,6 +222,16 @@
     const html = actual ? htmlInformes(actual.analisis, actual.desactualizados, esc) : '';
     caja.innerHTML = html;
     caja.hidden = !html;
+    const borradores = $('taller-desarrollos');
+    const htmlBorradores = actual ? htmlDesarrollos(actual, esc) : '';
+    borradores.innerHTML = htmlBorradores;
+    borradores.hidden = !htmlBorradores;
+  }
+
+  // El formato que La Grieta recomendó primero, si ya analizó la idea; si no, ensayo.
+  function formatoSugerido(semilla) {
+    const g = semilla && semilla.analisis && semilla.analisis.grieta && semilla.analisis.grieta.resultado;
+    return g && g.direcciones && g.direcciones[0] ? g.direcciones[0].formato : 'ensayo';
   }
 
   function contarLetras() {
@@ -251,6 +305,77 @@
     }
   }
 
+  // La Farolera desarrolla la idea en el formato elegido (guarda primero, para leer EXACTAMENTE el texto del cuadro) y deja
+  // el borrador a la vista, con lo suyo marcado en otro color. No publica nada.
+  async function desarrollar() {
+    const mesa = $('taller-estado');
+    const boton = $('taller-farolera');
+    if (!$('ts-texto').value.trim()) { mesa.textContent = '🏮 La Farolera necesita una idea: escribe primero tu semilla.'; return; }
+    boton.disabled = true;
+    mesa.textContent = '🏮 La Farolera está desarrollando tu idea (puede tardar un minuto)...';
+    try {
+      const guardada = await guardar();
+      if (!guardada) { mesa.textContent = 'No se pudo guardar la semilla, así que La Farolera no trabajó.'; return; }
+      const data = await apiFetch(`/api/semillas/${encodeURIComponent(guardada.id)}/desarrollar`, {
+        method: 'POST', body: JSON.stringify({ formato: $('taller-formato').value, indicaciones: $('taller-indicaciones').value.trim() }),
+      });
+      actual = { ...guardada, estado: data.estado, desarrollos: [...(guardada.desarrollos || []), data.desarrollo].slice(-5) };
+      $('ts-estado').value = actual.estado;
+      pintarResultados();
+      await cargarLista();
+      mesa.textContent = '🏮 La Farolera terminó: tu borrador está abajo. Lo tuyo va en tinta normal y lo que ella agregó, marcado. Tú decides si lo pasas a Contenidos.';
+      $('taller-desarrollos').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+      mesa.textContent = `La Farolera no pudo trabajar: ${err.message}`;
+    } finally {
+      boton.disabled = false;
+    }
+  }
+
+  async function copiarTexto(desarrollo) {
+    try {
+      await navigator.clipboard.writeText(textoDeDesarrollo(desarrollo));
+      $('taller-estado').textContent = '📋 Texto copiado (sin las marcas de color).';
+    } catch {
+      $('taller-estado').textContent = 'No se pudo copiar automáticamente: selecciona el texto del borrador y cópialo a mano.';
+    }
+  }
+
+  async function descartarDesarrollo(did) {
+    if (!confirm('¿Descartar este borrador de La Farolera? No se puede deshacer (tu idea y los demás borradores no se tocan).')) return;
+    try {
+      await apiFetch(`/api/semillas/${encodeURIComponent(actual.id)}/desarrollos/${encodeURIComponent(did)}`, { method: 'DELETE' });
+      actual = { ...actual, desarrollos: (actual.desarrollos || []).filter((d) => d.id !== did) };
+      pintarResultados();
+      $('taller-estado').textContent = 'Borrador descartado.';
+    } catch (err) { $('taller-estado').textContent = `No se pudo descartar: ${err.message}`; }
+  }
+
+  async function pasarAContenidos(did) {
+    if (!confirm('Se creará un BORRADOR en Contenidos (Revolución Humana › Lógica Humana), firmado por Aliado Imperfekto, con la divulgación de IA «parcial» y marcado «sin fuente externa». No se publica: lo revisas y lo editas allá antes de publicar. ¿Seguir?')) return;
+    const mesa = $('taller-estado');
+    mesa.textContent = '📤 Creando el borrador en Contenidos...';
+    try {
+      const data = await apiFetch(`/api/semillas/${encodeURIComponent(actual.id)}/pasar-a-contenidos`, { method: 'POST', body: JSON.stringify({ desarrolloId: did }) });
+      actual = { ...actual, estado: data.estado, contenido_id: data.contenido.id };
+      $('ts-estado').value = actual.estado;
+      pintarResultados();
+      await cargarLista();
+      mesa.textContent = `📤 Listo: la pieza «${data.contenido.titulo}» quedó como borrador en Contenidos. Ábrela para revisarla, ponerle portada y publicarla cuando quieras.`;
+    } catch (err) { mesa.textContent = `No se pudo pasar a Contenidos: ${err.message}`; }
+  }
+
+  function alHacerClicEnBorradores(e) {
+    const boton = e.target.closest('[data-accion]');
+    if (!boton || !actual) return;
+    if (boton.dataset.accion === 'abrir-contenido') { if (abrirContenido) abrirContenido(boton.dataset.id); return; }
+    const desarrollo = (actual.desarrollos || []).find((d) => d.id === boton.dataset.did);
+    if (!desarrollo) return;
+    if (boton.dataset.accion === 'copiar') copiarTexto(desarrollo);
+    else if (boton.dataset.accion === 'descartar') descartarDesarrollo(desarrollo.id);
+    else if (boton.dataset.accion === 'pasar') pasarAContenidos(desarrollo.id);
+  }
+
   const TRABAJO = {
     grieta: { espera: 'La Grieta está leyendo tu idea...' },
     contrapunto: { espera: 'El Contrapunto está pensando en la mejor objeción...' },
@@ -264,6 +389,7 @@
     iniciar(opts) {
       apiFetch = opts.apiFetch;
       if (opts.descripcion) descripcionDe = opts.descripcion;
+      if (opts.abrirContenido) abrirContenido = opts.abrirContenido;
       document.querySelectorAll('#taller-agentes [data-desc]').forEach((el) => { el.textContent = descripcionDe(el.dataset.desc); });
       $('taller-nueva').addEventListener('click', () => mostrarFormulario(null));
       $('taller-filtro').addEventListener('change', (e) => { filtro = e.target.value; cargarLista(); });
@@ -275,6 +401,8 @@
         const boton = $(`taller-${a.id}`);
         if (boton) boton.addEventListener('click', () => trabajarConAgente({ ...a, ...TRABAJO[a.id] }));
       });
+      $('taller-farolera').addEventListener('click', desarrollar);
+      $('taller-desarrollos').addEventListener('click', alHacerClicEnBorradores);
       return cargarLista();
     },
   };
