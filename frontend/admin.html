@@ -32,7 +32,7 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon-96.png" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=5d6ced6b">
+  <link rel="stylesheet" href="styles.css?v=e7fdbfa0">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Sabías que PR — Panel de administración","description":"Panel de administración de Sabías que PR: gestión de noticias y productos.","url":"https://sabiasquepr.com/admin.html","publisher":{"@type":"Organization","name":"Sabías que PR","url":"https://sabiasquepr.com","logo":{"@type":"ImageObject","url":"https://sabiasquepr.com/images/Coqui.webp"}}}</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YQT158RHH"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5YQT158RHH');</script>
@@ -156,6 +156,11 @@
                       <option value="en">English</option>
                     </select>
                   </div>
+                </div>
+                <div class="fuentes-extra" id="fuentes-extra-noticia">
+                  <p class="admin-hint">Otras fuentes (opcional, hasta 4): enlaces de otros medios, o libros y documentos sin enlace. La Guardiana compara con cada una y El Detective las busca. Se muestran al público como «Otras fuentes».</p>
+                  <div class="fuentes-extra-lista" id="fuentes-extra-lista-noticia"></div>
+                  <button type="button" class="admin-btn-cancel" id="fuentes-extra-agregar-noticia">＋ Agregar otra fuente</button>
                 </div>
                 <p class="admin-hint brigada-fuente-idioma" id="brigada-fuente-idioma-noticia" aria-live="polite"></p>
                 <div class="brigada-acciones">
@@ -329,6 +334,11 @@
                       <option value="en">English</option>
                     </select>
                   </div>
+                </div>
+                <div class="fuentes-extra" id="fuentes-extra-contenido">
+                  <p class="admin-hint">Otras fuentes (opcional, hasta 4): enlaces de otros medios, o libros y documentos sin enlace. Doña Pesquisa las lee todas juntas, La Guardiana compara con cada una y El Detective las busca. Se muestran al público como «Otras fuentes».</p>
+                  <div class="fuentes-extra-lista" id="fuentes-extra-lista-contenido"></div>
+                  <button type="button" class="admin-btn-cancel" id="fuentes-extra-agregar-contenido">＋ Agregar otra fuente</button>
                 </div>
                 <p class="admin-hint brigada-fuente-idioma" id="brigada-fuente-idioma-contenido" aria-live="polite"></p>
                 <p class="admin-hint brigada-recomendacion" id="brigada-recomendacion-contenido" aria-live="polite"></p>
@@ -1046,7 +1056,7 @@
       apiUrl:      'http://localhost:3000',
       youtubeApiKey: '',
       turnstileSiteKey: '0x4AAAAAAFD1ChRrVsC9PVWd',
-      i18nVersion: 'ed010587'
+      i18nVersion: 'd4558d68'
     };
   </script>
   <script src="i18n.js"></script>

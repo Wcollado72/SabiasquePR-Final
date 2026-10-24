@@ -5,6 +5,7 @@ const { requireAuth, requireAdmin, tryAuth } = require('../middleware/auth');
 const { slugify } = require('../util/slugify');
 const { validateNoticia } = require('../validators/noticia');
 const { resolverIaHerramientas } = require('../validators/iaHerramientas');
+const { resolverFuentes } = require('../validators/fuentes');
 const { aplicarTraducciones, normalizarLang } = require('../util/traducciones');
 
 const router = express.Router();
@@ -40,6 +41,7 @@ function toRow(id, body, existing = {}) {
     publicado,
     body.idiomaOriginal ?? existing.idioma_original ?? 'es',
     resolverIaHerramientas(body, existing).valor,
+    JSON.stringify(resolverFuentes(body, existing)),
   ];
 }
 
@@ -114,8 +116,8 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
       id,
       destacado,
       values,
-      `INSERT INTO noticias (id, titulo, fecha, fecha_display, imagen, imagen_alt, imagen_caption, clase, fuente_url, fuente_texto, parrafos, categoria, destacado, divulgacion_ia, publicado, idioma_original, ia_herramientas)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12,$13,$14,$15,$16,$17::text[]) RETURNING *`
+      `INSERT INTO noticias (id, titulo, fecha, fecha_display, imagen, imagen_alt, imagen_caption, clase, fuente_url, fuente_texto, parrafos, categoria, destacado, divulgacion_ia, publicado, idioma_original, ia_herramientas, fuentes)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12,$13,$14,$15,$16,$17::text[],$18::jsonb) RETURNING *`
     );
     res.status(201).json({ ok: true, noticia: rows[0] });
   } catch (err) { enviarError500(res, err); }
@@ -140,7 +142,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
       values,
       `UPDATE noticias SET titulo=$2, fecha=$3, fecha_display=$4, imagen=$5, imagen_alt=$6,
          imagen_caption=$7, clase=$8, fuente_url=$9, fuente_texto=$10, parrafos=$11::jsonb, categoria=$12,
-         destacado=$13, divulgacion_ia=$14, publicado=$15, idioma_original=$16, ia_herramientas=$17::text[]
+         destacado=$13, divulgacion_ia=$14, publicado=$15, idioma_original=$16, ia_herramientas=$17::text[], fuentes=$18::jsonb
        WHERE id=$1 RETURNING *`
     );
     res.json({ ok: true, noticia: rows[0] });

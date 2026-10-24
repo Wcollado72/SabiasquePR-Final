@@ -29,6 +29,14 @@ describe('compararPiezas', () => {
     expect(r.razones[0]).toContain('misma fuente');
   });
 
+  test('la misma fuente se detecta también entre las OTRAS fuentes de cualquiera de las dos piezas', () => {
+    const conExtra = D.compararPiezas({ titulo: 'Otro título', fuenteUrl: 'https://otro.com/a', fuentesExtra: ['http://nasa.gov/noticias/crater-luna/'] }, existente());
+    expect(conExtra.similitud).toBe(1);
+    const enLaExistente = D.compararPiezas({ titulo: 'Otro título', fuenteUrl: 'https://otro.com/a' }, existente({ fuentesExtra: ['https://otro.com/a?utm_source=y'] }));
+    expect(enLaExistente.similitud).toBe(1);
+    expect(D.compararPiezas({ titulo: 'Otro título', fuenteUrl: 'https://otro.com/a', fuentesExtra: ['https://tercero.com/z'] }, existente()).similitud).toBeLessThan(0.5);
+  });
+
   test('un título casi igual se detecta aunque se reescriba un poco y no haya URL', () => {
     const r = D.compararPiezas({ titulo: 'NASA halla el mayor cráter formado en la Luna en un siglo' }, existente());
     expect(r.similitud).toBeGreaterThanOrEqual(0.6);

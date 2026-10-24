@@ -245,4 +245,18 @@ setTimeout(() => {
         b.textContent.includes('ya pasó a Contenidos') && !b.querySelector('[data-accion=pasar]') && d.getElementById('ts-estado').value === 'pasada' && texto('taller-estado').includes('quedó como borrador')],
     );
   }, 1300);
+  // Otras fuentes del formulario de Contenidos: se agregan (hasta 4), se llenan y se leen limpias, y se quitan.
+  setTimeout(() => {
+    const agregar = d.getElementById('fuentes-extra-agregar-contenido');
+    for (let i = 0; i < 6; i += 1) agregar.click();
+    const filas = () => d.querySelectorAll('#fuentes-extra-lista-contenido .fuente-extra-fila');
+    const tope = filas().length === 4 && agregar.disabled;
+    filas()[0].querySelector('.fe-url').value = 'https://www.bbc.com/mundo/nota';
+    filas()[1].querySelector('.fe-nombre').value = 'Libro de Freire';
+    filas()[0].querySelector('.fe-quitar').click();
+    comprobaciones.push(
+      ['Otras fuentes: se agregan hasta 4, el botón se desactiva y se pueden quitar', tope && filas().length === 3 && !agregar.disabled],
+      ['Otras fuentes: las filas se llenan y quedan en el formulario', filas()[0].querySelector('.fe-nombre').value === 'Libro de Freire'],
+    );
+  }, 1350);
 }, 1500);

@@ -4,7 +4,8 @@ const { enviarError500 } = require('../util/errores');
 const { requireAuth, requireAdmin, requireModerador } = require('../middleware/auth');
 const { extraerArticulo } = require('../services/articleExtractor');
 const { redactarDesdeArticulo } = require('../services/anthropic');
-const { investigarDesdeUrl, investigarDesdeTexto } = require('../services/investigador');
+const { investigarDesdeUrl, investigarDesdeTexto, investigarDesdeVarias } = require('../services/investigador');
+const { limpiarUrlsExtra } = require('../validators/fuentes');
 const { redactarDesdeNotas } = require('../services/redactor');
 const { traducirCampos } = require('../services/traductor');
 const { validateTraduccion, TIPOS_VALIDOS, IDIOMAS_VALIDOS, CAMPOS_POR_TIPO } = require('../validators/traduccion');
@@ -97,15 +98,20 @@ async function registrarUsoIa({ agente, fuenteTipo, usarBusquedaWeb, usage, crea
 // tituloSugerido }, mas usarBusquedaWeb. Nunca guarda contenido, solo notas
 // para que el admin revise antes de redactar.
 router.post('/investigar', requireAuth, requireAdmin, async (req, res) => {
-  const { url, texto, tituloSugerido, usarBusquedaWeb, instrucciones, tono, respuestas, continente, region } = req.body || {};
+  const { url, texto, tituloSugerido, usarBusquedaWeb, instrucciones, tono, respuestas, continente, region, fuentesExtra } = req.body || {};
   if (!url && !texto) {
     return res.status(400).json({ ok: false, error: 'Falta la URL o el texto de la fuente.' });
   }
+  const extra = limpiarUrlsExtra(fuentesExtra);
+  if (extra.error) return res.status(400).json({ ok: false, error: extra.error });
   try {
     const opciones = { usarBusquedaWeb: Boolean(usarBusquedaWeb), instrucciones, tono, respuestas, continente, region };
-    const resultado = url
-      ? await investigarDesdeUrl(url, opciones)
-      : await investigarDesdeTexto(texto, { tituloSugerido, ...opciones });
+    // Con otras fuentes se leen todas juntas (la principal y las extra); sin ellas, el camino de siempre.
+    const resultado = extra.urls.length
+      ? await investigarDesdeVarias({ url, texto, extras: extra.urls, tituloSugerido, ...opciones })
+      : url
+        ? await investigarDesdeUrl(url, opciones)
+        : await investigarDesdeTexto(texto, { tituloSugerido, ...opciones });
 
     await registrarUsoIa({
       agente: 'investigador',
@@ -128,6 +134,8 @@ router.post('/investigar', requireAuth, requireAdmin, async (req, res) => {
       textoCorregido: resultado.textoCorregido || '',
       correcciones: resultado.correcciones || [],
       preguntas: resultado.preguntas || [],
+      // Solo cuando se investigaron varias fuentes: cuales se leyeron y cuales fallaron.
+      ...(resultado.fuentesLeidas ? { fuentesLeidas: resultado.fuentesLeidas, fuentesFallidas: resultado.fuentesFallidas || [] } : {}),
     });
   } catch (err) {
     res.status(400).json({ ok: false, error: err.message });

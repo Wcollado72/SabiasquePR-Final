@@ -78,7 +78,8 @@
       + avisoIdioma
       + figure
       + '<div class="article-body">' + paragraphs + '</div>'
-      + source;
+      + source
+      + S.otrasFuentesHtml(art.fuentes);
 
     root.insertAdjacentHTML('afterend', '<div id="articulo-comentarios"></div>');
 

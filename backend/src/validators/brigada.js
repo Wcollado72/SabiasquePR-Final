@@ -1,4 +1,5 @@
 // Validacion de los endpoints de la Brigada Coqui (agentes de contenido del panel).
+const { limpiarUrlsExtra } = require('./fuentes');
 const DESTINOS_VALIDOS = ['contenido', 'noticia'];
 
 function validateClasificar(body) {
@@ -12,9 +13,11 @@ function validateClasificar(body) {
 const MAX_TEXTO_REVISAR = 60000; // cabe en el limite de 100 KB del cuerpo JSON de la API
 
 function validateRevisar(body) {
-  const { titulo, resumen, cuerpo, fuenteUrl, seccion } = body || {};
+  const { titulo, resumen, cuerpo, fuenteUrl, fuentesExtra, seccion } = body || {};
   const textos = [titulo, resumen, cuerpo];
   if (textos.some((t) => t !== undefined && t !== null && typeof t !== 'string')) return ['Los textos a revisar deben ser texto.'];
+  const extra = limpiarUrlsExtra(fuentesExtra);
+  if (extra.error) return [extra.error];
   if (!textos.some((t) => typeof t === 'string' && t.trim())) return ['Escribe el título, el resumen o el cuerpo para poder revisarlos.'];
   if (textos.reduce((n, t) => n + (t ? t.length : 0), 0) > MAX_TEXTO_REVISAR) return [`El texto es demasiado largo para revisarlo (máximo ${MAX_TEXTO_REVISAR} caracteres).`];
   if (fuenteUrl !== undefined && fuenteUrl !== null && (typeof fuenteUrl !== 'string' || fuenteUrl.length > 2000)) return ['La URL de la fuente no es válida.'];
@@ -23,7 +26,9 @@ function validateRevisar(body) {
 }
 
 function validateDuplicados(body) {
-  const { titulo, resumen, fuenteUrl, excluir } = body || {};
+  const { titulo, resumen, fuenteUrl, fuentesExtra, excluir } = body || {};
+  const extra = limpiarUrlsExtra(fuentesExtra);
+  if (extra.error) return [extra.error];
   if ([titulo, resumen, fuenteUrl].some((t) => t !== undefined && t !== null && typeof t !== 'string')) return ['Los datos a buscar deben ser texto.'];
   if (![titulo, fuenteUrl].some((t) => typeof t === 'string' && t.trim())) return ['Escribe el título o la URL de la fuente para buscar historias repetidas.'];
   if ([titulo, resumen, fuenteUrl].some((t) => t && t.length > 5000)) return ['Los datos a buscar son demasiado largos.'];

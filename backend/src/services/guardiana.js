@@ -125,24 +125,30 @@ function limpiarRevision(entrada) {
   return { banderas, requiere18: e.requiere_18 === true, motivo18: String(e.motivo_18 || '').slice(0, 300) };
 }
 
-async function revisarPieza({ titulo, resumen, cuerpo, fuenteUrl, seccion }) {
+// Compara la pieza con UNA fuente (la descarga y mide cuanto se parece).
+async function copiaContraFuente(texto, url) {
+  try {
+    const { html } = await descargarHtml(url);
+    return compararCopia(texto, textoVisible(html, 400000));
+  } catch (err) {
+    return { evaluable: false, motivo: `No se pudo leer la fuente para comparar: ${err.message}` };
+  }
+}
+
+// `fuentesExtra`: las URLs de las otras fuentes de la pieza; la pieza se compara con CADA una (copiar de cualquiera cuenta).
+async function revisarPieza({ titulo, resumen, cuerpo, fuenteUrl, fuentesExtra = [], seccion }) {
   const texto = [titulo, resumen, cuerpo].filter(Boolean).join('\n');
 
-  let copia = { evaluable: false, motivo: 'No hay una URL de la fuente con la que comparar.' };
-  if (fuenteUrl) {
-    try {
-      const { html } = await descargarHtml(fuenteUrl);
-      copia = compararCopia(texto, textoVisible(html, 400000));
-    } catch (err) {
-      copia = { evaluable: false, motivo: `No se pudo leer la fuente para comparar: ${err.message}` };
-    }
-  }
+  const copia = fuenteUrl
+    ? await copiaContraFuente(texto, fuenteUrl)
+    : { evaluable: false, motivo: 'No hay una URL de la fuente con la que comparar.' };
+  const copiasExtra = await Promise.all(fuentesExtra.map(async (url) => ({ url, copia: await copiaContraFuente(texto, url) })));
 
   const { entrada, usage } = await llamarHerramienta({
     modelo: MODEL, maxTokens: 2000, herramienta: HERRAMIENTA,
     prompt: construirPrompt({ titulo, resumen, cuerpo: String(cuerpo || '').slice(0, 12000), seccion }),
   });
-  return { copia, revision: limpiarRevision(entrada), usage };
+  return { copia, copiasExtra, revision: limpiarRevision(entrada), usage };
 }
 
 module.exports = {

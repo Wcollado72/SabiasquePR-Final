@@ -954,6 +954,11 @@ const PAGES = [
                     </select>
                   </div>
                 </div>
+                <div class="fuentes-extra" id="fuentes-extra-noticia">
+                  <p class="admin-hint">Otras fuentes (opcional, hasta 4): enlaces de otros medios, o libros y documentos sin enlace. La Guardiana compara con cada una y El Detective las busca. Se muestran al público como «Otras fuentes».</p>
+                  <div class="fuentes-extra-lista" id="fuentes-extra-lista-noticia"></div>
+                  <button type="button" class="admin-btn-cancel" id="fuentes-extra-agregar-noticia">＋ Agregar otra fuente</button>
+                </div>
                 <p class="admin-hint brigada-fuente-idioma" id="brigada-fuente-idioma-noticia" aria-live="polite"></p>
                 <div class="brigada-acciones">
                   <button type="button" class="admin-btn-cancel" id="brigada-deshacer-noticia" hidden>Deshacer sugerencias</button>
@@ -1109,6 +1114,11 @@ const PAGES = [
                       <option value="en">English</option>
                     </select>
                   </div>
+                </div>
+                <div class="fuentes-extra" id="fuentes-extra-contenido">
+                  <p class="admin-hint">Otras fuentes (opcional, hasta 4): enlaces de otros medios, o libros y documentos sin enlace. Doña Pesquisa las lee todas juntas, La Guardiana compara con cada una y El Detective las busca. Se muestran al público como «Otras fuentes».</p>
+                  <div class="fuentes-extra-lista" id="fuentes-extra-lista-contenido"></div>
+                  <button type="button" class="admin-btn-cancel" id="fuentes-extra-agregar-contenido">＋ Agregar otra fuente</button>
                 </div>
                 <p class="admin-hint brigada-fuente-idioma" id="brigada-fuente-idioma-contenido" aria-live="polite"></p>
                 <p class="admin-hint brigada-recomendacion" id="brigada-recomendacion-contenido" aria-live="polite"></p>

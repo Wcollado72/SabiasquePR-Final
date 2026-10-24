@@ -7,9 +7,13 @@ const { clasificarUrl } = require('../services/clasificadora');
 const { revisarPieza } = require('../services/guardiana');
 const { pintarPieza } = require('../services/pintora');
 const { buscarDuplicados } = require('../services/detective');
+const { limpiarUrlsExtra } = require('../validators/fuentes');
 const { validateClasificar, validateRevisar, validateDuplicados, validatePintar } = require('../validators/brigada');
 
 const router = express.Router();
+
+// Las URLs (con enlace) de la lista de otras fuentes que guarda una pieza.
+const urlsDe = (fuentes) => (Array.isArray(fuentes) ? fuentes : []).map((f) => f && f.url).filter(Boolean);
 
 // POST /api/admin/brigada/clasificar -- solo admin. Recibe { url, destino } y devuelve las sugerencias de la pestana
 // Clasificacion. Nunca guarda nada: el panel las muestra marcadas y el admin decide.
@@ -34,11 +38,11 @@ router.post('/revisar', requireAuth, requireAdmin, async (req, res) => {
   if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
   try {
     const { titulo, resumen, cuerpo, fuenteUrl, seccion } = req.body;
-    const { copia, revision, usage } = await revisarPieza({
-      titulo, resumen, cuerpo, fuenteUrl: typeof fuenteUrl === 'string' ? fuenteUrl.trim() : '', seccion,
+    const { copia, copiasExtra, revision, usage } = await revisarPieza({
+      titulo, resumen, cuerpo, fuenteUrl: typeof fuenteUrl === 'string' ? fuenteUrl.trim() : '', fuentesExtra: limpiarUrlsExtra(req.body.fuentesExtra).urls, seccion,
     });
     await registrarUsoAgente(pool, { agente: 'guardiana', fuenteTipo: 'texto', usage, creadoPor: req.user.id });
-    res.json({ ok: true, copia, revision });
+    res.json({ ok: true, copia, ...(copiasExtra && copiasExtra.length ? { copiasExtra } : {}), revision });
   } catch (err) {
     res.status(400).json({ ok: false, error: err.message });
   }
@@ -52,17 +56,17 @@ router.post('/duplicados', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { titulo, resumen, fuenteUrl, excluir } = req.body;
     const [noticias, contenidos] = await Promise.all([
-      pool.query(`SELECT id, titulo, fuente_url, publicado, fecha,
+      pool.query(`SELECT id, titulo, fuente_url, fuentes, publicado, fecha,
                          concat_ws(' ', parrafos->>0, parrafos->>1) AS resumen
                   FROM noticias ORDER BY creado_en DESC LIMIT 1000`),
-      pool.query(`SELECT id, titulo, fuente_url, publicado, fecha_publicacion AS fecha, subtitulo_resumen AS resumen
+      pool.query(`SELECT id, titulo, fuente_url, fuentes, publicado, fecha_publicacion AS fecha, subtitulo_resumen AS resumen
                   FROM contenidos ORDER BY creado_en DESC LIMIT 1000`),
     ]);
     const existentes = [
-      ...noticias.rows.map((r) => ({ tipo: 'noticia', id: r.id, titulo: r.titulo, resumen: r.resumen, fuenteUrl: r.fuente_url, publicado: r.publicado, fecha: r.fecha })),
-      ...contenidos.rows.map((r) => ({ tipo: 'contenido', id: r.id, titulo: r.titulo, resumen: r.resumen, fuenteUrl: r.fuente_url, publicado: r.publicado, fecha: r.fecha })),
+      ...noticias.rows.map((r) => ({ tipo: 'noticia', id: r.id, titulo: r.titulo, resumen: r.resumen, fuenteUrl: r.fuente_url, fuentesExtra: urlsDe(r.fuentes), publicado: r.publicado, fecha: r.fecha })),
+      ...contenidos.rows.map((r) => ({ tipo: 'contenido', id: r.id, titulo: r.titulo, resumen: r.resumen, fuenteUrl: r.fuente_url, fuentesExtra: urlsDe(r.fuentes), publicado: r.publicado, fecha: r.fecha })),
     ];
-    const candidatas = buscarDuplicados({ titulo, resumen, fuenteUrl }, existentes, excluir || null);
+    const candidatas = buscarDuplicados({ titulo, resumen, fuenteUrl, fuentesExtra: limpiarUrlsExtra(req.body.fuentesExtra).urls }, existentes, excluir || null);
     res.json({ ok: true, candidatas, revisadas: existentes.length });
   } catch (err) {
     enviarError500(res, err);

@@ -111,9 +111,25 @@ describe('POST /api/admin/brigada/revisar (La Guardiana)', () => {
       .send({ titulo: 'T', cuerpo: 'Texto.', fuenteUrl: ' https://a.com/x ', seccion: 'noticias' });
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ ok: true, copia: RESULTADO.copia, revision: RESULTADO.revision });
-    expect(revisarPieza).toHaveBeenCalledWith({ titulo: 'T', resumen: undefined, cuerpo: 'Texto.', fuenteUrl: 'https://a.com/x', seccion: 'noticias' });
+    expect(revisarPieza).toHaveBeenCalledWith({ titulo: 'T', resumen: undefined, cuerpo: 'Texto.', fuenteUrl: 'https://a.com/x', fuentesExtra: [], seccion: 'noticias' });
     expect(pool.query.mock.calls[0][0]).toMatch(/INSERT INTO ia_generaciones/);
     expect(pool.query.mock.calls[0][1]).toEqual(['guardiana', 'texto', 800, 150, 0.0015, 'admin-1', 0]);
+  });
+
+  test('con otras fuentes las limpia y se las pasa a La Guardiana, y devuelve el parecido con cada una', async () => {
+    const copiasExtra = [{ url: 'https://b.com/y', copia: { evaluable: true, porcentaje: 40, nivel: 'alto', pasajes: [] } }];
+    revisarPieza.mockResolvedValue({ ...RESULTADO, copiasExtra });
+    const res = await request(app).post(URL_REVISAR).set('x-test-user', ADMIN)
+      .send({ titulo: 'T', cuerpo: 'Texto.', fuenteUrl: 'https://a.com/x', fuentesExtra: [{ nombre: 'B', url: ' https://b.com/y ' }, { nombre: 'Libro' }, 'https://b.com/y'] });
+    expect(res.status).toBe(200);
+    expect(res.body.copiasExtra).toEqual(copiasExtra);
+    expect(revisarPieza).toHaveBeenCalledWith(expect.objectContaining({ fuentesExtra: ['https://b.com/y'] }));
+  });
+
+  test.each([[['javascript:alert(1)']], ['no-es-lista'], [Array.from({ length: 5 }, (_, i) => `https://m${i}.com`)]])('400 con otras fuentes inválidas %#', async (fuentesExtra) => {
+    const res = await request(app).post(URL_REVISAR).set('x-test-user', ADMIN).send({ titulo: 'T', fuentesExtra });
+    expect(res.status).toBe(400);
+    expect(revisarPieza).not.toHaveBeenCalled();
   });
 
   test('sin URL de la fuente manda cadena vacía; si la IA falla, 400 sin costo', async () => {
@@ -166,6 +182,23 @@ describe('POST /api/admin/brigada/duplicados (El Detective)', () => {
     expect(pool.query.mock.calls[0][0]).toMatch(/FROM noticias/);
     expect(pool.query.mock.calls[1][0]).toMatch(/FROM contenidos/);
     expect(pool.query).toHaveBeenCalledTimes(2); // dos lecturas, ningun registro de costo
+  });
+
+  test('detecta la misma fuente aunque esté en la lista de OTRAS fuentes de la pieza existente o de la nueva', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'con-extra', titulo: 'Algo muy distinto', fuente_url: 'https://principal.com/a', fuentes: [{ nombre: 'Medio', url: 'https://medio.com/nota?utm_source=x' }, { nombre: 'Libro', url: '' }], publicado: true, fecha: '2026-01-01', resumen: 'Otro tema.' }] });
+    const res = await request(app).post(URL_DUP).set('x-test-user', ADMIN)
+      .send({ titulo: 'Un título sin relación', fuenteUrl: 'https://otra.com/z', fuentesExtra: [{ nombre: 'Medio', url: 'https://www.medio.com/nota/' }] });
+    expect(res.status).toBe(200);
+    expect(res.body.candidatas.map((c) => c.id)).toEqual(['con-extra']);
+    expect(pool.query.mock.calls[1][0]).toMatch(/fuentes/);
+  });
+
+  test('400 con otras fuentes inválidas', async () => {
+    const res = await request(app).post(URL_DUP).set('x-test-user', ADMIN).send({ titulo: 'T', fuentesExtra: ['ftp://x.com'] });
+    expect(res.status).toBe(400);
+    expect(pool.query).not.toHaveBeenCalled();
   });
 
   test('si la base falla, 500 genérico sin detalles internos', async () => {

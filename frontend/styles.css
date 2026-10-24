@@ -941,6 +941,13 @@ select:focus-visible{ outline-offset:0; border-color:var(--focus); }
   color:var(--ink-soft);
 }
 .article-source a{ font-weight:600; }
+.article-source-extra{ margin-top:12px; padding-top:0; border-top:0; }
+.article-sources{ margin:4px 0 0; padding-left:1.2rem; font-size:.9rem; color:var(--ink-soft); }
+.article-sources li{ margin-bottom:2px; }
+/* Otras fuentes en el formulario del panel */
+.fuentes-extra{ margin:8px 0; }
+.fuente-extra-fila{ display:grid; grid-template-columns:2fr 1fr auto; gap:6px; margin-bottom:6px; align-items:center; }
+@media (max-width:640px){ .fuente-extra-fila{ grid-template-columns:1fr auto; } .fuente-extra-fila .fe-nombre{ grid-column:1 / 2; } }
 .article-more{ max-width:var(--wrap); margin:0 auto; }
 .article-state{ max-width:var(--measure); margin:0 auto; padding:96px 0; text-align:center; color:var(--ink-mute); font-family:var(--font-read); font-size:1.2rem; }
 
