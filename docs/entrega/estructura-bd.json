@@ -1209,7 +1209,7 @@
    "t": "ia_generaciones",
    "tipo": "c",
    "nombre": "ia_generaciones_agente_check",
-   "def": "CHECK ((agente = ANY (ARRAY['investigador'::text, 'redactor'::text, 'traductor'::text])))"
+   "def": "CHECK ((agente = ANY (ARRAY['investigador'::text, 'redactor'::text, 'traductor'::text, 'clasificadora'::text, 'resumidora'::text, 'correctora'::text, 'guardiana'::text, 'pintora'::text])))"
   },
   {
    "t": "ia_generaciones",

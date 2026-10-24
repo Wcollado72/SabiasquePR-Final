@@ -58,7 +58,7 @@ describe('POST /api/admin/brigada/clasificar', () => {
     expect(clasificarUrl).toHaveBeenCalledWith({ url: 'https://a.com/x', destino: 'noticia' });
     const [sql, params] = pool.query.mock.calls[0];
     expect(sql).toMatch(/INSERT INTO ia_generaciones/);
-    expect(params).toEqual([800, 150, 0.0015, 'admin-1']);
+    expect(params).toEqual(['clasificadora', 'url', 800, 150, 0.0015, 'admin-1']);
   });
 
   test('el destino por defecto es contenido', async () => {
@@ -113,6 +113,7 @@ describe('POST /api/admin/brigada/revisar (La Guardiana)', () => {
     expect(res.body).toEqual({ ok: true, copia: RESULTADO.copia, revision: RESULTADO.revision });
     expect(revisarPieza).toHaveBeenCalledWith({ titulo: 'T', resumen: undefined, cuerpo: 'Texto.', fuenteUrl: 'https://a.com/x', seccion: 'noticias' });
     expect(pool.query.mock.calls[0][0]).toMatch(/INSERT INTO ia_generaciones/);
+    expect(pool.query.mock.calls[0][1]).toEqual(['guardiana', 'texto', 800, 150, 0.0015, 'admin-1']);
   });
 
   test('sin URL de la fuente manda cadena vacía; si la IA falla, 400 sin costo', async () => {
@@ -207,6 +208,7 @@ describe('POST /api/admin/brigada/pintar (La Pintora)', () => {
     expect(res.body).toEqual({ ok: true, textoAlternativo: 'Un farol sobre la Luna.', escena: 'A lantern on the moon.', promptImagen: 'A lantern on the moon. Estilo.' });
     expect(pintarPieza).toHaveBeenCalledWith({ titulo: 'T', resumen: 'R', cuerpo: undefined, idioma: 'es', seccion: 'noticias' });
     expect(pool.query.mock.calls[0][0]).toMatch(/INSERT INTO ia_generaciones/);
+    expect(pool.query.mock.calls[0][1]).toEqual(['pintora', 'texto', 800, 150, 0.0015, 'admin-1']);
   });
 
   test('si la IA falla, 400 con el motivo y sin costo', async () => {

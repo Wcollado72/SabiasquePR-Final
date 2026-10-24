@@ -17,7 +17,7 @@ PROPOSITO = {
     'comentarios': 'Comentarios bajo una noticia o un contenido. La pieza comentada se identifica por (tipo, item_id), sin llave foránea.',
     'reportes': 'Denuncias de publicaciones o comentarios (del debate y de noticias/contenidos), incluidas las que genera el filtro automático, para la moderación.',
     'traducciones': 'Versión en inglés de noticias, contenidos y productos. Llave compuesta (tipo, item_id, idioma).',
-    'ia_generaciones': 'Registro de cada uso de los agentes de IA (Investigador, Redactor, Traductor): tokens y costo estimado.',
+    'ia_generaciones': 'Registro de cada uso de los agentes de IA de la Brigada Coquí (cada uno con su nombre): tokens y costo estimado.',
     'gastos_servicios': 'Inventario de los servicios de terceros del proyecto (estado del plan, costo mensual y renovación) para el panel de administración.',
     'mensajes_contacto': 'Mensajes recibidos desde el formulario de contacto.',
     'suscriptores': 'Correos suscritos al boletín.',
@@ -165,7 +165,7 @@ DESC = {
     },
     'ia_generaciones': {
         'id': 'Identificador del registro',
-        'agente': 'Agente usado: investigador, redactor o traductor',
+        'agente': 'Agente que hizo la llamada: investigador, redactor, traductor, clasificadora, resumidora, correctora, guardiana o pintora',
         'fuente_tipo': 'Origen del material: url, texto o notas',
         'uso_busqueda_web': 'El agente usó búsqueda web',
         'busquedas_realizadas': 'Número de búsquedas web hechas',
