@@ -239,6 +239,7 @@ def build():
         'REST propia enviando ese JWT en el encabezado <font face="Courier">Authorization: Bearer</font>; el '
         'backend lo valida contra las llaves públicas del proyecto (JWKS) y solo entonces consulta PostgreSQL con '
         'una conexión directa. La API de datos de Supabase permanece cerrada.', styles['Body']))
+    story.append(Paragraph('<b>Despliegue.</b> Netlify y Render despliegan solos, en cada cambio, desde el repositorio de trabajo del proyecto; este repositorio público es una copia limpia del mismo código (sin documentos internos).', styles['Body']))
     story.append(P.diagrama_arquitectura())
     _fig['n'] += 1
     story.append(Paragraph(f'Figura {_fig["n"]}. Arquitectura de tres capas con Supabase Auth como servicio de identidad compartido.', styles['Caption']))
@@ -275,9 +276,13 @@ def build():
         'relaciones de autoría. El diccionario de datos completo, el esquema relacional y el script de creación '
         'están en el documento de Planificación y Diseño de la Base de Datos que acompaña la entrega.', styles['Body']))
     d = P.diagrama_mer()
+    k_mer = 0.74  # el diagrama completo no cabia con su texto en una pagina y dejaba una pagina casi vacia
+    d.scale(k_mer, k_mer)
+    d.width, d.height = d.width * k_mer, d.height * k_mer
     story.append(d)
     _fig['n'] += 1
     story.append(Paragraph(f'Figura {_fig["n"]}. Modelo Entidad-Relación de las {n_tablas} tablas propias.', styles['Caption']))
+    story.append(CondPageBreak(230))
     story.append(P.tabla_simple(
         [['Tabla', 'Propósito']] + [[t, P.PROPOSITO[t]] for t in por_tabla],
         [100, CONTENT_W - 100]))
@@ -288,13 +293,15 @@ def build():
     story.append(Paragraph(
         'Capturas tomadas en la aplicación desplegada (<font face="Courier">https://sabiasquepr.com</font>) y en las herramientas '
         'de despliegue. Cada una muestra una pantalla real.', styles['Body']))
+    story.append(CondPageBreak(190))
     story.append(Paragraph('Sitio público', styles['H2']))
     rejilla(story, [
         ('inicio-escritorio.png', 'Inicio.'), ('noticias-escritorio.png', 'Noticias, con filtros por categoría y región.'),
         ('revolucion-humana-escritorio.png', 'Revolución Humana.'), ('educacion-escritorio.png', 'Educación.'),
         ('pieza-detalle-escritorio.png', 'Detalle de una pieza (video).'), ('tienda-escritorio.png', 'Tienda.'),
         ('apoyo-escritorio.png', 'Apoya el canal.'), ('quienes-somos-escritorio.png', 'Quiénes somos y contacto.'),
-    ])
+    ], ancho=150, alto_max=118, cols=3)
+    story.append(CondPageBreak(190))
     story.append(Paragraph('Cuenta, debate (CRUD de usuario) y panel de administración (CRUD de administrador)', styles['H2']))
     rejilla(story, [
         ('inicio-sesion-modal.png', 'Inicio de sesión con verificación anti-robots.'), ('registro-modal.png', 'Creación de cuenta.'),
@@ -306,26 +313,33 @@ def build():
         ('B6-noticia-editada', 'Panel: noticia editada.'), ('B7-noticia-borrar', 'Panel: confirmar borrado.'),
         ('B8-contenidos', 'Panel: Contenidos.'), ('B9-productos', 'Panel: Productos.'),
     ], ancho=150, alto_max=118, cols=3)
+    story.append(CondPageBreak(190))
     story.append(Paragraph('Consumo de datos, seguridad y despliegue', styles['H2']))
     rejilla(story, [
         ('D1-red-json', 'El frontend consume la API: GET /api/noticias devuelve JSON.'), ('D2-api-401', 'Una ruta protegida sin sesión responde 401.'),
         ('E1-netlify', 'Frontend desplegado en Netlify.'), ('E2-render', 'API desplegada en Render.'),
         ('E3-supabase-tablas', 'Base de datos en Supabase: las 15 tablas.'), ('E4-github-ci', 'Integración continua en GitHub Actions.'),
     ], ancho=150, alto_max=118, cols=3)
-    story.append(Paragraph('Vista en celular (diseño responsivo)', styles['H2']))
+    story.append(CondPageBreak(300))
+    story.append(Paragraph('Vista en celular real (iPhone 14, Safari)', styles['H2']))
     from PIL import Image as PILImage
-    movil = [('inicio-movil.png', 'Inicio'), ('noticias-movil.png', 'Noticias'), ('tienda-movil.png', 'Tienda'), ('educacion-movil.png', 'Educación')]
-    celdas = []
-    for arch, _ in movil:
-        ruta = os.path.join(CAPTURAS, arch)
-        w, h = PILImage.open(ruta).size
-        k = 100 / w
-        celdas.append(Image(ruta, width=100, height=h * k))
-    t = Table([celdas, [Paragraph(n, styles['Caption']) for _, n in movil]], colWidths=[CONTENT_W / 4] * 4)
-    t.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER'), ('VALIGN', (0, 0), (-1, 0), 'TOP')]))
-    story.append(t)
-    _fig['n'] += 1
-    story.append(Paragraph(f'Figura {_fig["n"]}. El mismo sitio en una pantalla de 390 px de ancho.', styles['Caption']))
+    movil = [('C1-iphone-inicio', 'Inicio, sin sesión'), ('C5-iphone-inicio', 'Inicio, al bajar'), ('C4-iphone-login', 'Con sesión iniciada'),
+             ('C2-iphone-menu', 'Menú abierto'), ('C3-iphone-login-menu', 'Menú con sesión')]
+    celdas, pies = [], []
+    for base, nombre in movil:
+        arch = buscar(base)
+        if not arch:
+            continue
+        w, h = PILImage.open(os.path.join(CAPTURAS, arch)).size
+        k = 88 / w
+        celdas.append(Image(os.path.join(CAPTURAS, arch), width=88, height=h * k))
+        pies.append(Paragraph(nombre, styles['Caption']))
+    if celdas:
+        t = Table([celdas, pies], colWidths=[CONTENT_W / len(celdas)] * len(celdas))
+        t.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER'), ('VALIGN', (0, 0), (-1, 0), 'TOP')]))
+        story.append(t)
+        _fig['n'] += 1
+        story.append(Paragraph(f'Figura {_fig["n"]}. Capturas hechas en un iPhone 14: el sitio se adapta a la pantalla y el botón del menú se ve completo con y sin sesión.', styles['Caption']))
 
     # 8. Evidencias de pruebas
     story.append(CondPageBreak(260))

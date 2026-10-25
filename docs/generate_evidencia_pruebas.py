@@ -541,8 +541,27 @@ def build():
          'tableta y móvil emulados. Resultado: cargan las 7 páginas en los 3 tamaños, sin desbordamiento horizontal y sin errores de JavaScript '
          '(los avisos de seguridad que trae el distintivo «Powered by Netlify» no son del código del proyecto). '
          '<b>No sustituye</b> probar en dispositivos reales: el estudiante probó el sitio en un <b>iPhone 14 (Safari)</b>, lo que destapó dos fallos '
-         '(la página se arrastraba de lado y el botón de menú quedaba cortado) que se corrigieron; Firefox, Android y Samsung Internet no se probaron.',
+         '(la página se arrastraba de lado y el botón de menú quedaba cortado); se corrigieron y se volvió a verificar en el mismo iPhone (figura siguiente). Firefox, Android y Samsung Internet no se probaron.',
          fondo=RISK_SOFT, borde=RISK, color_titulo=RISK)
+
+    # Capturas reales del iPhone 14 (despues del ajuste de la cabecera)
+    from PIL import Image as PILImage
+    from reportlab.platypus import Image as RLImage
+    capturas_iphone = []
+    for base, nombre in [('C1-iphone-inicio', 'Inicio, sin sesión'), ('C5-iphone-inicio', 'Al bajar'), ('C4-iphone-login', 'Con sesión'),
+                         ('C2-iphone-menu', 'Menú abierto'), ('C3-iphone-login-menu', 'Menú con sesión')]:
+        ruta = next((os.path.join(ENTREGA_DIR, 'capturas', base + e) for e in ('.jpeg', '.jpg', '.png') if os.path.exists(os.path.join(ENTREGA_DIR, 'capturas', base + e))), None)
+        if ruta:
+            w, h = PILImage.open(ruta).size
+            capturas_iphone.append((RLImage(ruta, width=80, height=80 * h / w), nombre))
+    if capturas_iphone:
+        t = Table([[c for c, _ in capturas_iphone], [Paragraph(n, styles['Caption']) for _, n in capturas_iphone]],
+                  colWidths=[CONTENT_W / len(capturas_iphone)] * len(capturas_iphone))
+        t.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER'), ('VALIGN', (0, 0), (-1, 0), 'TOP')]))
+        story.append(KeepTogether([t, Paragraph('Prueba manual en un iPhone 14 (Safari), 24 de octubre de 2026, después de corregir la cabecera: '
+                                                'el botón de menú (tres líneas, o la X cuando está abierto) se ve completo, con y sin sesión iniciada, '
+                                                'y la página ya no se arrastra de lado.', styles['Caption'])]))
+        story.append(Spacer(1, 6))
 
     # ── 5.4 MOTOR DE SAFARI (WebKit) ───────────────────────────
     story.append(Paragraph('4.1 Motor de Safari (WebKit) en iPhone, iPad y Mac', styles['H2']))

@@ -48,7 +48,7 @@ README.md
 ```
 
 ## Despliegue
-Frontend en **Netlify**, API en **Render**, base de datos en **Supabase** (PostgreSQL con seguridad por fila activa en las 15 tablas). Las variables de entorno están descritas en `backend/.env.example`; los valores reales nunca se guardan en el repositorio.
+Frontend en **Netlify**, API en **Render**, base de datos en **Supabase** (PostgreSQL con seguridad por fila activa en las 15 tablas). Netlify y Render despliegan solos desde el repositorio de trabajo del proyecto; este repositorio público es una copia limpia del mismo código (sin documentos internos). Las variables de entorno están descritas en `backend/.env.example`; los valores reales nunca se guardan en el repositorio.
 
 ## Documentación de la entrega
 Documento final, manual de usuario, documentación técnica, planificación y diseño de la base de datos y evidencia de pruebas están en [`docs/entrega/`](docs/entrega); el índice [`INDICE-ENTREGA.md`](docs/entrega/INDICE-ENTREGA.md) dice dónde está cada cosa.

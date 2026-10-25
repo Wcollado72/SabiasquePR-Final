@@ -62,7 +62,7 @@ def main():
     s.append(tabla([
         ['Qué', 'Dónde'],
         ['Aplicación en línea', '<font face="Courier">https://sabiasquepr.com</font> (la primera carga puede tardar hasta 50 s: servidor gratuito que se «duerme»)'],
-        ['Código (público)', '<font face="Courier">https://github.com/Wcollado72/SabiasquePR-Final</font> · carpetas <font face="Courier">/frontend</font>, <font face="Courier">/backend</font> y README.md'],
+        ['Código (público)', '<font face="Courier">https://github.com/Wcollado72/SabiasquePR-Final</font> · carpetas <font face="Courier">/frontend</font>, <font face="Courier">/backend</font> y README.md. Es una copia limpia del repositorio de trabajo, desde el cual Netlify y Render despliegan el sitio.'],
         ['Video demostrativo (5–10 min)', VIDEO_URL],
         ['Cuenta de evaluación', 'Rol <i>usuario</i>. El estudiante entrega el correo y la contraseña por separado; se desactiva después de la calificación.'],
     ], [110, 400]))
