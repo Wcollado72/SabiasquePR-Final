@@ -7,7 +7,7 @@
     "build": "esbuild entry.js --bundle --format=esm --platform=browser --target=es2020 --minify --legal-comments=none --outfile=../../frontend/vendor/supabase-js.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.117.2"
+    "@supabase/supabase-js": "2.119.0"
   },
   "devDependencies": {
     "esbuild": "^0.28.2"
